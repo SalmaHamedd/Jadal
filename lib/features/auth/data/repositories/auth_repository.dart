@@ -15,27 +15,43 @@ class AuthRepository {
         body: jsonEncode({'email': email, 'password': password}),
       );
 
-      if (response.statusCode == 200) {
-        final Map<String, dynamic> responseBody = jsonDecode(response.body);
-        final bool success = responseBody['success'] ?? false;
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
 
-        if (success) {
-          final Map<String, dynamic> data = responseBody['data'];
-          final String token = data['token']; // you can store this later
-          final Map<String, dynamic> userJson = data['user'];
-          final user = UserModel.fromJson(userJson);
-          return Right(user);
-        } else {
-          final String message = responseBody['message'] ?? 'Login failed';
-          return Left(AuthFailure(message));
-        }
-      } else if (response.statusCode == 401) {
-        return Left(AuthFailure('Invalid email or password'));
-      } else {
-        return Left(ServerFailure('Server error: ${response.statusCode}'));
+      final String message = responseBody['message'] ?? 'Unknown error';
+
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        final data = responseBody['data'];
+
+        final user = UserModel.fromJson(data['user']);
+
+        return Right(user);
       }
+
+      return Left(AuthFailure(message));
     } catch (e) {
-      return Left(NetworkFailure('Check your internet connection: $e'));
+      return Left(NetworkFailure('Network error'));
+    }
+  }
+
+  Future<Either<Failure, String>> forgotPassword(String email) async {
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConstants.forgotPasswordUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'email': email}),
+      );
+
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+
+      final String message = responseBody['message'] ?? 'Unknown error';
+
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        return Right(message);
+      }
+
+      return Left(AuthFailure(message));
+    } catch (e) {
+      return Left(NetworkFailure('Network error'));
     }
   }
 }
