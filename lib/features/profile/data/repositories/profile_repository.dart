@@ -71,4 +71,41 @@ class ProfileRepository {
       return Left(NetworkFailure('Network error'));
     }
   }
+
+  Future<Either<Failure, String>> changePassword({
+    required String currentPassword,
+    required String newPassword,
+    required String confirmPassword,
+  }) async {
+    try {
+      final token = await TokenStorage.getToken();
+      if (token == null) {
+        return Left(AuthFailure('No authentication token found'));
+      }
+
+      final response = await http.put(
+        Uri.parse(ApiConstants.changePasswordUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({
+          'current_password': currentPassword,
+          'password': newPassword,
+          'password_confirmation': confirmPassword,
+        }),
+      );
+
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      final String message = responseBody['message'] ?? 'Unknown error';
+
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        return Right(message);
+      } else {
+        return Left(ServerFailure(message));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
 }

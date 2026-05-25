@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jadal_app/core/colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:jadal_app/features/profile/presentation/screens/edit_profile_screen.dart';
+import 'package:jadal_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_info_card.dart';
+import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -48,9 +49,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     SizedBox(height: context.hp(6)),
-                    ProfileAvatar(
-                      name: profile.name,
-                    ),
+                    ProfileAvatar(name: profile.name),
                     SizedBox(height: context.hp(2)),
                     Text(
                       profile.name,
@@ -67,30 +66,45 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       ),
                     ),
                     SizedBox(height: context.hp(2)),
-                    OutlinedButton(
-                      onPressed: () async {
-                        final result = await Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => EditProfileScreen(
-                              currentName: profile.name,
-                              currentPhone: profile.phone ?? '',
-                            ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: ProfileActionButton(
+                            text: 'Edit Profile',
+                            icon: Icons.edit,
+                            onPressed: () async {
+                              final result = await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EditProfileScreen(
+                                    currentName: profile.name,
+                                    currentPhone: profile.phone ?? '',
+                                  ),
+                                ),
+                              );
+                              if (result != null) {
+                                _cubit.loadProfile();
+                              }
+                            },
                           ),
-                        );
-                        if (result != null) {
-                          _cubit.loadProfile();
-                        }
-                      },
-                      style: OutlinedButton.styleFrom(
-                        foregroundColor: AppColors.primaryblue,
-                        side: BorderSide(color: AppColors.primaryblue),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
                         ),
-                        minimumSize: const Size(double.infinity, 40),
-                      ),
-                      child: const Text('Edit Profile'),
+                        const SizedBox(width: 16),
+                        Expanded(
+                          child: ProfileActionButton(
+                            text: 'Change Password',
+                            icon: Icons.lock,
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const ChangePasswordScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                        ),
+                      ],
                     ),
                     SizedBox(height: context.hp(3)),
                     ProfileInfoCard(
