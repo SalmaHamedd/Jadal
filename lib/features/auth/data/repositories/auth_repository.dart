@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
+import 'package:jadal_app/core/services/token_storage.dart';
 import 'package:jadal_app/features/auth/domain/entities/user.dart';
 import 'package:jadal_app/features/auth/data/models/user_model.dart';
 import 'package:jadal_app/core/error/failures.dart';
@@ -16,14 +17,13 @@ class AuthRepository {
       );
 
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
-
       final String message = responseBody['message'] ?? 'Unknown error';
 
       if (response.statusCode == 200 && responseBody['success'] == true) {
         final data = responseBody['data'];
-
+        final String token = data['token'];
+        await TokenStorage.saveToken(token); 
         final user = UserModel.fromJson(data['user']);
-
         return Right(user);
       }
 

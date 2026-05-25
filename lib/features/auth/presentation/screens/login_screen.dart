@@ -9,6 +9,7 @@ import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_card.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_gradient_background.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
+import 'package:jadal_app/features/profile/presentation/screens/profile_screen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -81,19 +82,10 @@ class _LoginScreenState extends State<LoginScreen> {
                           bloc: _loginCubit,
                           listener: (context, state) {
                             if (state is LoginSuccess) {
-                              showDialog(
-                                context: context,
-                                builder: (context) => AlertDialog(
-                                  title: const Text('✅ Login Success'),
-                                  content: Text(
-                                    'User ID: ${state.userId}\nWelcome!',
-                                  ),
-                                  actions: [
-                                    TextButton(
-                                      onPressed: () => Navigator.pop(context),
-                                      child: const Text('OK'),
-                                    ),
-                                  ],
+                              Navigator.pushReplacement(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const ProfileScreen(),
                                 ),
                               );
                             }
