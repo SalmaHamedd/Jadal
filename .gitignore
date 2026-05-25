@@ -4,42 +4,90 @@
 *.pyc
 *.swp
 .DS_Store
-.atom/
-.build/
-.buildlog/
-.history
-.svn/
-.swiftpm/
-migrate_working_dir/
+Thumbs.db
 
-# IntelliJ related
-*.iml
-*.ipr
-*.iws
+# IDEs / Editors
 .idea/
+.vscode/
+*.iml
 
-# The .vscode folder contains launch configuration and tasks you configure in
-# VS Code which you may wish to be included in version control, so this line
-# is commented out by default.
-#.vscode/
-
-# Flutter/Dart/Pub related
-**/doc/api/
-**/ios/Flutter/.last_build_id
+# Flutter / Dart
 .dart_tool/
+.flutter-plugins
 .flutter-plugins-dependencies
-.pub-cache/
+.packages
 .pub/
-/build/
-/coverage/
+.pub-cache/
+build/
 
-# Symbolication related
-app.*.symbols
+# Generated files
+**/generated_plugin_registrant.dart
 
-# Obfuscation related
-app.*.map.json
+# Coverage
+coverage/
 
-# Android Studio will place build artifacts here
-/android/app/debug
-/android/app/profile
-/android/app/release
+# Dart SDK
+.dartServer/
+
+# Android
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+android/key.properties
+*.jks
+*.keystore
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/.last_build_id
+ios/Flutter/App.framework
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/Generated.xcconfig
+ios/Flutter/flutter_export_environment.sh
+ios/Runner.xcworkspace/
+ios/build/
+
+# macOS
+macos/Pods/
+macos/build/
+
+# Linux
+linux/build/
+
+# Windows
+windows/build/
+
+# Web
+web/flutter_service_worker.js
+web/.dart_tool/
+
+# Firebase
+google-services.json
+GoogleService-Info.plist
+firebase_app_id_file.json
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# Optional: environment files
+.env
+.env.*
+
+# Optional: FVM
+.fvm/
+
+# Optional: Melos
+.melos_tool/
+
+# Optional: test outputs
+test_driver/screenshots/
+
+# Temporary files
+*.tmp
+*.temp
