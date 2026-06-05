@@ -11,7 +11,7 @@ class ProfileAvatar extends StatelessWidget {
   Widget build(BuildContext context) {
     return CircleAvatar(
       radius: context.wp(10),
-      backgroundColor: AppColors.primaryblue,
+      backgroundColor: AppColors.primaryorange,
       child: Text(
         name.isNotEmpty ? name[0].toUpperCase() : '?',
         style: TextStyle(fontSize: context.wp(10), color: Colors.white),

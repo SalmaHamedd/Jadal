@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/services/message_service.dart';
 import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:jadal_app/features/auth/presentation/screens/forgot_password_screen.dart';
@@ -90,12 +91,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               );
                             }
                             if (state is LoginFailure) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(
-                                  content: Text(state.message),
-                                  backgroundColor: Colors.red,
-                                ),
-                              );
+                              MessageService.showError(context, state.message);
                             }
                           },
                           builder: (context, state) {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/services/message_service.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -51,17 +52,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bloc: _cubit,
           listener: (context, state) {
             if (state is EditProfileSuccess) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('Profile updated successfully')),
+              MessageService.showSuccess(
+                context,
+                'Profile updated successfully',
               );
               Navigator.pop(context, state.updatedProfile);
             } else if (state is EditProfileError) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                  backgroundColor: Colors.red,
-                ),
-              );
+              MessageService.showError(context, state.message);
             }
           },
           builder: (context, state) {
@@ -80,7 +77,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     child: Column(
                       children: [
                         ProfileAvatar(name: widget.currentName),
-                        SizedBox(height: context.hp(2)),
+                        SizedBox(height: context.hp(4)),
                         AuthTextField(
                           label: 'Name',
                           icon: Icons.person,
