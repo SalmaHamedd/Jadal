@@ -1,0 +1,36 @@
+import 'package:fpdart/fpdart.dart';
+
+import '../../../../core/error/failures.dart';
+import '../../domain/entities/user.dart';
+import '../../domain/repositories/auth_repository.dart';
+
+class MockAuthRepository implements AuthRepository {
+  @override
+  Future<Either<Failure, User>> login(String email, String password) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (email.isEmpty || password.isEmpty) {
+      return const Left(AuthFailure('Email and password are required'));
+    }
+    return const Right(
+      User(
+        id: 1,
+        name: 'أحمد الزهراني',
+        email: 'demo@jadal.app',
+        role: 'debater',
+        status: 'active',
+        points: 1240,
+        lang: 'ar',
+        theme: 'dark',
+      ),
+    );
+  }
+
+  @override
+  Future<Either<Failure, String>> forgotPassword(String email) async {
+    await Future.delayed(const Duration(milliseconds: 600));
+    if (email.isEmpty) {
+      return const Left(AuthFailure('Please enter your email'));
+    }
+    return const Right('Reset link sent. Check your email.');
+  }
+}

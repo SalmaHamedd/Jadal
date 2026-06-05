@@ -9,6 +9,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
 
   cupertino_icons: ^1.0.8
   http: ^1.6.0
@@ -18,12 +21,24 @@ dependencies:
   equatable: ^2.0.8
   flutter_bloc: ^9.1.1
   google_fonts: ^6.2.1
-  app_links: ^5.0.0
+  app_links: 7.0.0
   shared_preferences: ^2.5.5
   image_picker: ^1.2.2
-  permission_handler: ^11.3.0
   fluttertoast: ^8.2.8
-  
+  livekit_client: ^2.4.6
+  flutter_webrtc: ^0.14.0
+  sqflite: ^2.3.0
+  path_provider: ^2.1.1
+  path: ^1.9.0
+  encrypt: ^5.0.1
+  internet_connection_checker: ^1.0.0+1
+  permission_handler: ^12.0.0+1
+  cached_network_image: ^3.3.1
+  conditional_builder_null_safety: ^0.0.6
+  fl_chart: ^0.69.0
+  # Lightweight audio playback for the debate protected-period bell (§8.3).
+  audioplayers: ^6.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -31,12 +46,15 @@ dev_dependencies:
   flutter_lints: ^6.0.0
 
 flutter:
+  generate: true
 
   uses-material-design: true
 
   # To add assets to your application, add an assets section, like this:
   assets:
-    - assets/images/Jadal-logo.jpg
+    - assets/images/
+    # Drop a `bell.mp3` here for the debate protected-period bell (§8.3).
+    - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

@@ -1,14 +1,15 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jadal_app/core/colors.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
-import 'package:jadal_app/core/services/message_service.dart';
-import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
-import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit.dart';
-import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
-import 'package:jadal_app/features/auth/presentation/widgets/auth_card.dart';
-import 'package:jadal_app/features/auth/presentation/widgets/auth_gradient_background.dart';
-import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
+
+import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/extensions/responsive_extension.dart';
+import '../../../../core/widgets/jadal_snack_bar.dart';
+import '../cubit/forgot_password_cubit.dart';
+import '../widgets/auth_button.dart';
+import '../widgets/auth_text_field.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -18,142 +19,316 @@ class ForgotPasswordScreen extends StatefulWidget {
 }
 
 class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
+  final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
-  late final ForgotPasswordCubit _cubit;
-
-  @override
-  void initState() {
-    super.initState();
-    final repository = AuthRepository();
-    _cubit = ForgotPasswordCubit(repository);
-  }
 
   @override
   void dispose() {
     _emailController.dispose();
-    _cubit.close();
     super.dispose();
+  }
+
+  void _submit() {
+    FocusScope.of(context).unfocus();
+    if (!(_formKey.currentState?.validate() ?? true)) return;
+    context.read<ForgotPasswordCubit>().forgotPassword(
+      _emailController.text.trim(),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final isTablet = context.isTablet;
-    final maxCardWidth = isTablet ? 500.0 : 450.0;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final loc = context.loc;
+    final mq = MediaQuery.of(context);
+    final size = mq.size;
+    final isMobile = context.isMobile;
+
+    final scaffoldBg =
+    isDark ? JadalColors.darkSurface : JadalColors.lightBackground;
+    final cardBg = isDark ? JadalColors.darkBackground : JadalColors.lightSurface;
+    final textPrimary =
+    isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
+    final textSecondary =
+    isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
+    final iconColor =
+    isDark ? const Color(0xFFF59A4A) : JadalColors.primaryBlue;
+    final accentLink =
+    isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
+
+    final blobSize = isMobile ? 220.0 : 280.0;
+    final iconCircle = isMobile ? 60.0 : 72.0;
 
     return Scaffold(
-      body: AuthGradientBackground(
-        child: SafeArea(
-          child: Column(
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: IconButton(
-                  onPressed: () => Navigator.pop(context),
-                  icon: Icon(
-                    Icons.arrow_back,
-                    color: Colors.white,
-                    size: isTablet ? 28 : 24,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Center(
+      backgroundColor: scaffoldBg,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          Positioned(
+            top: 120,
+            left: -100,
+            child: _blurBlob(
+              color: isDark
+                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
+                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
+              size: blobSize,
+            ),
+          ),
+          Positioned(
+            top: 500,
+            right: -100,
+            child: _blurBlob(
+              color: isDark
+                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
+                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
+              size: blobSize,
+            ),
+          ),
+          Positioned(
+            top: -70,
+            right: -70,
+            child: _blurBlob(
+              color: isDark
+                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
+                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
+              size: blobSize,
+            ),
+          ),
+          Positioned(
+            top: 770,
+            left: -80,
+            child: _blurBlob(
+              color: isDark
+                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
+                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
+              size: blobSize,
+            ),
+          ),
+          SafeArea(
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final maxWidth =
+                constraints.maxWidth >= 600 ? 460.0 : double.infinity;
+                return Center(
                   child: SingleChildScrollView(
-                    child: Padding(
-                      padding: EdgeInsets.all(context.wp(6)),
+                    padding: EdgeInsets.only(
+                      left: 20,
+                      right: 20,
+                      top: size.height * (isMobile ? 0.04 : 0.06),
+                      bottom: 24 + mq.viewInsets.bottom,
+                    ),
+                    child: Center(
                       child: ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: maxCardWidth),
-                        child: AuthCard(
-                          child: BlocConsumer<ForgotPasswordCubit, ForgotPasswordState>(
-                            bloc: _cubit,
-                            listener: (context, state) {
-                              if (state is ForgotPasswordSuccess) {
-                                showDialog(
-                                  context: context,
-                                  builder: (context) => AlertDialog(
-                                    title: const Text('Check Your Email'),
-                                    content: Text(state.message),
-                                    actions: [
-                                      TextButton(
-                                        onPressed: () {
-                                          Navigator.pop(context); 
-                                          Navigator.pop(context);
-                                        },
-                                        child: const Text('OK'),
-                                      ),
-                                    ],
-                                  ),
-                                );
-                              }
-                              if (state is ForgotPasswordFailure) {
-                                MessageService.showError(context, state.message);
-                              }
-                            },
-                            builder: (context, state) {
-                              return Column(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  Icon(
-                                    Icons.lock_reset,
-                                    size: isTablet ? 80 : 60,
-                                    color: AppColors.primaryblue,
-                                  ),
-                                  SizedBox(height: context.hp(2)),
-                                  Text(
-                                    'Forgot Password?',
-                                    style: TextStyle(
-                                      fontSize: context.fontSize(22, max: 32),
-                                      fontWeight: FontWeight.bold,
+                        constraints: BoxConstraints(maxWidth: maxWidth),
+                        child: _FloatingCard(
+                          isDark: isDark,
+                          cardBg: cardBg,
+                          child: Form(
+                            key: _formKey,
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.stretch,
+                              children: [
+                                Align(
+                                  alignment: AlignmentDirectional.centerStart,
+                                  child: TextButton.icon(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    style: TextButton.styleFrom(
+                                      padding: EdgeInsets.zero,
+                                      minimumSize: Size.zero,
+                                      tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                      foregroundColor: textSecondary,
                                     ),
-                                  ),
-                                  SizedBox(height: context.hp(1)),
-                                  Text(
-                                    'We’ll send you a link to reset your password.',
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      fontSize: context.fontSize(14, max: 18),
+                                    icon: Icon(
+                                      Icons.arrow_back_rounded,
+                                      size: 18,
+                                      color: textSecondary,
                                     ),
-                                  ),
-                                  SizedBox(height: context.hp(2)),
-                                  AuthTextField(
-                                    label: 'Email',
-                                    icon: Icons.email,
-                                    controller: _emailController,
-                                  ),
-                                  SizedBox(height: context.hp(2)),
-                                  AuthButton(
-                                    text: 'Send Reset Link',
-                                    isLoading: state is ForgotPasswordLoading,
-                                    onPressed: () {
-                                      _cubit.forgotPassword(
-                                        _emailController.text.trim(),
-                                      );
-                                    },
-                                  ),
-                                  SizedBox(height: context.hp(1.5)),
-                                  TextButton(
-                                    onPressed: () => Navigator.pop(context),
-                                    child: const Text(
-                                      'Back to Login',
+                                    label: Text(
+                                      loc.backToLogin,
                                       style: TextStyle(
-                                        color: AppColors.primaryblue,
+                                        fontFamily: 'Cairo',
+                                        fontSize: context.fontSize(13,
+                                            min: 11.5, max: 13),
+                                        color: textSecondary,
                                       ),
                                     ),
                                   ),
-                                ],
-                              );
-                            },
+                                ),
+                                SizedBox(height: isMobile ? 16 : 22),
+                                Center(
+                                  child: Container(
+                                    width: iconCircle,
+                                    height: iconCircle,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      gradient: LinearGradient(
+                                        begin: Alignment.topLeft,
+                                        end: Alignment.bottomRight,
+                                        colors: [
+                                          JadalColors.primaryBlue
+                                              .withValues(alpha: 0.18),
+                                          JadalColors.primaryOrange
+                                              .withValues(alpha: 0.18),
+                                        ],
+                                      ),
+                                    ),
+                                    child: Icon(
+                                      Icons.lock_reset_rounded,
+                                      size: isMobile ? 28 : 34,
+                                      color: iconColor,
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: isMobile ? 16 : 20),
+                                Text(
+                                  loc.forgotPasswordTitle,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize:
+                                    context.fontSize(19, min: 16, max: 22),
+                                    fontWeight: FontWeight.w700,
+                                    color: textPrimary,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  loc.forgotPasswordSubtitle,
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize:
+                                    context.fontSize(13, min: 11.5, max: 14),
+                                    color: textSecondary,
+                                    height: 1.5,
+                                  ),
+                                ),
+                                SizedBox(height: isMobile ? 22 : 28),
+                                AuthTextField(
+                                  label: loc.email,
+                                  icon: Icons.email_outlined,
+                                  controller: _emailController,
+                                  keyboardType: TextInputType.emailAddress,
+                                  textInputAction: TextInputAction.done,
+                                  onSubmitted: (_) => _submit(),
+                                ),
+                                SizedBox(height: isMobile ? 20 : 24),
+                                BlocConsumer<ForgotPasswordCubit,
+                                    ForgotPasswordState>(
+                                  listener: (context, state) {
+                                    if (state is ForgotPasswordFailure) {
+                                      JadalSnackBar.show(
+                                        context,
+                                        state.message,
+                                        type: SnackBarType.error,
+                                      );
+                                    }
+                                    if (state is ForgotPasswordSuccess) {
+                                      showDialog<void>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: Text(loc.checkYourEmail),
+                                          content: Text(state.message),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () {
+                                                Navigator.of(ctx).pop();
+                                                Navigator.of(context).pop();
+                                              },
+                                              child: Text(loc.ok),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  },
+                                  builder: (context, state) => AuthButton(
+                                    text: loc.forgotPasswordButton,
+                                    isLoading: state is ForgotPasswordLoading,
+                                    onPressed: _submit,
+                                  ),
+                                ),
+                                const SizedBox(height: 14),
+                                Center(
+                                  child: TextButton(
+                                    onPressed: () => Navigator.of(context).pop(),
+                                    style: TextButton.styleFrom(
+                                      padding: const EdgeInsets.symmetric(
+                                          horizontal: 8, vertical: 4),
+                                      minimumSize: Size.zero,
+                                      tapTargetSize:
+                                      MaterialTapTargetSize.shrinkWrap,
+                                    ),
+                                    child: Text(
+                                      loc.backToLogin,
+                                      style: TextStyle(
+                                        fontFamily: 'Cairo',
+                                        fontSize: context.fontSize(13,
+                                            min: 12, max: 14),
+                                        fontWeight: FontWeight.w600,
+                                        color: accentLink,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-            ],
+                );
+              },
+            ),
           ),
-        ),
+        ],
       ),
+    );
+  }
+
+  Widget _blurBlob({required Color color, required double size}) {
+    return ImageFiltered(
+      imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
+      child: Container(
+        width: size,
+        height: size,
+        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
+      ),
+    );
+  }
+}
+
+class _FloatingCard extends StatelessWidget {
+  final bool isDark;
+  final Color cardBg;
+  final Widget child;
+
+  const _FloatingCard({
+    required this.isDark,
+    required this.cardBg,
+    required this.child,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final pad = context.isMobile ? 18.0 : 24.0;
+    return Container(
+      decoration: BoxDecoration(
+        color: cardBg,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: isDark ? 0.38 : 0.08),
+            blurRadius: isDark ? 36 : 22,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(pad),
+      child: child,
     );
   }
 }
