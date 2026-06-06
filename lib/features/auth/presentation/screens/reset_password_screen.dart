@@ -3,9 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/services/message_service.dart';
-import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
+import 'package:jadal_app/features/auth/domain/repositories/auth_repository.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/reset_password_cubit.dart';
-import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_card.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_gradient_background.dart';
@@ -32,8 +31,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     _tokenController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    final repository = AuthRepository();
-    _cubit = ResetPasswordCubit(repository);
+    _cubit = ResetPasswordCubit(context.read<AuthRepository>());
   }
 
   @override

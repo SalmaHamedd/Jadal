@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
+
+import '../../domain/repositories/auth_repository.dart';
 
 part 'reset_password_state.dart';
 

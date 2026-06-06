@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
+
+import '../../domain/repositories/auth_repository.dart';
 
 part 'forgot_password_state.dart';
 
@@ -19,8 +20,8 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
 
     final result = await _repository.forgotPassword(email);
     result.fold(
-      (failure) => emit(ForgotPasswordFailure(failure.message)),
-      (message) => emit(ForgotPasswordSuccess(message)), 
+          (failure) => emit(ForgotPasswordFailure(failure.message)),
+          (message) => emit(ForgotPasswordSuccess(message)),
     );
   }
 }
