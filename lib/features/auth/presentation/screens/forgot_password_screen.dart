@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/features/auth/presentation/screens/reset_password_screen.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -45,17 +46,24 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final size = mq.size;
     final isMobile = context.isMobile;
 
-    final scaffoldBg =
-    isDark ? JadalColors.darkSurface : JadalColors.lightBackground;
-    final cardBg = isDark ? JadalColors.darkBackground : JadalColors.lightSurface;
-    final textPrimary =
-    isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
-    final textSecondary =
-    isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
-    final iconColor =
-    isDark ? const Color(0xFFF59A4A) : JadalColors.primaryBlue;
-    final accentLink =
-    isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
+    final scaffoldBg = isDark
+        ? JadalColors.darkSurface
+        : JadalColors.lightBackground;
+    final cardBg = isDark
+        ? JadalColors.darkBackground
+        : JadalColors.lightSurface;
+    final textPrimary = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.deepBlue;
+    final textSecondary = isDark
+        ? JadalColors.darkTextSecondary
+        : JadalColors.lightTextSecondary;
+    final iconColor = isDark
+        ? const Color(0xFFF59A4A)
+        : JadalColors.primaryBlue;
+    final accentLink = isDark
+        ? const Color(0xFFF59A4A)
+        : JadalColors.primaryOrange;
 
     final blobSize = isMobile ? 220.0 : 280.0;
     final iconCircle = isMobile ? 60.0 : 72.0;
@@ -108,8 +116,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
-                final maxWidth =
-                constraints.maxWidth >= 600 ? 460.0 : double.infinity;
+                final maxWidth = constraints.maxWidth >= 600
+                    ? 460.0
+                    : double.infinity;
                 return Center(
                   child: SingleChildScrollView(
                     padding: EdgeInsets.only(
@@ -132,12 +141,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 Align(
                                   alignment: AlignmentDirectional.centerStart,
                                   child: TextButton.icon(
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
                                     style: TextButton.styleFrom(
                                       padding: EdgeInsets.zero,
                                       minimumSize: Size.zero,
                                       tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
+                                          MaterialTapTargetSize.shrinkWrap,
                                       foregroundColor: textSecondary,
                                     ),
                                     icon: Icon(
@@ -149,8 +159,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                       loc.backToLogin,
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
-                                        fontSize: context.fontSize(13,
-                                            min: 11.5, max: 13),
+                                        fontSize: context.fontSize(
+                                          13,
+                                          min: 11.5,
+                                          max: 13,
+                                        ),
                                         color: textSecondary,
                                       ),
                                     ),
@@ -167,10 +180,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                         begin: Alignment.topLeft,
                                         end: Alignment.bottomRight,
                                         colors: [
-                                          JadalColors.primaryBlue
-                                              .withValues(alpha: 0.18),
-                                          JadalColors.primaryOrange
-                                              .withValues(alpha: 0.18),
+                                          JadalColors.primaryBlue.withValues(
+                                            alpha: 0.18,
+                                          ),
+                                          JadalColors.primaryOrange.withValues(
+                                            alpha: 0.18,
+                                          ),
                                         ],
                                       ),
                                     ),
@@ -187,8 +202,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
-                                    fontSize:
-                                    context.fontSize(19, min: 16, max: 22),
+                                    fontSize: context.fontSize(
+                                      19,
+                                      min: 16,
+                                      max: 22,
+                                    ),
                                     fontWeight: FontWeight.w700,
                                     color: textPrimary,
                                   ),
@@ -199,8 +217,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
-                                    fontSize:
-                                    context.fontSize(13, min: 11.5, max: 14),
+                                    fontSize: context.fontSize(
+                                      13,
+                                      min: 11.5,
+                                      max: 14,
+                                    ),
                                     color: textSecondary,
                                     height: 1.5,
                                   ),
@@ -215,8 +236,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                   onSubmitted: (_) => _submit(),
                                 ),
                                 SizedBox(height: isMobile ? 20 : 24),
-                                BlocConsumer<ForgotPasswordCubit,
-                                    ForgotPasswordState>(
+                                BlocConsumer<
+                                  ForgotPasswordCubit,
+                                  ForgotPasswordState
+                                >(
                                   listener: (context, state) {
                                     if (state is ForgotPasswordFailure) {
                                       JadalSnackBar.show(
@@ -234,8 +257,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                           actions: [
                                             TextButton(
                                               onPressed: () {
-                                                Navigator.of(ctx).pop();
-                                                Navigator.of(context).pop();
+                                                Navigator.push(
+                                                  context,
+                                                  MaterialPageRoute(
+                                                    builder: (context) =>
+                                                        ResetPasswordScreen(
+                                                          email:
+                                                              _emailController
+                                                                  .text
+                                                                  .trim(),
+                                                        ),
+                                                  ),
+                                                );
                                               },
                                               child: Text(loc.ok),
                                             ),
@@ -253,20 +286,26 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                                 const SizedBox(height: 14),
                                 Center(
                                   child: TextButton(
-                                    onPressed: () => Navigator.of(context).pop(),
+                                    onPressed: () =>
+                                        Navigator.of(context).pop(),
                                     style: TextButton.styleFrom(
                                       padding: const EdgeInsets.symmetric(
-                                          horizontal: 8, vertical: 4),
+                                        horizontal: 8,
+                                        vertical: 4,
+                                      ),
                                       minimumSize: Size.zero,
                                       tapTargetSize:
-                                      MaterialTapTargetSize.shrinkWrap,
+                                          MaterialTapTargetSize.shrinkWrap,
                                     ),
                                     child: Text(
                                       loc.backToLogin,
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
-                                        fontSize: context.fontSize(13,
-                                            min: 12, max: 14),
+                                        fontSize: context.fontSize(
+                                          13,
+                                          min: 12,
+                                          max: 14,
+                                        ),
                                         fontWeight: FontWeight.w600,
                                         color: accentLink,
                                       ),

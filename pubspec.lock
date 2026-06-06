@@ -417,10 +417,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_webrtc
-      sha256: "792aa1e5838a719f29ae52c0773dbb5dd781fc33b1bf87c321b274e55ab51ad1"
+      sha256: b832dc76c0d1577f14aaf35e9c38d4ed7667cbc89c492b7bf4505d8d5f62e08b
       url: "https://pub.dev"
     source: hosted
-    version: "0.14.2"
+    version: "0.12.12+hotfix.1"
   fluttertoast:
     dependency: "direct main"
     description:
@@ -625,10 +625,10 @@ packages:
     dependency: "direct main"
     description:
       name: livekit_client
-      sha256: "5d182f40cc9aafce60a9acf936bad8bc69010b5cbf0a949f6f27dc4390f2fcce"
+      sha256: "7f489fa415253d8d99c649b7efc95a733c5e5ac38dcfb02362ced99feb139376"
       url: "https://pub.dev"
     source: hosted
-    version: "2.4.9"
+    version: "2.4.1"
   logging:
     dependency: transitive
     description:
@@ -657,10 +657,10 @@ packages:
     dependency: transitive
     description:
       name: meta
-      sha256: "23f08335362185a5ea2ad3a4e597f1375e78bce8a040df5c600c8d3552ef2394"
+      sha256: "1741988757a65eb6b36abe716829688cf01910bbf91c34354ff7ec1c3de2b349"
       url: "https://pub.dev"
     source: hosted
-    version: "1.17.0"
+    version: "1.18.0"
   mime:
     dependency: transitive
     description:
@@ -669,14 +669,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
-  mime_type:
-    dependency: transitive
-    description:
-      name: mime_type
-      sha256: d652b613e84dac1af28030a9fba82c0999be05b98163f9e18a0849c6e63838bb
-      url: "https://pub.dev"
-    source: hosted
-    version: "1.0.1"
   nested:
     dependency: transitive
     description:
@@ -857,10 +849,10 @@ packages:
     dependency: transitive
     description:
       name: protobuf
-      sha256: de9c9eb2c33f8e933a42932fe1dc504800ca45ebc3d673e6ed7f39754ee4053e
+      sha256: "68645b24e0716782e58948f8467fd42a880f255096a821f9e7d0ec625b00c84d"
       url: "https://pub.dev"
     source: hosted
-    version: "4.2.0"
+    version: "3.1.0"
   provider:
     dependency: transitive
     description:
@@ -1054,10 +1046,10 @@ packages:
     dependency: transitive
     description:
       name: test_api
-      sha256: "8161c84903fd860b26bfdefb7963b3f0b68fee7adea0f59ef805ecca346f0c7a"
+      sha256: "949a932224383300f01be9221c39180316445ecb8e7547f70a41a35bf421fb9e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.7.10"
+    version: "0.7.11"
   typed_data:
     dependency: transitive
     description:

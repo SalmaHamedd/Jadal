@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/services/message_service.dart';
-import 'package:jadal_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:jadal_app/features/auth/data/repositories/auth_repository.dart';
+import 'package:jadal_app/features/auth/data/repositories/mock_auth_repository.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/reset_password_cubit.dart';
+import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_card.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_gradient_background.dart';
@@ -28,10 +30,11 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
+    final repository = ApiAuthRepository();
+    _cubit = ResetPasswordCubit(repository);
     _tokenController = TextEditingController();
     _passwordController = TextEditingController();
     _confirmPasswordController = TextEditingController();
-    _cubit = ResetPasswordCubit(context.read<AuthRepository>());
   }
 
   @override
@@ -84,9 +87,12 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       context,
                                       state.message,
                                     );
-                                    Navigator.pushNamedAndRemoveUntil(
+                                    Navigator.pushAndRemoveUntil(
                                       context,
-                                      '/login',
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            const LoginScreen(),
+                                      ),
                                       (route) => false,
                                     );
                                   } else if (state is ResetPasswordFailure) {

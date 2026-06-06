@@ -53,7 +53,7 @@ class JadalVideoCard extends StatelessWidget {
               child: live
                   ? VideoTrackRenderer(
                       videoTrack!,
-                      fit: VideoViewFit.cover,
+                     // fit: VideoViewFit.cover,
                     )
                   : Center(
                       child: Container(

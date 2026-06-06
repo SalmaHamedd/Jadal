@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:encrypt/encrypt.dart' as encrypt;
 import 'package:flutter/foundation.dart';
 import 'package:path/path.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:sqflite/sqflite.dart';
 
 class PreferencesDatabase {
   static final PreferencesDatabase _instance = PreferencesDatabase._internal();
@@ -11,35 +11,44 @@ class PreferencesDatabase {
 
   PreferencesDatabase._internal();
 
-  Database? _db;
-
-  // Web fallback: in-memory only, no persistence across reloads.
+  File? _storageFile;
   final Map<String, String> _memory = {};
-
   final String _secretKey = 'v3ryS3cur3AndR4nd0mAESKey00012345';
 
-  Future<Database> get database async {
-    if (_db != null) return _db!;
-    _db = await _initDatabase();
-    return _db!;
+  Future<File> get _localFile async {
+    if (_storageFile != null) return _storageFile!;
+
+    final dir = await getApplicationDocumentsDirectory();
+    final path = join(dir.path, 'app_preferences.json');
+    final file = File(path);
+
+    if (!(await file.exists())) {
+      await file.writeAsString(json.encode({}), flush: true);
+    }
+
+    _storageFile = file;
+    return file;
   }
 
-  Future<Database> _initDatabase() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final path = join(dir.path, 'app_preferences.db');
+  Future<Map<String, String>> _readStorage() async {
+    final file = await _localFile;
 
-    return await openDatabase(
-      path,
-      version: 1,
-      onCreate: (db, version) async {
-        await db.execute('''
-          CREATE TABLE preferences (
-            key TEXT PRIMARY KEY,
-            value TEXT
-          )
-        ''');
-      },
-    );
+    try {
+      final content = await file.readAsString();
+      if (content.isEmpty) return {};
+
+      final decoded = json.decode(content);
+      if (decoded is Map<String, dynamic>) {
+        return decoded.map((key, value) => MapEntry(key, value.toString()));
+      }
+    } catch (_) {}
+
+    return {};
+  }
+
+  Future<void> _writeStorage(Map<String, String> data) async {
+    final file = await _localFile;
+    await file.writeAsString(json.encode(data), flush: true);
   }
 
   Future<void> setValue(String key, dynamic value) async {
@@ -48,12 +57,10 @@ class PreferencesDatabase {
       _memory[key] = stringValue;
       return;
     }
-    final db = await database;
-    await db.insert(
-      'preferences',
-      {'key': key, 'value': stringValue},
-      conflictAlgorithm: ConflictAlgorithm.replace,
-    );
+
+    final data = await _readStorage();
+    data[key] = stringValue;
+    await _writeStorage(data);
   }
 
   Future<T?> getValue<T>(String key) async {
@@ -66,22 +73,16 @@ class PreferencesDatabase {
         return null;
       }
     }
-    final db = await database;
-    final result = await db.query(
-      'preferences',
-      where: 'key = ?',
-      whereArgs: [key],
-    );
-    if (result.isNotEmpty) {
-      final val = result.first['value'] as String;
-      try {
-        final decoded = json.decode(val);
-        return decoded as T;
-      } catch (_) {
-        return null;
-      }
+
+    final data = await _readStorage();
+    final val = data[key];
+    if (val == null) return null;
+
+    try {
+      return json.decode(val) as T;
+    } catch (_) {
+      return null;
     }
-    return null;
   }
 
   Future<void> removeValue(String key) async {
@@ -89,12 +90,11 @@ class PreferencesDatabase {
       _memory.remove(key);
       return;
     }
-    final db = await database;
-    await db.delete(
-      'preferences',
-      where: 'key = ?',
-      whereArgs: [key],
-    );
+
+    final data = await _readStorage();
+    if (!data.containsKey(key)) return;
+    data.remove(key);
+    await _writeStorage(data);
   }
 
   String _encrypt(String plainText) {
@@ -149,18 +149,16 @@ class PreferencesDatabase {
         }
         return;
       }
-      final List<Map<String, dynamic>> rows = await _db!.query('preferences');
 
-      if (rows.isNotEmpty) {
-        print('Columns in "preferences" table: ${rows.first.keys.join(', ')}');
+      final data = await _readStorage();
+      if (data.isNotEmpty) {
+        print('Columns in "preferences" table: key, value');
       }
 
       print('\nContents of "preferences" table:');
-      for (final row in rows) {
-        print(row);
-      }
+      data.forEach((key, value) => print({'key': key, 'value': value}));
 
-      if (rows.isEmpty) {
+      if (data.isEmpty) {
         print('The "preferences" table is empty.');
       }
     } catch (e) {
