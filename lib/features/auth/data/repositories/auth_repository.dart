@@ -54,4 +54,35 @@ class AuthRepository {
       return Left(NetworkFailure('Network error'));
     }
   }
+
+  Future<Either<Failure, String>> resetPassword({
+  required String email,
+  required String token,
+  required String password,
+  required String passwordConfirmation,
+}) async {
+  try {
+    final response = await http.post(
+      Uri.parse(ApiConstants.resetPasswordUrl),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({
+        'email': email,
+        'token': token,
+        'password': password,
+        'password_confirmation': passwordConfirmation,
+      }),
+    );
+
+    final Map<String, dynamic> responseBody = jsonDecode(response.body);
+    final String message = responseBody['message'] ?? 'Unknown error';
+
+    if (response.statusCode == 200 && responseBody['success'] == true) {
+      return Right(message);
+    } else {
+      return Left(ServerFailure(message));
+    }
+  } catch (e) {
+    return Left(NetworkFailure('Network error: $e'));
+  }
+}
 }
