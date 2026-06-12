@@ -27,3 +27,13 @@ class ResetPasswordFailure extends ResetPasswordState {
   @override
   List<Object> get props => [message];
 }
+class ResetPasswordVisibility extends ResetPasswordState {
+  final bool obscurePassword;
+  final bool obscureConfirmPassword;
+  const ResetPasswordVisibility({
+    required this.obscurePassword,
+    required this.obscureConfirmPassword,
+  });
+  @override
+  List<Object> get props => [obscurePassword, obscureConfirmPassword];
+}

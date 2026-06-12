@@ -125,5 +125,12 @@
   "leaveDebateBody": "هل أنت متأكد من رغبتك في مغادرة المناظرة؟",
   "themeToggleTest": "تبديل السمة (للاختبار فقط)",
   "noMessages": "لا توجد رسائل بعد",
-  "messageHint": "راسل فريقك…"
+  "messageHint": "راسل فريقك…",
+
+  "resetPasswordTitle": "إعادة تعيين كلمة المرور",
+  "resetPasswordSubtitle": "أدخل الرمز المرسل إلى بريدك الإلكتروني واختر كلمة مرور جديدة.",
+  "resetCode": "رمز إعادة التعيين",
+  "newPassword": "كلمة المرور الجديدة",
+  "confirmPassword": "تأكيد كلمة المرور",
+  "resetPasswordButton": "إعادة تعيين كلمة المرور"
 }

@@ -128,5 +128,12 @@
   "leaveDebateBody": "Are you sure you want to leave the debate?",
   "themeToggleTest": "Toggle theme (test only)",
   "noMessages": "No messages yet",
-  "messageHint": "Message your team…"
+  "messageHint": "Message your team…",
+
+  "resetPasswordTitle": "Reset your password",
+  "resetPasswordSubtitle": "Enter the code sent to your email and choose a new password.",
+  "resetCode": "Reset code",
+  "newPassword": "New password",
+  "confirmPassword": "Confirm password",
+  "resetPasswordButton": "Reset password"
 }

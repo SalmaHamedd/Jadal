@@ -369,4 +369,23 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get messageHint => 'Message your team…';
+
+  @override
+  String get resetPasswordTitle => 'Reset your password';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'Enter the code sent to your email and choose a new password.';
+
+  @override
+  String get resetCode => 'Reset code';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get confirmPassword => 'Confirm password';
+
+  @override
+  String get resetPasswordButton => 'Reset password';
 }

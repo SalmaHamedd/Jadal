@@ -369,4 +369,23 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get messageHint => 'راسل فريقك…';
+
+  @override
+  String get resetPasswordTitle => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get resetPasswordSubtitle =>
+      'أدخل الرمز المرسل إلى بريدك الإلكتروني واختر كلمة مرور جديدة.';
+
+  @override
+  String get resetCode => 'رمز إعادة التعيين';
+
+  @override
+  String get newPassword => 'كلمة المرور الجديدة';
+
+  @override
+  String get confirmPassword => 'تأكيد كلمة المرور';
+
+  @override
+  String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
 }

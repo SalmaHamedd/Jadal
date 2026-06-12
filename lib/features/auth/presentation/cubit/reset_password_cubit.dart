@@ -10,6 +10,29 @@ class ResetPasswordCubit extends Cubit<ResetPasswordState> {
 
   ResetPasswordCubit(this._repository) : super(ResetPasswordInitial());
 
+  bool obscurePassword = true;
+  bool obscureConfirmPassword = true;
+
+  void togglePasswordVisibility() {
+    obscurePassword = !obscurePassword;
+    emit(
+      ResetPasswordVisibility(
+        obscurePassword: obscurePassword,
+        obscureConfirmPassword: obscureConfirmPassword,
+      ),
+    );
+  }
+
+  void toggleConfirmPasswordVisibility() {
+    obscureConfirmPassword = !obscureConfirmPassword;
+    emit(
+      ResetPasswordVisibility(
+        obscurePassword: obscurePassword,
+        obscureConfirmPassword: obscureConfirmPassword,
+      ),
+    );
+  }
+
   Future<void> resetPassword({
     required String email,
     required String token,

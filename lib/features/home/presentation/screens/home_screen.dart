@@ -16,7 +16,7 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('جدال'),
+        title: const Text('جدل'),
         actions: const [
           LocaleToggleButton(),
           SizedBox(width: 6),
@@ -28,7 +28,7 @@ class HomeScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           Text(
-            'مرحباً بك في جدال — اختر دورك للمتابعة',
+            'مرحباً بك في جدل — اختر دورك للمتابعة',
             style: Theme.of(context).textTheme.titleMedium,
           ),
           const SizedBox(height: 12),

@@ -12,12 +12,6 @@ class ForgotPasswordCubit extends Cubit<ForgotPasswordState> {
 
   Future<void> forgotPassword(String email) async {
     emit(ForgotPasswordLoading());
-
-    if (email.isEmpty) {
-      emit(const ForgotPasswordFailure('Please enter your email'));
-      return;
-    }
-
     final result = await _repository.forgotPassword(email);
     result.fold(
           (failure) => emit(ForgotPasswordFailure(failure.message)),

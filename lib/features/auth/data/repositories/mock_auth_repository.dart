@@ -31,7 +31,7 @@ class MockAuthRepository implements AuthRepository {
     if (email.isEmpty) {
       return const Left(AuthFailure('Please enter your email'));
     }
-    return const Right('Reset link sent. Check your email.');
+    return const Right('Password reset link sent to your email');
   }
 
   @override
@@ -48,7 +48,6 @@ class MockAuthRepository implements AuthRepository {
     if (password != passwordConfirmation) {
       return const Left(AuthFailure('Passwords do not match'));
     }
-    // Simulate successful reset
-    return const Right('تم إعادة تعيين كلمة المرور بنجاح. | Password has been reset successfully.');
+    return const Right('Password has been reset successfully');
   }
 }

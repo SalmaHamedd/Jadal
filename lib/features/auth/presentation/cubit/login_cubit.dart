@@ -18,12 +18,12 @@ class LoginCubit extends Cubit<LoginState> {
     emit(LoginPasswordVisibility(obscurePassword));
   }
 
-  Future<void> login(String email, String password) async {
-    emit(LoginLoading());
-    final result = await _repository.login(email, password);
-    result.fold(
-          (failure) => emit(LoginFailure(failure.message)),
-          (user) => emit(LoginSuccess(user.id.toString())),
-    );
-  }
+Future<void> login(String email, String password) async {
+  emit(LoginLoading());
+  final result = await _repository.login(email, password);
+  result.fold(
+    (failure) => emit(LoginFailure(failure.message)),
+    (user) => emit(LoginSuccess(user.id.toString())),
+  );
+}
 }

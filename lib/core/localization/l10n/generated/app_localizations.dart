@@ -805,6 +805,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Message your team…'**
   String get messageHint;
+
+  /// No description provided for @resetPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset your password'**
+  String get resetPasswordTitle;
+
+  /// No description provided for @resetPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the code sent to your email and choose a new password.'**
+  String get resetPasswordSubtitle;
+
+  /// No description provided for @resetCode.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset code'**
+  String get resetCode;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm password'**
+  String get confirmPassword;
+
+  /// No description provided for @resetPasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPasswordButton;
 }
 
 class _AppLocalizationsDelegate
