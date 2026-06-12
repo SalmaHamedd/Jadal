@@ -13,8 +13,10 @@ class ProfileAvatar extends StatelessWidget {
     return CircleAvatar(
       radius: context.wp(10),
       backgroundColor: AppColors.primaryblue,
-      backgroundImage: avatarUrl != null ? NetworkImage(avatarUrl!) : null,
-      child: avatarUrl == null
+      backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
+          ? NetworkImage(avatarUrl!)
+          : null,
+      child: (avatarUrl == null || avatarUrl!.isEmpty)
           ? Text(
               name.isNotEmpty ? name[0].toUpperCase() : '?',
               style: TextStyle(fontSize: context.wp(10), color: Colors.white),

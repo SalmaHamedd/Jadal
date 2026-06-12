@@ -53,7 +53,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   }
 
   Future<void> _pickAndUploadImage() async {
-    // Show source selection dialog
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (context) => AlertDialog(
@@ -72,7 +71,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
     if (source == null) return;
 
-    // Request permission for camera only
     if (source == ImageSource.camera) {
       final status = await Permission.camera.status;
       if (!status.isGranted) {
@@ -84,8 +82,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     }
 
-    // Pick image
-    final pickedFile = await _picker.pickImage(source: source);
+    final pickedFile = await _picker.pickImage(
+      source: source,
+      imageQuality: 70,
+    );
     if (pickedFile != null) {
       final file = File(pickedFile.path);
       _cubit.uploadAvatar(file);
@@ -130,24 +130,28 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     padding: EdgeInsets.all(context.wp(5)),
                     child: Column(
                       children: [
-                        // Avatar with camera overlay
                         Stack(
                           alignment: Alignment.bottomRight,
                           children: [
                             ProfileAvatar(
                               name: widget.currentName,
-                              avatarUrl: _avatarUrl, 
+                              avatarUrl: _avatarUrl,
                             ),
                             if (state is! EditProfileAvatarUploading)
                               IconButton(
-                                icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                                icon: const Icon(
+                                  Icons.camera_alt,
+                                  color: Colors.blue,
+                                ),
                                 onPressed: _pickAndUploadImage,
                               )
                             else
                               const SizedBox(
                                 height: 40,
                                 width: 40,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               ),
                           ],
                         ),
