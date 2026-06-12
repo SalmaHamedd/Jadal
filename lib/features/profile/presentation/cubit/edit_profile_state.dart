@@ -28,3 +28,14 @@ class EditProfileError extends EditProfileState {
   List<Object> get props => [message];
 }
 
+class EditProfileAvatarUploading extends EditProfileState {
+  @override
+  List<Object> get props => [];
+}
+
+class EditProfileAvatarUploaded extends EditProfileState {
+  final String newAvatarUrl;
+  const EditProfileAvatarUploaded(this.newAvatarUrl);
+  @override
+  List<Object> get props => [newAvatarUrl];
+}

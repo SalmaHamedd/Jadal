@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -19,6 +21,15 @@ class EditProfileCubit extends Cubit<EditProfileState> {
     result.fold(
       (failure) => emit(EditProfileError(failure.message)),
       (updatedProfile) => emit(EditProfileSuccess(updatedProfile)),
+    );
+  }
+
+  Future<void> uploadAvatar(File imageFile) async {
+    emit(EditProfileAvatarUploading());
+    final result = await _repository.uploadAvatar(imageFile);
+    result.fold(
+      (failure) => emit(EditProfileError(failure.message)),
+      (newUrl) => emit(EditProfileAvatarUploaded(newUrl)),
     );
   }
 }

@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/services/message_service.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
@@ -7,15 +9,18 @@ import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dar
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/edit_profile_cubit.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class EditProfileScreen extends StatefulWidget {
   final String currentName;
   final String currentPhone;
+  final String? currentAvatarUrl; // optional, if you have it
 
   const EditProfileScreen({
     super.key,
     required this.currentName,
     required this.currentPhone,
+    this.currentAvatarUrl,
   });
 
   @override
@@ -26,6 +31,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
   late final EditProfileCubit _cubit;
+  final ImagePicker _picker = ImagePicker();
+  String? _avatarUrl; // local copy for immediate UI update
 
   @override
   void initState() {
@@ -34,6 +41,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController = TextEditingController(text: widget.currentPhone);
     final repository = ProfileRepository();
     _cubit = EditProfileCubit(repository);
+    _avatarUrl = widget.currentAvatarUrl;
   }
 
   @override
@@ -42,6 +50,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     _phoneController.dispose();
     _cubit.close();
     super.dispose();
+  }
+
+  Future<void> _pickAndUploadImage() async {
+    // Show source selection dialog
+    final source = await showDialog<ImageSource>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Choose source'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.camera),
+            child: const Text('Camera'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, ImageSource.gallery),
+            child: const Text('Gallery'),
+          ),
+        ],
+      ),
+    );
+    if (source == null) return;
+
+    // Request permission for camera only
+    if (source == ImageSource.camera) {
+      final status = await Permission.camera.status;
+      if (!status.isGranted) {
+        final requested = await Permission.camera.request();
+        if (!requested.isGranted) {
+          MessageService.showError(context, 'Camera permission required');
+          return;
+        }
+      }
+    }
+
+    // Pick image
+    final pickedFile = await _picker.pickImage(source: source);
+    if (pickedFile != null) {
+      final file = File(pickedFile.path);
+      _cubit.uploadAvatar(file);
+    }
   }
 
   @override
@@ -59,6 +107,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               Navigator.pop(context, state.updatedProfile);
             } else if (state is EditProfileError) {
               MessageService.showError(context, state.message);
+            } else if (state is EditProfileAvatarUploaded) {
+              // Update local avatar URL and show success
+              setState(() {
+                _avatarUrl = state.newAvatarUrl;
+              });
+              MessageService.showSuccess(context, 'Avatar updated');
             }
           },
           builder: (context, state) {
@@ -76,7 +130,27 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     padding: EdgeInsets.all(context.wp(5)),
                     child: Column(
                       children: [
-                        ProfileAvatar(name: widget.currentName),
+                        // Avatar with camera overlay
+                        Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            ProfileAvatar(
+                              name: widget.currentName,
+                              avatarUrl: _avatarUrl, 
+                            ),
+                            if (state is! EditProfileAvatarUploading)
+                              IconButton(
+                                icon: const Icon(Icons.camera_alt, color: Colors.blue),
+                                onPressed: _pickAndUploadImage,
+                              )
+                            else
+                              const SizedBox(
+                                height: 40,
+                                width: 40,
+                                child: CircularProgressIndicator(strokeWidth: 2),
+                              ),
+                          ],
+                        ),
                         SizedBox(height: context.hp(4)),
                         AuthTextField(
                           label: 'Name',

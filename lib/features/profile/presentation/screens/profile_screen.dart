@@ -49,7 +49,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: Column(
                   children: [
                     SizedBox(height: context.hp(6)),
-                    ProfileAvatar(name: profile.name),
+                    ProfileAvatar(
+                      name: profile.name,
+                      avatarUrl: profile.avatarUrl, 
+                    ),
                     SizedBox(height: context.hp(2)),
                     Text(
                       profile.name,
@@ -79,11 +82,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   builder: (context) => EditProfileScreen(
                                     currentName: profile.name,
                                     currentPhone: profile.phone ?? '',
+                                    currentAvatarUrl: profile.avatarUrl, 
                                   ),
                                 ),
                               );
                               if (result != null) {
-                                _cubit.loadProfile();
+                                _cubit.loadProfile(); 
                               }
                             },
                           ),

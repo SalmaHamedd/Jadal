@@ -4,6 +4,7 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:jadal_app/features/splash/presentation/cubit/splash_cubit.dart';
+import 'package:jadal_app/features/splash/presentation/screens/splash_screen.dart';
 
 import 'core/app_cubit/app_cubit.dart';
 import 'core/app_cubit/app_states.dart';
@@ -47,7 +48,7 @@ class JadalApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: const LoginScreen(),
+            home: const SplashScreen(),
           );
         },
       ),

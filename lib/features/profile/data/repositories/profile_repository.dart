@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
@@ -103,6 +104,40 @@ class ProfileRepository {
         return Right(message);
       } else {
         return Left(ServerFailure(message));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  Future<Either<Failure, String>> uploadAvatar(File imageFile) async {
+    try {
+      final token = await TokenStorage.getToken();
+      if (token == null) return Left(AuthFailure('No token'));
+
+      var request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConstants.avatarUrl),
+      );
+      request.headers['Authorization'] = 'Bearer $token';
+      request.files.add(
+        await http.MultipartFile.fromPath(
+          'avatar',
+          imageFile.path,
+          contentType: http.MediaType('image', 'jpeg'),
+        ),
+      );
+
+      final response = await request.send();
+      final responseBody = await response.stream.bytesToString();
+      final json = jsonDecode(responseBody);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        // If backend returns the new avatar URL, extract it; otherwise just the message
+        final newAvatarUrl = json['data']?['avatar_url'] ?? json['message'];
+        return Right(newAvatarUrl.toString());
+      } else {
+        return Left(ServerFailure(json['message'] ?? 'Upload failed'));
       }
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));
