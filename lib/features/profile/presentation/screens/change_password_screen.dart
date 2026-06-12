@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
-import 'package:jadal_app/core/services/message_service.dart';
+import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -47,10 +47,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           bloc: _cubit,
           listener: (context, state) {
             if (state is ChangePasswordSuccess) {
-              MessageService.showSuccess(context, state.message);
+              JadalSnackBar.show(context, state.message, type: SnackBarType.success);
               Navigator.pop(context);
             } else if (state is ChangePasswordError) {
-              MessageService.showError(context, state.message);
+              JadalSnackBar.show(context, state.message, type: SnackBarType.error);
             }
           },
           builder: (context, state) {
@@ -107,13 +107,10 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                           text: 'Update Password',
                           isLoading: state is ChangePasswordLoading,
                           onPressed: () {
-                            // No client-side validation – backend will handle everything
                             _cubit.changePassword(
-                              currentPassword: _currentPasswordController.text
-                                  .trim(),
+                              currentPassword: _currentPasswordController.text.trim(),
                               newPassword: _newPasswordController.text.trim(),
-                              confirmPassword: _confirmPasswordController.text
-                                  .trim(),
+                              confirmPassword: _confirmPasswordController.text.trim(),
                             );
                           },
                         ),

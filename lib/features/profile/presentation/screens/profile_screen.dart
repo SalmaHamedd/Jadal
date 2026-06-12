@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
-import 'package:jadal_app/core/services/message_service.dart';
+import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/profile_cubit.dart';
@@ -22,28 +22,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
   late ProfileCubit _cubit;
 
   void _showLogoutConfirmation() {
-  showDialog(
-    context: context,
-    builder: (context) => AlertDialog(
-      title: const Text('Logout'),
-      content: const Text('Are you sure you want to log out?'),
-      actions: [
-        TextButton(
-          onPressed: () => Navigator.pop(context),
-          child: const Text('Cancel'),
-        ),
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context); 
-            _cubit.logout();
-          },
-          style: TextButton.styleFrom(foregroundColor: Colors.red),
-          child: const Text('Logout'),
-        ),
-      ],
-    ),
-  );
-}
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to log out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              _cubit.logout();
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void initState() {
@@ -65,9 +65,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
       body: BlocConsumer<ProfileCubit, ProfileState>(
         bloc: _cubit,
         listener: (context, state) {
-          // Handle logout success
           if (state is ProfileLogoutSuccess) {
-            MessageService.showSuccess(context, state.message);
+            JadalSnackBar.show(context, state.message, type: SnackBarType.success);
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -76,7 +75,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           if (state is ProfileError) {
-            MessageService.showError(context, state.message);
+            JadalSnackBar.show(context, state.message, type: SnackBarType.error);
           }
         },
         builder: (context, state) {
@@ -140,8 +139,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) =>
-                                      const ChangePasswordScreen(),
+                                  builder: (context) => const ChangePasswordScreen(),
                                 ),
                               );
                             },

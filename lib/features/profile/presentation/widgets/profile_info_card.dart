@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jadal_app/core/colors.dart';
+import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 
 class ProfileInfoCard extends StatelessWidget {
@@ -21,7 +21,7 @@ class ProfileInfoCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: context.hp(1.5)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        leading: Icon(icon, color: AppColors.primaryblue),
+        leading: Icon(icon, color: JadalColors.primaryBlue),
         title: Text(label, style: const TextStyle(fontWeight: FontWeight.w500)),
         subtitle: Text(value),
       ),

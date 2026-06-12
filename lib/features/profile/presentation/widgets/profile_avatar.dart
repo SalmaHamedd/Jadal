@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:jadal_app/core/colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 
 class ProfileAvatar extends StatelessWidget {
@@ -10,18 +9,24 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (avatarUrl != null && avatarUrl!.isNotEmpty) {
+      return CircleAvatar(
+        radius: context.wp(15),
+        backgroundImage: NetworkImage(avatarUrl!),
+        backgroundColor: Colors.grey[200],
+        child: null,
+      );
+    }
+
+
     return CircleAvatar(
-      radius: context.wp(10),
-      backgroundColor: AppColors.primaryblue,
-      backgroundImage: avatarUrl != null && avatarUrl!.isNotEmpty
-          ? NetworkImage(avatarUrl!)
-          : null,
-      child: (avatarUrl == null || avatarUrl!.isEmpty)
-          ? Text(
-              name.isNotEmpty ? name[0].toUpperCase() : '?',
-              style: TextStyle(fontSize: context.wp(10), color: Colors.white),
-            )
-          : null,
+      radius: context.wp(15),
+      backgroundColor: Colors.grey[300],
+      child: Icon(
+        Icons.person,
+        size: context.wp(18),
+        color: Colors.grey[700],
+      ),
     );
   }
 }

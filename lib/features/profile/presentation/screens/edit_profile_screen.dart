@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
-import 'package:jadal_app/core/services/message_service.dart';
+import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -14,7 +14,7 @@ import 'package:permission_handler/permission_handler.dart';
 class EditProfileScreen extends StatefulWidget {
   final String currentName;
   final String currentPhone;
-  final String? currentAvatarUrl; // optional, if you have it
+  final String? currentAvatarUrl;
 
   const EditProfileScreen({
     super.key,
@@ -32,7 +32,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _phoneController;
   late final EditProfileCubit _cubit;
   final ImagePicker _picker = ImagePicker();
-  String? _avatarUrl; // local copy for immediate UI update
+  String? _avatarUrl;
 
   @override
   void initState() {
@@ -76,7 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!status.isGranted) {
         final requested = await Permission.camera.request();
         if (!requested.isGranted) {
-          MessageService.showError(context, 'Camera permission required');
+          JadalSnackBar.show(context, 'Camera permission required', type: SnackBarType.error);
           return;
         }
       }
@@ -100,19 +100,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bloc: _cubit,
           listener: (context, state) {
             if (state is EditProfileSuccess) {
-              MessageService.showSuccess(
-                context,
-                'Profile updated successfully',
-              );
+              JadalSnackBar.show(context, 'Profile updated successfully', type: SnackBarType.success);
               Navigator.pop(context, state.updatedProfile);
             } else if (state is EditProfileError) {
-              MessageService.showError(context, state.message);
+              JadalSnackBar.show(context, state.message, type: SnackBarType.error);
             } else if (state is EditProfileAvatarUploaded) {
-              // Update local avatar URL and show success
               setState(() {
                 _avatarUrl = state.newAvatarUrl;
               });
-              MessageService.showSuccess(context, 'Avatar updated');
+              JadalSnackBar.show(context, 'Avatar updated', type: SnackBarType.success);
             }
           },
           builder: (context, state) {

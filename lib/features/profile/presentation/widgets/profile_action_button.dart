@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:jadal_app/core/colors.dart';
+import 'package:jadal_app/core/theme/app_colors.dart';
 
 class ProfileActionButton extends StatelessWidget {
   final String text;
@@ -24,15 +24,15 @@ class ProfileActionButton extends StatelessWidget {
     return OutlinedButton.icon(
       onPressed: onPressed,
       icon: icon != null
-          ? Icon(icon, size: 18, color: textColor ?? AppColors.primaryblue)
+          ? Icon(icon, size: 18, color: textColor ?? JadalColors.primaryBlue)
           : const SizedBox.shrink(),
       label: Text(
         text,
-        style: TextStyle(color: textColor ?? AppColors.primaryblue),
+        style: TextStyle(color: textColor ?? JadalColors.primaryBlue),
       ),
       style: OutlinedButton.styleFrom(
-        foregroundColor: borderColor ?? AppColors.primaryblue,
-        side: BorderSide(color: borderColor ?? AppColors.primaryblue),
+        foregroundColor: borderColor ?? JadalColors.primaryBlue,
+        side: BorderSide(color: borderColor ?? JadalColors.primaryBlue),
         backgroundColor: backgroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
         padding: const EdgeInsets.symmetric(vertical: 12),
