@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/services/message_service.dart';
+import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:jadal_app/features/profile/presentation/screens/edit_profile_screen.dart';
@@ -19,6 +21,30 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   late ProfileCubit _cubit;
 
+  void _showLogoutConfirmation() {
+  showDialog(
+    context: context,
+    builder: (context) => AlertDialog(
+      title: const Text('Logout'),
+      content: const Text('Are you sure you want to log out?'),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.pop(context),
+          child: const Text('Cancel'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context); 
+            _cubit.logout();
+          },
+          style: TextButton.styleFrom(foregroundColor: Colors.red),
+          child: const Text('Logout'),
+        ),
+      ],
+    ),
+  );
+}
+
   @override
   void initState() {
     super.initState();
@@ -36,8 +62,23 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<ProfileCubit, ProfileState>(
+      body: BlocConsumer<ProfileCubit, ProfileState>(
         bloc: _cubit,
+        listener: (context, state) {
+          // Handle logout success
+          if (state is ProfileLogoutSuccess) {
+            MessageService.showSuccess(context, state.message);
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const LoginScreen()),
+              (route) => false,
+            );
+          }
+
+          if (state is ProfileError) {
+            MessageService.showError(context, state.message);
+          }
+        },
         builder: (context, state) {
           if (state is ProfileLoading) {
             return const Center(child: CircularProgressIndicator());
@@ -51,7 +92,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     SizedBox(height: context.hp(6)),
                     ProfileAvatar(
                       name: profile.name,
-                      avatarUrl: profile.avatarUrl, 
+                      avatarUrl: profile.avatarUrl,
                     ),
                     SizedBox(height: context.hp(2)),
                     Text(
@@ -82,13 +123,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   builder: (context) => EditProfileScreen(
                                     currentName: profile.name,
                                     currentPhone: profile.phone ?? '',
-                                    currentAvatarUrl: profile.avatarUrl, 
+                                    currentAvatarUrl: profile.avatarUrl,
                                   ),
                                 ),
                               );
-                              if (result != null) {
-                                _cubit.loadProfile(); 
-                              }
+                              if (result != null) _cubit.loadProfile();
                             },
                           ),
                         ),
@@ -130,6 +169,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       icon: Icons.calendar_today,
                       label: 'Joined',
                       value: profile.createdAt.split('T')[0],
+                    ),
+                    SizedBox(height: context.hp(2)),
+                    Center(
+                      child: SizedBox(
+                        width: MediaQuery.of(context).size.width * 0.5,
+                        child: ProfileActionButton(
+                          text: 'Logout',
+                          icon: Icons.logout,
+                          textColor: Colors.red,
+                          borderColor: Colors.red,
+                          onPressed: () {
+                            _showLogoutConfirmation();
+                          },
+                        ),
+                      ),
                     ),
                   ],
                 ),

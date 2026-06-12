@@ -18,4 +18,13 @@ class ProfileCubit extends Cubit<ProfileState> {
       (profile) => emit(ProfileLoaded(profile)),
     );
   }
+
+  Future<void> logout() async {
+    emit(ProfileLoading());
+    final result = await _repository.logout();
+    result.fold(
+      (failure) => emit(ProfileError(failure.message)),
+      (message) => emit(ProfileLogoutSuccess(message)),
+    );
+  }
 }

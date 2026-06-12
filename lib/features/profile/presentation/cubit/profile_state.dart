@@ -27,3 +27,11 @@ class ProfileError extends ProfileState {
   @override
   List<Object> get props => [message];
 }
+
+class ProfileLogoutSuccess extends ProfileState {
+  final String message;
+  const ProfileLogoutSuccess(this.message);
+  @override
+  List<Object> get props => [message];
+}
+

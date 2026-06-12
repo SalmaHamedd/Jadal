@@ -133,11 +133,32 @@ class ProfileRepository {
       final json = jsonDecode(responseBody);
 
       if (response.statusCode == 200 && json['success'] == true) {
-        // If backend returns the new avatar URL, extract it; otherwise just the message
         final newAvatarUrl = json['data']?['avatar_url'] ?? json['message'];
         return Right(newAvatarUrl.toString());
       } else {
         return Left(ServerFailure(json['message'] ?? 'Upload failed'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  Future<Either<Failure, String>> logout() async {
+    try {
+      final token = await TokenStorage.getToken();
+      if (token == null) return Left(AuthFailure('Not logged in'));
+
+      final response = await http.post(
+        Uri.parse(ApiConstants.logoutUrl),
+        headers: {'Authorization': 'Bearer $token'},
+      );
+
+      final Map<String, dynamic> body = jsonDecode(response.body);
+      if (response.statusCode == 200 && body['success'] == true) {
+        await TokenStorage.deleteToken();
+        return Right(body['message'] ?? 'Logged out successfully');
+      } else {
+        return Left(ServerFailure(body['message'] ?? 'Logout failed'));
       }
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));
