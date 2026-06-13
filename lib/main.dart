@@ -13,6 +13,7 @@ import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
+import 'features/profile/presentation/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,7 @@ class JadalApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: const SplashScreen(),
+            home: const LoginScreen(),
           );
         },
       ),
