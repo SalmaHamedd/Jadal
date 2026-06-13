@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'http://31.70.76.84/api';
+  static const String baseUrl = 'https://www.jadal-platform.com/api';
 
   static const String login = '/auth/login';
   static const String forgotPassword = '/auth/password/forgot';
@@ -8,6 +8,8 @@ class ApiConstants {
   static const String avatar = '/profile/avatar';
   static const String changePassword = '/profile/password';
   static const String logout = '/auth/logout';
+  static const String search = '/search';
+
 
   static String get loginUrl => '$baseUrl$login';
   static String get forgotPasswordUrl => '$baseUrl$forgotPassword';
@@ -16,4 +18,5 @@ class ApiConstants {
   static String get avatarUrl => '$baseUrl$avatar';
   static String get changePasswordUrl => '$baseUrl$changePassword';
   static String get logoutUrl => '$baseUrl$logout';
+  static String get searchUrl => '$baseUrl$search';
 }
