@@ -22,7 +22,6 @@ dependencies:
   flutter_bloc: ^9.1.1
   google_fonts: ^6.2.1
   app_links: 7.0.0
-  shared_preferences: ^2.5.5
   image_picker: ^1.2.2
   fluttertoast: ^8.2.8
   livekit_client: ^2.1.0
