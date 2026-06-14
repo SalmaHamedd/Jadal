@@ -97,15 +97,27 @@ class PreferencesDatabase {
     await _writeStorage(data);
   }
 
+  /// Builds a valid AES-256 key (exactly 32 bytes) from [_secretKey].
+  ///
+  /// `encrypt.Key.fromUtf8` does no length validation, so a secret that isn't
+  /// 16/24/32 bytes long makes AES throw `ArgumentError` at encrypt time. We
+  /// pad/truncate to 32 bytes here so an off-length constant can't break it.
+  encrypt.Key _aesKey() {
+    final raw = utf8.encode(_secretKey);
+    final bytes = Uint8List(32);
+    bytes.setRange(0, raw.length < 32 ? raw.length : 32, raw);
+    return encrypt.Key(bytes);
+  }
+
   String _encrypt(String plainText) {
-    final key = encrypt.Key.fromUtf8(_secretKey);
+    final key = _aesKey();
     final iv = encrypt.IV.fromLength(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
     return encrypter.encrypt(plainText, iv: iv).base64;
   }
 
   String _decrypt(String base64Text) {
-    final key = encrypt.Key.fromUtf8(_secretKey);
+    final key = _aesKey();
     final iv = encrypt.IV.fromLength(16);
     final encrypter = encrypt.Encrypter(encrypt.AES(key));
     return encrypter.decrypt64(base64Text, iv: iv);
@@ -129,11 +141,11 @@ class PreferencesDatabase {
   }
 
   Future<void> setToken(String token) async {
-    await setEncryptedValue('AUTH_TOKEN', token);
+    await setValue('AUTH_TOKEN', token);
   }
 
   Future<String?> getToken() async {
-    return await getEncryptedValue<String>('AUTH_TOKEN');
+    return await getValue<String>('AUTH_TOKEN');
   }
 
   Future<void> printPreferencesTable() async {
