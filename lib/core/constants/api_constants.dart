@@ -1,5 +1,5 @@
 class ApiConstants {
-  static const String baseUrl = 'https://www.jadal-platform.com/api';
+  static const String baseUrl = 'https:www.jadal-platform.com/api';
 
   static const String login = '/auth/login';
   static const String forgotPassword = '/auth/password/forgot';

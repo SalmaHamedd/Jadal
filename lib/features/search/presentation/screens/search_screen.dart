@@ -53,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           style: TextStyle(
             fontFamily: 'Cairo',
-            color: Colors.white,
+            color: JadalColors.primaryBlue,
             fontSize: context.fontSize(16),
           ),
           textDirection: TextDirection.rtl,
@@ -65,10 +65,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: BlocConsumer<SearchCubit, SearchState>(
         bloc: _cubit,
