@@ -5,7 +5,7 @@ import 'package:http/http.dart' as http;
 
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/services/token_storage.dart';
+import '../../../../core/storage/preferences_database.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
 import '../models/user_model.dart';
@@ -30,7 +30,7 @@ class ApiAuthRepository implements AuthRepository {
       if (response.statusCode == 200 && responseBody['success'] == true) {
         final data = responseBody['data'];
         final String token = data['token'];
-        await TokenStorage.saveToken(token);
+        await PreferencesDatabase().setToken(token);
         final user = UserModel.fromJson(data['user']);
         return Right(user);
       }
@@ -89,9 +89,7 @@ class ApiAuthRepository implements AuthRepository {
         return Right(message);
       }
 
-      return Left(
-        AuthFailure(message),
-      );
+      return Left(AuthFailure(message));
     } catch (_) {
       return const Left(NetworkFailure('Network error'));
     }

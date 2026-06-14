@@ -7,12 +7,11 @@ import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
-import '../../../home/presentation/screens/home_screen.dart';
 import '../cubit/reset_password_cubit.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
 import 'login_screen.dart';
-import '../../data/repositories/auth_repository.dart'; // or mock
+import '../../data/repositories/auth_repository.dart';
 
 class ResetPasswordScreen extends StatefulWidget {
   final String email;
@@ -23,7 +22,7 @@ class ResetPasswordScreen extends StatefulWidget {
 }
 
 class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
-  late final ResetPasswordCubit _cubit;   // ✅ declared
+  late final ResetPasswordCubit _cubit;  
 
   final _formKey = GlobalKey<FormState>();
   final _tokenController = TextEditingController();
@@ -35,7 +34,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
   @override
   void initState() {
     super.initState();
-    final repository = ApiAuthRepository(); // or MockAuthRepository()
+    final repository = ApiAuthRepository(); 
     _cubit = ResetPasswordCubit(repository);
   }
 
@@ -86,7 +85,6 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
         body: Stack(
           fit: StackFit.expand,
           children: [
-            // Blur blobs (identical to LoginScreen)
             Positioned(
               top: 160,
               left: -30,

@@ -5,15 +5,12 @@ import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit
 import 'package:jadal_app/features/auth/presentation/cubit/login_cubit.dart';
 import 'package:jadal_app/features/splash/presentation/cubit/splash_cubit.dart';
 import 'package:jadal_app/features/splash/presentation/screens/splash_screen.dart';
-
 import 'core/app_cubit/app_cubit.dart';
 import 'core/app_cubit/app_states.dart';
 import 'core/localization/l10n/generated/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/screens/login_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
-import 'features/profile/presentation/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -4,14 +4,14 @@ import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
-import 'package:jadal_app/core/services/token_storage.dart';
+import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/profile/data/models/profile_model.dart';
 
 class ProfileRepository {
   Future<Either<Failure, Profile>> getProfile() async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) {
         return Left(AuthFailure('No authentication token found'));
       }
@@ -44,7 +44,7 @@ class ProfileRepository {
     required String phone,
   }) async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) {
         return Left(AuthFailure('No authentication token found'));
       }
@@ -79,7 +79,7 @@ class ProfileRepository {
     required String confirmPassword,
   }) async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) {
         return Left(AuthFailure('No authentication token found'));
       }
@@ -112,7 +112,7 @@ class ProfileRepository {
 
   Future<Either<Failure, String>> uploadAvatar(File imageFile) async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) return Left(AuthFailure('No token'));
 
       var request = http.MultipartRequest(
@@ -145,7 +145,7 @@ class ProfileRepository {
 
   Future<Either<Failure, String>> logout() async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) return Left(AuthFailure('Not logged in'));
 
       final response = await http.post(
@@ -155,7 +155,7 @@ class ProfileRepository {
 
       final Map<String, dynamic> body = jsonDecode(response.body);
       if (response.statusCode == 200 && body['success'] == true) {
-        await TokenStorage.deleteToken();
+        await PreferencesDatabase().removeValue('AUTH_TOKEN');
         return Right(body['message'] ?? 'Logged out successfully');
       } else {
         return Left(ServerFailure(body['message'] ?? 'Logout failed'));

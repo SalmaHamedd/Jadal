@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
 import 'package:jadal_app/core/error/failures.dart';
-import 'package:jadal_app/core/services/token_storage.dart';
+import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 import 'package:jadal_app/features/search/domain/entities/search_team.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
@@ -13,7 +13,7 @@ class SearchRepositoryImpl implements SearchRepository {
   final http.Client client;
 
   SearchRepositoryImpl({http.Client? client})
-    : client = client ?? http.Client();
+      : client = client ?? http.Client();
 
   @override
   Future<Either<Failure, (List<SearchUser>, List<SearchTeam>)>> search({
@@ -23,7 +23,7 @@ class SearchRepositoryImpl implements SearchRepository {
     int teamsPage = 1,
   }) async {
     try {
-      final token = await TokenStorage.getToken();
+      final token = await PreferencesDatabase().getToken();
       if (token == null) return Left(AuthFailure('Not authenticated'));
 
       final uri = Uri.parse(ApiConstants.searchUrl).replace(
@@ -34,7 +34,7 @@ class SearchRepositoryImpl implements SearchRepository {
           'teams_page': teamsPage.toString(),
         },
       );
-      print('🔍 Search URI: $uri');
+      
       final response = await client.get(
         uri,
         headers: {

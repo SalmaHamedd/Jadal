@@ -9,8 +9,8 @@ import '../../../debates/presentation/screens/debates_list_screen.dart';
 import '../../../debates/presentation/screens/statistics_screen.dart';
 import '../../../../core/mock/mock_data.dart';
 
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class TempHomeScreen extends StatelessWidget {
+  const TempHomeScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
