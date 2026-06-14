@@ -18,7 +18,7 @@ class ProfileInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       color: Theme.of(context).cardColor,
-      margin: EdgeInsets.only(bottom: context.hp(1.5)),
+      margin: EdgeInsets.only(bottom: context.hp(1)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
         leading: Icon(icon, color: JadalColors.primaryBlue),

@@ -65,10 +65,6 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.pop(context),
-        ),
       ),
       body: BlocConsumer<SearchCubit, SearchState>(
         bloc: _cubit,

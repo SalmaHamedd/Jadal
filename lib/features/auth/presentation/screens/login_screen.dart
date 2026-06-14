@@ -2,6 +2,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/profile/presentation/screens/profile_screen.dart';
 
@@ -9,7 +10,6 @@ import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
-import '../../../home/presentation/screens/home_screen.dart';
 import '../cubit/login_cubit.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
@@ -262,7 +262,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                     if (state is LoginSuccess) {
                                       Navigator.of(context).pushReplacement(
                                         MaterialPageRoute(
-                                          builder: (_) => const ProfileScreen(),
+                                          builder: (_) => const MainScreen(),
                                         ),
                                       );
                                     }

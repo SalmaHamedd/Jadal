@@ -88,12 +88,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 padding: EdgeInsets.all(context.wp(5)),
                 child: Column(
                   children: [
-                    SizedBox(height: context.hp(6)),
                     ProfileAvatar(
                       name: profile.name,
                       avatarUrl: profile.avatarUrl,
                     ),
-                    SizedBox(height: context.hp(2)),
+                    SizedBox(height: context.hp(1)),
                     Text(
                       profile.name,
                       style: TextStyle(
@@ -108,7 +107,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         color: Colors.grey[600],
                       ),
                     ),
-                    SizedBox(height: context.hp(2)),
+                    SizedBox(height: context.hp(1)),
                     Row(
                       children: [
                         Expanded(
@@ -168,7 +167,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       label: 'Joined',
                       value: profile.createdAt.split('T')[0],
                     ),
-                    SizedBox(height: context.hp(2)),
+                    SizedBox(height: context.hp(1)),
                     Center(
                       child: SizedBox(
                         width: MediaQuery.of(context).size.width * 0.5,

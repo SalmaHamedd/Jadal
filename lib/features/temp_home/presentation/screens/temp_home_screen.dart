@@ -15,15 +15,6 @@ class TempHomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('جدل'),
-        actions: const [
-          LocaleToggleButton(),
-          SizedBox(width: 6),
-          ThemeToggleButton(),
-          SizedBox(width: 8),
-        ],
-      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
