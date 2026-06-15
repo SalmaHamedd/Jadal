@@ -31,6 +31,7 @@ class ApiAuthRepository implements AuthRepository {
         final data = responseBody['data'];
         final String token = data['token'];
         await PreferencesDatabase().setToken(token);
+        await PreferencesDatabase().setValue('user_id', data['user']['id']);
         final user = UserModel.fromJson(data['user']);
         return Right(user);
       }

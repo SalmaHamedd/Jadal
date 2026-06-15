@@ -9,7 +9,7 @@ class ApiConstants {
   static const String changePassword = '/profile/password';
   static const String logout = '/auth/logout';
   static const String search = '/search';
-
+  static const String blog = '/blog';
 
   static String get loginUrl => '$baseUrl$login';
   static String get forgotPasswordUrl => '$baseUrl$forgotPassword';
@@ -19,4 +19,6 @@ class ApiConstants {
   static String get changePasswordUrl => '$baseUrl$changePassword';
   static String get logoutUrl => '$baseUrl$logout';
   static String get searchUrl => '$baseUrl$search';
+  static String get blogUrl => '$baseUrl$blog';
+  static String get blogDetailsUrl => '$baseUrl$blog/';
 }

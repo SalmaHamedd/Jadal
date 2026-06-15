@@ -177,6 +177,29 @@ class PreferencesDatabase {
       print('Error reading "preferences" table: $e');
     }
   }
+
+  Future<void> clearAll() async {
+    if (kIsWeb) {
+      _memory.clear();
+      return;
+    }
+    final file = await _localFile;
+    await file.writeAsString(json.encode({}), flush: true);
+    _storageFile = null;
+  }
+
+
+  Future<void> clearReactions() async {
+    final data = await _readStorage();
+    final keysToRemove = data.keys
+        .where((key) => key.startsWith('reaction_'))
+        .toList();
+    if (keysToRemove.isEmpty) return;
+    for (var key in keysToRemove) {
+      data.remove(key);
+    }
+    await _writeStorage(data);
+  }
 }
 
 Future<String> getDocumentsPath() async {

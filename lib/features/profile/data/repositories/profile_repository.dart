@@ -156,6 +156,7 @@ class ProfileRepository {
       final Map<String, dynamic> body = jsonDecode(response.body);
       if (response.statusCode == 200 && body['success'] == true) {
         await PreferencesDatabase().removeValue('AUTH_TOKEN');
+        await PreferencesDatabase().removeValue('user_id');
         return Right(body['message'] ?? 'Logged out successfully');
       } else {
         return Left(ServerFailure(body['message'] ?? 'Logout failed'));
