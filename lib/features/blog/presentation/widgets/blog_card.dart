@@ -6,7 +6,7 @@ import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen
 
 class BlogCard extends StatelessWidget {
   final Blog blog;
-  final VoidCallback? onTap; // 👈 جديد
+  final VoidCallback? onTap;
 
   const BlogCard({super.key, required this.blog, this.onTap});
 

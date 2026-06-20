@@ -20,5 +20,4 @@ class ApiConstants {
   static String get logoutUrl => '$baseUrl$logout';
   static String get searchUrl => '$baseUrl$search';
   static String get blogUrl => '$baseUrl$blog';
-  static String get blogDetailsUrl => '$baseUrl$blog/';
 }

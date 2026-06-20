@@ -67,7 +67,7 @@ class BlogRepositoryImpl implements BlogRepository {
       if (token == null) return Left(AuthFailure('Not authenticated'));
 
       final response = await client.get(
-        Uri.parse('${ApiConstants.blogDetailsUrl}$slug'),
+        Uri.parse('${ApiConstants.blogUrl}/$slug'),
         headers: {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',

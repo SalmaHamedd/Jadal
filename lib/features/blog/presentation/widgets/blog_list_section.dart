@@ -24,12 +24,9 @@ class BlogListSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(
-                  horizontal: context.wp(4),
-                  vertical: context.hp(1),
-                ),
+                padding: EdgeInsets.symmetric(horizontal: context.wp(4), vertical: context.hp(1)),
                 child: Text(
-                  'أحدث المقالات',
+                  'جميع المقالات',
                   style: TextStyle(
                     fontSize: context.fontSize(18),
                     fontWeight: FontWeight.bold,
@@ -37,30 +34,29 @@ class BlogListSection extends StatelessWidget {
                   ),
                 ),
               ),
-              ListView.separated(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
-                padding: EdgeInsets.symmetric(horizontal: context.wp(4)),
-                itemCount: blogs.length,
-                separatorBuilder: (_, __) => SizedBox(height: context.hp(1)),
-                itemBuilder: (context, index) {
-                  final blog = blogs[index];
-                  return BlogCard(
-                    blog: blog,
-                    onTap: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) =>
-                              BlogDetailsScreen(slug: blog.slug),
-                        ),
-                      );
-                      if (context.mounted) {
-                        context.read<BlogCubit>().loadBlogs();
-                      }
-                    },
-                  );
-                },
+              Expanded(
+                child: ListView.separated(
+                  padding: EdgeInsets.symmetric(horizontal: context.wp(4)),
+                  itemCount: blogs.length,
+                  separatorBuilder: (_, __) => SizedBox(height: context.hp(1)),
+                  itemBuilder: (context, index) {
+                    final blog = blogs[index];
+                    return BlogCard(
+                      blog: blog,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlogDetailsScreen(slug: blog.slug),
+                          ),
+                        );
+                        if (context.mounted) {
+                          context.read<BlogCubit>().loadBlogs();
+                        }
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           );
