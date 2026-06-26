@@ -5,8 +5,6 @@ import 'package:jadal_app/core/constants/api_constants.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/blog/data/models/blog_details_model.dart';
-import 'package:jadal_app/features/blog/data/models/blog_reaction_request.dart';
-import 'package:jadal_app/features/blog/data/models/blog_reaction_response.dart';
 import 'package:jadal_app/features/blog/data/models/category_model.dart';
 import 'package:jadal_app/features/blog/data/models/tag_model.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
@@ -137,52 +135,53 @@ class BlogRepositoryImpl implements BlogRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, BlogDetails>> createBlog({
-    required String title,
-    required String content,
-    String? coverImageUrl,
-    List<int>? categoryIds,
-    List<int>? tagIds,
-  }) async {
-    try {
-      final token = await PreferencesDatabase().getToken();
-      if (token == null) return Left(AuthFailure('Not authenticated'));
+ @override
+Future<Either<Failure, BlogDetails>> createBlog({
+  required String title,
+  required String content,
+  String? coverImageUrl,
+  List<int>? categoryIds,
+  List<int>? tagIds,
+}) async {
+  try {
+    final token = await PreferencesDatabase().getToken();
+    if (token == null) return Left(AuthFailure('Not authenticated'));
 
-      final Map<String, dynamic> body = {'title': title, 'content': content};
+    final Map<String, dynamic> body = {
+      'title': title,
+      'content': content,
+      'cover_image_url': coverImageUrl,
+      'category_ids': categoryIds ?? [],
+      'tag_ids': tagIds ?? [],
+    };
 
-      body['cover_image_url'] = coverImageUrl;
+    final response = await client.post(
+      Uri.parse(ApiConstants.blogUrl),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $token',
+      },
+      body: jsonEncode(body),
+    );
 
-      body['category_ids'] = categoryIds ?? [];
-      body['tag_ids'] = tagIds ?? [];
+    final json = jsonDecode(response.body);
+    final String message = json['message'] ?? 'Unknown error';
 
-      final response = await client.post(
-        Uri.parse(ApiConstants.blogUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode(body),
-      );
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        final json = jsonDecode(response.body);
-        if (json['success'] == true) {
-          final data = json['data'];
-          final blogDetails = BlogDetailsModel.fromJson({'data': data});
-          return Right(blogDetails);
-        } else {
-          return Left(
-            ServerFailure(json['message'] ?? 'Failed to create blog'),
-          );
-        }
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      if (json['success'] == true) {
+        final data = json['data'];
+        final blogDetails = BlogDetailsModel.fromJson({'data': data});
+        return Right(blogDetails);
       } else {
-        return Left(ServerFailure('Server error: ${response.statusCode}'));
+        return Left(ServerFailure(message));
       }
-    } catch (e) {
-      return Left(NetworkFailure('Network error: $e'));
+    } else {
+      return Left(ServerFailure(message));
     }
+  } catch (e) {
+    return Left(NetworkFailure('Network error: $e'));
   }
+}
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() async {
@@ -244,6 +243,46 @@ class BlogRepositoryImpl implements BlogRepository {
         }
       } else {
         return Left(ServerFailure('Server error: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteBlog(int blogId) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.delete(
+        Uri.parse('${ApiConstants.blogUrl}/$blogId'),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          return const Right(null);
+        } else {
+          return Left(
+            ServerFailure(json['message'] ?? 'Failed to delete blog'),
+          );
+        }
+      } else {
+        try {
+          final json = jsonDecode(response.body);
+          return Left(
+            ServerFailure(
+              json['message'] ?? 'Server error: ${response.statusCode}',
+            ),
+          );
+        } catch (_) {
+          return Left(ServerFailure('Server error: ${response.statusCode}'));
+        }
       }
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));

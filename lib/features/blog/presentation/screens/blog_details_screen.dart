@@ -26,6 +26,8 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   String? _optimisticReaction;
   bool _isReacting = false;
   int? _blogId;
+  bool _isDeleting = false;
+  bool _isAuthor = false;
 
   final PreferencesDatabase _prefs = PreferencesDatabase();
 
@@ -93,6 +95,48 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     _isReacting = false;
   }
 
+  Future<void> _confirmDelete(int blogId, String title) async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('حذف المقال'),
+        content: Text('هل أنت متأكد من حذف المقال "$title"؟'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('إلغاء'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('حذف'),
+          ),
+        ],
+      ),
+    );
+    if (confirm == true && mounted) {
+      await _deleteBlog(blogId);
+    }
+  }
+
+  Future<void> _deleteBlog(int blogId) async {
+    if (_isDeleting) return;
+    setState(() => _isDeleting = true);
+
+    final repository = BlogRepositoryImpl();
+    final result = await repository.deleteBlog(blogId);
+    result.fold(
+      (failure) {
+        JadalSnackBar.show(context, failure.message, type: SnackBarType.error);
+        setState(() => _isDeleting = false);
+      },
+      (_) {
+        JadalSnackBar.show(context, 'تم حذف المقال بنجاح', type: SnackBarType.success);
+        Navigator.pop(context, true);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final BlogRepository repository = BlogRepositoryImpl();
@@ -100,8 +144,12 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
 
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => BlogDetailsCubit(repository)..loadBlogDetails(widget.slug)),
-        BlocProvider(create: (_) => BlogReactionCubit(repository)),
+        BlocProvider<BlogDetailsCubit>(
+          create: (_) => BlogDetailsCubit(repository)..loadBlogDetails(widget.slug),
+        ),
+        BlocProvider<BlogReactionCubit>(
+          create: (_) => BlogReactionCubit(repository),
+        ),
       ],
       child: Scaffold(
         backgroundColor: isDark ? JadalColors.darkBackground : JadalColors.lightBackground,
@@ -109,6 +157,14 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
           title: const Text('تفاصيل المقال'),
           foregroundColor: Colors.white,
           elevation: 0,
+          actions: [
+            if (_isAuthor && !_isDeleting)
+              IconButton(
+                icon: const Icon(Icons.delete_outline),
+                onPressed: () => _confirmDelete(_blogId!, ''),
+                tooltip: 'حذف المقال',
+              ),
+          ],
         ),
         body: BlocBuilder<BlogDetailsCubit, BlogDetailsState>(
           builder: (context, detailsState) {
@@ -120,6 +176,13 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                 _blogId = blog.id;
                 _optimisticLikes = blog.likesCount;
                 _optimisticDislikes = blog.dislikesCount;
+                _prefs.getValue<int>('user_id').then((userId) {
+                  if (mounted) {
+                    setState(() {
+                      _isAuthor = userId != null && userId == blog.author.id;
+                    });
+                  }
+                });
               }
 
               return BlocListener<BlogReactionCubit, BlogReactionState>(

@@ -27,6 +27,8 @@ abstract class BlogRepository {
   });
 
   Future<Either<Failure, List<Category>>> getCategories();
-  
+
   Future<Either<Failure, List<Tag>>> getTags();
+
+  Future<Either<Failure, void>> deleteBlog(int blogId);
 }
