@@ -5,7 +5,7 @@ import 'package:jadal_app/features/blog/domain/entities/author.dart';
 
 class BlogAuthorInfo extends StatelessWidget {
   final Author author;
-  final DateTime publishedAt;
+  final DateTime? publishedAt;
   final bool isDark;
 
   const BlogAuthorInfo({
@@ -42,7 +42,7 @@ class BlogAuthorInfo extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatDate(publishedAt),
+                _formatDate(publishedAt!),
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontSize: context.fontSize(12),

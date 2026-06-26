@@ -7,8 +7,12 @@ import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/blog/data/models/blog_details_model.dart';
 import 'package:jadal_app/features/blog/data/models/blog_reaction_request.dart';
 import 'package:jadal_app/features/blog/data/models/blog_reaction_response.dart';
+import 'package:jadal_app/features/blog/data/models/category_model.dart';
+import 'package:jadal_app/features/blog/data/models/tag_model.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog_details.dart';
+import 'package:jadal_app/features/blog/domain/entities/category.dart';
+import 'package:jadal_app/features/blog/domain/entities/tag.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:jadal_app/features/blog/data/models/blog_model.dart';
 
@@ -124,6 +128,119 @@ class BlogRepositoryImpl implements BlogRepository {
           });
         } else {
           return Left(ServerFailure(json['message'] ?? 'Reaction failed'));
+        }
+      } else {
+        return Left(ServerFailure('Server error: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, BlogDetails>> createBlog({
+    required String title,
+    required String content,
+    String? coverImageUrl,
+    List<int>? categoryIds,
+    List<int>? tagIds,
+  }) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final Map<String, dynamic> body = {'title': title, 'content': content};
+
+      body['cover_image_url'] = coverImageUrl;
+
+      body['category_ids'] = categoryIds ?? [];
+      body['tag_ids'] = tagIds ?? [];
+
+      final response = await client.post(
+        Uri.parse(ApiConstants.blogUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode(body),
+      );
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          final data = json['data'];
+          final blogDetails = BlogDetailsModel.fromJson({'data': data});
+          return Right(blogDetails);
+        } else {
+          return Left(
+            ServerFailure(json['message'] ?? 'Failed to create blog'),
+          );
+        }
+      } else {
+        return Left(ServerFailure('Server error: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Category>>> getCategories() async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.get(
+        Uri.parse(ApiConstants.categoriesUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          final data = json['data'] as List;
+          final categories = data
+              .map((item) => CategoryModel.fromJson(item))
+              .toList();
+          return Right(categories);
+        } else {
+          return Left(
+            ServerFailure(json['message'] ?? 'Failed to load categories'),
+          );
+        }
+      } else {
+        return Left(ServerFailure('Server error: ${response.statusCode}'));
+      }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Tag>>> getTags() async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.get(
+        Uri.parse(ApiConstants.tagsUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          final data = json['data'] as List;
+          final tags = data.map((item) => TagModel.fromJson(item)).toList();
+          return Right(tags);
+        } else {
+          return Left(ServerFailure(json['message'] ?? 'Failed to load tags'));
         }
       } else {
         return Left(ServerFailure('Server error: ${response.statusCode}'));

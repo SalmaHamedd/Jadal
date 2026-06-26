@@ -18,7 +18,7 @@ class BlogDetailsModel extends BlogDetails {
     required super.dislikesCount,
     required super.status,
     super.reviewerComment,
-    required super.publishedAt,
+    super.publishedAt,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -30,20 +30,20 @@ class BlogDetailsModel extends BlogDetails {
       title: data['title'],
       slug: data['slug'],
       content: data['content'],
-      coverImageUrl: data['cover_image_url'],
+      coverImageUrl: data['cover_image_url'] as String?,
       author: AuthorModel.fromJson(data['author']),
       categories: (data['categories'] as List)
           .map((c) => CategoryModel.fromJson(c))
           .toList(),
-      tags: (data['tags'] as List)
-          .map((t) => TagModel.fromJson(t))
-          .toList(),
+      tags: (data['tags'] as List).map((t) => TagModel.fromJson(t)).toList(),
       views: data['views'],
       likesCount: data['likes_count'],
       dislikesCount: data['dislikes_count'],
       status: data['status'],
-      reviewerComment: data['reviewer_comment'],
-      publishedAt: DateTime.parse(data['published_at']),
+      reviewerComment: data['reviewer_comment'] as String?,
+      publishedAt: data['published_at'] != null
+          ? DateTime.parse(data['published_at'])
+          : null,
       createdAt: DateTime.parse(data['created_at']),
       updatedAt: DateTime.parse(data['updated_at']),
     );

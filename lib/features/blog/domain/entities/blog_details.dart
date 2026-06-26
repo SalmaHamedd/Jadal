@@ -7,7 +7,7 @@ class BlogDetails extends Equatable {
   final int id;
   final String title;
   final String slug;
-  final String content;         
+  final String content;
   final String? coverImageUrl;
   final Author author;
   final List<Category> categories;
@@ -17,7 +17,7 @@ class BlogDetails extends Equatable {
   final int dislikesCount;
   final String status;
   final String? reviewerComment;
-  final DateTime publishedAt;
+  final DateTime? publishedAt;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -35,28 +35,28 @@ class BlogDetails extends Equatable {
     required this.dislikesCount,
     required this.status,
     this.reviewerComment,
-    required this.publishedAt,
+    this.publishedAt,
     required this.createdAt,
     required this.updatedAt,
   });
 
   @override
   List<Object?> get props => [
-        id,
-        title,
-        slug,
-        content,
-        coverImageUrl,
-        author,
-        categories,
-        tags,
-        views,
-        likesCount,
-        dislikesCount,
-        status,
-        reviewerComment,
-        publishedAt,
-        createdAt,
-        updatedAt,
-      ];
+    id,
+    title,
+    slug,
+    content,
+    coverImageUrl,
+    author,
+    categories,
+    tags,
+    views,
+    likesCount,
+    dislikesCount,
+    status,
+    reviewerComment,
+    publishedAt,
+    createdAt,
+    updatedAt,
+  ];
 }
