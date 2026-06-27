@@ -86,20 +86,22 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
   Widget _body(BuildContext context) {
     final cubit = context.read<DebateController>();
     if (cubit.isCancelled) return const _Cancelled();
-    if (!cubit.debateFinished) return const _NotReady();
+    // FE-3: gate on the result phase being open (speeches done while the debate
+    // is STILL `live`), never on `debateFinished`/`completed`.
+    if (!cubit.resultPhaseOpen) return const _NotReady();
 
     final view = cubit.resultView;
-    return cubit.canManageResult ? _ChairSubmitPrompt(cubit: cubit) : _ChairSubmitPrompt(cubit: cubit);
     if (view == null) {
-      // Finished, but no result yet: the chair submits; everyone else waits.
+      // Result phase open, no result yet: the chair submits; everyone else waits.
       return cubit.canManageResult ? _ChairSubmitPrompt(cubit: cubit) : const _ResultsPending();
     }
 
+    // FE-2/FE-6: the result room is submit-/read-only — "share result" moved to
+    // the LIVE room, so there is no chair-controls/share bar here.
     return Column(
       children: [
         Expanded(child: ResultSummaryView(result: view)),
-        if (cubit.canManageResult) _ChairControlsBar(cubit: cubit, revealed: view.revealed),
-        if (view.revealed && cubit.debateFinished) _RatingBar(cubit: cubit),
+        if (view.revealed) _RatingBar(cubit: cubit),
       ],
     );
   }
@@ -155,34 +157,6 @@ class _ChairSubmitPrompt extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-/// Chair control once a result exists: share it (confetti). The old
-/// "close main room" button was removed — closing happens from the live room (§U5).
-class _ChairControlsBar extends StatelessWidget {
-  final DebateController cubit;
-  final bool revealed;
-  const _ChairControlsBar({required this.cubit, required this.revealed});
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = context.loc;
-    // Once revealed there's nothing left for the chair to do here.
-    if (revealed) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
-      child: SizedBox(
-        width: double.infinity,
-        height: 48,
-        child: FilledButton.icon(
-          icon: const Icon(Icons.emoji_events_rounded),
-          label: Text(loc.shareResult,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-          onPressed: () => cubit.revealResult(),
-        ),
-      ),
     );
   }
 }

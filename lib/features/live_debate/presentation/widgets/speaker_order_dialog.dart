@@ -14,6 +14,11 @@ class SpeakerOrderDialog extends StatefulWidget {
   final TeamInfo team;
   final SpeakerOrder current;
   final bool replyEnabled;
+
+  /// FE-8: the number of speaking slots to offer (= speakers per side), so a
+  /// 2-person team can still fill a 3rd slot (duplicates allowed). Defaults to
+  /// the roster size when not provided.
+  final int? slotCount;
   final void Function(List<String> ordered, String? replySpeakerId) onConfirm;
 
   const SpeakerOrderDialog({
@@ -21,6 +26,7 @@ class SpeakerOrderDialog extends StatefulWidget {
     required this.team,
     required this.current,
     required this.replyEnabled,
+    this.slotCount,
     required this.onConfirm,
   });
 
@@ -30,35 +36,41 @@ class SpeakerOrderDialog extends StatefulWidget {
 
 class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
   late List<String> _ordered;
+  // FE-8: the DISTINCT debaters for the per-slot dropdown — `team.debaters` is N
+  // fixed slots that may repeat a debater (multi-role), so the dropdown's item
+  // list must be de-duplicated (a DropdownButton requires unique item values).
+  late List<Debater> _roster;
   String? _replyId;
 
   @override
   void initState() {
     super.initState();
-    final roster = widget.team.debaters.map((d) => d.id).toList();
-    _ordered = widget.current.orderedSpeakerIds.isNotEmpty
+    final seen = <String>{};
+    _roster = [
+      for (final d in widget.team.debaters)
+        if (d.id.isNotEmpty && seen.add(d.id)) d,
+    ];
+    final rosterIds = _roster.map((d) => d.id).toSet();
+    final fallback = _roster.isNotEmpty ? _roster.first.id : '';
+    // FE-7/8: exactly N slots (= team speeches per side), duplicates allowed. Seed
+    // from the saved order, else from the slot defaults; coerce any invalid slot
+    // to a real debater so the dropdown value is always a valid item.
+    final n = (widget.slotCount != null && widget.slotCount! > 0)
+        ? widget.slotCount!
+        : widget.team.debaters.length;
+    final base = widget.current.orderedSpeakerIds.isNotEmpty
         ? List.of(widget.current.orderedSpeakerIds)
-        : List.of(roster);
-    // Normalise to exactly one slot per speech and ensure every slot holds a real
-    // roster id (the dropdown asserts its value is a valid item).
-    if (roster.isNotEmpty) {
-      if (_ordered.length != roster.length) {
-        _ordered = [
-          for (var i = 0; i < roster.length; i++)
-            (i < _ordered.length && roster.contains(_ordered[i])) ? _ordered[i] : roster[i],
-        ];
-      } else {
-        for (var i = 0; i < _ordered.length; i++) {
-          if (!roster.contains(_ordered[i])) _ordered[i] = roster[i];
-        }
-      }
-    }
+        : widget.team.debaters.map((d) => d.id).toList();
+    _ordered = [
+      for (var i = 0; i < n; i++)
+        (i < base.length && rosterIds.contains(base[i])) ? base[i] : fallback,
+    ];
     if (widget.replyEnabled) {
       final allowed = _ordered.take(2).toList();
       _replyId = (widget.current.replySpeakerId != null &&
               allowed.contains(widget.current.replySpeakerId))
           ? widget.current.replySpeakerId
-          : allowed.first;
+          : (allowed.isNotEmpty ? allowed.first : null);
     }
   }
 
@@ -98,11 +110,18 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
                     fontFamily: 'Cairo', color: DebateTheme.textSecondary(context), fontSize: 12)),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                children: [
-                  for (var i = 0; i < _ordered.length; i++) _slotRow(context, i),
-                ],
-              ),
+              child: _roster.isEmpty
+                  ? Center(
+                      child: Text(loc.notJoinedYet,
+                          style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: DebateTheme.textSecondary(context))),
+                    )
+                  : ListView(
+                      children: [
+                        for (var i = 0; i < _ordered.length; i++) _slotRow(context, i),
+                      ],
+                    ),
             ),
             if (widget.replyEnabled) ...[
               const SizedBox(height: 8),
@@ -178,7 +197,7 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
                 icon: Icon(Icons.keyboard_arrow_down_rounded,
                     color: DebateTheme.textSecondary(context)),
                 items: [
-                  for (final d in widget.team.debaters)
+                  for (final d in _roster)
                     DropdownMenuItem<String>(
                       value: d.id,
                       child: Row(

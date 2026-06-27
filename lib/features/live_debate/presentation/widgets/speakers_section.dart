@@ -34,7 +34,10 @@ class SpeakersSection extends StatelessWidget {
               flex: kSpeakerColumnFlex,
               child: _column(context, cubit, DebateSide.proposition),
             ),
-            Expanded(flex: kSpeakerGapFlex, child: _PoiChannel(cubit: cubit)),
+            // FE-5: POIs now render as a badge anchored to the asking debater's
+            // own card (see SpeakerCard) so two simultaneous askers each show on
+            // their own card. The old centered pill is gone — this is just the gap.
+            const Expanded(flex: kSpeakerGapFlex, child: SizedBox.shrink()),
             Expanded(
               flex: kSpeakerColumnFlex,
               child: _column(context, cubit, DebateSide.opposition),
@@ -48,7 +51,10 @@ class SpeakersSection extends StatelessWidget {
   Widget _column(BuildContext context, DebateController cubit, DebateSide side) {
     // Whether the local user (current main speaker in test mode) can answer POIs.
     final canAnswer = cubit.currentSlot != null;
-    final count = cubit.teamFor(side).debaters.length;
+    // FE-7: render a FIXED N slots per side (= speakers per side) so both columns
+    // are equal height; a side with fewer speakers leaves its bottom slot(s) as a
+    // quiet "not joined" placeholder rather than stretching its cards.
+    final count = cubit.speakersPerSide;
     final order = cubit.orderFor(side);
     final slot = cubit.currentSlot;
     // The id currently featured in the MAIN speaker card — its video lives there,
@@ -114,7 +120,7 @@ class SpeakersSection extends StatelessWidget {
                   showVideo: showVid,
                   videoTrack: present ? cubit.videoTrackForUser(debater.id) : null,
                   onPoiTap: (asking && canAnswer)
-                      ? () => showPoiAcceptRefuse(context, cubit)
+                      ? () => showPoiAcceptRefuse(context, cubit, askerUserId: debater.id)
                       : null,
                 ),
               );
@@ -132,62 +138,13 @@ class SpeakersSection extends StatelessWidget {
   }
 }
 
-/// The central 24% channel between the teams (§11). Shows a POI pill — coloured
-/// by the asking (opposing) side — whenever a POI is in flight; tapping it lets
-/// the current speaker accept/refuse (the per-card bubble is the other entry).
-class _PoiChannel extends StatelessWidget {
-  final DebateController cubit;
-  const _PoiChannel({required this.cubit});
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = context.loc;
-    final slot = cubit.currentSlot;
-    final asking = slot != null && (cubit.askingPoiSids.isNotEmpty || cubit.isLocalAskingPOI);
-    if (!asking) return const SizedBox.shrink();
-
-    final askingSide = slot.side.other;
-    final color = DebateTheme.sideColor(askingSide);
-
-    return Center(
-      child: GestureDetector(
-        onTap: () => showPoiAcceptRefuse(context, cubit),
-        child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.16),
-            borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color, width: 1.4),
-            boxShadow: [BoxShadow(color: color.withValues(alpha: 0.3), blurRadius: 10)],
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(Icons.front_hand_rounded, color: color, size: 22),
-              const SizedBox(height: 4),
-              Text(
-                loc.poiTitle,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 9,
-                  height: 1.1,
-                  color: color,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-/// The speaker's accept/refuse prompt for an incoming POI (§8.4).
-void showPoiAcceptRefuse(BuildContext context, DebateController cubit) {
+/// The speaker's accept/refuse prompt for an incoming POI (§8.4). [askerUserId]
+/// is the debater whose card was tapped, so accepting/refusing targets that
+/// SPECIFIC asker (FE-5) — letting the speaker answer the 2nd asker, not the 1st.
+void showPoiAcceptRefuse(BuildContext context, DebateController cubit,
+    {String? askerUserId}) {
   final loc = context.loc;
-  final askerSid = cubit.localParticipant?.sid ?? 'local';
+  final asker = askerUserId ?? cubit.localParticipant?.sid ?? 'local';
   showDialog(
     context: context,
     builder: (_) => AlertDialog(
@@ -198,14 +155,14 @@ void showPoiAcceptRefuse(BuildContext context, DebateController cubit) {
       actions: [
         TextButton(
           onPressed: () {
-            cubit.refusePOI(askerSid);
+            cubit.refusePOI(asker);
             Navigator.of(context).maybePop();
           },
           child: Text(loc.refuse, style: const TextStyle(color: JadalColors.judgesGrey)),
         ),
         TextButton(
           onPressed: () {
-            cubit.acceptPOI(askerSid);
+            cubit.acceptPOI(asker);
             Navigator.of(context).maybePop();
           },
           child: Text(loc.accept,

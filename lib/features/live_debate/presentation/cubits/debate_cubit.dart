@@ -964,7 +964,7 @@ class DebateCubit extends DebateController {
   }
 
   @override
-  Future<void> submitResult({
+  Future<bool> submitResult({
     required DebateSide winningSide,
     required Map<int, num> scoresByStageOrder,
     required String summaryNotes,
@@ -976,6 +976,7 @@ class DebateCubit extends DebateController {
     _resultNotes = summaryNotes;
     _resultSubmitted = true;
     emit(LiveStateUpdatedState());
+    return true; // FE-1: local test mode always succeeds
   }
 
   @override

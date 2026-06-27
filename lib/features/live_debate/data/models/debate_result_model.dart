@@ -50,11 +50,20 @@ class LiveResult {
     this.stageScores = const [],
   });
 
-  factory LiveResult.fromJson(Map<String, dynamic> j) => LiveResult(
-        winningSide: asString(j['winning_side']),
-        summaryNotes: asString(j['summary_notes']),
-        stageScores: asMapList(j['stage_scores']).map(StageScore.fromJson).toList(),
-      );
+  factory LiveResult.fromJson(Map<String, dynamic> j) {
+    // G1: the READ shape nests the per-stage scores under `scores.stages`
+    // (`{stage_order, participant_id, user_id, score}`) and the notes under
+    // `scores.notes` — NOT a top-level `stage_scores` (that is the SUBMIT shape).
+    // Reading the wrong key left scores empty → blank result screen + no
+    // best-speaker crown. Fall back to the legacy key defensively.
+    final scores = asMap(j['scores']);
+    final stageList = scores?['stages'] ?? j['stage_scores'];
+    return LiveResult(
+      winningSide: asString(j['winning_side']),
+      summaryNotes: asString(j['summary_notes']) ?? asString(scores?['notes']),
+      stageScores: asMapList(stageList).map(StageScore.fromJson).toList(),
+    );
+  }
 
   /// Score for a given stage `order_index`, or null if not scored.
   num? scoreForStage(int orderIndex) {

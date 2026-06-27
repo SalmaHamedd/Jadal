@@ -12,6 +12,9 @@ enum LiveEventType {
   returnedToLobby('returned_to_lobby'),
   participantAttended('participant_attended'),
   chairElected('chair_elected'),
+  // FE-3 (B1): speeches finished → the result phase opens while status is STILL
+  // `live`. Replaces the legacy `debate_completed` for opening the result room.
+  speechesCompleted('speeches_completed'),
   debateCompleted('debate_completed'),
   resultRevealed('result_revealed'),
   // Chair force-closed the main room (backend close-room, §FE-7). Sent right
@@ -100,14 +103,17 @@ class LiveEvent {
 abstract class LiveDebateSocket {
   static List<int> _encode(Map<String, dynamic> map) => utf8.encode(jsonEncode(map));
 
-  static List<int> poiRaised({required int stagePhaseId, required int byUserId}) =>
+  // FE-4: the phase id is OPTIONAL on the peer flash — it's often null and must
+  // never block the broadcast (only the REST persistence needs it). `by_user_id`
+  // is what every device keys the POI badge off.
+  static List<int> poiRaised({int? stagePhaseId, required int byUserId}) =>
       _encode({
         'event': LiveEventType.poiRaised.wire,
         'stage_phase_id': stagePhaseId,
         'by_user_id': byUserId,
       });
 
-  static List<int> poiAnswered({required int stagePhaseId, required int byUserId}) =>
+  static List<int> poiAnswered({int? stagePhaseId, required int byUserId}) =>
       _encode({
         'event': LiveEventType.poiAnswered.wire,
         'stage_phase_id': stagePhaseId,

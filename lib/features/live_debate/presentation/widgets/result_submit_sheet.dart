@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -8,9 +9,11 @@ import '../../domain/debate_result_view.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
-/// The chair's result-submit UI (§10): a winning-side picker, one score slider
-/// per speech (from [DebateController.scoreableStages]) and free-text notes.
-/// On submit it calls [DebateController.submitResult] and pops with `true`.
+/// The chair's result-submit UI (§10): a winning-side picker, one **integer
+/// 0–100** score slider per speech (from [DebateController.scoreableStages]) and
+/// free-text notes. On submit it calls [DebateController.submitResult] and pops
+/// with `true` **only when the backend actually accepted it** (FE-1) — on failure
+/// it stays open and shows the server's message.
 class ResultSubmitSheet extends StatefulWidget {
   final DebateController controller;
   const ResultSubmitSheet({super.key, required this.controller});
@@ -33,19 +36,20 @@ class ResultSubmitSheet extends StatefulWidget {
 
 class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
   late final List<ResultStageRef> _stages;
-  final Map<int, double> _scores = {};
+  // FE-1: scores are plain INTEGERS 0–100 for every stage (incl. reply) — no
+  // 59–90 / reply-halving / 0.5 steps (the backend validator rejects decimals).
+  final Map<int, int> _scores = {};
+  static const int _defaultScore = 75;
   final TextEditingController _notes = TextEditingController();
   DebateSide? _winning;
   bool _submitting = false;
 
-  // Score ranges (§U5): main speech 59–90, reply speech (always half) 29.5–45,
-  // in 0.5 steps — applied per slider in [_StageSlider].
   @override
   void initState() {
     super.initState();
     _stages = widget.controller.scoreableStages;
     for (final s in _stages) {
-      _scores[s.stageOrder] = s.isReply ? 37 : 75;
+      _scores[s.stageOrder] = _defaultScore;
     }
   }
 
@@ -62,20 +66,38 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
       return;
     }
     setState(() => _submitting = true);
-    await widget.controller.submitResult(
+    // FE-1: honest submit — only treat it as success if the backend accepted it.
+    final ok = await widget.controller.submitResult(
       winningSide: _winning!,
       scoresByStageOrder: _scores.map<int, num>((k, v) => MapEntry(k, v)),
       summaryNotes: _notes.text.trim(),
     );
-    if (mounted) Navigator.of(context).pop(true);
+    if (!mounted) return;
+    if (ok) {
+      Navigator.of(context).pop(true);
+    } else {
+      // Failed: stay open so the chair can fix + retry. The exact server message
+      // is shown by the DebateErrorState listener wrapping this sheet.
+      setState(() => _submitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    return Padding(
-      padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
-      child: SafeArea(
+    // FE-1: surface the backend's real rejection message (e.g. an integer-score
+    // validation error) and keep the sheet open instead of faking success.
+    return BlocListener<DebateController, DebateStates>(
+      bloc: widget.controller,
+      listenWhen: (_, s) => s is DebateErrorState,
+      listener: (ctx, s) {
+        if (s is DebateErrorState) {
+          JadalSnackBar.show(ctx, s.message, type: SnackBarType.error);
+        }
+      },
+      child: Padding(
+        padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
+        child: SafeArea(
         child: ConstrainedBox(
           constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.9),
           child: Column(
@@ -146,7 +168,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
                     const SizedBox(height: 4),
                     for (final s in _stages) _StageSlider(
                       stage: s,
-                      value: _scores[s.stageOrder] ?? (s.isReply ? 37 : 75),
+                      value: _scores[s.stageOrder] ?? _defaultScore,
                       onChanged: (v) => setState(() => _scores[s.stageOrder] = v),
                     ),
                     const SizedBox(height: 14),
@@ -191,6 +213,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
               ),
             ],
           ),
+        ),
         ),
       ),
     );
@@ -264,21 +287,20 @@ class _SideButton extends StatelessWidget {
 
 class _StageSlider extends StatelessWidget {
   final ResultStageRef stage;
-  final double value;
-  final ValueChanged<double> onChanged;
+  final int value;
+  final ValueChanged<int> onChanged;
   const _StageSlider({required this.stage, required this.value, required this.onChanged});
 
   @override
   Widget build(BuildContext context) {
     final color = stage.side != null ? DebateTheme.sideColor(stage.side!) : JadalColors.judgesGrey;
-    // Reply speeches are always scored on half the main range (§U5).
-    final min = stage.isReply ? 29.5 : 59.0;
-    final max = stage.isReply ? 45.0 : 90.0;
-    final divisions = ((max - min) / 0.5).round();
-    final shown = value.clamp(min, max);
-    final display = shown == shown.roundToDouble()
-        ? shown.toInt().toString()
-        : shown.toStringAsFixed(1);
+    // FE-1: integer 0–100 for every stage (incl. reply) — the backend stores an
+    // integer; no 59–90 range, no reply-halving, no 0.5 steps.
+    const min = 0.0;
+    const max = 100.0;
+    const divisions = 100;
+    final shown = value.clamp(min.toInt(), max.toInt());
+    final display = shown.toString();
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 2),
       child: Row(
@@ -326,7 +348,7 @@ class _StageSlider extends StatelessWidget {
                 max: max,
                 divisions: divisions,
                 label: display,
-                onChanged: onChanged,
+                onChanged: (v) => onChanged(v.round()),
               ),
             ),
           ),

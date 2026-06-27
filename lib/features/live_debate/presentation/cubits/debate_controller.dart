@@ -148,6 +148,16 @@ abstract class DebateController extends Cubit<DebateStates> {
   SpeakerOrder get propOrder;
   SpeakerOrder get oppOrder;
   Debater debaterAt(DebateSide side, int orderIndex);
+
+  /// FE-7: how many fixed speaking slots to render per side (= speakers per
+  /// side). Both team columns render this many cards so they stay equal height;
+  /// a side with fewer speakers leaves its bottom slot(s) empty. Default: the
+  /// larger side's roster (test mode is symmetric, so this is unchanged there).
+  int get speakersPerSide {
+    final p = teamFor(DebateSide.proposition).debaters.length;
+    final o = teamFor(DebateSide.opposition).debaters.length;
+    return p >= o ? p : o;
+  }
   String roleLabel(DebateSide side, int orderIndex);
   String roleLabelForSlot(SpeechSlot slot);
   bool isCurrentSpeaker(DebateSide side, int orderIndex);
@@ -295,9 +305,19 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// The main room was closed with no result → the debate is cancelled (§10).
   bool get isCancelled;
 
+  /// FE-3: the result phase is open (speeches finished) while the debate is still
+  /// `live` — gate the result room on THIS, not on `debateFinished`/`completed`.
+  /// Test/mock mode: opens when the local debate is finished.
+  bool get resultPhaseOpen => debateFinished;
+
+  /// FE-6: a result has been stored (submitted) — drives enabling the chair's
+  /// "share result" action in the LIVE room. Defaults to "a result view exists".
+  bool get hasResult => resultView != null;
+
   /// Chair: submit scores. [scoresByStageOrder] is keyed by the 1-based stage
-  /// order; [winningSide] picks the victor.
-  Future<void> submitResult({
+  /// order; [winningSide] picks the victor. **Returns whether the submit actually
+  /// succeeded** (FE-1) so the UI never reports a false success.
+  Future<bool> submitResult({
     required DebateSide winningSide,
     required Map<int, num> scoresByStageOrder,
     required String summaryNotes,

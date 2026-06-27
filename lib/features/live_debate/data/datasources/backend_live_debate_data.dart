@@ -44,7 +44,25 @@ class BackendLiveDebateData implements LiveDebateData {
   @override
   TeamInfo get oppositionTeam => _team(state.opposition, DebateSide.opposition);
 
+  /// FE-7: the number of fixed speaking slots per side (= `speakers_per_side`),
+  /// so both team columns render the SAME count (a 2-person side no longer
+  /// stretches its cards to a 3-person side's height — the shorter side just
+  /// leaves its bottom slot(s) empty). Falls back to the larger side's roster so
+  /// the columns still match when the format omits the count.
+  int get slotsPerSide {
+    final fmt = state.format.speakersPerSide;
+    if (fmt != null && fmt > 0) return fmt;
+    final p = propositionTeam.debaters.length;
+    final o = oppositionTeam.debaters.length;
+    final m = p >= o ? p : o;
+    return m > 0 ? m : 1;
+  }
+
   TeamInfo _team(SideInfo side, DebateSide s) {
+    // Distinct roster (one entry per speaker), phase-order sorted. The fixed
+    // N-slot rendering (FE-7) is applied at the widget layer off [slotsPerSide];
+    // this stays the canonical roster used by the prep/lobby grids + the order
+    // dialog's dropdown, so those are unaffected.
     final ordered = side.orderedSpeakers;
     final debaters = <Debater>[
       for (var i = 0; i < ordered.length; i++)

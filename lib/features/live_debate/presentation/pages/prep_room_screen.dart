@@ -116,6 +116,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                           team: team,
                           current: order,
                           replyEnabled: cubit.data.format.replySpeech,
+                          slotCount: cubit.speakersPerSide, // FE-8: N slots, dup allowed
                           onConfirm: (ordered, replyId) => cubit.setSpeakerOrder(
                             teamId: team.teamId,
                             orderedSpeakerIds: ordered,

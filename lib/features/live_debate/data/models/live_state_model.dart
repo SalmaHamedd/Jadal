@@ -97,6 +97,11 @@ class DebateInfo {
   /// the lobby / stage 0. Used to seed the timer so it reads 0 before any speech
   /// and syncs a mid-speech (re)join to the real elapsed time.
   final DateTime? currentStageStartedAt;
+
+  /// FE-3 (B1): set when the speeches finish → the result phase opens while the
+  /// debate is STILL `live`. Gate the result UI on this (or `rooms.result.open`),
+  /// NEVER on `status == completed`.
+  final DateTime? speechesCompletedAt;
   final String? cancellationReason;
   final DateTime? scheduledAt;
   final DateTime? startedAt;
@@ -113,6 +118,7 @@ class DebateInfo {
     required this.statusRaw,
     required this.currentStage,
     required this.currentStageStartedAt,
+    required this.speechesCompletedAt,
     required this.cancellationReason,
     required this.scheduledAt,
     required this.startedAt,
@@ -130,6 +136,7 @@ class DebateInfo {
         statusRaw: asString(j['status']),
         currentStage: asInt(j['current_stage']) ?? 0,
         currentStageStartedAt: asDate(j['current_stage_started_at']),
+        speechesCompletedAt: asDate(j['speeches_completed_at']),
         cancellationReason: asString(j['cancellation_reason']),
         scheduledAt: asDate(j['scheduled_at']),
         startedAt: asDate(j['started_at']),
@@ -142,6 +149,9 @@ class DebateInfo {
   bool get isCancelled => status == DebateStatus.cancelled;
   bool get isCompleted => status == DebateStatus.completed;
   bool get resultRevealed => resultRevealedAt != null;
+
+  /// FE-3: speeches are done (result phase open) while still `live`.
+  bool get speechesCompleted => speechesCompletedAt != null;
 }
 
 /// `live-state.rooms` — the four rooms with pre-join gating.
@@ -235,18 +245,43 @@ String? sanitizeAvatarUrl(String? raw) {
   return raw;
 }
 
+/// One slot in `speaking_order[]` (B4) — `{phase_order, user_id, participant_id}`.
+/// DUPLICATES ARE ALLOWED (a 2-person team can fill 3 slots as `[A, B, A]`).
+class SpeakingOrderEntry {
+  final int phaseOrder;
+  final int userId;
+  final int? participantId;
+
+  const SpeakingOrderEntry({
+    required this.phaseOrder,
+    required this.userId,
+    required this.participantId,
+  });
+
+  factory SpeakingOrderEntry.fromJson(Map<String, dynamic> j) => SpeakingOrderEntry(
+        phaseOrder: asInt(j['phase_order']) ?? 0,
+        userId: asInt(j['user_id']) ?? 0,
+        participantId: asInt(j['participant_id']),
+      );
+}
+
 /// `live-state.proposition` / `.opposition`.
 class SideInfo {
   final BackendTeam? team;
   final bool isRandom;
   final List<LiveUser> members; // wider roster
-  final List<SpeakerEntry> speakers; // speaking order
+  final List<SpeakerEntry> speakers; // approved debaters on this side
+
+  /// B4: the N-slot speaking order with DUPLICATES allowed (multi-role). Drives
+  /// the fixed N equal slots (FE-7) and the order dialog (FE-8).
+  final List<SpeakingOrderEntry> speakingOrder;
 
   const SideInfo({
     required this.team,
     required this.isRandom,
     required this.members,
     required this.speakers,
+    required this.speakingOrder,
   });
 
   factory SideInfo.fromJson(Map<String, dynamic> j) => SideInfo(
@@ -254,7 +289,13 @@ class SideInfo {
         isRandom: asBool(j['is_random']),
         members: asMapList(j['members']).map(LiveUser.fromJson).toList(),
         speakers: asMapList(j['speakers']).map(SpeakerEntry.fromJson).toList(),
+        speakingOrder: (asMapList(j['speaking_order']).map(SpeakingOrderEntry.fromJson).toList()
+              ..sort((a, b) => a.phaseOrder.compareTo(b.phaseOrder))),
       );
+
+  /// The speaking-order user ids in phase order (duplicates preserved). Empty
+  /// when the backend hasn't sent `speaking_order` yet.
+  List<int> get speakingOrderUserIds => speakingOrder.map((e) => e.userId).toList();
 
   /// Speakers ordered by `speaking_phase_order` (1-based), nulls last.
   List<SpeakerEntry> get orderedSpeakers {
@@ -334,6 +375,11 @@ class SpeakerEntry {
   final bool isAttended;
   final int? speakingPhaseOrder;
 
+  /// G3: the backend's authoritative reply-speaker flag (`is_reply_speaker`).
+  /// This — NOT the role string — drives the PR/OR label and pre-selecting the
+  /// reply speaker in the order dialog.
+  final bool isReplySpeakerFlag;
+
   const SpeakerEntry({
     required this.id,
     required this.user,
@@ -344,6 +390,7 @@ class SpeakerEntry {
     required this.isChair,
     required this.isAttended,
     required this.speakingPhaseOrder,
+    required this.isReplySpeakerFlag,
   });
 
   factory SpeakerEntry.fromJson(Map<String, dynamic> j) => SpeakerEntry(
@@ -356,12 +403,14 @@ class SpeakerEntry {
         isChair: asBool(j['is_chair']),
         isAttended: asBool(j['is_attended']),
         speakingPhaseOrder: asInt(j['speaking_phase_order']),
+        isReplySpeakerFlag: asBool(j['is_reply_speaker']),
       );
 
-  /// The reply role is flagged on the participant by the backend; the field name
-  /// isn't confirmed, so check a couple of likely shapes defensively.
+  /// G3: read the boolean `is_reply_speaker` (now present, V5 §2). The old
+  /// `role.contains('reply')` heuristic was always false (role is just
+  /// "debater") — kept only as a defensive fallback.
   bool get isReplySpeaker =>
-      (role ?? '').toLowerCase().contains('reply');
+      isReplySpeakerFlag || (role ?? '').toLowerCase().contains('reply');
 }
 
 /// `live-state.stages[]` — one speech phase.

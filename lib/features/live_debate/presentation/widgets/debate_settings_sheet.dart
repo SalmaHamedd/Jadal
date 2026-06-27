@@ -93,11 +93,12 @@ class DebateSettingsSheet {
                       );
                     },
                   ),
-                // Chair-only: share the (already submitted) result to the room —
-                // everyone is taken to the result screen with confetti (§U4b).
+                // FE-6: chair shares the STORED result from the LIVE room (not the
+                // result room) — enabled once a result exists and until it's
+                // revealed; everyone is taken to the result screen with confetti.
                 if (cubit.canManageResult &&
-                    cubit.resultView != null &&
-                    !cubit.resultShared)
+                    cubit.hasResult &&
+                    !(cubit.resultView?.revealed ?? false))
                   _Item(
                     icon: Icons.emoji_events_rounded,
                     label: loc.shareResult,

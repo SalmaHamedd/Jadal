@@ -7,6 +7,10 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/function/json_utils.dart';
 import '../../../../core/services/token_storage.dart';
+// Debug tracing (relative import into presentation is intentional: this is the
+// single HTTP choke point, so logging here captures every backend payload — the
+// raw bodies the live-debate diagnosis depends on, incl. the details fetch).
+import '../../presentation/utils/debate_log.dart';
 import '../../domain/debate_registration.dart';
 import '../models/debate_list_model.dart';
 import '../models/debate_result_model.dart';
@@ -34,16 +38,51 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
 
   /// Runs [run], catching network errors, then maps the response to the decoded
   /// envelope body (`{success,message,data,…}`) or a [Failure].
+  ///
+  /// Logs the request line + (optional) request body before the call and the
+  /// status + FULL response body after it, tagged with [label], so the whole
+  /// backend conversation shows up in the trace/file. Sensitive fields (room
+  /// token JWTs) are redacted in the logged body.
   Future<Either<Failure, Map<String, dynamic>?>> _safe(
-      Future<http.Response> Function() run) async {
+    String label,
+    Uri uri,
+    String method,
+    Future<http.Response> Function() run, {
+    String? reqBody,
+  }) async {
+    dlog('http', '▶ $label — $method $uri');
+    if (reqBody != null) dlogJson('http', '$label request body', reqBody);
     try {
-      return await _handle(await run());
+      final res = await run();
+      dlog('http', '◀ $label — HTTP ${res.statusCode} ($method $uri)');
+      dlogJson('http', '$label response body', _bodyForLog(label, res.body));
+      return await _handle(label, res);
     } catch (e) {
+      dlog('http', '✗ $label — NETWORK ERROR: $e');
       return Left(NetworkFailure('Network error: $e'));
     }
   }
 
-  Future<Either<Failure, Map<String, dynamic>?>> _handle(http.Response res) async {
+  /// Redacts known-sensitive fields (the room-token JWT) so the full body can be
+  /// logged without leaking a usable credential. Everything else is logged verbatim.
+  String _bodyForLog(String label, String raw) {
+    if (raw.isEmpty) return '<empty body>';
+    if (!label.startsWith('token')) return raw;
+    try {
+      final decoded = jsonDecode(raw);
+      if (decoded is Map && decoded['data'] is Map) {
+        final data = Map<String, dynamic>.from(decoded['data'] as Map);
+        final tok = data['token'];
+        if (tok is String) data['token'] = '<jwt redacted, len=${tok.length}>';
+        decoded['data'] = data;
+        return jsonEncode(decoded);
+      }
+    } catch (_) {/* fall through */}
+    return raw;
+  }
+
+  Future<Either<Failure, Map<String, dynamic>?>> _handle(
+      String label, http.Response res) async {
     final code = res.statusCode;
     Map<String, dynamic>? body;
     if (res.body.isNotEmpty) {
@@ -56,6 +95,7 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     if (code >= 200 && code < 300) return Right(body);
 
     final message = asString(body?['message']);
+    dlog('http', '✗ $label — FAILURE $code: ${message ?? "(no message)"}');
     switch (code) {
       case 401:
         await TokenStorage.deleteToken(); // bounce to login + clear token (§G)
@@ -111,7 +151,8 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
       'per_page': perPage.toString(),
       'page': page.toString(),
     });
-    final res = await _safe(() async => _client.get(uri, headers: await _headers(json: false)));
+    final res = await _safe('debates[$status]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
     return res.flatMap((body) {
       if (body == null) return const Left(ServerFailure('Unexpected empty response'));
       return Right(DebateListPage.fromEnvelope(body));
@@ -120,17 +161,17 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
 
   @override
   Future<Either<Failure, LiveStateModel>> getLiveState(int debateId) async {
-    final res = await _safe(() async => _client.get(
-          Uri.parse(ApiConstants.liveStateUrl(debateId)),
-          headers: await _headers(json: false),
-        ));
+    final uri = Uri.parse(ApiConstants.liveStateUrl(debateId));
+    final res = await _safe('live-state[$debateId]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
     return _model(res, LiveStateModel.fromJson);
   }
 
   @override
   Future<Either<Failure, RoomTokenModel>> getRoomToken(int debateId, String room) async {
     final uri = Uri.parse(ApiConstants.tokenUrl(debateId)).replace(queryParameters: {'room': room});
-    final res = await _safe(() async => _client.get(uri, headers: await _headers(json: false)));
+    final res = await _safe('token[$room]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
     return _model(res, RoomTokenModel.fromJson);
   }
 
@@ -141,33 +182,31 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     required List<int> speakerUserIds,
     int? replySpeakerUserId,
   }) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.teamSpeakersUrl(debateId)),
-          headers: await _headers(),
-          body: jsonEncode({
-            'side': side,
-            'speaker_user_ids': speakerUserIds,
-            'reply_speaker_user_id': ?replySpeakerUserId,
-          }),
-        ));
+    final uri = Uri.parse(ApiConstants.teamSpeakersUrl(debateId));
+    final body = jsonEncode({
+      'side': side,
+      'speaker_user_ids': speakerUserIds,
+      'reply_speaker_user_id': ?replySpeakerUserId,
+    });
+    final res = await _safe('team-speakers[$side]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, Unit>> nextStage(int debateId) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.nextStageUrl(debateId)),
-          headers: await _headers(),
-        ));
+    final uri = Uri.parse(ApiConstants.nextStageUrl(debateId));
+    final res = await _safe('next-stage', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, Unit>> rollbackToLobby(int debateId) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.rollbackToLobbyUrl(debateId)),
-          headers: await _headers(),
-        ));
+    final uri = Uri.parse(ApiConstants.rollbackToLobbyUrl(debateId));
+    final res = await _safe('rollback-to-lobby', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
     return _unit(res);
   }
 
@@ -177,11 +216,11 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     required int phaseId,
     required String action,
   }) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.poiUrl(debateId, phaseId)),
-          headers: await _headers(),
-          body: jsonEncode({'action': action}),
-        ));
+    final uri = Uri.parse(ApiConstants.poiUrl(debateId, phaseId));
+    final body = jsonEncode({'action': action});
+    final res = await _safe('poi[$action]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
     return _unit(res);
   }
 
@@ -190,38 +229,35 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     required int debateId,
     required DebateResultModel result,
   }) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.resultUrl(debateId)),
-          headers: await _headers(),
-          body: jsonEncode(result.toJson()),
-        ));
+    final uri = Uri.parse(ApiConstants.resultUrl(debateId));
+    final body = jsonEncode(result.toJson());
+    final res = await _safe('submit-result', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, Unit>> revealResult(int debateId) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.revealResultUrl(debateId)),
-          headers: await _headers(),
-        ));
+    final uri = Uri.parse(ApiConstants.revealResultUrl(debateId));
+    final res = await _safe('reveal-result', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, Unit>> closeMain(int debateId) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.closeMainUrl(debateId)),
-          headers: await _headers(),
-        ));
+    final uri = Uri.parse(ApiConstants.closeMainUrl(debateId));
+    final res = await _safe('close-main', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, LiveStateModel>> closeRoom(int debateId) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.closeRoomUrl(debateId)),
-          headers: await _headers(),
-        ));
+    final uri = Uri.parse(ApiConstants.closeRoomUrl(debateId));
+    final res = await _safe('close-room', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
     // Returns the full LiveStateResource reflecting the post-close state.
     return _model(res, LiveStateModel.fromJson);
   }
@@ -234,31 +270,30 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     required int rating,
     String? content,
   }) async {
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.feedbackUrl),
-          headers: await _headers(),
-          body: jsonEncode({
-            'debate_id': debateId,
-            'type': type,
-            'to_user_id': ?toUserId,
-            'scores': {'rating': rating},
-            'content': ?content,
-          }),
-        ));
+    final uri = Uri.parse(ApiConstants.feedbackUrl);
+    final body = jsonEncode({
+      'debate_id': debateId,
+      'type': type,
+      'to_user_id': ?toUserId,
+      'scores': {'rating': rating},
+      'content': ?content,
+    });
+    final res = await _safe('feedback[$type]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
     return _unit(res);
   }
 
   @override
   Future<Either<Failure, String>> register(DebateRegistration request) async {
-    final body = <String, dynamic>{
+    final uri = Uri.parse(ApiConstants.registerUrl(request.debateId));
+    final body = jsonEncode(<String, dynamic>{
       'as': request.kind.wire,
       if (request.kind == RegistrationKind.team) 'team_id': request.teamId,
-    };
-    final res = await _safe(() async => _client.post(
-          Uri.parse(ApiConstants.registerUrl(request.debateId)),
-          headers: await _headers(),
-          body: jsonEncode(body),
-        ));
+    });
+    final res = await _safe('register[${request.kind.wire}]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
     // Surface the backend's bilingual success message ("…| Registered…").
     return res.map((b) => asString(b?['message']) ?? 'Registered successfully.');
   }

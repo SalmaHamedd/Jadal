@@ -11,7 +11,9 @@ import '../../data/models/live_state_model.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_status.dart';
+import '../utils/avatar_palette.dart';
 import '../utils/debate_date.dart';
+import '../utils/debate_log.dart';
 import '../utils/debate_theme.dart';
 import '../widgets/registration_sheet.dart';
 import '../widgets/result_summary_view.dart';
@@ -36,11 +38,33 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
   @override
   void initState() {
     super.initState();
-    _future = di.sl<LiveDebateRepository>().getLiveState(widget.debateId);
+    // Open the on-device trace file (and print its path) the moment the user
+    // lands on debate-details — this is the start of the flow we want captured.
+    dlogInitFile();
+    dlog('details', '▶ OPEN debate-details (debateId=${widget.debateId}, '
+        'title="${widget.title ?? ''}")');
+    _future = _loadLiveState('open details');
   }
 
   void _reload() {
-    setState(() => _future = di.sl<LiveDebateRepository>().getLiveState(widget.debateId));
+    setState(() => _future = _loadLiveState('retry/reload details'));
+  }
+
+  /// Fetch the details' live-state. The FULL raw response body is logged by the
+  /// repository (`http` tag); this adds a screen-level marker + a one-line digest
+  /// so the trace clearly shows the user opened details and how it resolved.
+  Future<Either<Failure, LiveStateModel>> _loadLiveState(String reason) {
+    dlog('details', 'GET live-state for details — reason="$reason" '
+        'debateId=${widget.debateId}');
+    final future = di.sl<LiveDebateRepository>().getLiveState(widget.debateId);
+    future.then((res) => res.fold(
+          (f) => dlog('details', '✗ details live-state FAILED: ${f.message}'),
+          (s) => dlog('details', '✓ details live-state OK — status=${s.debate.statusRaw} '
+              'currentStage=${s.debate.currentStage} judges=${s.judges.length} '
+              'prop.speakers=${s.proposition.speakers.length} '
+              'opp.speakers=${s.opposition.speakers.length} stages=${s.stages.length}'),
+        ));
+    return future;
   }
 
   @override
@@ -733,9 +757,9 @@ class _Section extends StatelessWidget {
   }
 }
 
-/// A deliberately understated judges strip: a small label + a wrap of light
-/// pills (one per judge, chair marked with a star). A light wash in dark mode /
-/// a darker wash in light mode keeps it elegant without grabbing attention.
+/// FE-11: the richer judges presentation — a labelled panel with an avatar +
+/// name per judge, the chair marked with a star badge (restored from the earlier
+/// design, which the user preferred over the understated pill strip).
 class _JudgesStrip extends StatelessWidget {
   final List<JudgeEntry> judges;
   const _JudgesStrip({required this.judges});
@@ -747,73 +771,120 @@ class _JudgesStrip extends StatelessWidget {
     final wash = dark
         ? Colors.white.withValues(alpha: 0.05)
         : JadalColors.deepBlue.withValues(alpha: 0.05);
-    final pill = dark
-        ? Colors.white.withValues(alpha: 0.08)
-        : JadalColors.deepBlue.withValues(alpha: 0.07);
     final muted = DebateTheme.textSecondary(context);
+
+    // Chair first, then the rest in judge order.
+    final ordered = [...judges]..sort((a, b) {
+        if (a.isChair != b.isChair) return a.isChair ? -1 : 1;
+        return (a.judgeOrder ?? 1 << 30).compareTo(b.judgeOrder ?? 1 << 30);
+      });
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
       decoration: BoxDecoration(
         color: wash,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: muted.withValues(alpha: 0.12)),
       ),
-      child: Row(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 3),
-            child: Icon(Icons.gavel_rounded, size: 14, color: muted),
-          ),
-          const SizedBox(width: 6),
-          Padding(
-            padding: const EdgeInsets.only(top: 2),
-            child: Text(
-              loc.judgesLabel,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w700,
-                fontSize: 11.5,
-                color: muted,
+          Row(
+            children: [
+              Icon(Icons.gavel_rounded, size: 15, color: muted),
+              const SizedBox(width: 6),
+              Text(
+                loc.judgesLabel,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 12.5,
+                  color: muted,
+                ),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: 10),
-          Expanded(
-            child: Wrap(
-              spacing: 6,
-              runSpacing: 6,
-              children: [
-                for (final j in judges)
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: pill,
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (j.isChair) ...[
-                          Icon(Icons.star_rounded,
-                              size: 12, color: JadalColors.primaryOrange.withValues(alpha: 0.9)),
-                          const SizedBox(width: 4),
-                        ],
-                        Text(
-                          j.user.name.isNotEmpty ? j.user.name : '—',
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontWeight: FontWeight.w600,
-                            fontSize: 12,
-                            color: DebateTheme.textPrimary(context).withValues(alpha: 0.85),
-                          ),
-                        ),
-                      ],
-                    ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 16,
+            runSpacing: 12,
+            children: [
+              for (final j in ordered) _JudgeAvatar(judge: j),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// One judge: a coloured initial avatar (chair ringed + star-badged) above the
+/// name. Keeps the chair star marker the user liked.
+class _JudgeAvatar extends StatelessWidget {
+  final JudgeEntry judge;
+  const _JudgeAvatar({required this.judge});
+
+  @override
+  Widget build(BuildContext context) {
+    const d = 46.0;
+    final name = judge.user.name.isNotEmpty ? judge.user.name : '—';
+    return SizedBox(
+      width: 74,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Stack(
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                width: d,
+                height: d,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: avatarColorFor(judge.user.id.toString()),
+                  border: judge.isChair
+                      ? Border.all(color: JadalColors.primaryOrange, width: 2.2)
+                      : null,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  avatarInitial(name),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w800,
+                    fontSize: d * 0.4,
                   ),
-              ],
+                ),
+              ),
+              if (judge.isChair)
+                PositionedDirectional(
+                  bottom: -3,
+                  end: -3,
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      color: DebateTheme.surface(context),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.star_rounded,
+                        size: 16, color: JadalColors.primaryOrange),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Text(
+            name,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontWeight: judge.isChair ? FontWeight.w800 : FontWeight.w600,
+              fontSize: 11.5,
+              color: DebateTheme.textPrimary(context),
             ),
           ),
         ],
