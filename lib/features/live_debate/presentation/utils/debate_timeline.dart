@@ -28,21 +28,24 @@ extension DebateTimelineEventX on DebateTimelineEvent {
 }
 
 /// Pure state machine for a single speech, driven entirely by [DebateFormat].
+///
+/// POI availability follows the **frontend** rules (§9.1) — the backend has no
+/// POI field — and the protected/open tiers are derived from the same windows:
+///  - **reply speech** → POI never available;
+///  - speech **> 3 min** → POI restricted in the first & last **minute**;
+///  - speech **1–3 min** → first & last **30 s**;
+///  - speech **≤ 1 min** → no POI (the button stays visible but disabled).
+///
+/// If [DebateFormat.poiOffset] is ever provided by the backend it overrides the
+/// manual rules.
 class DebateTimeline {
   final DebateFormat format;
   const DebateTimeline(this.format);
 
-  int get _protected => format.protectedPeriod.inSeconds;
   int get _speech => format.speechDuration.inSeconds;
   int get _extra => format.extraTime.inSeconds;
 
-  /// Opening protected window: [0, openingProtectedEnd).
-  int get openingProtectedEnd => _protected;
-
-  /// Closing protected window: [poiCloseStart, mainEnd).
-  int get poiCloseStart => _speech - _protected;
-
-  /// Main speech ends here (closing protected also ends).
+  /// Main speech ends here.
   int get mainEnd => _speech;
 
   /// Extra time ends here → Time Off beyond this.
@@ -51,27 +54,51 @@ class DebateTimeline {
   /// Total seconds tracked by the progress ring (main + extra).
   int get totalTrackedSeconds => extraEnd;
 
-  DebateTier tierAt(int elapsed) {
-    if (elapsed >= extraEnd) return DebateTier.timeOff;
-    if (elapsed >= mainEnd) return DebateTier.extra;
-    if (elapsed < openingProtectedEnd) return DebateTier.protected;
-    if (elapsed >= poiCloseStart) return DebateTier.protected;
-    return DebateTier.open;
+  /// POI protected margin (seconds) by §9.1, derived from the speech duration.
+  int get _poiMargin {
+    if (format.poiOffset != null) return format.poiOffset!.inSeconds;
+    if (_speech <= 60) return _speech; // ≤1 min → no open window at all
+    return _speech > 180 ? 60 : 30; // >3 min → 60 s; 1–3 min → 30 s
   }
 
-  /// POIs are available only in the open window
-  /// [openingProtectedEnd, poiCloseStart).
-  bool poiOpenAt(int elapsed) => tierAt(elapsed) == DebateTier.open;
+  /// First instant POIs open.
+  int get openWindowStart => _poiMargin;
+
+  /// First instant POIs are closed again (exclusive end of the open window).
+  int get openWindowEnd => _speech - _poiMargin;
+
+  /// Whether POIs are available at [elapsed] for this speech (§9.1).
+  bool poiAllowedAt(int elapsed, {bool isReply = false}) {
+    if (isReply) return false;
+    if (_speech <= 2 * _poiMargin) return false; // window collapses → no POI
+    return elapsed >= openWindowStart && elapsed < openWindowEnd;
+  }
+
+  /// Back-compat alias used by the cubits.
+  bool poiOpenAt(int elapsed, {bool isReply = false}) =>
+      poiAllowedAt(elapsed, isReply: isReply);
+
+  DebateTier tierAt(int elapsed, {bool isReply = false}) {
+    if (elapsed >= extraEnd) return DebateTier.timeOff;
+    if (elapsed >= mainEnd) return DebateTier.extra;
+    // A reply has no POI windows → keep it side-coloured (open) throughout.
+    if (isReply) return DebateTier.open;
+    return poiAllowedAt(elapsed) ? DebateTier.open : DebateTier.protected;
+  }
 
   /// The timeline event occurring exactly at [elapsed] seconds, if any. Ticks
-  /// advance one second at a time, so this catches every boundary.
-  DebateTimelineEvent? eventAt(int elapsed) {
+  /// advance one second at a time, so this catches every boundary. POI
+  /// boundaries are skipped for reply speeches and ≤1-min speeches.
+  DebateTimelineEvent? eventAt(int elapsed, {bool isReply = false}) {
     if (elapsed == 0) return DebateTimelineEvent.speechStarted;
-    if (elapsed == openingProtectedEnd) return DebateTimelineEvent.poisOpened;
-    if (elapsed == poiCloseStart - 60 && poiCloseStart - 60 > openingProtectedEnd) {
-      return DebateTimelineEvent.lastChancePoi;
+    final hasPoiWindow = !isReply && _speech > 2 * _poiMargin;
+    if (hasPoiWindow) {
+      if (elapsed == openWindowStart) return DebateTimelineEvent.poisOpened;
+      if (elapsed == openWindowEnd - 60 && openWindowEnd - 60 > openWindowStart) {
+        return DebateTimelineEvent.lastChancePoi;
+      }
+      if (elapsed == openWindowEnd) return DebateTimelineEvent.poisClosed;
     }
-    if (elapsed == poiCloseStart) return DebateTimelineEvent.poisClosed;
     if (elapsed == mainEnd) return DebateTimelineEvent.mainTimeEnded;
     if (elapsed == extraEnd) return DebateTimelineEvent.extraTimeEnded;
     return null;

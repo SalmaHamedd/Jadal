@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/app_cubit/app_cubit.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import 'team_chat_dialog.dart';
 
@@ -13,7 +13,7 @@ import 'team_chat_dialog.dart';
 class DebateSettingsSheet {
   DebateSettingsSheet._();
 
-  static Future<void> show(BuildContext context, DebateCubit cubit) {
+  static Future<void> show(BuildContext context, DebateController cubit) {
     final loc = context.loc;
     return showModalBottomSheet(
       context: context,
@@ -37,49 +37,86 @@ class DebateSettingsSheet {
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                // TODO(role-gating): judge-only.
-                _Item(
-                  icon: Icons.mic_off_rounded,
-                  label: loc.muteAll,
-                  onTap: () {
-                    cubit.muteAll();
-                    Navigator.of(sheetCtx).pop();
-                  },
-                ),
-                // TODO(role-gating): judge-only.
-                _Item(
-                  icon: cubit.isLobbyMode ? Icons.grid_view_rounded : Icons.grid_on_rounded,
-                  label: loc.openLobbyMode,
-                  trailing: Switch(
-                    value: cubit.isLobbyMode,
-                    onChanged: (v) {
-                      cubit.setLobbyMode(v);
+                // Chair-only: room-wide publish lock (prevents opening mics);
+                // toggles to "unmute all" while active (§U4b).
+                if (cubit.canModerateOthers)
+                  _Item(
+                    icon: cubit.muteAllActive ? Icons.mic_rounded : Icons.mic_off_rounded,
+                    label: cubit.muteAllActive ? loc.unmuteAll : loc.muteAll,
+                    onTap: () {
+                      cubit.toggleMuteAll();
                       Navigator.of(sheetCtx).pop();
                     },
                   ),
-                  onTap: () {
-                    cubit.setLobbyMode(!cubit.isLobbyMode);
-                    Navigator.of(sheetCtx).pop();
-                  },
-                ),
-                _Item(
-                  icon: Icons.chat_rounded,
-                  label: loc.teamChat,
-                  onTap: () {
-                    Navigator.of(sheetCtx).pop();
-                    showDialog(
-                      context: context,
-                      builder: (_) => BlocProvider.value(
-                        value: cubit,
-                        // TODO(role-gating): viewer's real team id.
-                        child: TeamChatDialog(teamId: cubit.data.propositionTeam.teamId),
-                      ),
-                    );
-                  },
-                ),
+                // Chair-only: room-wide camera lock (mirrors mute-all, §FE-6).
+                if (cubit.canModerateOthers)
+                  _Item(
+                    icon: cubit.cameraAllOff
+                        ? Icons.videocam_rounded
+                        : Icons.videocam_off_rounded,
+                    label: cubit.cameraAllOff ? loc.allowCameraAll : loc.cameraOffAll,
+                    onTap: () {
+                      cubit.toggleCameraAll();
+                      Navigator.of(sheetCtx).pop();
+                    },
+                  ),
+                // Chair-only: open-lobby / stage control (§8).
+                if (cubit.canControlStage)
+                  _Item(
+                    icon: cubit.isLobbyMode ? Icons.grid_view_rounded : Icons.grid_on_rounded,
+                    label: loc.openLobbyMode,
+                    trailing: Switch(
+                      value: cubit.isLobbyMode,
+                      onChanged: (v) {
+                        cubit.setLobbyMode(v);
+                        Navigator.of(sheetCtx).pop();
+                      },
+                    ),
+                    onTap: () {
+                      cubit.setLobbyMode(!cubit.isLobbyMode);
+                      Navigator.of(sheetCtx).pop();
+                    },
+                  ),
+                // Debater-only (not the current speaker): team chat (§8).
+                if (cubit.canOpenChat)
+                  _Item(
+                    icon: Icons.chat_rounded,
+                    label: loc.teamChat,
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      showDialog(
+                        context: context,
+                        builder: (_) => BlocProvider.value(
+                          value: cubit,
+                          child: TeamChatDialog(teamId: _myTeamId(cubit)),
+                        ),
+                      );
+                    },
+                  ),
+                // Chair-only: share the (already submitted) result to the room —
+                // everyone is taken to the result screen with confetti (§U4b).
+                if (cubit.canManageResult &&
+                    cubit.resultView != null &&
+                    !cubit.resultShared)
+                  _Item(
+                    icon: Icons.emoji_events_rounded,
+                    label: loc.shareResult,
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      cubit.shareResult();
+                    },
+                  ),
+                // Chair-only: close the room — kicks everyone to the rooms list (§U4b).
+                if (cubit.canControlStage)
+                  _Item(
+                    icon: Icons.meeting_room_rounded,
+                    label: loc.closeRoom,
+                    danger: true,
+                    onTap: () => _confirmCloseRoom(context, sheetCtx, cubit),
+                  ),
                 _Item(
                   icon: Icons.logout_rounded,
-                  label: loc.leaveDebate,
+                  label: loc.leaveSession,
                   danger: true,
                   onTap: () => _confirmLeave(context, sheetCtx, cubit),
                 ),
@@ -103,8 +140,16 @@ class DebateSettingsSheet {
     );
   }
 
+  /// The viewer's own team id (so team chat is scoped correctly for either side).
+  static String _myTeamId(DebateController cubit) {
+    final me = cubit.data.currentUserId;
+    final prop = cubit.data.propositionTeam;
+    if (prop.debaterById(me) != null) return prop.teamId;
+    return cubit.data.oppositionTeam.teamId;
+  }
+
   static Future<void> _confirmLeave(
-      BuildContext context, BuildContext sheetCtx, DebateCubit cubit) async {
+      BuildContext context, BuildContext sheetCtx, DebateController cubit) async {
     final loc = context.loc;
     final confirmed = await showDialog<bool>(
       context: sheetCtx,
@@ -125,9 +170,40 @@ class DebateSettingsSheet {
       ),
     );
     if (confirmed == true) {
-      await cubit.disconnect();
+      // Pop the sheet + the room FIRST (→ rooms list, a single pop), then
+      // disconnect so the room's disconnect-listener doesn't pop a second time
+      // (which used to overshoot to the debate detail screen, §U4b).
       if (sheetCtx.mounted) Navigator.of(sheetCtx).pop();
       if (context.mounted) Navigator.of(context).maybePop();
+      await cubit.disconnect();
+    }
+  }
+
+  static Future<void> _confirmCloseRoom(
+      BuildContext context, BuildContext sheetCtx, DebateController cubit) async {
+    final loc = context.loc;
+    final confirmed = await showDialog<bool>(
+      context: sheetCtx,
+      builder: (_) => AlertDialog(
+        backgroundColor: DebateTheme.surface(context),
+        title: Text(loc.areYouSure, style: const TextStyle(fontFamily: 'Cairo')),
+        content: Text(loc.closeRoomBody, style: const TextStyle(fontFamily: 'Cairo')),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(sheetCtx).pop(false),
+            child: Text(loc.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(sheetCtx).pop(true),
+            child: Text(loc.confirm, style: const TextStyle(color: Color(0xFFE53935))),
+          ),
+        ],
+      ),
+    );
+    if (confirmed == true) {
+      if (sheetCtx.mounted) Navigator.of(sheetCtx).pop();
+      // Everyone (incl. the chair) is taken back via the RoomClosedState listener.
+      await cubit.closeRoom();
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/features/debates/presentation/screens/judge_session_screen.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../di/injection_container.dart' as di;
@@ -151,7 +152,11 @@ class _DebatesTab extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               itemBuilder: (context, i) => DebateCard(
                 debate: items[i],
-                onTap: () => _openDetail(context, items[i]),
+                onTap: () => Navigator.of(context).pushReplacement(
+                  MaterialPageRoute(
+                    builder: (_) => JudgeSessionScreen(debate: items[i]),
+                  ),
+                ),
                 trailingCta: _CtaButton(debate: items[i], mode: mode),
               ),
               separatorBuilder: (_, __) => const SizedBox(height: 12),

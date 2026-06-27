@@ -25,9 +25,30 @@ class EmptyCacheFailure extends Failure {
 }
 
 class ValidationFailure extends Failure {
-  const ValidationFailure(super.message);
+  /// Per-field validation errors from a 422 response's `errors` map.
+  final Map<String, List<String>>? errors;
+  const ValidationFailure(super.message, {this.errors});
+
+  @override
+  List<Object?> get props => [message, errors];
 }
 
 class AuthFailure extends Failure {
   const AuthFailure(super.message);
+}
+
+/// 403 — the action isn't allowed for this role/room. Prefer hiding the control;
+/// if surfaced, show a non-blocking toast and keep the user where they are (§G).
+class ForbiddenFailure extends Failure {
+  const ForbiddenFailure([super.message = 'Forbidden']);
+}
+
+/// 404 — the debate/phase/participant doesn't exist; pop back to the list (§G).
+class NotFoundFailure extends Failure {
+  const NotFoundFailure([super.message = 'Not found']);
+}
+
+/// 429 — throttled; show "try again in a minute" (§G).
+class RateLimitFailure extends Failure {
+  const RateLimitFailure([super.message = 'Too many requests']);
 }

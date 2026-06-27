@@ -650,6 +650,12 @@ abstract class AppLocalizations {
   /// **'New event happened'**
   String get newEventHappened;
 
+  /// No description provided for @debateNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'The debate hasn\'t started yet.'**
+  String get debateNotStarted;
+
   /// No description provided for @audience.
   ///
   /// In en, this message translates to:
@@ -734,6 +740,12 @@ abstract class AppLocalizations {
   /// **'Force camera off'**
   String get forceCameraOff;
 
+  /// No description provided for @allowCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera'**
+  String get allowCamera;
+
   /// No description provided for @goToProfile.
   ///
   /// In en, this message translates to:
@@ -806,6 +818,312 @@ abstract class AppLocalizations {
   /// **'Message your team…'**
   String get messageHint;
 
+  /// No description provided for @submitResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit result'**
+  String get submitResult;
+
+  /// No description provided for @submitResultTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit Result'**
+  String get submitResultTitle;
+
+  /// No description provided for @submitResultPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter each speaker\'s score, pick the winning side, then submit.'**
+  String get submitResultPrompt;
+
+  /// No description provided for @revealResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Reveal result'**
+  String get revealResult;
+
+  /// No description provided for @closeMainRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Close main room'**
+  String get closeMainRoom;
+
+  /// No description provided for @closeWithoutResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Close without a result'**
+  String get closeWithoutResult;
+
+  /// No description provided for @winningSideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Winning side'**
+  String get winningSideLabel;
+
+  /// No description provided for @summaryNotesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Summary notes'**
+  String get summaryNotesLabel;
+
+  /// No description provided for @summaryNotesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Notes about the result (optional)'**
+  String get summaryNotesHint;
+
+  /// No description provided for @selectWinningSideFirst.
+  ///
+  /// In en, this message translates to:
+  /// **'Please select the winning side first.'**
+  String get selectWinningSideFirst;
+
+  /// No description provided for @resultSubmittedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Result submitted'**
+  String get resultSubmittedMsg;
+
+  /// No description provided for @resultRevealedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Result revealed!'**
+  String get resultRevealedMsg;
+
+  /// No description provided for @mainRoomClosedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Main room closed'**
+  String get mainRoomClosedMsg;
+
+  /// No description provided for @awaitingReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'The result is in — awaiting the chair\'s reveal.'**
+  String get awaitingReveal;
+
+  /// No description provided for @resultsPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The chair is finalizing the result…'**
+  String get resultsPending;
+
+  /// No description provided for @noResultYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No result submitted yet'**
+  String get noResultYet;
+
+  /// No description provided for @winnerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Winner'**
+  String get winnerLabel;
+
+  /// No description provided for @congratulations.
+  ///
+  /// In en, this message translates to:
+  /// **'Congratulations!'**
+  String get congratulations;
+
+  /// No description provided for @bestSpeakerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Best speaker'**
+  String get bestSpeakerLabel;
+
+  /// No description provided for @perSpeechScores.
+  ///
+  /// In en, this message translates to:
+  /// **'Per-speech scores'**
+  String get perSpeechScores;
+
+  /// No description provided for @scoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Score'**
+  String get scoreLabel;
+
+  /// No description provided for @debateCancelledTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debate cancelled'**
+  String get debateCancelledTitle;
+
+  /// No description provided for @debateCancelledBody.
+  ///
+  /// In en, this message translates to:
+  /// **'The main room was closed without submitting a result.'**
+  String get debateCancelledBody;
+
+  /// No description provided for @rateDebate.
+  ///
+  /// In en, this message translates to:
+  /// **'Rate this debate'**
+  String get rateDebate;
+
+  /// No description provided for @ratingThanks.
+  ///
+  /// In en, this message translates to:
+  /// **'Thanks for your feedback!'**
+  String get ratingThanks;
+
+  /// No description provided for @debatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Debates'**
+  String get debatesTitle;
+
+  /// No description provided for @tabRegistration.
+  ///
+  /// In en, this message translates to:
+  /// **'Registration'**
+  String get tabRegistration;
+
+  /// No description provided for @tabAnnounced.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced'**
+  String get tabAnnounced;
+
+  /// No description provided for @tabSidesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sides selected'**
+  String get tabSidesSelected;
+
+  /// No description provided for @tabLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get tabLive;
+
+  /// No description provided for @tabDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get tabDone;
+
+  /// No description provided for @tabCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get tabCancelled;
+
+  /// No description provided for @noDebatesHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No debates here yet'**
+  String get noDebatesHere;
+
+  /// No description provided for @retry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// No description provided for @register.
+  ///
+  /// In en, this message translates to:
+  /// **'Register'**
+  String get register;
+
+  /// No description provided for @joinNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Join now'**
+  String get joinNow;
+
+  /// No description provided for @viewResults.
+  ///
+  /// In en, this message translates to:
+  /// **'View results'**
+  String get viewResults;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Register for this debate'**
+  String get registerTitle;
+
+  /// No description provided for @registerAsTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Register as a team'**
+  String get registerAsTeam;
+
+  /// No description provided for @registerAsSolo.
+  ///
+  /// In en, this message translates to:
+  /// **'Register solo'**
+  String get registerAsSolo;
+
+  /// No description provided for @registerAsJudge.
+  ///
+  /// In en, this message translates to:
+  /// **'Register as a judge'**
+  String get registerAsJudge;
+
+  /// No description provided for @judgesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Judges'**
+  String get judgesLabel;
+
+  /// No description provided for @judgeRole.
+  ///
+  /// In en, this message translates to:
+  /// **'Judge'**
+  String get judgeRole;
+
+  /// No description provided for @youTag.
+  ///
+  /// In en, this message translates to:
+  /// **'You'**
+  String get youTag;
+
+  /// No description provided for @stagesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Stages'**
+  String get stagesLabel;
+
+  /// No description provided for @formatLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get formatLabel;
+
+  /// No description provided for @chairLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Chair'**
+  String get chairLabel;
+
+  /// No description provided for @replyTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Reply'**
+  String get replyTag;
+
+  /// No description provided for @scheduledLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get scheduledLabel;
+
+  /// No description provided for @speakersPerSideLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Speakers per side'**
+  String get speakersPerSideLabel;
+
+  /// No description provided for @cancellationReasonLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancellation reason'**
+  String get cancellationReasonLabel;
+
   /// No description provided for @resetPasswordTitle.
   ///
   /// In en, this message translates to:
@@ -841,6 +1159,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reset password'**
   String get resetPasswordButton;
+
+  /// No description provided for @firstTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'First team'**
+  String get firstTeam;
+
+  /// No description provided for @secondTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Second team'**
+  String get secondTeam;
+
+  /// No description provided for @speaking.
+  ///
+  /// In en, this message translates to:
+  /// **'Speaking'**
+  String get speaking;
+
+  /// No description provided for @muteUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Block mic'**
+  String get muteUser;
+
+  /// No description provided for @unmuteUser.
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock mic'**
+  String get unmuteUser;
+
+  /// No description provided for @unmuteAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute all'**
+  String get unmuteAll;
+
+  /// No description provided for @cameraOffAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera off — all'**
+  String get cameraOffAll;
+
+  /// No description provided for @allowCameraAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow camera — all'**
+  String get allowCameraAll;
+
+  /// No description provided for @shareResult.
+  ///
+  /// In en, this message translates to:
+  /// **'Share result'**
+  String get shareResult;
+
+  /// No description provided for @shareResultPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'The room is closed. Share the result to finish the debate.'**
+  String get shareResultPrompt;
+
+  /// No description provided for @resultSharedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Result shared successfully.'**
+  String get resultSharedMsg;
+
+  /// No description provided for @closeRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Close room'**
+  String get closeRoom;
+
+  /// No description provided for @closeRoomBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This removes everyone from the room and closes it. Continue?'**
+  String get closeRoomBody;
+
+  /// No description provided for @leaveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave session'**
+  String get leaveSession;
+
+  /// No description provided for @roomClosedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'The chair closed the room.'**
+  String get roomClosedMsg;
+
+  /// No description provided for @roomClosedStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Room closed'**
+  String get roomClosedStatus;
+
+  /// No description provided for @teamIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Team ID'**
+  String get teamIdLabel;
+
+  /// No description provided for @teamRegisterPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your team\'s ID to register the whole team. You must be the team\'s leader or coach.'**
+  String get teamRegisterPrompt;
+
+  /// No description provided for @connectingToRoom.
+  ///
+  /// In en, this message translates to:
+  /// **'Connecting to the debate room…'**
+  String get connectingToRoom;
+
+  /// No description provided for @connectionFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t connect to the room. Please try again.'**
+  String get connectionFailed;
+
+  /// No description provided for @notJoinedYet.
+  ///
+  /// In en, this message translates to:
+  /// **'Hasn\'t joined yet'**
+  String get notJoinedYet;
+
+  /// No description provided for @waitingToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to join'**
+  String get waitingToJoin;
 }
 
 class _AppLocalizationsDelegate

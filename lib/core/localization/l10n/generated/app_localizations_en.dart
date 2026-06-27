@@ -293,6 +293,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newEventHappened => 'New event happened';
 
   @override
+  String get debateNotStarted => 'The debate hasn\'t started yet.';
+
+  @override
   String get audience => 'Audience';
 
   @override
@@ -335,6 +338,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get forceCameraOff => 'Force camera off';
 
   @override
+  String get allowCamera => 'Allow camera';
+
+  @override
   String get goToProfile => 'Go to profile';
 
   @override
@@ -371,6 +377,162 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageHint => 'Message your team…';
 
   @override
+  String get submitResult => 'Submit result';
+
+  @override
+  String get submitResultTitle => 'Submit Result';
+
+  @override
+  String get submitResultPrompt =>
+      'Enter each speaker\'s score, pick the winning side, then submit.';
+
+  @override
+  String get revealResult => 'Reveal result';
+
+  @override
+  String get closeMainRoom => 'Close main room';
+
+  @override
+  String get closeWithoutResult => 'Close without a result';
+
+  @override
+  String get winningSideLabel => 'Winning side';
+
+  @override
+  String get summaryNotesLabel => 'Summary notes';
+
+  @override
+  String get summaryNotesHint => 'Notes about the result (optional)';
+
+  @override
+  String get selectWinningSideFirst => 'Please select the winning side first.';
+
+  @override
+  String get resultSubmittedMsg => 'Result submitted';
+
+  @override
+  String get resultRevealedMsg => 'Result revealed!';
+
+  @override
+  String get mainRoomClosedMsg => 'Main room closed';
+
+  @override
+  String get awaitingReveal =>
+      'The result is in — awaiting the chair\'s reveal.';
+
+  @override
+  String get resultsPending => 'The chair is finalizing the result…';
+
+  @override
+  String get noResultYet => 'No result submitted yet';
+
+  @override
+  String get winnerLabel => 'Winner';
+
+  @override
+  String get congratulations => 'Congratulations!';
+
+  @override
+  String get bestSpeakerLabel => 'Best speaker';
+
+  @override
+  String get perSpeechScores => 'Per-speech scores';
+
+  @override
+  String get scoreLabel => 'Score';
+
+  @override
+  String get debateCancelledTitle => 'Debate cancelled';
+
+  @override
+  String get debateCancelledBody =>
+      'The main room was closed without submitting a result.';
+
+  @override
+  String get rateDebate => 'Rate this debate';
+
+  @override
+  String get ratingThanks => 'Thanks for your feedback!';
+
+  @override
+  String get debatesTitle => 'Debates';
+
+  @override
+  String get tabRegistration => 'Registration';
+
+  @override
+  String get tabAnnounced => 'Announced';
+
+  @override
+  String get tabSidesSelected => 'Sides selected';
+
+  @override
+  String get tabLive => 'Live';
+
+  @override
+  String get tabDone => 'Done';
+
+  @override
+  String get tabCancelled => 'Cancelled';
+
+  @override
+  String get noDebatesHere => 'No debates here yet';
+
+  @override
+  String get retry => 'Retry';
+
+  @override
+  String get register => 'Register';
+
+  @override
+  String get joinNow => 'Join now';
+
+  @override
+  String get viewResults => 'View results';
+
+  @override
+  String get registerTitle => 'Register for this debate';
+
+  @override
+  String get registerAsTeam => 'Register as a team';
+
+  @override
+  String get registerAsSolo => 'Register solo';
+
+  @override
+  String get registerAsJudge => 'Register as a judge';
+
+  @override
+  String get judgesLabel => 'Judges';
+
+  @override
+  String get judgeRole => 'Judge';
+
+  @override
+  String get youTag => 'You';
+
+  @override
+  String get stagesLabel => 'Stages';
+
+  @override
+  String get formatLabel => 'Format';
+
+  @override
+  String get chairLabel => 'Chair';
+
+  @override
+  String get replyTag => 'Reply';
+
+  @override
+  String get scheduledLabel => 'Scheduled';
+
+  @override
+  String get speakersPerSideLabel => 'Speakers per side';
+
+  @override
+  String get cancellationReasonLabel => 'Cancellation reason';
+
+  @override
   String get resetPasswordTitle => 'Reset your password';
 
   @override
@@ -388,4 +550,74 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'Reset password';
+
+  @override
+  String get firstTeam => 'First team';
+
+  @override
+  String get secondTeam => 'Second team';
+
+  @override
+  String get speaking => 'Speaking';
+
+  @override
+  String get muteUser => 'Block mic';
+
+  @override
+  String get unmuteUser => 'Unblock mic';
+
+  @override
+  String get unmuteAll => 'Unmute all';
+
+  @override
+  String get cameraOffAll => 'Camera off — all';
+
+  @override
+  String get allowCameraAll => 'Allow camera — all';
+
+  @override
+  String get shareResult => 'Share result';
+
+  @override
+  String get shareResultPrompt =>
+      'The room is closed. Share the result to finish the debate.';
+
+  @override
+  String get resultSharedMsg => 'Result shared successfully.';
+
+  @override
+  String get closeRoom => 'Close room';
+
+  @override
+  String get closeRoomBody =>
+      'This removes everyone from the room and closes it. Continue?';
+
+  @override
+  String get leaveSession => 'Leave session';
+
+  @override
+  String get roomClosedMsg => 'The chair closed the room.';
+
+  @override
+  String get roomClosedStatus => 'Room closed';
+
+  @override
+  String get teamIdLabel => 'Team ID';
+
+  @override
+  String get teamRegisterPrompt =>
+      'Enter your team\'s ID to register the whole team. You must be the team\'s leader or coach.';
+
+  @override
+  String get connectingToRoom => 'Connecting to the debate room…';
+
+  @override
+  String get connectionFailed =>
+      'Couldn\'t connect to the room. Please try again.';
+
+  @override
+  String get notJoinedYet => 'Hasn\'t joined yet';
+
+  @override
+  String get waitingToJoin => 'Waiting to join';
 }

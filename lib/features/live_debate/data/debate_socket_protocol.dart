@@ -20,7 +20,10 @@ enum DebateEventType {
   forceMute('force_mute'),
   forceCameraOff('force_camera_off'),
   teamChat('team_chat'),
-  lobbyMode('lobby_mode');
+  lobbyMode('lobby_mode'),
+  publishLock('publish_lock'),
+  shareResult('share_result'),
+  closeRoom('close_room');
 
   final String wire;
   const DebateEventType(this.wire);
@@ -68,6 +71,14 @@ class DebateEvent {
   int get elapsedSeconds => (data['elapsedSeconds'] as num?)?.toInt() ?? 0;
   bool get isPaused => data['isPaused'] == true;
   String? get timestamp => data['timestamp'] as String?;
+
+  // publish_lock (mic + camera)
+  bool get muteAll => data['muteAll'] == true;
+  List<String> get lockedIds =>
+      (data['lockedIds'] as List?)?.map((e) => '$e').toList() ?? const [];
+  bool get cameraAllOff => data['cameraAllOff'] == true;
+  List<String> get cameraLockedIds =>
+      (data['cameraLockedIds'] as List?)?.map((e) => '$e').toList() ?? const [];
 }
 
 /// Builds and parses the data-channel payloads.
@@ -157,6 +168,24 @@ abstract class DebateSocketProtocol {
 
   static List<int> lobbyMode({required bool enabled}) =>
       _encode({'type': DebateEventType.lobbyMode.wire, 'enabled': enabled});
+
+  static List<int> publishLock({
+    required bool muteAll,
+    required List<String> lockedIds,
+    bool cameraAllOff = false,
+    List<String> cameraLockedIds = const [],
+  }) =>
+      _encode({
+        'type': DebateEventType.publishLock.wire,
+        'muteAll': muteAll,
+        'lockedIds': lockedIds,
+        'cameraAllOff': cameraAllOff,
+        'cameraLockedIds': cameraLockedIds,
+      });
+
+  static List<int> shareResult() => _encode({'type': DebateEventType.shareResult.wire});
+
+  static List<int> closeRoom() => _encode({'type': DebateEventType.closeRoom.wire});
 
   // ── Decoder ──────────────────────────────────────────────────────────────
 

@@ -5,11 +5,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../../data/models/debate_models.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_access.dart';
 import '../utils/debate_theme.dart';
+import '../widgets/debate_room_shell.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/speaker_order_dialog.dart';
 
@@ -52,7 +52,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    final cubit = context.read<DebateCubit>();
+    final cubit = context.read<DebateController>();
     final team = cubit.teamFor(widget.side);
     final remaining = DebateAccess.prepRemaining(
       cubit.data.format,
@@ -64,11 +64,15 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
       backgroundColor: DebateTheme.background(context),
       appBar: AppBar(
         backgroundColor: DebateTheme.sideColor(widget.side),
+        // Side colours (blue/opp orange) are too dark for navy text → force white.
         foregroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.white),
         title: Text('${loc.prepRoomTitle} (${team.teamName})',
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+            style: const TextStyle(
+                fontFamily: 'Cairo', fontWeight: FontWeight.w800, color: Colors.white)),
       ),
-      body: BlocBuilder<DebateCubit, DebateStates>(
+      body: DebateRoomShell(
+        child: BlocBuilder<DebateController, DebateStates>(
         builder: (context, state) {
           final present = cubit.presentIds;
           final leader = DebateAccess.currentLeader(team, present);
@@ -86,24 +90,37 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                 orderSet: order.isSet,
                 leaderName: leader?.name,
                 isLeader: isLeader,
+                accent: DebateTheme.sideColor(widget.side),
               ),
               Expanded(child: GridLayout(participants: tiles)),
               if (isLeader)
                 Padding(
                   padding: const EdgeInsets.all(12),
-                  child: JadalGradientButton(
-                    text: order.isSet ? loc.updateSpeakerOrder : loc.selectSpeakerOrder,
-                    icon: Icons.reorder_rounded,
-                    onPressed: () => showDialog(
-                      context: context,
-                      builder: (_) => SpeakerOrderDialog(
-                        team: team,
-                        current: order,
-                        replyEnabled: cubit.data.format.replySpeech,
-                        onConfirm: (ordered, replyId) => cubit.setSpeakerOrder(
-                          teamId: team.teamId,
-                          orderedSpeakerIds: ordered,
-                          replySpeakerId: replyId,
+                  child: SizedBox(
+                    width: double.infinity,
+                    height: 48,
+                    // Solid side colour — no gradient in the prep room (§U4a).
+                    child: FilledButton.icon(
+                      style: FilledButton.styleFrom(
+                        backgroundColor: DebateTheme.sideColor(widget.side),
+                        foregroundColor: Colors.white,
+                      ),
+                      icon: const Icon(Icons.reorder_rounded),
+                      label: Text(
+                        order.isSet ? loc.updateSpeakerOrder : loc.selectSpeakerOrder,
+                        style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                      ),
+                      onPressed: () => showDialog(
+                        context: context,
+                        builder: (_) => SpeakerOrderDialog(
+                          team: team,
+                          current: order,
+                          replyEnabled: cubit.data.format.replySpeech,
+                          onConfirm: (ordered, replyId) => cubit.setSpeakerOrder(
+                            teamId: team.teamId,
+                            orderedSpeakerIds: ordered,
+                            replySpeakerId: replyId,
+                          ),
                         ),
                       ),
                     ),
@@ -112,6 +129,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
             ],
           );
         },
+        ),
       ),
     );
   }
@@ -122,11 +140,13 @@ class _PrepBanner extends StatelessWidget {
   final bool orderSet;
   final String? leaderName;
   final bool isLeader;
+  final Color accent;
   const _PrepBanner({
     required this.remainingLabel,
     required this.orderSet,
     required this.leaderName,
     required this.isLeader,
+    required this.accent,
   });
 
   @override
@@ -139,14 +159,14 @@ class _PrepBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: DebateTheme.surfaceElevated(context),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: JadalColors.primaryBlue.withValues(alpha: 0.2)),
+        border: Border.all(color: accent.withValues(alpha: 0.25)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(Icons.timer_outlined, size: 18, color: JadalColors.primaryBlue),
+              Icon(Icons.timer_outlined, size: 18, color: accent),
               const SizedBox(width: 8),
               Text('${loc.prepEndsIn}: $remainingLabel',
                   style: TextStyle(

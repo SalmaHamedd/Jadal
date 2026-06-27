@@ -1,4 +1,4 @@
-part of 'debate_cubit.dart';
+part of 'debate_controller.dart';
 
 abstract class DebateStates {}
 
@@ -51,3 +51,26 @@ class LobbyModeChangedState extends DebateStates {}
 class TeamChatUpdatedState extends DebateStates {}
 
 class DebateFinishedState extends DebateStates {}
+
+/// Backend mode: a fresh `live-state` was fetched and applied (§7) — rebuild
+/// rooms/teams/judges/result from the new snapshot.
+class LiveStateUpdatedState extends DebateStates {}
+
+/// Backend mode: the result was revealed (`result_revealed`). The result room
+/// plays the celebratory confetti reveal (§10) on this.
+class ResultRevealedState extends DebateStates {}
+
+/// The main room was closed without a submitted result → the debate is
+/// cancelled (§10). The result room swaps to the cancelled message on this.
+class DebateCancelledState extends DebateStates {}
+
+/// Chair moderation publish-lock changed (mute-all / per-user) → widgets
+/// re-evaluate whether the local user may open their mic (§U4b).
+class PublishLockChangedState extends DebateStates {}
+
+/// The chair shared the result from the live room → every client navigates to
+/// the result screen with confetti (§U4b).
+class NavigateToSharedResultState extends DebateStates {}
+
+/// The chair closed the room → every client is kicked back to the rooms list (§U4b).
+class RoomClosedState extends DebateStates {}

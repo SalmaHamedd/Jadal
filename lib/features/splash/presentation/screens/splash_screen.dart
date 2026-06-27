@@ -10,6 +10,8 @@ import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../../auth/presentation/screens/login_screen.dart';
+import '../../../home/presentation/screens/home_screen.dart';
+import '../../../live_debate/presentation/pages/debate_list_screen.dart';
 import '../cubit/splash_cubit.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -125,7 +127,7 @@ class _SplashViewState extends State<_SplashView> with TickerProviderStateMixin 
     return BlocListener<SplashCubit, SplashState>(
       listener: (context, state) {
         if (state is SplashNavigateToLogin) _navigate(const LoginScreen());
-        if (state is SplashNavigateToHome)  _navigate(const TempHomeScreen());
+        if (state is SplashNavigateToHome)  _navigate(const DebateListScreen());
         if (state is SplashNavigateToPermissions) {
           PermissionSettingsDialog.show(
             context,

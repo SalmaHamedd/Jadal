@@ -7,8 +7,9 @@ import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_models.dart';
+import '../../domain/debate_room_role.dart';
 import '../cubits/connection_cubit.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_access.dart';
 import '../utils/debate_theme.dart';
 import 'debate_room_screen.dart';
@@ -16,16 +17,21 @@ import 'prep_room_screen.dart';
 import 'result_room_screen.dart';
 
 /// Lobby / rooms list (§8.1). The entry point of the feature — provides the
-/// shared [DebateCubit] + [ConnectionCubit] that persist across the room
+/// shared [DebateController] + [ConnectionCubit] that persist across the room
 /// screens, and gates each room with the [DebateAccess] rules.
+///
+/// [debateId] picks which backend debate to load (from the list → detail flow,
+/// §13); null falls back to `DebateModeConfig.devDebateId`. Ignored in test mode.
 class DebateLobbyScreen extends StatelessWidget {
-  const DebateLobbyScreen({super.key});
+  final int? debateId;
+  const DebateLobbyScreen({super.key, this.debateId});
 
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => di.sl<DebateCubit>()),
+        // init() loads profile + live-state in backend mode; no-op in test mode.
+        BlocProvider(create: (_) => di.sl<DebateController>(param1: debateId)..init()),
         BlocProvider(create: (_) => di.sl<ConnectionCubit>()),
       ],
       child: const _LobbyView(),
@@ -39,8 +45,7 @@ class _LobbyView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    final cubit = context.read<DebateCubit>();
-    final data = cubit.data;
+    final cubit = context.read<DebateController>();
 
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
@@ -48,11 +53,28 @@ class _LobbyView extends StatelessWidget {
         title: Text(loc.lobbyTitle,
             style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
       ),
-      body: BlocBuilder<DebateCubit, DebateStates>(
+      body: BlocBuilder<DebateController, DebateStates>(
         builder: (context, state) {
+          // Backend mode shows a loader until live-state arrives; test mode is
+          // always ready.
+          if (!cubit.isReady) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          final data = cubit.data;
+          // After the chair closes the room with an unshared result, only the
+          // chair sees a "share result" action here → flips the debate to done (§U4b).
+          final showShare = cubit.canManageResult &&
+              cubit.isRoomClosed &&
+              cubit.resultView != null &&
+              !cubit.resultShared;
           return ListView(
             padding: const EdgeInsets.all(16),
             children: [
+              if (showShare)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _ShareResultBanner(cubit: cubit),
+                ),
               for (final room in data.rooms)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 14),
@@ -73,37 +95,70 @@ class _RoomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    final cubit = context.read<DebateCubit>();
+    final cubit = context.read<DebateController>();
     final access = _evaluate(context, cubit);
+    // "on" = the room is joinable now; "off" = locked (lighter colours).
+    final on = !access.locked;
+    final isLive = room.type == DebateRoomType.liveDebate;
 
-    final (IconData icon, Color color) = switch (room.type) {
-      DebateRoomType.proposition => (Icons.shield_rounded, JadalColors.propositionBlue),
-      DebateRoomType.opposition => (Icons.gavel_rounded, JadalColors.oppositionOrange),
-      DebateRoomType.liveDebate => (Icons.podcasts_rounded, JadalColors.deepBlue),
-      DebateRoomType.result => (Icons.emoji_events_rounded, JadalColors.judgesGrey),
+    final icon = switch (room.type) {
+      DebateRoomType.proposition => Icons.shield_rounded,
+      DebateRoomType.opposition => Icons.gavel_rounded,
+      DebateRoomType.liveDebate => Icons.podcasts_rounded,
+      DebateRoomType.result => Icons.emoji_events_rounded,
     };
 
-    return Container(
+    // Card border/accent per room + state (§U3). Live is the meeting point of
+    // both brand colours, so it gets the blue↔orange gradient treatment.
+    final lightOrange = _lighten(JadalColors.primaryOrange, 0.45);
+    final lightBlue = _lighten(JadalColors.primaryBlue, 0.45);
+    final accent = switch (room.type) {
+      DebateRoomType.proposition =>
+        on ? JadalColors.primaryBlue : _lighten(JadalColors.primaryBlue, 0.4),
+      DebateRoomType.opposition =>
+        on ? JadalColors.primaryOrange : _lighten(JadalColors.primaryOrange, 0.4),
+      DebateRoomType.liveDebate => on ? JadalColors.deepBlue : JadalColors.judgesGrey,
+      DebateRoomType.result => JadalColors.judgesGrey,
+    };
+
+    final iconWidget = Container(
+      width: 46,
+      height: 46,
+      decoration: BoxDecoration(
+        color: isLive ? null : accent.withValues(alpha: 0.14),
+        gradient: isLive
+            ? LinearGradient(
+                begin: AlignmentDirectional.topStart,
+                end: AlignmentDirectional.bottomEnd,
+                colors: [lightOrange, lightBlue],
+              )
+            : null,
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Icon(icon, color: isLive ? JadalColors.deepBlue : accent),
+    );
+
+    final inner = Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: DebateTheme.surface(context),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
-        boxShadow: [
-          BoxShadow(color: color.withValues(alpha: 0.10), blurRadius: 14, offset: const Offset(0, 6)),
-        ],
+        borderRadius: BorderRadius.circular(isLive ? 18 : 20),
+        // Live uses the surrounding gradient ring instead of a flat border.
+        border: isLive ? null : Border.all(color: accent.withValues(alpha: 0.28)),
+        boxShadow: isLive
+            ? null
+            : [
+                BoxShadow(
+                  color: accent.withValues(alpha: 0.18),
+                  blurRadius: 16,
+                  spreadRadius: -2,
+                  offset: const Offset(0, 7),
+                ),
+              ],
       ),
       child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.14),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            child: Icon(icon, color: color),
-          ),
+          iconWidget,
           const SizedBox(width: 12),
           Expanded(
             child: Column(
@@ -144,18 +199,44 @@ class _RoomCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 10),
-          SizedBox(
-            width: 96,
-            child: JadalGradientButton(
-              text: loc.join,
-              height: 42,
-              onPressed: access.onJoin,
-            ),
-          ),
+          _RoomJoinButton(type: room.type, enabled: on, onPressed: access.onJoin),
         ],
       ),
     );
+
+    if (!isLive) return inner;
+
+    // Live debate: blue↔orange gradient border + a blended glow elevation.
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          begin: AlignmentDirectional.topStart,
+          end: AlignmentDirectional.bottomEnd,
+          colors: [lightOrange, lightBlue],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: JadalColors.primaryOrange.withValues(alpha: 0.18),
+            blurRadius: 16,
+            spreadRadius: -2,
+            offset: const Offset(0, 7),
+          ),
+          BoxShadow(
+            color: JadalColors.primaryBlue.withValues(alpha: 0.18),
+            blurRadius: 16,
+            spreadRadius: -2,
+            offset: const Offset(0, 7),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.all(1.6),
+      child: inner,
+    );
   }
+
+  /// Lighten a colour toward white by [amount] (0..1).
+  static Color _lighten(Color c, double amount) => Color.lerp(c, Colors.white, amount)!;
 
   String _title(AppLocalizations loc) {
     switch (room.type) {
@@ -170,8 +251,13 @@ class _RoomCard extends StatelessWidget {
     }
   }
 
-  _RoomAccess _evaluate(BuildContext context, DebateCubit cubit) {
+  _RoomAccess _evaluate(BuildContext context, DebateController cubit) {
     final loc = context.loc;
+    // Backend mode gates pre-join from live-state (joinable_for_me); test mode
+    // returns null here and uses the local DebateAccess rules below.
+    final gate = cubit.backendRoomGate(room.type);
+    if (gate != null) return _backendAccess(context, cubit, gate);
+
     final data = cubit.data;
     final userId = data.currentUserId;
     final now = DateTime.now();
@@ -194,6 +280,10 @@ class _RoomCard extends StatelessWidget {
         );
 
       case DebateRoomType.liveDebate:
+        // The chair closed the room → join is locked for everyone (§U4b).
+        if (cubit.isRoomClosed) {
+          return _RoomAccess(status: loc.roomClosedStatus, locked: true, onJoin: null);
+        }
         final role = DebateAccess.resolveLiveJoinRole(
           judgeIds: room.judgeIds,
           propTeam: data.propositionTeam,
@@ -230,7 +320,46 @@ class _RoomCard extends StatelessWidget {
     }
   }
 
-  void _showNeedsOrder(BuildContext context, DebateCubit cubit) {
+  /// Backend pre-join gate (§7): joinability comes from `live-state.rooms`.
+  _RoomAccess _backendAccess(
+    BuildContext context,
+    DebateController cubit,
+    ({bool joinable, DebateRoomRole? role}) gate,
+  ) {
+    final loc = context.loc;
+    if (!gate.joinable) {
+      final status = switch (room.type) {
+        DebateRoomType.proposition || DebateRoomType.opposition => loc.onlyTeamMembers,
+        DebateRoomType.result => loc.resultsNotReady,
+        DebateRoomType.liveDebate => loc.orderNotSet,
+      };
+      return _RoomAccess(status: status, locked: true, onJoin: null);
+    }
+    return _RoomAccess(
+      status: loc.statusOpen,
+      locked: false,
+      onJoin: () => _joinBackend(context, cubit),
+    );
+  }
+
+  /// Fetches the room-scoped token (token discipline, §7) and navigates. The
+  /// live room connects inside [DebateRoomScreen.enterDebateRoom], so it isn't
+  /// pre-joined here.
+  Future<void> _joinBackend(BuildContext context, DebateController cubit) async {
+    switch (room.type) {
+      case DebateRoomType.liveDebate:
+        _pushRoom(context, cubit, LiveJoinRole.participant);
+      case DebateRoomType.proposition:
+      case DebateRoomType.opposition:
+        await cubit.joinRoom(room.type);
+        if (context.mounted) _push(context, cubit, PrepRoomScreen(side: room.team!.side));
+      case DebateRoomType.result:
+        await cubit.joinRoom(room.type);
+        if (context.mounted) _push(context, cubit, const ResultRoomScreen());
+    }
+  }
+
+  void _showNeedsOrder(BuildContext context, DebateController cubit) {
     final loc = context.loc;
     final data = cubit.data;
     final side = data.propositionTeam.debaterById(data.currentUserId) != null
@@ -259,13 +388,21 @@ class _RoomCard extends StatelessWidget {
     );
   }
 
-  void _push(BuildContext context, DebateCubit cubit, Widget screen) {
+  void _push(BuildContext context, DebateController cubit, Widget screen) {
+    // Carry the ConnectionCubit so prep/result rooms get the action row too (§9.3).
+    final connection = context.read<ConnectionCubit>();
     Navigator.of(context).push(MaterialPageRoute(
-      builder: (_) => BlocProvider.value(value: cubit, child: screen),
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: cubit),
+          BlocProvider.value(value: connection),
+        ],
+        child: screen,
+      ),
     ));
   }
 
-  void _pushRoom(BuildContext context, DebateCubit cubit, LiveJoinRole role) {
+  void _pushRoom(BuildContext context, DebateController cubit, LiveJoinRole role) {
     final connection = context.read<ConnectionCubit>();
     if (role == LiveJoinRole.audience) {
       JadalSnackBar.show(context, context.loc.joiningAsAudience, type: SnackBarType.success);
@@ -287,4 +424,107 @@ class _RoomAccess {
   final bool locked;
   final VoidCallback? onJoin;
   const _RoomAccess({required this.status, required this.locked, required this.onJoin});
+}
+
+/// Chair-only rooms-list action shown after the room is closed with an unshared
+/// result: shares it (flips the debate live→done) without navigating (§U4b).
+class _ShareResultBanner extends StatelessWidget {
+  final DebateController cubit;
+  const _ShareResultBanner({required this.cubit});
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: DebateTheme.surface(context),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: JadalColors.primaryOrange.withValues(alpha: 0.4)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(loc.shareResultPrompt,
+              style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w700,
+                  color: DebateTheme.textPrimary(context))),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: JadalGradientButton(
+              text: loc.shareResult,
+              icon: Icons.emoji_events_rounded,
+              onPressed: () async {
+                await cubit.shareResult();
+                if (context.mounted) {
+                  JadalSnackBar.show(context, loc.resultSharedMsg, type: SnackBarType.success);
+                }
+              },
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Compact per-room join button (§U3): solid side colour for prop/opp (light
+/// when locked, main when joinable); the blue↔orange gradient for the live room
+/// and result (grey when locked).
+class _RoomJoinButton extends StatelessWidget {
+  final DebateRoomType type;
+  final bool enabled;
+  final VoidCallback? onPressed;
+  const _RoomJoinButton({required this.type, required this.enabled, required this.onPressed});
+
+  static const double _w = 82;
+  static const double _h = 36;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    final gradient = type == DebateRoomType.liveDebate || type == DebateRoomType.result;
+
+    if (gradient && enabled) {
+      return SizedBox(
+        width: _w,
+        child: JadalGradientButton(text: loc.join, height: _h, onPressed: onPressed),
+      );
+    }
+
+    final Color fill = switch (type) {
+      DebateRoomType.proposition => enabled
+          ? JadalColors.primaryBlue
+          : Color.lerp(JadalColors.primaryBlue, Colors.white, 0.55)!,
+      DebateRoomType.opposition => enabled
+          ? JadalColors.primaryOrange
+          : Color.lerp(JadalColors.primaryOrange, Colors.white, 0.55)!,
+      // Live / result locked → light grey.
+      _ => Color.lerp(JadalColors.judgesGrey, Colors.white, 0.35)!,
+    };
+
+    return GestureDetector(
+      onTap: enabled ? onPressed : null,
+      child: Container(
+        width: _w,
+        height: _h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          color: fill,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Text(
+          loc.join,
+          style: const TextStyle(
+            color: Colors.white,
+            fontFamily: 'Cairo',
+            fontSize: 13,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+    );
+  }
 }

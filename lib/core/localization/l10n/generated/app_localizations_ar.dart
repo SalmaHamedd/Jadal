@@ -293,6 +293,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get newEventHappened => 'حدث جديد وقع';
 
   @override
+  String get debateNotStarted => 'لم تبدأ المناظرة بعد.';
+
+  @override
   String get audience => 'الجمهور';
 
   @override
@@ -335,6 +338,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get forceCameraOff => 'إيقاف الكاميرا إجبارياً';
 
   @override
+  String get allowCamera => 'السماح بالكاميرا';
+
+  @override
   String get goToProfile => 'الذهاب إلى الملف الشخصي';
 
   @override
@@ -371,6 +377,161 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messageHint => 'راسل فريقك…';
 
   @override
+  String get submitResult => 'إرسال النتيجة';
+
+  @override
+  String get submitResultTitle => 'إرسال النتيجة';
+
+  @override
+  String get submitResultPrompt =>
+      'أدخل درجة كل متحدث، واختر الفريق الفائز، ثم أرسل.';
+
+  @override
+  String get revealResult => 'إظهار النتيجة';
+
+  @override
+  String get closeMainRoom => 'إغلاق الغرفة الرئيسية';
+
+  @override
+  String get closeWithoutResult => 'الإغلاق دون نتيجة';
+
+  @override
+  String get winningSideLabel => 'الفريق الفائز';
+
+  @override
+  String get summaryNotesLabel => 'ملاحظات ختامية';
+
+  @override
+  String get summaryNotesHint => 'ملاحظات حول النتيجة (اختياري)';
+
+  @override
+  String get selectWinningSideFirst => 'يرجى اختيار الفريق الفائز أولاً.';
+
+  @override
+  String get resultSubmittedMsg => 'تم إرسال النتيجة';
+
+  @override
+  String get resultRevealedMsg => 'تم إظهار النتيجة!';
+
+  @override
+  String get mainRoomClosedMsg => 'تم إغلاق الغرفة الرئيسية';
+
+  @override
+  String get awaitingReveal =>
+      'النتيجة جاهزة — بانتظار إظهارها من رئيس اللجنة.';
+
+  @override
+  String get resultsPending => 'يقوم رئيس اللجنة بإنهاء النتيجة…';
+
+  @override
+  String get noResultYet => 'لم تُرسل أي نتيجة بعد';
+
+  @override
+  String get winnerLabel => 'الفائز';
+
+  @override
+  String get congratulations => 'تهانينا!';
+
+  @override
+  String get bestSpeakerLabel => 'أفضل متحدث';
+
+  @override
+  String get perSpeechScores => 'درجات الخطابات';
+
+  @override
+  String get scoreLabel => 'الدرجة';
+
+  @override
+  String get debateCancelledTitle => 'أُلغيت المناظرة';
+
+  @override
+  String get debateCancelledBody => 'أُغلقت الغرفة الرئيسية دون إرسال نتيجة.';
+
+  @override
+  String get rateDebate => 'قيّم هذه المناظرة';
+
+  @override
+  String get ratingThanks => 'شكرًا لتقييمك!';
+
+  @override
+  String get debatesTitle => 'المناظرات';
+
+  @override
+  String get tabRegistration => 'التسجيل';
+
+  @override
+  String get tabAnnounced => 'معلنة';
+
+  @override
+  String get tabSidesSelected => 'تم تحديد الفرق';
+
+  @override
+  String get tabLive => 'مباشرة';
+
+  @override
+  String get tabDone => 'منتهية';
+
+  @override
+  String get tabCancelled => 'ملغاة';
+
+  @override
+  String get noDebatesHere => 'لا توجد مناظرات هنا بعد';
+
+  @override
+  String get retry => 'إعادة المحاولة';
+
+  @override
+  String get register => 'تسجيل';
+
+  @override
+  String get joinNow => 'انضم الآن';
+
+  @override
+  String get viewResults => 'عرض النتائج';
+
+  @override
+  String get registerTitle => 'سجّل في هذه المناظرة';
+
+  @override
+  String get registerAsTeam => 'التسجيل كفريق';
+
+  @override
+  String get registerAsSolo => 'التسجيل كمتحدث فردي';
+
+  @override
+  String get registerAsJudge => 'التسجيل كحكم';
+
+  @override
+  String get judgesLabel => 'الحكام';
+
+  @override
+  String get judgeRole => 'حكم';
+
+  @override
+  String get youTag => 'أنت';
+
+  @override
+  String get stagesLabel => 'المراحل';
+
+  @override
+  String get formatLabel => 'النظام';
+
+  @override
+  String get chairLabel => 'رئيس اللجنة';
+
+  @override
+  String get replyTag => 'رد';
+
+  @override
+  String get scheduledLabel => 'الموعد';
+
+  @override
+  String get speakersPerSideLabel => 'المتحدثون لكل فريق';
+
+  @override
+  String get cancellationReasonLabel => 'سبب الإلغاء';
+
+  @override
   String get resetPasswordTitle => 'إعادة تعيين كلمة المرور';
 
   @override
@@ -388,4 +549,74 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get resetPasswordButton => 'إعادة تعيين كلمة المرور';
+
+  @override
+  String get firstTeam => 'الفريق الأول';
+
+  @override
+  String get secondTeam => 'الفريق الثاني';
+
+  @override
+  String get speaking => 'يتحدث';
+
+  @override
+  String get muteUser => 'منع الميكروفون';
+
+  @override
+  String get unmuteUser => 'السماح بالميكروفون';
+
+  @override
+  String get unmuteAll => 'السماح للجميع';
+
+  @override
+  String get cameraOffAll => 'إيقاف كاميرا الجميع';
+
+  @override
+  String get allowCameraAll => 'السماح بالكاميرا للجميع';
+
+  @override
+  String get shareResult => 'مشاركة النتيجة';
+
+  @override
+  String get shareResultPrompt =>
+      'تم إغلاق الغرفة. شارك النتيجة لإنهاء المناظرة.';
+
+  @override
+  String get resultSharedMsg => 'تمت مشاركة النتيجة بنجاح.';
+
+  @override
+  String get closeRoom => 'إغلاق الغرفة';
+
+  @override
+  String get closeRoomBody =>
+      'سيؤدي هذا إلى إخراج الجميع من الغرفة وإغلاقها. هل تريد المتابعة؟';
+
+  @override
+  String get leaveSession => 'مغادرة الجلسة';
+
+  @override
+  String get roomClosedMsg => 'قام رئيس اللجنة بإغلاق الغرفة.';
+
+  @override
+  String get roomClosedStatus => 'الغرفة مغلقة';
+
+  @override
+  String get teamIdLabel => 'معرّف الفريق';
+
+  @override
+  String get teamRegisterPrompt =>
+      'أدخل معرّف فريقك لتسجيل الفريق بأكمله. يجب أن تكون قائد الفريق أو المدرّب.';
+
+  @override
+  String get connectingToRoom => 'جارٍ الاتصال بغرفة المناظرة…';
+
+  @override
+  String get connectionFailed =>
+      'تعذّر الاتصال بالغرفة. يُرجى المحاولة مرة أخرى.';
+
+  @override
+  String get notJoinedYet => 'لم ينضمّ بعد';
+
+  @override
+  String get waitingToJoin => 'بانتظار الانضمام';
 }

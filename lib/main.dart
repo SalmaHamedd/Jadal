@@ -12,6 +12,8 @@ import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
 import 'features/auth/presentation/screens/login_screen.dart';
 import 'features/home/presentation/screens/home_screen.dart';
+import 'features/live_debate/presentation/pages/debate_list_screen.dart';
+import 'features/profile/presentation/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -40,7 +42,7 @@ class JadalApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: state.themeMode,
-            locale: state.locale,
+            locale: Locale('en'),
             supportedLocales: AppCubit.supportedLocales,
             localizationsDelegates: const [
               AppLocalizations.delegate,

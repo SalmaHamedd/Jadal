@@ -12,18 +12,37 @@ class ConnectionCubit extends Cubit<ConnectionStates> {
   static const Duration _hideAfter = Duration(milliseconds: 3500);
 
   bool showActions = false;
+
+  /// The participant card currently selected (its 3-dots is shown, §9.2). Null
+  /// when nothing is selected.
+  String? selectedParticipantId;
   Timer? _hideTimer;
 
   void toggleActionsVisibility() {
     showActions = !showActions;
+    if (!showActions) selectedParticipantId = null;
     emit(ShowActionsState());
     _hideTimer?.cancel();
     if (showActions) {
       _hideTimer = Timer(_hideAfter, () {
         showActions = false;
+        selectedParticipantId = null;
         if (!isClosed) emit(ShowActionsState());
       });
     }
+  }
+
+  /// Selecting a participant card reveals its 3-dots **and** the action row (§9.2/§9.3).
+  void selectParticipant(String id) {
+    selectedParticipantId = selectedParticipantId == id ? null : id;
+    showActions = true;
+    emit(ShowActionsState());
+    _hideTimer?.cancel();
+    _hideTimer = Timer(_hideAfter, () {
+      showActions = false;
+      selectedParticipantId = null;
+      if (!isClosed) emit(ShowActionsState());
+    });
   }
 
   /// Restarts the auto-hide countdown (call when the user interacts with the

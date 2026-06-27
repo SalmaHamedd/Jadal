@@ -11,6 +11,6 @@ class MotionModel extends MotionEntity {
   }
 
   Map<String, dynamic> toJson() {
-    return {'email': title, 'password': topics};
+    return {'title': title, 'topics': topics};
   }
 }

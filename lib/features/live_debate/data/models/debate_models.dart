@@ -42,6 +42,10 @@ class DebateFormat {
   /// Reply speech duration (used only when [replySpeech] is true).
   final Duration replyDuration;
 
+  /// Optional backend override for the POI protected margin (§9.1). Absent today
+  /// → the manual duration-based rules apply. When present, it replaces them.
+  final Duration? poiOffset;
+
   const DebateFormat({
     required this.preparationPeriod,
     required this.speechDuration,
@@ -49,6 +53,7 @@ class DebateFormat {
     required this.extraTime,
     required this.replySpeech,
     required this.replyDuration,
+    this.poiOffset,
   });
 }
 
@@ -87,13 +92,8 @@ class JudgeInfo {
   const JudgeInfo({required this.id, required this.name});
 }
 
-class Motion {
-  final String title;
-  final List<String> categories; // shown in the motion dialog
-  final List<String> tags; // shown if any
-
-  const Motion({required this.title, this.categories = const [], this.tags = const []});
-}
+// The motion lives in core now (§5): see `lib/core/app_models/motion.dart`
+// (`Motion` + `Framework`), shared with the backend live-state and debate list.
 
 class AudienceMember {
   final String id;

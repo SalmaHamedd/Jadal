@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../utils/avatar_palette.dart';
 import 'call_indicators.dart';
 
@@ -22,6 +23,12 @@ class JadalVideoCard extends StatelessWidget {
   final double? borderRadius;
   final Color? nameColor;
 
+  /// Live 0..1 audio level for the volume meter (null → no meter source).
+  final double Function()? micLevel;
+
+  /// Bars colour for the volume meter when the mic is on.
+  final Color? micActiveColor;
+
   const JadalVideoCard({
     super.key,
     required this.name,
@@ -34,11 +41,15 @@ class JadalVideoCard extends StatelessWidget {
     required this.mainAxis,
     this.borderRadius,
     this.nameColor,
+    this.micLevel,
+    this.micActiveColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final scale = (mainAxis / 168).clamp(0.5, 2.2);
+    // The mic badge shouldn't balloon on the big main card — cap it tighter.
+    final micScale = scale.clamp(0.65, 1.0).toDouble();
     final live = showVideo && videoTrack != null;
     final radius = borderRadius ?? widgetBorderRadius;
 
@@ -90,20 +101,24 @@ class JadalVideoCard extends StatelessWidget {
                 color: live ? Colors.white : (nameColor ?? Colors.white),
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
-                fontSize: 12 * scale,
+                fontSize: 13 * scale,
                 shadows: live
                     ? const [Shadow(color: Colors.black54, blurRadius: 4)]
                     : null,
               ),
             ),
           ),
-          // Mic / speaking badge.
+          // Mic / volume badge (fixed footprint → never shifts on toggle).
           PositionedDirectional(
-            top: 6 * scale,
-            end: 6 * scale,
-            child: isMicEnabled
-                ? SpeakingIndicator(isSpeaking: isSpeaking, scale: scale)
-                : MuteIndicator(scale: scale),
+            top: 6 * micScale,
+            end: 6 * micScale,
+            child: MicVolumeIndicator(
+              micOn: isMicEnabled,
+              isSpeaking: isSpeaking,
+              scale: micScale,
+              activeColor: micActiveColor ?? JadalColors.primaryBlue,
+              levelProvider: micLevel,
+            ),
           ),
         ],
       ),

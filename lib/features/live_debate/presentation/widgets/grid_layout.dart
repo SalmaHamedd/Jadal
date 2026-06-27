@@ -3,9 +3,11 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/extensions/responsive_extension.dart';
-import '../cubits/debate_cubit.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import 'jadal_video_card.dart';
+import 'participant_details_dialog.dart';
 
 /// A tile to render in the grid layout.
 class GridParticipant {
@@ -25,9 +27,9 @@ class GridLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final crossAxisCount = context.isMobile ? 2 : (context.isTablet ? 3 : 4);
-    return BlocBuilder<DebateCubit, DebateStates>(
+    return BlocBuilder<DebateController, DebateStates>(
       builder: (context, state) {
-        final cubit = context.read<DebateCubit>();
+        final cubit = context.read<DebateController>();
         return GridView.builder(
           padding: const EdgeInsets.all(12),
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
@@ -39,23 +41,45 @@ class GridLayout extends StatelessWidget {
           itemCount: participants.length,
           itemBuilder: (context, i) {
             final p = participants[i];
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(widgetBorderRadius + 2),
-                border: Border.all(
-                  color: DebateTheme.surfaceElevated(context),
-                  width: 3,
-                ),
-              ),
-              child: JadalVideoCard(
-                name: p.name,
+            final dark = DebateTheme.isDark(context);
+            const outer = widgetBorderRadius + 2;
+            const bw = 2.5;
+            // Border must read as distinct from the card body in BOTH themes
+            // (dark's elevated surface used to match the card exactly, §U4a).
+            final cardBorder = dark
+                ? Color.lerp(JadalColors.darkSurfaceElevated, Colors.white, 0.14)!
+                : DebateTheme.surfaceElevated(context);
+            return SelectableCard(
+              participantId: p.id,
+              onShowDetails: () => showParticipantDetails(
+                context,
+                cubit,
                 participantId: p.id,
-                bgColor: DebateTheme.floatingCard(context),
-                showVideo: p.isLocal && cubit.isCameraEnabled,
-                videoTrack: p.isLocal ? cubit.localVideoTrack : null,
-                isMicEnabled: p.isLocal ? cubit.isMicEnabled : false,
-                isSpeaking: p.isLocal ? cubit.isLocalSpeaking : false,
-                mainAxis: 168,
+                name: p.name,
+              ),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(outer),
+                  border: Border.all(color: cardBorder, width: bw),
+                ),
+                // Inner radius = outer − border so no sliver of background shows
+                // at the rounded corners (§U4a).
+                child: JadalVideoCard(
+                  name: p.name,
+                  participantId: p.id,
+                  bgColor: DebateTheme.floatingCard(context),
+                  // Wire each tile to its OWN media (local or a present remote),
+                  // so remote cameras show and we never paint the local stream on
+                  // someone else's tile.
+                  showVideo: cubit.showVideoForUser(p.id),
+                  videoTrack: cubit.videoTrackForUser(p.id),
+                  isMicEnabled: cubit.micOnForUser(p.id),
+                  isSpeaking: cubit.speakingForUser(p.id),
+                  micLevel: cubit.isLocalUserId(p.id) ? () => cubit.localAudioLevel : null,
+                  mainAxis: 168,
+                  borderRadius: outer - bw,
+                  nameColor: DebateTheme.textPrimary(context),
+                ),
               ),
             );
           },

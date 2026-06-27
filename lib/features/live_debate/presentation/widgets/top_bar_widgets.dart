@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/app_models/motion.dart';
 import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/framework_chips.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
-import '../../data/models/debate_models.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
 
-/// Compact (small-width) button opening the audience dialog (§8.3 A, left).
+/// Compact (small-width) button opening the viewers dialog (§8.3 A, left).
 class AudienceButton extends StatelessWidget {
-  final List<AudienceMember> audience;
-  const AudienceButton({super.key, required this.audience});
+  final DebateController cubit;
+  const AudienceButton({super.key, required this.cubit});
 
   @override
   Widget build(BuildContext context) {
@@ -20,10 +22,19 @@ class AudienceButton extends StatelessWidget {
       icon: Icons.groups_2_rounded,
       onTap: () => showDialog(
         context: context,
-        builder: (_) => AudienceDialog(audience: audience),
+        builder: (_) => AudienceDialog(cubit: cubit),
       ),
     );
   }
+}
+
+/// One row in the viewers dialog (a judge, an audience member, or the local user).
+class _Viewer {
+  final String id;
+  final String name;
+  final String role;
+  final bool isMe;
+  const _Viewer({required this.id, required this.name, required this.role, this.isMe = false});
 }
 
 /// Motion button using the existing motion image (§8.3 A, right). Falls back to
@@ -83,10 +94,11 @@ class _TopBarIconButton extends StatelessWidget {
   }
 }
 
-/// Large, searchable list of the debate audience + their roles (§8.3 A).
+/// Large, searchable list of who's watching: judges + audience + (always) the
+/// local user — unless they're a debater in the match (§8.3 A).
 class AudienceDialog extends StatefulWidget {
-  final List<AudienceMember> audience;
-  const AudienceDialog({super.key, required this.audience});
+  final DebateController cubit;
+  const AudienceDialog({super.key, required this.cubit});
 
   @override
   State<AudienceDialog> createState() => _AudienceDialogState();
@@ -95,13 +107,45 @@ class AudienceDialog extends StatefulWidget {
 class _AudienceDialogState extends State<AudienceDialog> {
   String _query = '';
 
+  List<_Viewer> _buildViewers(BuildContext context) {
+    final loc = context.loc;
+    final cubit = widget.cubit;
+    final me = cubit.data.currentUserId;
+    final isDebater = cubit.data.propositionTeam.debaterById(me) != null ||
+        cubit.data.oppositionTeam.debaterById(me) != null;
+    final seen = <String>{};
+    final out = <_Viewer>[];
+    // Judges always appear (incl. me when I'm the judge/chair).
+    for (final j in cubit.data.judges) {
+      if (seen.add(j.id)) {
+        out.add(_Viewer(id: j.id, name: j.name, role: loc.judgeRole, isMe: j.id == me));
+      }
+    }
+    for (final a in cubit.data.audience) {
+      if (seen.add(a.id)) {
+        out.add(_Viewer(id: a.id, name: a.name, role: a.role, isMe: a.id == me));
+      }
+    }
+    // I should always see myself here unless I'm a debater in the match.
+    if (!isDebater && !seen.contains(me)) {
+      final myName = cubit.localParticipant?.name ?? '';
+      out.add(_Viewer(
+        id: me,
+        name: myName.isNotEmpty ? myName : loc.youTag,
+        role: loc.youTag,
+        isMe: true,
+      ));
+    }
+    return out;
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
     final size = MediaQuery.of(context).size;
-    final filtered = widget.audience
-        .where((m) => m.name.toLowerCase().contains(_query.toLowerCase()))
-        .toList();
+    final all = _buildViewers(context);
+    final filtered =
+        all.where((m) => m.name.toLowerCase().contains(_query.toLowerCase())).toList();
 
     return JadalDialog(
       width: size.width * 0.9,
@@ -109,7 +153,8 @@ class _AudienceDialogState extends State<AudienceDialog> {
       firstColor: JadalColors.primaryBlue,
       secondColor: JadalColors.primaryOrange,
       bodyColor: DebateTheme.surface(context),
-      title: '${loc.audience} (${widget.audience.length})',
+      icon: Icons.groups_2_rounded,
+      title: '${loc.audience} (${all.length})',
       body: Padding(
         padding: const EdgeInsets.all(14),
         child: Column(
@@ -139,11 +184,17 @@ class _AudienceDialogState extends State<AudienceDialog> {
                       separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, i) {
                         final m = filtered[i];
+                        // The local user's row is gently highlighted so you can
+                        // always spot yourself.
+                        final accent =
+                            m.isMe ? JadalColors.primaryBlue : Colors.transparent;
                         return Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                           decoration: BoxDecoration(
                             color: DebateTheme.surfaceElevated(context),
                             borderRadius: BorderRadius.circular(14),
+                            border: Border.all(
+                                color: accent.withValues(alpha: m.isMe ? 0.5 : 0.0)),
                           ),
                           child: Row(
                             children: [
@@ -162,7 +213,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
-                                  m.name,
+                                  m.isMe ? '${m.name} • ${loc.youTag}' : m.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
@@ -213,22 +264,29 @@ class MotionDialog extends StatelessWidget {
     final size = MediaQuery.of(context).size;
     return JadalDialog(
       width: size.width * 0.86,
-      height: size.height * 0.5,
+      height: size.height * 0.42,
       firstColor: JadalColors.primaryBlue,
       secondColor: JadalColors.primaryOrange,
       bodyColor: DebateTheme.surface(context),
+      icon: Icons.campaign_rounded,
       title: loc.motion,
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (motion.categories.isNotEmpty) ...[
-              _ChipsRow(label: loc.categories, items: motion.categories, color: JadalColors.primaryBlue),
+            if (motion.frameworks.isNotEmpty) ...[
+              _LabeledChips(
+                label: loc.categories,
+                child: FrameworkChips(frameworks: motion.frameworks),
+              ),
               const SizedBox(height: 10),
             ],
             if (motion.tags.isNotEmpty) ...[
-              _ChipsRow(label: loc.tags, items: motion.tags, color: JadalColors.primaryOrange),
+              _LabeledChips(
+                label: loc.tags,
+                child: TagChips(tags: motion.tags),
+              ),
               const SizedBox(height: 12),
             ],
             Expanded(
@@ -241,7 +299,8 @@ class MotionDialog extends StatelessWidget {
                 ),
                 child: SingleChildScrollView(
                   child: Text(
-                    motion.title,
+                    motion.text,
+                    textAlign: TextAlign.center,
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w700,
@@ -260,11 +319,11 @@ class MotionDialog extends StatelessWidget {
   }
 }
 
-class _ChipsRow extends StatelessWidget {
+/// A label followed by a wrap of chips (frameworks or tags).
+class _LabeledChips extends StatelessWidget {
   final String label;
-  final List<String> items;
-  final Color color;
-  const _ChipsRow({required this.label, required this.items, required this.color});
+  final Widget child;
+  const _LabeledChips({required this.label, required this.child});
 
   @override
   Widget build(BuildContext context) {
@@ -278,37 +337,13 @@ class _ChipsRow extends StatelessWidget {
             style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w800,
-              color: color,
+              color: DebateTheme.textSecondary(context),
               fontSize: 12,
             ),
           ),
         ),
         const SizedBox(width: 8),
-        Expanded(
-          child: Wrap(
-            spacing: 6,
-            runSpacing: 6,
-            children: [
-              for (final item in items)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    item,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w700,
-                      color: color,
-                    ),
-                  ),
-                ),
-            ],
-          ),
-        ),
+        Expanded(child: child),
       ],
     );
   }

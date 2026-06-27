@@ -1,11 +1,14 @@
+import '../../../../core/app_models/framework.dart';
+import '../../../../core/app_models/motion.dart';
+import '../../domain/live_debate_data.dart';
 import '../models/debate_models.dart';
 
 /// In-memory mock for the live-debate feature (§5).
 ///
 /// Returns 4 rooms, two named teams, a judges list, a motion (categories +
-/// tags), an audience list and a [DebateFormat]. Swap this for a real backend
-/// data source later — the [DebateCubit] depends on this type only.
-class MockLiveDebateData {
+/// tags), an audience list and a [DebateFormat]. Implements [LiveDebateData] so
+/// the shared widget set renders it exactly like the backend-derived source.
+class MockLiveDebateData implements LiveDebateData {
   const MockLiveDebateData();
 
   /// Used so access rules (§8.1) can be evaluated against the local user.
@@ -13,8 +16,10 @@ class MockLiveDebateData {
   /// NOTE: For solo socket testing (§9) the local participant is treated as the
   /// first proposition speaker regardless of this id. Change this to a judge id
   /// (e.g. 'judge_1') or an opposition debater id to exercise other gating.
+  @override
   String get currentUserId => 'prop_1';
 
+  @override
   DebateFormat get format => const DebateFormat(
         preparationPeriod: Duration(minutes: 30),
         speechDuration: Duration(minutes: 8),
@@ -26,9 +31,11 @@ class MockLiveDebateData {
 
   /// The debate start time. Prep rooms are open while `now` is within
   /// [DebateFormat.preparationPeriod] of this instant.
+  @override
   DateTime get debateStartTime =>
       DateTime.now().subtract(const Duration(minutes: 2));
 
+  @override
   TeamInfo get propositionTeam => const TeamInfo(
         teamId: 'team_falcons',
         teamName: 'Falcons',
@@ -40,6 +47,7 @@ class MockLiveDebateData {
         ],
       );
 
+  @override
   TeamInfo get oppositionTeam => const TeamInfo(
         teamId: 'team_owls',
         teamName: 'Owls',
@@ -51,20 +59,28 @@ class MockLiveDebateData {
         ],
       );
 
+  @override
   List<JudgeInfo> get judges => const [
         JudgeInfo(id: 'judge_1', name: 'Dr. Faisal Noor'),
         JudgeInfo(id: 'judge_2', name: 'Huda Karim'),
         JudgeInfo(id: 'judge_3', name: 'Tariq Saleh'),
       ];
 
+  @override
   Motion get motion => const Motion(
-        title:
+        id: 1,
+        text:
             'This House believes that developing nations should prioritise '
             'renewable energy over rapid industrialisation.',
-        categories: ['Environment', 'Economics', 'Development'],
         tags: ['Policy', 'Sustainability'],
+        frameworks: [
+          Framework(id: 1, name: 'Environment', colorHex: '#2E9E5B'),
+          Framework(id: 2, name: 'Economics', colorHex: '#8B5CF6'),
+          Framework(id: 3, name: 'Development', colorHex: '#F59E0B'),
+        ],
       );
 
+  @override
   List<AudienceMember> get audience => const [
         AudienceMember(id: 'aud_1', name: 'Nour Saad', role: 'Spectator'),
         AudienceMember(id: 'aud_2', name: 'Khaled Amir', role: 'Coach'),
@@ -74,10 +90,12 @@ class MockLiveDebateData {
         AudienceMember(id: 'aud_6', name: 'Dana Rashid', role: 'Observer'),
       ];
 
+  @override
   List<String> get judgeIds => judges.map((j) => j.id).toList();
 
   /// The 4 lobby rooms (§8.1). Display names are placeholders; the lobby
   /// localises them and appends team names in parentheses.
+  @override
   List<DebateRoom> get rooms => [
         DebateRoom(
           type: DebateRoomType.proposition,
@@ -103,6 +121,7 @@ class MockLiveDebateData {
         ),
       ];
 
+  @override
   TeamInfo? teamById(String? teamId) {
     if (teamId == propositionTeam.teamId) return propositionTeam;
     if (teamId == oppositionTeam.teamId) return oppositionTeam;

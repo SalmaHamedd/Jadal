@@ -2,9 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
-import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import 'debate_settings_sheet.dart';
 
@@ -17,7 +16,6 @@ class DebateActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.loc;
     return AnimatedSize(
       duration: const Duration(milliseconds: 350),
       curve: Curves.easeInOut,
@@ -43,36 +41,52 @@ class DebateActionRow extends StatelessWidget {
                   ),
                 ],
               ),
-              child: BlocBuilder<DebateCubit, DebateStates>(
+              child: BlocBuilder<DebateController, DebateStates>(
                 builder: (context, state) {
-                  final cubit = context.read<DebateCubit>();
+                  final cubit = context.read<DebateController>();
+                  // Role gating (§8): controls a role can't use are hidden; the
+                  // POI button stays visible but disabled outside its window.
+                  // Test mode returns all flags true, so it shows everything.
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      _ToggleButton(
-                        enabled: cubit.isMicEnabled,
-                        onIcon: Icons.mic_rounded,
-                        offIcon: Icons.mic_off_rounded,
-                        onPressed: cubit.toggleMic,
-                      ),
-                      _ToggleButton(
-                        enabled: cubit.isCameraEnabled,
-                        onIcon: Icons.videocam_rounded,
-                        offIcon: Icons.videocam_off_rounded,
-                        onPressed: cubit.toggleCamera,
-                      ),
-                      _ActionButton(
-                        icon: Icons.front_hand_rounded,
-                        onPressed: cubit.sendPOIRequest,
-                        highlight: cubit.isLocalAskingPOI,
-                      ),
-                      _ActionButton(
-                        icon: Icons.campaign_rounded,
-                        onPressed: () => cubit
-                            .pushRandomNews((n) => '${loc.newEventHappened} $n'),
-                      ),
-                      _NextButton(cubit: cubit),
-                      // TODO(role-gating): some sheet items become judge-only.
+                      if (cubit.canUseMedia)
+                        // Publish-locked (chair mute-all / per-user) → disabled (§U4b).
+                        cubit.canPublishNow
+                            ? _ToggleButton(
+                                enabled: cubit.isMicEnabled,
+                                onIcon: Icons.mic_rounded,
+                                offIcon: Icons.mic_off_rounded,
+                                onPressed: cubit.toggleMic,
+                              )
+                            : const _ActionButton(
+                                icon: Icons.mic_off_rounded,
+                                onPressed: null,
+                              ),
+                      if (cubit.canUseMedia)
+                        // Camera-locked (chair camera-all / per-user) → disabled,
+                        // mirroring the mic lock above (§FE-6).
+                        cubit.canEnableCameraNow
+                            ? _ToggleButton(
+                                enabled: cubit.isCameraEnabled,
+                                onIcon: Icons.videocam_rounded,
+                                offIcon: Icons.videocam_off_rounded,
+                                onPressed: cubit.toggleCamera,
+                              )
+                            : const _ActionButton(
+                                icon: Icons.videocam_off_rounded,
+                                onPressed: null,
+                              ),
+                      if (cubit.canAskPoi)
+                        _ActionButton(
+                          icon: Icons.front_hand_rounded,
+                          onPressed: cubit.poiEnabledNow ? cubit.sendPOIRequest : null,
+                          highlight: cubit.isLocalAskingPOI,
+                        ),
+                      // The next-stage control belongs to the live debate only;
+                      // the open lobby has its own "Back to debate" button (FE-2).
+                      if (cubit.canControlStage && !cubit.isLobbyMode)
+                        _NextButton(cubit: cubit),
                       _ActionButton(
                         icon: Icons.more_vert_rounded,
                         onPressed: () => DebateSettingsSheet.show(context, cubit),
@@ -115,13 +129,17 @@ class _ToggleButton extends StatelessWidget {
 
 class _ActionButton extends StatelessWidget {
   final IconData icon;
-  final VoidCallback onPressed;
+
+  /// Null → the button is shown but disabled/greyed (e.g. POI outside its window).
+  final VoidCallback? onPressed;
   final bool highlight;
   const _ActionButton({required this.icon, required this.onPressed, this.highlight = false});
 
   @override
   Widget build(BuildContext context) {
-    final color = highlight ? JadalColors.primaryOrange : DebateTheme.textPrimary(context);
+    final disabled = onPressed == null;
+    final base = highlight ? JadalColors.primaryOrange : DebateTheme.textPrimary(context);
+    final color = disabled ? DebateTheme.textSecondary(context).withValues(alpha: 0.4) : base;
     return _Circle(
       onPressed: onPressed,
       borderColor: color.withValues(alpha: highlight ? 0.6 : 0.25),
@@ -133,7 +151,7 @@ class _ActionButton extends StatelessWidget {
 
 /// The next-state control (§8.6): start → next speaker → mark done.
 class _NextButton extends StatelessWidget {
-  final DebateCubit cubit;
+  final DebateController cubit;
   const _NextButton({required this.cubit});
 
   @override
@@ -177,8 +195,8 @@ class _Circle extends StatelessWidget {
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: 50,
-        height: 50,
+        width: 44,
+        height: 44,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           color: gradient ? null : fillColor,
@@ -190,9 +208,7 @@ class _Circle extends StatelessWidget {
                 )
               : null,
           border: Border.all(color: borderColor, width: 1.5),
-          boxShadow: gradient
-              ? [BoxShadow(color: JadalColors.primaryBlue.withValues(alpha: 0.4), blurRadius: 10)]
-              : null,
+          // No glow on the next-stage button — it read as too much (§U4b).
         ),
         child: Center(child: child),
       ),

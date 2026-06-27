@@ -4,7 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
 /// Team-only chat (§8.5): send/receive messages over the `team_chat` socket
@@ -27,7 +27,7 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
     super.dispose();
   }
 
-  void _send(DebateCubit cubit) {
+  void _send(DebateController cubit) {
     final text = _controller.text.trim();
     if (text.isEmpty) return;
     cubit.sendTeamChat(teamId: widget.teamId, message: text);
@@ -45,9 +45,9 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
       secondColor: JadalColors.primaryOrange,
       bodyColor: DebateTheme.surface(context),
       title: loc.teamChat,
-      body: BlocBuilder<DebateCubit, DebateStates>(
+      body: BlocBuilder<DebateController, DebateStates>(
         builder: (context, state) {
-          final cubit = context.read<DebateCubit>();
+          final cubit = context.read<DebateController>();
           final localId = cubit.localParticipant?.identity ?? cubit.data.currentUserId;
           final messages = cubit.chatFor(widget.teamId);
           return Column(
@@ -67,6 +67,12 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                         itemBuilder: (context, i) {
                           final m = messages[i];
                           final mine = m.senderId == localId;
+                          // Received bubbles get a tinted fill + border so they
+                          // read clearly against the near-white dialog (§11).
+                          final receivedBg = DebateTheme.isDark(context)
+                              ? DebateTheme.surfaceElevated(context)
+                              : Color.lerp(
+                                  JadalColors.lightSurface, JadalColors.primaryBlue, 0.07)!;
                           return Align(
                             alignment:
                                 mine ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart,
@@ -75,10 +81,12 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                               constraints: BoxConstraints(maxWidth: size.width * 0.6),
                               decoration: BoxDecoration(
-                                color: mine
-                                    ? JadalColors.primaryBlue
-                                    : DebateTheme.surfaceElevated(context),
+                                color: mine ? JadalColors.primaryBlue : receivedBg,
                                 borderRadius: BorderRadius.circular(14),
+                                border: mine
+                                    ? null
+                                    : Border.all(
+                                        color: JadalColors.primaryBlue.withValues(alpha: 0.22)),
                               ),
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -89,9 +97,7 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                                       fontFamily: 'Cairo',
                                       fontSize: 10,
                                       fontWeight: FontWeight.w700,
-                                      color: mine
-                                          ? Colors.white70
-                                          : DebateTheme.textSecondary(context),
+                                      color: mine ? Colors.white70 : JadalColors.primaryBlue,
                                     ),
                                   ),
                                   Text(
@@ -132,7 +138,11 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                     IconButton.filled(
                       onPressed: () => _send(cubit),
                       icon: const Icon(Icons.send_rounded),
-                      style: IconButton.styleFrom(backgroundColor: JadalColors.primaryBlue),
+                      // White icon in both themes (was dark-blue-on-blue in light).
+                      style: IconButton.styleFrom(
+                        backgroundColor: JadalColors.primaryBlue,
+                        foregroundColor: Colors.white,
+                      ),
                     ),
                   ],
                 ),

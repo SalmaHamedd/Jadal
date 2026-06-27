@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../cubits/debate_cubit.dart';
+import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
 /// News ticker with a slide + glow on update, recolored to a Jadal blue/orange
@@ -19,16 +20,26 @@ class NewsTicker extends StatefulWidget {
 class _NewsTickerState extends State<NewsTicker> {
   String? _lastNews;
   bool _showGlow = false;
+  bool _initialized = false;
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<DebateCubit, DebateStates>(
+    return BlocBuilder<DebateController, DebateStates>(
       builder: (context, state) {
-        final cubit = context.read<DebateCubit>();
+        final cubit = context.read<DebateController>();
         final dark = DebateTheme.isDark(context);
-        final news = cubit.latestNews;
+        // The ticker is never empty: before any news arrives it shows a calm
+        // "debate hasn't started yet" line instead of a blank glowing bar (§news).
+        final raw = cubit.latestNews;
+        final news = raw.isNotEmpty ? raw : context.loc.debateNotStarted;
 
-        if (_lastNews != news) {
+        if (!_initialized) {
+          // First open: seed the baseline WITHOUT the glow. The slide+glow should
+          // only fire when the news *changes while we're watching* — not just
+          // because the screen was opened (§news).
+          _initialized = true;
+          _lastNews = news;
+        } else if (_lastNews != news) {
           _lastNews = news;
           _showGlow = true;
           Future.delayed(const Duration(milliseconds: 800), () {
@@ -38,7 +49,7 @@ class _NewsTickerState extends State<NewsTicker> {
 
         return AnimatedContainer(
           duration: const Duration(milliseconds: 400),
-          height: 46,
+          height: 44,
           width: double.infinity,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(widgetBorderRadius),
@@ -93,7 +104,7 @@ class _NewsTickerState extends State<NewsTicker> {
                     color: DebateTheme.textPrimary(context),
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w600,
-                    fontSize: 13,
+                    fontSize: 14,
                   ),
                 ),
               ),
