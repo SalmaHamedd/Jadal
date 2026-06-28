@@ -115,8 +115,11 @@ class _ChairSubmitPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
+    // Issue 1: only the judges ACTUALLY present in the result room (real LiveKit
+    // presence), not the full judge roster (mock reports everyone present).
     final tiles = [
-      for (final j in cubit.data.judges) GridParticipant(id: j.id, name: j.name),
+      for (final j in cubit.data.judges)
+        if (cubit.isUserPresent(j.id)) GridParticipant(id: j.id, name: j.name),
     ];
     return Column(
       children: [

@@ -49,8 +49,9 @@ class SpeakersSection extends StatelessWidget {
   }
 
   Widget _column(BuildContext context, DebateController cubit, DebateSide side) {
-    // Whether the local user (current main speaker in test mode) can answer POIs.
-    final canAnswer = cubit.currentSlot != null;
+    // Issue 8: ONLY the current main speaker may accept/answer a POI — not every
+    // device that happens to see the raised-hand badge.
+    final canAnswer = cubit.iAmCurrentSpeaker;
     // FE-7: render a FIXED N slots per side (= speakers per side) so both columns
     // are equal height; a side with fewer speakers leaves its bottom slot(s) as a
     // quiet "not joined" placeholder rather than stretching its cards.

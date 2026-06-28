@@ -656,6 +656,12 @@ abstract class AppLocalizations {
   /// **'The debate hasn\'t started yet.'**
   String get debateNotStarted;
 
+  /// No description provided for @youJoinedLiveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve joined the live session.'**
+  String get youJoinedLiveSession;
+
   /// No description provided for @audience.
   ///
   /// In en, this message translates to:

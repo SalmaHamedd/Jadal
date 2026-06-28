@@ -175,6 +175,11 @@ abstract class DebateController extends Cubit<DebateStates> {
   bool isAskingPOIByDebater(String debaterId);
   bool isAskingPOIBySid(String sid);
 
+  /// Whether the local user currently holds the floor (is the main speaker).
+  /// **Only the current speaker may accept/answer a POI** (Issue 8). Test/mock
+  /// mode: true whenever a speech is live (the solo demo speaks as the local user).
+  bool get iAmCurrentSpeaker => currentSlot != null;
+
   void sendPOIRequest();
   void acceptPOI(String askerSid);
   void refusePOI(String askerSid);

@@ -4,6 +4,7 @@ import 'package:livekit_client/livekit_client.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../utils/avatar_palette.dart';
+import '../utils/debate_theme.dart';
 import 'call_indicators.dart';
 
 /// Reusable participant tile (camera stream or deterministic-colour avatar),
@@ -98,7 +99,10 @@ class JadalVideoCard extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                color: live ? Colors.white : (nameColor ?? Colors.white),
+                // Over a video the name sits on dark footage → white. On the
+                // avatar/card surface it must follow the theme (dark in light
+                // theme) like the team cards, not be hard-coded white.
+                color: live ? Colors.white : (nameColor ?? DebateTheme.textPrimary(context)),
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
                 fontSize: 13 * scale,

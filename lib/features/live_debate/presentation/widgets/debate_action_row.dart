@@ -16,14 +16,17 @@ class DebateActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedSize(
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeInOut,
-      child: SizedBox(
-        height: visible ? 76 : 0,
-        child: Visibility(
-          maintainState: true,
-          maintainAnimation: false,
+    // Constant footprint (was `height: visible ? 76 : 0`): collapsing the height
+    // on auto-hide resized the team cards, which overflowed on some phones. Keep
+    // the 76px reserved and just fade the controls — the layout never reflows.
+    return SizedBox(
+      height: 76,
+      child: IgnorePointer(
+        ignoring: !visible,
+        child: AnimatedOpacity(
+          opacity: visible ? 1 : 0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Container(

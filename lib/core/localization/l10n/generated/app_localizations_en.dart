@@ -296,6 +296,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debateNotStarted => 'The debate hasn\'t started yet.';
 
   @override
+  String get youJoinedLiveSession => 'You\'ve joined the live session.';
+
+  @override
   String get audience => 'Audience';
 
   @override

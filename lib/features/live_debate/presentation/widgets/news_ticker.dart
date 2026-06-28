@@ -28,10 +28,16 @@ class _NewsTickerState extends State<NewsTicker> {
       builder: (context, state) {
         final cubit = context.read<DebateController>();
         final dark = DebateTheme.isDark(context);
-        // The ticker is never empty: before any news arrives it shows a calm
-        // "debate hasn't started yet" line instead of a blank glowing bar (§news).
+        // The ticker is never empty. Before any news arrives, show a calm line —
+        // but if the debate is already live (a mid-debate joiner / the chair just
+        // moved to the live session) the "hasn't started yet" line is misleading,
+        // so show "you've joined the live session" instead.
         final raw = cubit.latestNews;
-        final news = raw.isNotEmpty ? raw : context.loc.debateNotStarted;
+        final news = raw.isNotEmpty
+            ? raw
+            : (cubit.debateStarted
+                ? context.loc.youJoinedLiveSession
+                : context.loc.debateNotStarted);
 
         if (!_initialized) {
           // First open: seed the baseline WITHOUT the glow. The slide+glow should

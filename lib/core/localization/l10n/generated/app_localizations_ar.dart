@@ -296,6 +296,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get debateNotStarted => 'لم تبدأ المناظرة بعد.';
 
   @override
+  String get youJoinedLiveSession => 'لقد انضممت إلى الجلسة المباشرة.';
+
+  @override
   String get audience => 'الجمهور';
 
   @override

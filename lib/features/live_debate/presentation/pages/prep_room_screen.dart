@@ -78,9 +78,14 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
           final leader = DebateAccess.currentLeader(team, present);
           final isLeader = leader?.id == cubit.data.currentUserId;
           final order = cubit.orderFor(widget.side);
+          // Issue 1: show who is ACTUALLY in the prep room (real LiveKit
+          // presence), not the whole roster — same rule the live room uses. The
+          // prep room is connected (the lobby joins it before pushing), and mock
+          // mode reports everyone present so the solo demo is unchanged.
           final tiles = [
             for (final d in team.debaters)
-              GridParticipant(id: d.id, name: d.name, isLocal: d.id == cubit.data.currentUserId),
+              if (cubit.isUserPresent(d.id))
+                GridParticipant(id: d.id, name: d.name, isLocal: d.id == cubit.data.currentUserId),
           ];
 
           return Column(

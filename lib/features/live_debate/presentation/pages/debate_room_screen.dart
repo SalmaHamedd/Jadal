@@ -309,9 +309,10 @@ class _LobbyModeView extends StatelessWidget {
     }
     return Column(
       children: [
-        // "Back to debate" is chair-only — and gone once the debate has ended,
-        // since the room then stays in the open lobby (§U4b).
-        if (cubit.canControlStage && !cubit.debateFinished)
+        // "Back to debate" is chair-only — and gone once the result phase opens
+        // (speeches done / revealed / completed): the room then stays in the open
+        // lobby and can't return to a speech (Issue 9).
+        if (cubit.canControlStage && !cubit.resultPhaseOpen)
           Padding(
             padding: const EdgeInsets.all(12),
             child: SizedBox(

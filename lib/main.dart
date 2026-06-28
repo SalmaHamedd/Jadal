@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit.dart';
@@ -17,6 +18,11 @@ import 'features/profile/presentation/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // Phones must stay portrait — the debate layouts (main speaker + team columns)
+  // are designed vertically and a forced landscape overflows them.
+  await SystemChrome.setPreferredOrientations(
+    const [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown],
+  );
   await di.init();
   await di.sl<AppCubit>().load();
   runApp(const JadalApp());

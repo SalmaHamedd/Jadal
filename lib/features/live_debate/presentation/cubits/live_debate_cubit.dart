@@ -37,8 +37,10 @@ class LiveDebateCubit extends DebateController {
   final ProfileRepository profileRepo;
   final int debateId;
 
-  /// Keep-local-vs-snap threshold for the chair-broadcast timer (§7).
-  static const int kTimerSyncOffsetSeconds = 2;
+  /// Keep-local-vs-snap threshold for the chair-broadcast timer (§7). Issue 6:
+  /// the tester's spec — within 1s keep the local clock, otherwise snap to the
+  /// authority's value then keep ticking locally.
+  static const int kTimerSyncOffsetSeconds = 1;
 
   // ── State ──────────────────────────────────────────────────────────────────
   LiveStateModel? _state;
@@ -164,6 +166,11 @@ class LiveDebateCubit extends DebateController {
   final Set<String> _cameraLockedIds = {};
   bool _roomClosed = false;
 
+  /// Issue 10: emit the "go to the shared result" navigation exactly once,
+  /// whether it's triggered by the chair sharing or by the inbound
+  /// `result_revealed` broadcast (the chair receives its own broadcast too).
+  bool _resultNavSignaled = false;
+
   /// Chair-driven open-lobby PAUSE overlay (§open-lobby): a break that freezes the
   /// current speaker + timer where they are (so it resumes from the same spot)
   /// WITHOUT advancing/rolling-back the backend stage. Distinct from the real
@@ -274,6 +281,7 @@ class LiveDebateCubit extends DebateController {
     }
 
     if (stageChanged) {
+      _clearPois(); // Issue 8: leftover POIs don't survive into the next speech
       // Flip the lobby↔debate gate (the chair's own action has no broadcast).
       emit(LobbyModeChangedState());
       emit(SpeakerChangedState());
@@ -683,6 +691,7 @@ class LiveDebateCubit extends DebateController {
       case LiveEventType.resultRevealed:
         _refreshLiveState();
         emit(ResultRevealedState());
+        _signalResultNav(); // Issue 10: every device opens the shared result
         break;
       case LiveEventType.poiRaised:
         if (event.byUserId != null) {
@@ -709,6 +718,7 @@ class LiveDebateCubit extends DebateController {
         // pause/resume freezes/continues the clock.
         dlog('mode', 'lobby_overlay received → ${event.lobbyOverlayEnabled}');
         _lobbyOverlay = event.lobbyOverlayEnabled;
+        _clearPois(); // Issue 8: a toggle clears in-flight POIs
         emit(LobbyModeChangedState());
         break;
       case LiveEventType.teamChat:
@@ -761,6 +771,7 @@ class LiveDebateCubit extends DebateController {
 
   void _onStageChanged(LiveEvent e) {
     final previousStage = _currentStage;
+    _clearPois(); // Issue 8: a new speech clears any leftover raised hands
     dlog('stage', 'stage_changed → currentStage=${e.currentStage} '
         'speakerUserId=${e.speakerUserId} serverStartedAt=${e.serverStartedAt} '
         'durationSeconds=${e.durationSeconds}');
@@ -799,7 +810,18 @@ class LiveDebateCubit extends DebateController {
 
   void _publish(List<int> bytes) {
     _logOutgoing(bytes);
-    _room?.localParticipant?.publishData(bytes, reliable: true);
+    final lp = _room?.localParticipant;
+    if (lp == null) {
+      dlog('socket-send', 'DROPPED — not connected (localParticipant null)');
+      return;
+    }
+    // §0.1 diagnostic: confirm the publish was accepted by the SFU. A throw here
+    // is the tell-tale of a missing `canPublishData` grant (the V10 root cause) —
+    // surface it instead of swallowing it, so a future regression is obvious.
+    lp.publishData(bytes, reliable: true).catchError((Object e) {
+      dlog('socket-send', 'publishData FAILED — canPublishData grant or '
+          'connection issue: $e');
+    });
   }
 
   /// Trace every outbound data-channel message in full (POI flashes, team chat,
@@ -1146,6 +1168,18 @@ class LiveDebateCubit extends DebateController {
     emit(POIChangedState());
   }
 
+  /// Issue 8: drop all in-flight POIs — called on a stage change and on an
+  /// open↔live toggle so a raised hand never lingers into the next speech or the
+  /// lobby (a stale POI the next speaker would otherwise "see").
+  void _clearPois() {
+    if (_poiRaisedUserIds.isEmpty && !isLocalAskingPOI) return;
+    dlog('poi', 'clearing in-flight POIs (stage change / lobby toggle)');
+    _poiRaisedUserIds.clear();
+    isLocalAskingPOI = false;
+    _poiTimer?.cancel();
+    emit(POIChangedState());
+  }
+
   @override
   bool isAskingPOIByDebater(String debaterId) {
     final uid = int.tryParse(debaterId);
@@ -1204,7 +1238,7 @@ class LiveDebateCubit extends DebateController {
   /// The open lobby is shown either before/after the debate (real stage 0) or
   /// during a chair PAUSE overlay mid-debate.
   @override
-  bool get isLobbyMode => _currentStage <= 0 || _lobbyOverlay;
+  bool get isLobbyMode => _currentStage <= 0 || _lobbyOverlay || resultPhaseOpen;
 
   /// Chair toggle. Mid-debate it's a **pause overlay** that freezes the current
   /// speaker + clock (so resume continues from the same spot, never restarting or
@@ -1215,12 +1249,19 @@ class LiveDebateCubit extends DebateController {
       dlog('action', 'setLobbyMode IGNORED — not authority');
       return;
     }
+    // Issue 9: once the speeches are done (result phase open) the room stays in
+    // the open lobby — the chair can't go back to a speech.
+    if (!enabled && resultPhaseOpen) {
+      dlog('action', 'setLobbyMode(live) IGNORED — result phase open (Issue 9)');
+      return;
+    }
     if (enabled) {
       // Pause into the open-lobby grid. At stage 0 there's nothing live to pause.
       if (_currentStage > 0 && !_lobbyOverlay) {
         dlog('action', 'OPEN-LOBBY pause ▸ freeze stage $_currentStage + timer '
             '(elapsed=$elapsedSeconds)');
         _lobbyOverlay = true;
+        _clearPois(); // Issue 8: clear in-flight POIs on the toggle
         pauseTimer(); // freezes elapsed + broadcasts time_control pause
         _publish(LiveDebateSocket.lobbyOverlay(enabled: true));
         emit(LobbyModeChangedState());
@@ -1420,6 +1461,11 @@ class LiveDebateCubit extends DebateController {
 
   bool get _iAmCurrentSpeaker => _currentSpeakerUserId == _myUserId;
 
+  /// Issue 8: only the real current speaker may answer a POI. In the lobby
+  /// `_currentSpeakerUserId` is null → false for everyone.
+  @override
+  bool get iAmCurrentSpeaker => _iAmCurrentSpeaker;
+
   @override
   bool get canModerateOthers => isAuthority; // chair only
   @override
@@ -1570,6 +1616,15 @@ class LiveDebateCubit extends DebateController {
   // The dedicated endpoints (server-side publish-lock, kick-all, explicit
   // live→done) don't exist yet; map to what we have and TODO the rest.
 
+  /// Issue 10: navigate to the shared result exactly once (idempotent), driven
+  /// by either the chair's share or the inbound `result_revealed` broadcast.
+  void _signalResultNav() {
+    if (_resultNavSignaled || isClosed) return;
+    _resultNavSignaled = true;
+    dlog('action', 'result shared/revealed → opening the result screen on this device');
+    emit(NavigateToSharedResultState());
+  }
+
   @override
   Future<void> shareResult() async {
     if (!isAuthority) return;
@@ -1577,7 +1632,7 @@ class LiveDebateCubit extends DebateController {
     // explicit live→done stage flip is a TODO until the endpoint exists.
     // TODO(backend): POST a "complete/share result" route to flip live→done.
     await revealResult();
-    emit(NavigateToSharedResultState());
+    _signalResultNav();
   }
 
   @override
