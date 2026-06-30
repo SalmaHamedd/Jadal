@@ -39,6 +39,18 @@ abstract class LiveDebateRepository {
   /// `POST /debates/{id}/rollback-to-lobby` — chair: back to stage 0.
   Future<Either<Failure, Unit>> rollbackToLobby(int debateId);
 
+  /// `POST /debates/{id}/timer` `{action:"pause"|"resume"}` (V11 §0) — chair:
+  /// server-authoritative pause/resume; the server broadcasts `timer_update`.
+  Future<Either<Failure, Unit>> setTimer({
+    required int debateId,
+    required String action,
+  });
+
+  /// `POST /debates/{id}/start-live` (V11 §1) — chair: enter the live session
+  /// from the lobby (intro phase); `current_stage` stays 0, broadcasts
+  /// `debate_mode_started`.
+  Future<Either<Failure, Unit>> startLive(int debateId);
+
   /// `POST /debates/{id}/stages/{phaseId}/poi` `{action:"raise"|"answer"}` (→204).
   Future<Either<Failure, Unit>> sendPoi({
     required int debateId,

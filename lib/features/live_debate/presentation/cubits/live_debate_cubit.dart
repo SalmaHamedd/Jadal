@@ -37,11 +37,6 @@ class LiveDebateCubit extends DebateController {
   final ProfileRepository profileRepo;
   final int debateId;
 
-  /// Keep-local-vs-snap threshold for the chair-broadcast timer (§7). Issue 6:
-  /// the tester's spec — within 1s keep the local clock, otherwise snap to the
-  /// authority's value then keep ticking locally.
-  static const int kTimerSyncOffsetSeconds = 1;
-
   // ── State ──────────────────────────────────────────────────────────────────
   LiveStateModel? _state;
   BackendLiveDebateData _data;
@@ -257,28 +252,16 @@ class LiveDebateCubit extends DebateController {
 
     final stageChanged = prevStage != _currentStage;
 
-    // Timer is driven by the server's authoritative start time: it reads 0 in the
-    // lobby (stage 0 → `current_stage_started_at` null) and only counts once a
-    // speech has actually started — so it never runs "from open lobby" and never
-    // auto-starts just because the chair joined/refreshed. We only (re)seed on an
-    // actual stage change so a plain refresh never clobbers a running/paused clock
-    // (e.g. after an open-lobby resume, where the server start time would wrongly
-    // include the paused gap). Skipped entirely while the pause overlay is active.
-    if (!_lobbyOverlay) {
-      if (_currentStage <= 0) {
-        _resetTimerSilently(); // lobby → 0, not counting
-      } else if (stageChanged && isAuthority && _serverStartedAt != null) {
-        // New speaking stage: the chair seeds from the server start (≈0 for a fresh
-        // speech) and runs + broadcasts the clock. Non-authorities get the speaker
-        // + clock from `stage_changed` / `time_update`, not from here.
-        elapsedSeconds = DateTime.now()
-            .toUtc()
-            .difference(_serverStartedAt!)
-            .inSeconds
-            .clamp(0, 1 << 30);
-        startTimer();
-      }
-    }
+    // V11 §0: the timer is SERVER-authoritative. Every client (not just the chair)
+    // computes elapsed from the server clock + the persisted paused state, so all
+    // devices agree and a (re)joiner restores the exact clock — including a paused
+    // open-lobby break (Issues 6 & 7). No peer `time_update` dependency anymore.
+    _applyServerTimer(
+      stageStartedAt: _serverStartedAt,
+      serverNow: s.debate.serverNow?.toUtc(),
+      paused: s.debate.timerIsPaused,
+      pausedElapsed: s.debate.timerPausedElapsedSeconds,
+    );
 
     if (stageChanged) {
       _clearPois(); // Issue 8: leftover POIs don't survive into the next speech
@@ -653,7 +636,11 @@ class LiveDebateCubit extends DebateController {
         _onStageChanged(event);
         break;
       case LiveEventType.debateModeStarted:
-        dlog('mode', 'debate_mode_started → entering debate from the open lobby');
+        // C3: the chair started the live session (intro) OR a real lobby→debate
+        // move. Refresh to pick up `live_started_at` so this device shows the
+        // intro (chair welcome) vs the open lobby correctly.
+        dlog('mode', 'debate_mode_started → live session started (intro)');
+        _refreshLiveState();
         emit(LobbyModeChangedState());
         break;
       case LiveEventType.returnedToLobby:
@@ -700,17 +687,45 @@ class LiveDebateCubit extends DebateController {
         }
         break;
       case LiveEventType.poiAnswered:
-        if (event.byUserId != null) _poiRaisedUserIds.remove(event.byUserId);
+        final asker = event.byUserId;
+        if (asker != null) _poiRaisedUserIds.remove(asker);
+        // B1/B2: if I'm the asker, learn the outcome — always clear my "asking"
+        // toolbar state; on ACCEPT, reopen my mic (lock-exempt) + show the mic
+        // dialog (the screen also pushes the "POI accepted" news).
+        if (asker == _myUserId) {
+          isLocalAskingPOI = false;
+          _poiTimer?.cancel();
+          if (event.poiAccepted) {
+            dlog('poi', 'my POI was ACCEPTED → reopening mic + asker dialog');
+            localPoiAccepted = true; // exempts me from the publish-lock
+            emit(POIAcceptedForLocalState());
+          } else {
+            dlog('poi', 'my POI was refused → clearing my raised hand');
+          }
+        }
         emit(POIChangedState());
         break;
+      case LiveEventType.timerUpdate:
+        // V11 §0: server-authoritative timer. Reconcile this device's clock to the
+        // server's pause/resume/no-judge state — the single source of truth.
+        dlog('timer', 'timer_update → paused=${event.timerIsPaused} '
+            'pausedElapsed=${event.timerPausedElapsedSeconds} '
+            'stage=${event.currentStage} reason=${event.pauseReason}');
+        if (event.currentStage != null) _currentStage = event.currentStage!;
+        _applyServerTimer(
+          stageStartedAt: DateTime.tryParse(event.currentStageStartedAt ?? '')?.toUtc(),
+          serverNow: DateTime.tryParse(event.serverNow ?? '')?.toUtc(),
+          paused: event.timerIsPaused,
+          pausedElapsed: event.timerPausedElapsedSeconds,
+        );
+        emit(TimerTickedState());
+        break;
       case LiveEventType.timeUpdate:
-        if (!isAuthority) _reconcileTime(event);
+        // Legacy peer timer — retired as the source of truth (V11 §0). Ignored;
+        // the server `timer_update` drives the clock now.
         break;
       case LiveEventType.timeControl:
-        if (!isAuthority) {
-          if (event.action == 'pause') pauseTimer();
-          if (event.action == 'resume') startTimer();
-        }
+        // Legacy peer pause/resume — superseded by server `timer_update`.
         break;
       case LiveEventType.lobbyOverlay:
         // Chair paused/resumed into the open-lobby grid (peer signal). Mirror the
@@ -795,17 +810,6 @@ class LiveDebateCubit extends DebateController {
     emit(SpeakerChangedState());
     emit(DebateTimelineEventState(DebateTimelineEvent.speechStarted));
     startTimer();
-  }
-
-  void _reconcileTime(LiveEvent e) {
-    final ts = DateTime.tryParse(e.timestamp ?? '')?.toUtc();
-    final delay = ts == null ? 0 : DateTime.now().toUtc().difference(ts).inSeconds;
-    final corrected = e.isPaused ? e.elapsedSeconds : e.elapsedSeconds + delay;
-    if ((corrected - elapsedSeconds).abs() > kTimerSyncOffsetSeconds) {
-      elapsedSeconds = corrected;
-      isPaused = e.isPaused;
-      emit(TimerTickedState());
-    }
   }
 
   void _publish(List<int> bytes) {
@@ -894,28 +898,56 @@ class LiveDebateCubit extends DebateController {
       final event = timeline.eventAt(elapsedSeconds, isReply: currentSlot?.isReply ?? false);
       if (event != null) emit(DebateTimelineEventState(event));
       emit(TimerTickedState());
-      if (isAuthority) {
-        _publish(LiveDebateSocket.timeUpdate(
-          elapsedSeconds: elapsedSeconds,
-          isPaused: isPaused,
-          timestamp: DateTime.now().toUtc(),
-        ));
-      }
+      // V11 §0: the timer is SERVER-authoritative — no peer `time_update`
+      // broadcast anymore. This is a cosmetic local tick that the next live-state
+      // poll / `timer_update` reconciles.
     });
+  }
+
+  /// V11 §0: apply the server-authoritative timer — compute elapsed from the
+  /// server clock + persisted paused state, and run the cosmetic local tick only
+  /// while the server says the clock is running. Called on every live-state apply
+  /// and every `timer_update`, so all devices converge and a rejoin restores the
+  /// exact (incl. paused) clock.
+  void _applyServerTimer({
+    required DateTime? stageStartedAt,
+    required DateTime? serverNow,
+    required bool paused,
+    required int pausedElapsed,
+  }) {
+    if (_currentStage <= 0) {
+      _resetTimerSilently(); // lobby / intro → no clock
+      return;
+    }
+    if (paused) {
+      elapsedSeconds = pausedElapsed.clamp(0, 1 << 30);
+      isPaused = true;
+      _localTimer?.cancel();
+      emit(TimerTickedState());
+      return;
+    }
+    if (stageStartedAt != null) {
+      // offset = server − client; add it to the client clock to track the server.
+      final offset = serverNow?.difference(DateTime.now().toUtc()) ?? Duration.zero;
+      final adjustedNow = DateTime.now().toUtc().add(offset);
+      elapsedSeconds =
+          adjustedNow.difference(stageStartedAt).inSeconds.clamp(0, 1 << 30);
+    }
+    isPaused = false;
+    startTimer(); // run the cosmetic local tick from the seeded value
   }
 
   @override
   void pauseTimer() {
+    // Local cosmetic freeze; the AUTHORITATIVE pause goes through `toggleTimerPause`
+    // → POST /timer (server broadcasts `timer_update`). V11 §0.
     isPaused = true;
-    if (isAuthority) _publish(LiveDebateSocket.timeControl(pause: true));
+    _localTimer?.cancel();
     emit(TimerTickedState());
   }
 
   @override
-  void resumeTimer() {
-    if (isAuthority) _publish(LiveDebateSocket.timeControl(pause: false));
-    startTimer();
-  }
+  void resumeTimer() => startTimer();
 
   @override
   void resetTimer() {
@@ -1135,10 +1167,11 @@ class LiveDebateCubit extends DebateController {
     // disambiguated — clear only that asker and tell every device to drop that
     // asker's badge (`by_user_id` = the asker being answered).
     final askerId = int.tryParse(askerUserId);
-    dlog('poi', 'POI accepted (asker=$askerUserId, phaseId=$phaseId)');
-    // FE-4: always broadcast the answer flash; only persistence needs the phase id.
+    dlog('poi', 'POI ACCEPTED (asker=$askerUserId, phaseId=$phaseId)');
+    // FE-4/B2: always broadcast the answer flash with accepted=true so the asker
+    // learns it (reopens their mic + sees the dialog/news). Persistence needs the id.
     _publish(LiveDebateSocket.poiAnswered(
-        stagePhaseId: phaseId, byUserId: askerId ?? _myUserId));
+        stagePhaseId: phaseId, byUserId: askerId ?? _myUserId, accepted: true));
     if (phaseId != null) {
       repo.sendPoi(debateId: debateId, phaseId: phaseId, action: 'answer');
     }
@@ -1152,9 +1185,16 @@ class LiveDebateCubit extends DebateController {
 
   @override
   void refusePOI(String askerUserId) {
-    // FE-5: dismiss only the specific asker's badge.
+    // FE-5/B1: dismiss the specific asker — and BROADCAST accepted=false so the
+    // asker's own raised hand + toolbar POI button clear too (not just locally on
+    // the speaker's device).
     final uid = int.tryParse(askerUserId);
-    if (uid != null) _poiRaisedUserIds.remove(uid);
+    if (uid != null) {
+      dlog('poi', 'POI REFUSED (asker=$uid)');
+      _publish(LiveDebateSocket.poiAnswered(
+          stagePhaseId: _currentPhaseId, byUserId: uid, accepted: false));
+      _poiRaisedUserIds.remove(uid);
+    }
     if (askerUserId == 'local' || uid == _myUserId) isLocalAskingPOI = false;
     emit(POIChangedState());
   }
@@ -1235,14 +1275,45 @@ class LiveDebateCubit extends DebateController {
   void pushRandomNews(String Function(int n) build) =>
       updateLatestNews(build(_newsCounter++));
 
-  /// The open lobby is shown either before/after the debate (real stage 0) or
-  /// during a chair PAUSE overlay mid-debate.
+  /// The open lobby is shown before the live session (real stage 0, NOT intro),
+  /// during a chair PAUSE overlay mid-debate, or in the result phase. The intro
+  /// (C3) shows the live layout (chair welcome), so it is NOT lobby mode.
   @override
-  bool get isLobbyMode => _currentStage <= 0 || _lobbyOverlay || resultPhaseOpen;
+  bool get isLobbyMode =>
+      _lobbyOverlay || resultPhaseOpen || (_currentStage <= 0 && !isIntro);
+
+  /// V11 §1: the chair has entered the live session but no speech yet (welcome).
+  @override
+  bool get isIntro => _state?.debate.isIntroPhase ?? false;
+
+  /// The chair shown in the main speaker card during the intro.
+  @override
+  String? get introHostId => _state?.chairJudge?.user.id.toString();
+  @override
+  String get introHostName => _state?.chairJudge?.user.name ?? '';
+
+  /// Chair: enter the live session from the lobby → intro (chair welcome, no
+  /// timer). The chair's "Start debate" (next-stage) then begins P1 (C3).
+  @override
+  Future<void> startLive() async {
+    if (!isAuthority) return;
+    dlog('action', 'START-LIVE ▸ POST start-live (enter intro)');
+    final res = await repo.startLive(debateId);
+    await res.fold(
+      (f) async {
+        dlog('action', 'start-live FAILED: ${f.message}');
+        emit(DebateErrorState(f.message));
+      },
+      (_) async {
+        await _refreshLiveState(); // picks up live_started_at → isIntro
+        emit(LobbyModeChangedState());
+      },
+    );
+  }
 
   /// Chair toggle. Mid-debate it's a **pause overlay** that freezes the current
-  /// speaker + clock (so resume continues from the same spot, never restarting or
-  /// counting during the break). At stage 0 it starts/advances the debate.
+  /// speaker + server clock (resume continues from the same spot). From the
+  /// open lobby it enters the **intro** (C3), not P1.
   @override
   void setLobbyMode(bool enabled) {
     if (!isAuthority) {
@@ -1262,32 +1333,51 @@ class LiveDebateCubit extends DebateController {
             '(elapsed=$elapsedSeconds)');
         _lobbyOverlay = true;
         _clearPois(); // Issue 8: clear in-flight POIs on the toggle
-        pauseTimer(); // freezes elapsed + broadcasts time_control pause
         _publish(LiveDebateSocket.lobbyOverlay(enabled: true));
+        // V11 §0: AUTHORITATIVE pause via the server (persists + broadcasts), plus
+        // an immediate local freeze for snappy feedback.
+        repo.setTimer(debateId: debateId, action: 'pause');
+        pauseTimer();
         emit(LobbyModeChangedState());
       }
     } else if (_lobbyOverlay) {
       // Resume the paused speaker exactly where they stopped.
-      dlog('action', 'OPEN-LOBBY resume ▸ continue stage $_currentStage '
-          '(elapsed=$elapsedSeconds)');
+      dlog('action', 'OPEN-LOBBY resume ▸ continue stage $_currentStage');
       _lobbyOverlay = false;
       _publish(LiveDebateSocket.lobbyOverlay(enabled: false));
-      resumeTimer(); // continues from the frozen elapsed + broadcasts resume
+      repo.setTimer(debateId: debateId, action: 'resume');
+      resumeTimer();
       emit(LobbyModeChangedState());
+    } else if (_currentStage <= 0 && !isIntro) {
+      // C3: open lobby (pre-live) → enter the INTRO (chair welcome), not P1.
+      startLive();
     } else {
-      // Real stage-0 lobby → start / advance the debate.
-      dlog('action', 'START/NEXT ▸ POST next-stage (from stage $_currentStage)');
-      repo.nextStage(debateId).then((res) => res.fold(
-            (f) {
-              dlog('action', 'next-stage FAILED: ${f.message}');
-              emit(DebateErrorState(f.message));
-            },
-            (_) {
-              dlog('action', 'next-stage OK — refreshing live-state (FE-1 safety net)');
-              _refreshLiveState();
-            },
-          ));
+      // Intro → "Start debate": begin the first speech.
+      dlog('action', 'START DEBATE ▸ POST next-stage (from intro)');
+      advanceDebate();
     }
+  }
+
+  /// V11 §0 / Update 1: the chair's stop/resume timer button. Drives the
+  /// server-authoritative pause/resume; the server broadcasts `timer_update` so
+  /// every device matches exactly.
+  @override
+  void toggleTimerPause() {
+    if (!isAuthority) return;
+    final action = isPaused ? 'resume' : 'pause';
+    dlog('action', 'TIMER $action ▸ POST /timer');
+    if (action == 'pause') {
+      pauseTimer();
+    } else {
+      resumeTimer();
+    }
+    repo.setTimer(debateId: debateId, action: action).then((res) => res.fold(
+          (f) {
+            dlog('action', 'timer $action FAILED: ${f.message}');
+            emit(DebateErrorState(f.message));
+          },
+          (_) => _refreshLiveState(),
+        ));
   }
 
   // ── Immediate "turn off now" nudges (paired with the durable lock below) ─────
@@ -1328,9 +1418,11 @@ class LiveDebateCubit extends DebateController {
   bool _isUserExempt(int uid) =>
       (_state?.isJudge(uid) ?? false) || _currentSpeakerUserId == uid;
 
-  /// Judges + the current main speaker can always publish (never locked).
+  /// Judges + the current main speaker can always publish (never locked). B2: an
+  /// asker whose POI was just accepted is also exempt so their mic reopens even
+  /// if the chair had force-muted them.
   bool get _amExemptFromLock =>
-      _debateRole.isJudge || _iAmCurrentSpeaker;
+      _debateRole.isJudge || _iAmCurrentSpeaker || localPoiAccepted;
 
   @override
   bool get muteAllActive => _muteAllActive;

@@ -27,22 +27,27 @@ class SpeakersSection extends StatelessWidget {
     return BlocBuilder<DebateController, DebateStates>(
       builder: (context, state) {
         final cubit = context.read<DebateController>();
-        return Row(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Expanded(
-              flex: kSpeakerColumnFlex,
-              child: _column(context, cubit, DebateSide.proposition),
-            ),
-            // FE-5: POIs now render as a badge anchored to the asking debater's
-            // own card (see SpeakerCard) so two simultaneous askers each show on
-            // their own card. The old centered pill is gone — this is just the gap.
-            const Expanded(flex: kSpeakerGapFlex, child: SizedBox.shrink()),
-            Expanded(
-              flex: kSpeakerColumnFlex,
-              child: _column(context, cubit, DebateSide.opposition),
-            ),
-          ],
+        // A1: the sides are FIXED regardless of the app locale (incl. Arabic RTL):
+        // **opposition on the LEFT, proposition on the RIGHT.** Forcing LTR on this
+        // row keeps that order; the per-card POI badge still anchors to the outer edge.
+        return Directionality(
+          textDirection: TextDirection.ltr,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                flex: kSpeakerColumnFlex,
+                child: _column(context, cubit, DebateSide.opposition),
+              ),
+              // FE-5: POIs render as a badge anchored to the asking debater's own
+              // card (see SpeakerCard); the old centered pill is gone — this is the gap.
+              const Expanded(flex: kSpeakerGapFlex, child: SizedBox.shrink()),
+              Expanded(
+                flex: kSpeakerColumnFlex,
+                child: _column(context, cubit, DebateSide.proposition),
+              ),
+            ],
+          ),
         );
       },
     );

@@ -14,20 +14,17 @@ class DebateActionRow extends StatelessWidget {
   final bool visible;
   const DebateActionRow({super.key, required this.visible});
 
+  static const double kHeight = 76;
+
   @override
   Widget build(BuildContext context) {
-    // Constant footprint (was `height: visible ? 76 : 0`): collapsing the height
-    // on auto-hide resized the team cards, which overflowed on some phones. Keep
-    // the 76px reserved and just fade the controls — the layout never reflows.
+    // A2: collapse to zero when hidden so the freed space goes back to the cards.
+    // `_DebateView` redistributes it 75% to the main card / 25% to the team cards
+    // (via a LayoutBuilder), so the team cards barely shrink and never overflow.
+    if (!visible) return const SizedBox(height: 0, width: double.infinity);
     return SizedBox(
-      height: 76,
-      child: IgnorePointer(
-        ignoring: !visible,
-        child: AnimatedOpacity(
-          opacity: visible ? 1 : 0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeInOut,
-          child: Padding(
+      height: kHeight,
+      child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 8),
             child: Container(
               decoration: BoxDecoration(
@@ -100,8 +97,6 @@ class DebateActionRow extends StatelessWidget {
               ),
             ),
           ),
-        ),
-      ),
     );
   }
 }

@@ -98,6 +98,9 @@
   "newEventHappened": "حدث جديد وقع",
   "debateNotStarted": "لم تبدأ المناظرة بعد.",
   "youJoinedLiveSession": "لقد انضممت إلى الجلسة المباشرة.",
+  "goLiveSession": "بدء الجلسة المباشرة",
+  "introductionsLabel": "التقديم",
+  "poiAcceptedNews": "تم قبول مداخلتك",
 
   "audience": "الجمهور",
   "searchHint": "بحث…",

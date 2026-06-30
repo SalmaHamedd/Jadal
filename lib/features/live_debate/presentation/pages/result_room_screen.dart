@@ -8,6 +8,7 @@ import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import '../widgets/confetti_overlay.dart';
 import '../widgets/debate_room_shell.dart';
+import '../widgets/debate_screen_header.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/result_submit_sheet.dart';
 import '../widgets/result_summary_view.dart';
@@ -44,14 +45,16 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
     final loc = context.loc;
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
-      appBar: AppBar(
-        title: Text(loc.resultRoomTitle,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-      ),
       body: DebateRoomShell(
-        child: Stack(
-          children: [
-            BlocConsumer<DebateController, DebateStates>(
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              DebateScreenHeader(title: loc.resultRoomTitle),
+              Expanded(
+                child: Stack(
+                  children: [
+                    BlocConsumer<DebateController, DebateStates>(
               listenWhen: (_, s) =>
                   s is ResultRevealedState || s is DebateErrorState,
               listener: (context, state) {
@@ -77,7 +80,11 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
                   },
                 ),
               ),
-          ],
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

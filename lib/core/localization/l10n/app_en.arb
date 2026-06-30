@@ -101,6 +101,9 @@
   "newEventHappened": "New event happened",
   "debateNotStarted": "The debate hasn't started yet.",
   "youJoinedLiveSession": "You've joined the live session.",
+  "goLiveSession": "Go to live session",
+  "introductionsLabel": "Introductions",
+  "poiAcceptedNews": "Your POI was accepted",
 
   "audience": "Audience",
   "searchHint": "Search…",

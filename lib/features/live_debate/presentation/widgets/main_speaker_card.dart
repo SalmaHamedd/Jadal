@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../cubits/connection_cubit.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import '../utils/debate_timeline.dart';
@@ -25,6 +26,15 @@ class MainSpeakerCard extends StatelessWidget {
         final dark = DebateTheme.isDark(context);
         final slot = cubit.currentSlot;
 
+        // C3: the intro phase (live session started, no speech yet) shows the
+        // chair in the main card to welcome/introduce — no timer.
+        if (cubit.isIntro) {
+          return _IntroCard(
+            hostId: cubit.introHostId ?? '',
+            hostName: cubit.introHostName,
+            label: loc.introductionsLabel,
+          );
+        }
         if (slot == null) {
           return _IdleCard(message: loc.tapNextToStart);
         }
@@ -62,6 +72,9 @@ class MainSpeakerCard extends StatelessWidget {
           builder: (context, constraints) {
             final h = constraints.maxHeight;
             return Stack(
+              // Clip.none so the chair's stop/resume button can straddle the
+              // bottom edge (its lower half sits below the card).
+              clipBehavior: Clip.none,
               children: [
                 // Neutral card surface (§11) — the side colour now lives only in
                 // the animated progress ring, not the card body.
@@ -159,7 +172,7 @@ class MainSpeakerCard extends StatelessWidget {
                   end: 0,
                   child: Center(child: _RoleChip(label: cubit.roleLabelForSlot(slot), color: accent)),
                 ),
-                // Timer (top-start).
+                // Timer (top-start) — always visible.
                 PositionedDirectional(
                   top: 12,
                   start: 12,
@@ -170,6 +183,40 @@ class MainSpeakerCard extends StatelessWidget {
                     isReply: slot.isReply,
                   ),
                 ),
+                // C1 / Update 1: chair-only stop/resume timer button, straddling
+                // the bottom-centre edge. It appears/disappears (animated) together
+                // with the tool bar — so when the bar is hidden the button is too,
+                // and the tap that reveals the bar can't be mistaken for a (missed)
+                // press on a button that wouldn't have stopped the timer anyway.
+                if (cubit.canControlTimer)
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    bottom: -22,
+                    child: Center(
+                      child: BlocBuilder<ConnectionCubit, ConnectionStates>(
+                        builder: (context, _) {
+                          final show = context.read<ConnectionCubit>().showActions;
+                          return IgnorePointer(
+                            ignoring: !show,
+                            child: AnimatedScale(
+                              scale: show ? 1 : 0,
+                              duration: const Duration(milliseconds: 260),
+                              curve: Curves.easeOutBack,
+                              child: AnimatedOpacity(
+                                opacity: show ? 1 : 0,
+                                duration: const Duration(milliseconds: 200),
+                                child: _TimerControlButton(
+                                  isPaused: cubit.isPaused,
+                                  onTap: cubit.toggleTimerPause,
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ),
               ],
             );
           },
@@ -302,6 +349,101 @@ class _IdleCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// C3: the intro main card — the chair (welcome) with an "Introductions" chip and
+/// NO timer, shown after the chair starts the live session and before P1.
+class _IntroCard extends StatelessWidget {
+  final String hostId;
+  final String hostName;
+  final String label;
+  const _IntroCard({
+    required this.hostId,
+    required this.hostName,
+    required this.label,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final cubit = context.read<DebateController>();
+    const cardRadius = widgetBorderRadius + 4;
+    final hasHost = hostId.isNotEmpty;
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return Stack(
+          children: [
+            Positioned.fill(
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(cardRadius),
+                  boxShadow: [
+                    BoxShadow(
+                      color: JadalColors.judgesGrey.withValues(alpha: 0.22),
+                      blurRadius: 14,
+                      offset: const Offset(0, 6),
+                    ),
+                  ],
+                ),
+                child: JadalVideoCard(
+                  name: hostName.isNotEmpty ? hostName : '—',
+                  participantId: hasHost ? hostId : 'chair',
+                  bgColor: DebateTheme.floatingCard(context),
+                  showVideo: hasHost && cubit.showVideoForUser(hostId),
+                  videoTrack: hasHost ? cubit.videoTrackForUser(hostId) : null,
+                  isMicEnabled: hasHost && cubit.micOnForUser(hostId),
+                  isSpeaking: hasHost && cubit.speakingForUser(hostId),
+                  mainAxis: constraints.maxHeight,
+                  borderRadius: cardRadius,
+                ),
+              ),
+            ),
+            PositionedDirectional(
+              top: 12,
+              start: 0,
+              end: 0,
+              child: Center(child: _RoleChip(label: label, color: JadalColors.judgesGrey)),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+/// C1 / Update 1: the chair's circular, icon-only stop/resume timer button. Its
+/// border is the card surface colour so it reads as straddling the card edge.
+class _TimerControlButton extends StatelessWidget {
+  final bool isPaused;
+  final VoidCallback onTap;
+  const _TimerControlButton({required this.isPaused, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 46,
+        height: 46,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: const LinearGradient(
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+            colors: [JadalColors.primaryBlue, JadalColors.primaryOrange],
+          ),
+          border: Border.all(color: DebateTheme.background(context), width: 3),
+          boxShadow: [
+            BoxShadow(color: Colors.black.withValues(alpha: 0.28), blurRadius: 8),
+          ],
+        ),
+        child: Icon(
+          isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+          color: Colors.white,
+          size: 26,
+        ),
       ),
     );
   }

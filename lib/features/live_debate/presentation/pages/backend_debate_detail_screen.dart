@@ -4,17 +4,17 @@ import 'package:fpdart/fpdart.dart' show Either;
 import '../../../../core/error/failures.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/jadal_blob_background.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_models.dart';
 import '../../data/models/live_state_model.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_status.dart';
-import '../utils/avatar_palette.dart';
 import '../utils/debate_date.dart';
 import '../utils/debate_log.dart';
 import '../utils/debate_theme.dart';
+import '../widgets/debate_screen_header.dart';
 import '../widgets/registration_sheet.dart';
 import '../widgets/result_summary_view.dart';
 import 'debate_lobby_screen.dart';
@@ -72,22 +72,29 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
     final loc = context.loc;
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
-      appBar: AppBar(
-        title: Text(widget.title ?? loc.debatesTitle,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-      ),
-      body: JadalBlobBackground(
-        child: FutureBuilder<Either<Failure, LiveStateModel>>(
-          future: _future,
-          builder: (context, snap) {
-            if (!snap.hasData) {
-              return const Center(child: CircularProgressIndicator());
-            }
-            return snap.data!.fold(
-              (f) => _ErrorView(message: f.message, onRetry: _reload),
-              (state) => _content(context, state),
-            );
-          },
+      // No AppBar — the gradient runs edge-to-edge and the title lives in an
+      // in-body header over it.
+      body: JadalGradientBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              DebateScreenHeader(title: widget.title ?? loc.debatesTitle),
+              Expanded(
+                child: FutureBuilder<Either<Failure, LiveStateModel>>(
+                  future: _future,
+                  builder: (context, snap) {
+                    if (!snap.hasData) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    return snap.data!.fold(
+                      (f) => _ErrorView(message: f.message, onRetry: _reload),
+                      (state) => _content(context, state),
+                    );
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -160,8 +167,10 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
         ),
         // Judges + teams — nothing to show during registration.
         if (!isRegistration) ...[
-          // A light, low-key judges strip — it shouldn't compete with the teams.
-          if (state.judges.isNotEmpty) _JudgesStrip(judges: state.judges),
+          // Judges sit in the same calm section card as Format (the user didn't
+          // want the old busy strip), with the chair keeping its star/ring badge.
+          if (state.judges.isNotEmpty)
+            _Section(title: loc.judgesLabel, child: _JudgesContent(judges: state.judges)),
           // Teams sit side-by-side as two filled, team-coloured panels (§design).
           _teamsRow(context, state, neutral: isAnnounced),
         ],
@@ -556,17 +565,17 @@ class _TeamColumn extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        // The translucent fill is the "secondary" mid-tone between the page
-        // background and the solid accent — the whole panel reads as the team's.
-        color: color.withValues(alpha: dark ? 0.18 : 0.09),
+        // A gentle team-tinted fill, kept subtle now the page background carries
+        // colour of its own — no bright coloured glow competing with it.
+        color: color.withValues(alpha: dark ? 0.12 : 0.06),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.40)),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: dark ? 0.22 : 0.14),
-            blurRadius: 14,
-            spreadRadius: -4,
-            offset: const Offset(0, 6),
+            color: Colors.black.withValues(alpha: dark ? 0.22 : 0.05),
+            blurRadius: 12,
+            spreadRadius: -6,
+            offset: const Offset(0, 5),
           ),
         ],
       ),
@@ -757,136 +766,101 @@ class _Section extends StatelessWidget {
   }
 }
 
-/// FE-11: the richer judges presentation — a labelled panel with an avatar +
-/// name per judge, the chair marked with a star badge (restored from the earlier
-/// design, which the user preferred over the understated pill strip).
-class _JudgesStrip extends StatelessWidget {
+/// The judges roster as a plain list of names inside the shared [_Section] card
+/// (so it matches the Format block's surface + typography — no coloured circles).
+/// Chair first; it's the one row that gets a distinct treatment.
+class _JudgesContent extends StatelessWidget {
   final List<JudgeEntry> judges;
-  const _JudgesStrip({required this.judges});
+  const _JudgesContent({required this.judges});
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.loc;
-    final dark = DebateTheme.isDark(context);
-    final wash = dark
-        ? Colors.white.withValues(alpha: 0.05)
-        : JadalColors.deepBlue.withValues(alpha: 0.05);
-    final muted = DebateTheme.textSecondary(context);
-
     // Chair first, then the rest in judge order.
     final ordered = [...judges]..sort((a, b) {
         if (a.isChair != b.isChair) return a.isChair ? -1 : 1;
         return (a.judgeOrder ?? 1 << 30).compareTo(b.judgeOrder ?? 1 << 30);
       });
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
-      decoration: BoxDecoration(
-        color: wash,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: muted.withValues(alpha: 0.12)),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(Icons.gavel_rounded, size: 15, color: muted),
-              const SizedBox(width: 6),
-              Text(
-                loc.judgesLabel,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 12.5,
-                  color: muted,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Wrap(
-            spacing: 16,
-            runSpacing: 12,
-            children: [
-              for (final j in ordered) _JudgeAvatar(judge: j),
-            ],
-          ),
-        ],
-      ),
+    return Column(
+      children: [
+        for (var i = 0; i < ordered.length; i++)
+          _JudgeRow(judge: ordered[i], isLast: i == ordered.length - 1),
+      ],
     );
   }
 }
 
-/// One judge: a coloured initial avatar (chair ringed + star-badged) above the
-/// name. Keeps the chair star marker the user liked.
-class _JudgeAvatar extends StatelessWidget {
+/// One judge name row. Non-chair rows are a calm neutral tile (matching the
+/// section surface); the chair is orange-tinted with a star + a "Chair" pill so
+/// it's the one element that stands out — no rainbow avatars.
+class _JudgeRow extends StatelessWidget {
   final JudgeEntry judge;
-  const _JudgeAvatar({required this.judge});
+  final bool isLast;
+  const _JudgeRow({required this.judge, required this.isLast});
 
   @override
   Widget build(BuildContext context) {
-    const d = 46.0;
+    final loc = context.loc;
+    final dark = DebateTheme.isDark(context);
+    final chair = judge.isChair;
     final name = judge.user.name.isNotEmpty ? judge.user.name : '—';
-    return SizedBox(
-      width: 74,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+
+    final tileColor = chair
+        ? JadalColors.primaryOrange.withValues(alpha: dark ? 0.16 : 0.10)
+        : (dark
+            ? Colors.white.withValues(alpha: 0.04)
+            : JadalColors.primaryBlue.withValues(alpha: 0.04));
+
+    return Container(
+      margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 11),
+      decoration: BoxDecoration(
+        color: tileColor,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: chair
+              ? JadalColors.primaryOrange.withValues(alpha: 0.45)
+              : DebateTheme.textSecondary(context).withValues(alpha: 0.10),
+        ),
+      ),
+      child: Row(
         children: [
-          Stack(
-            clipBehavior: Clip.none,
-            children: [
-              Container(
-                width: d,
-                height: d,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: avatarColorFor(judge.user.id.toString()),
-                  border: judge.isChair
-                      ? Border.all(color: JadalColors.primaryOrange, width: 2.2)
-                      : null,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  avatarInitial(name),
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: d * 0.4,
-                  ),
-                ),
-              ),
-              if (judge.isChair)
-                PositionedDirectional(
-                  bottom: -3,
-                  end: -3,
-                  child: Container(
-                    padding: const EdgeInsets.all(2),
-                    decoration: BoxDecoration(
-                      color: DebateTheme.surface(context),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(Icons.star_rounded,
-                        size: 16, color: JadalColors.primaryOrange),
-                  ),
-                ),
-            ],
+          Icon(
+            chair ? Icons.star_rounded : Icons.gavel_rounded,
+            size: 18,
+            color: chair ? JadalColors.primaryOrange : DebateTheme.textSecondary(context),
           ),
-          const SizedBox(height: 6),
-          Text(
-            name,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: judge.isChair ? FontWeight.w800 : FontWeight.w600,
-              fontSize: 11.5,
-              color: DebateTheme.textPrimary(context),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: chair ? FontWeight.w800 : FontWeight.w600,
+                fontSize: 14,
+                color: DebateTheme.textPrimary(context),
+              ),
             ),
           ),
+          if (chair)
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+              decoration: BoxDecoration(
+                color: JadalColors.primaryOrange,
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                loc.chairLabel,
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  color: Colors.white,
+                  fontWeight: FontWeight.w800,
+                  fontSize: 10.5,
+                ),
+              ),
+            ),
         ],
       ),
     );

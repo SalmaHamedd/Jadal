@@ -10,6 +10,7 @@ import '../cubits/debate_controller.dart';
 import '../utils/debate_access.dart';
 import '../utils/debate_theme.dart';
 import '../widgets/debate_room_shell.dart';
+import '../widgets/debate_screen_header.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/speaker_order_dialog.dart';
 
@@ -62,18 +63,18 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
 
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
-      appBar: AppBar(
-        backgroundColor: DebateTheme.sideColor(widget.side),
-        // Side colours (blue/opp orange) are too dark for navy text → force white.
-        foregroundColor: Colors.white,
-        iconTheme: const IconThemeData(color: Colors.white),
-        title: Text('${loc.prepRoomTitle} (${team.teamName})',
-            style: const TextStyle(
-                fontFamily: 'Cairo', fontWeight: FontWeight.w800, color: Colors.white)),
-      ),
       body: DebateRoomShell(
-        child: BlocBuilder<DebateController, DebateStates>(
-        builder: (context, state) {
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              DebateScreenHeader(
+                title: '${loc.prepRoomTitle} (${team.teamName})',
+                color: DebateTheme.sideColor(widget.side),
+              ),
+              Expanded(
+                child: BlocBuilder<DebateController, DebateStates>(
+                  builder: (context, state) {
           final present = cubit.presentIds;
           final leader = DebateAccess.currentLeader(team, present);
           final isLeader = leader?.id == cubit.data.currentUserId;
@@ -134,7 +135,11 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                 ),
             ],
           );
-        },
+                  },
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

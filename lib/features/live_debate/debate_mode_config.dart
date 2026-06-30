@@ -1,15 +1,9 @@
-/// Dev-only switch between the two live-debate modes (§12). There is **no**
-/// user-facing dialog — flip the flag here in code.
-///
-/// >>> To switch which live-debate you see, change [useBackend] below. <<<
-///   • false → mock/test peer-to-peer mode ([DebateCubit] + [MockLiveDebateData])
-///   • true  → real backend mode ([LiveDebateCubit] driven by REST + LiveKit)
+/// Live-debate runs against the real backend only — the old mock/test
+/// peer-to-peer mode (and its `useBackend` toggle) has been removed.
 class DebateModeConfig {
   DebateModeConfig._();
 
-  /// false = mock/test mode; true = real backend mode.
-  static const bool useBackend = true;
-
-  /// Used only when [useBackend] is true: which debate to load on entry.
+  /// Fallback debate id used only when a [DebateController] is created without an
+  /// explicit id (the normal list → detail → lobby flow always passes a real one).
   static const int devDebateId = 43;
 }

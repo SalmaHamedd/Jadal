@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../data/models/debate_models.dart';
 import '../cubits/connection_cubit.dart';
@@ -57,7 +58,12 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
-      body: SafeArea(
+      // A3: the debate layout has no text input of its own (chat is a dialog) —
+      // don't let a dialog's soft keyboard reflow/shrink the team cards underneath
+      // (that race on dialog-close threw a RenderFlex overflow on some phones).
+      resizeToAvoidBottomInset: false,
+      body: JadalGradientBackground(
+        child: SafeArea(
         child: MultiBlocListener(
           listeners: [
             BlocListener<DebateController, DebateStates>(
@@ -83,13 +89,18 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
             ),
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is POIAcceptedForLocalState,
-              listener: (context, _) => showDialog(
-                context: context,
-                builder: (_) => BlocProvider.value(
-                  value: context.read<DebateController>(),
-                  child: const PoiAskerMicDialog(),
-                ),
-              ),
+              listener: (context, _) {
+                // B2: the asker learns their POI was accepted — push a news line
+                // and open the mic dialog (their mic is already lock-exempt).
+                context.read<DebateController>().updateLatestNews(context.loc.poiAcceptedNews);
+                showDialog(
+                  context: context,
+                  builder: (_) => BlocProvider.value(
+                    value: context.read<DebateController>(),
+                    child: const PoiAskerMicDialog(),
+                  ),
+                );
+              },
             ),
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is DebateFinishedState,
@@ -165,6 +176,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
           ],
           child: _gatedBody(context),
         ),
+        ),
       ),
     );
   }
@@ -216,56 +228,90 @@ class _DebateView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<DebateController>();
-    return Column(
-      children: [
-        // (A) Top row: audience button | news ticker | motion button. The bottom
-        // gap matches the main↔speakers gap (16) so the news ticker's update glow
-        // never touches the main speaker card below it (§U / news spacing).
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 6, 12, 16),
-          child: Row(
-            children: [
-              AudienceButton(cubit: cubit),
-              const SizedBox(width: 8),
-              const Expanded(child: NewsTicker()),
-              const SizedBox(width: 8),
-              MotionButton(motion: cubit.data.motion),
-            ],
-          ),
-        ),
-        // (B) Main speaker card + timer. The extra gap + bottom breathing room
-        // below are taken from this card (lower flex), not the speaker cards (§U4b).
-        Expanded(
-          flex: 4,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: const MainSpeakerCard(),
-          ),
-        ),
-        // Gap between the main card and the speakers (≈2× the old spacing).
-        const SizedBox(height: 16),
-        // (C) Speakers section: 3 prop (left) / 3 opp (right).
-        Expanded(
-          flex: 6,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            child: const SpeakersSection(),
-          ),
-        ),
-        // Bottom breathing room so the third speaker cards aren't on the edge
-        // (≈half the main↔speakers gap).
-        const SizedBox(height: 8),
-        // (D) Auto-hiding bottom action row.
-        BlocBuilder<ConnectionCubit, ConnectionStates>(
-          builder: (context, _) {
-            final connection = context.read<ConnectionCubit>();
-            return GestureDetector(
-              onTap: connection.resetHideTimer,
-              child: DebateActionRow(visible: connection.showActions),
+    return BlocBuilder<ConnectionCubit, ConnectionStates>(
+      builder: (context, _) {
+        final connection = context.read<ConnectionCubit>();
+        final showActions = connection.showActions;
+        // A single animated driver: t = 1 → tool bar fully shown, 0 → hidden.
+        // The action row's height is `t·kHeight` and the cards' freed space is
+        // `(1-t)·kHeight`, so they sum to kHeight at every frame — the cards
+        // shrink *exactly* as fast as the bar grows into their place (no snap,
+        // no overflow).
+        return TweenAnimationBuilder<double>(
+          tween: Tween<double>(begin: 0, end: showActions ? 1.0 : 0.0),
+          duration: const Duration(milliseconds: 340),
+          curve: Curves.easeInOutCubic,
+          builder: (context, t, _) {
+            return Column(
+              children: [
+                // (A) Top row: audience button | news ticker | motion button.
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 6, 12, 16),
+                  child: Row(
+                    children: [
+                      AudienceButton(cubit: cubit),
+                      const SizedBox(width: 8),
+                      const Expanded(child: NewsTicker()),
+                      const SizedBox(width: 8),
+                      MotionButton(motion: cubit.data.motion),
+                    ],
+                  ),
+                ),
+                // (B)+(C) Main speaker card + speakers. The freed space is
+                // redistributed 75% to the main card / 25% to the team cards (A2)
+                // so the team cards barely shrink and never overflow.
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, c) {
+                      const gaps = 16.0 + 8.0;
+                      final freed = (1 - t) * DebateActionRow.kHeight;
+                      final base =
+                          (c.maxHeight - freed - gaps).clamp(0.0, double.infinity);
+                      final mainH = base * 0.40 + freed * 0.75;
+                      final speakersH = base * 0.60 + freed * 0.25;
+                      return Column(
+                        children: [
+                          SizedBox(
+                            height: mainH,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: MainSpeakerCard(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          SizedBox(
+                            height: speakersH,
+                            child: const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 12),
+                              child: SpeakersSection(),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+                      );
+                    },
+                  ),
+                ),
+                // (D) The bottom action row, revealed top-down in lockstep with t.
+                GestureDetector(
+                  onTap: connection.resetHideTimer,
+                  behavior: HitTestBehavior.opaque,
+                  child: ClipRect(
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      heightFactor: t.clamp(0.0, 1.0),
+                      child: Opacity(
+                        opacity: t.clamp(0.0, 1.0),
+                        child: const DebateActionRow(visible: true),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             );
           },
-        ),
-      ],
+        );
+      },
     );
   }
 }
@@ -319,8 +365,12 @@ class _LobbyModeView extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () => cubit.setLobbyMode(false),
-                icon: const Icon(Icons.arrow_back_rounded),
-                label: Text(loc.backToDebate),
+                // C3: pre-live this enters the intro (chair welcome); mid-debate
+                // it resumes the paused speaker.
+                icon: Icon(cubit.debateStarted
+                    ? Icons.arrow_back_rounded
+                    : Icons.play_arrow_rounded),
+                label: Text(cubit.debateStarted ? loc.backToDebate : loc.goLiveSession),
               ),
             ),
           ),

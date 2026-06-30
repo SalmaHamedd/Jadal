@@ -662,6 +662,24 @@ abstract class AppLocalizations {
   /// **'You\'ve joined the live session.'**
   String get youJoinedLiveSession;
 
+  /// No description provided for @goLiveSession.
+  ///
+  /// In en, this message translates to:
+  /// **'Go to live session'**
+  String get goLiveSession;
+
+  /// No description provided for @introductionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Introductions'**
+  String get introductionsLabel;
+
+  /// No description provided for @poiAcceptedNews.
+  ///
+  /// In en, this message translates to:
+  /// **'Your POI was accepted'**
+  String get poiAcceptedNews;
+
   /// No description provided for @audience.
   ///
   /// In en, this message translates to:

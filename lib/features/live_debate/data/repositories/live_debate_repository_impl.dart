@@ -211,6 +211,27 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
   }
 
   @override
+  Future<Either<Failure, Unit>> setTimer({
+    required int debateId,
+    required String action,
+  }) async {
+    final uri = Uri.parse(ApiConstants.timerUrl(debateId));
+    final body = jsonEncode({'action': action});
+    final res = await _safe('timer[$action]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
+    return _unit(res);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> startLive(int debateId) async {
+    final uri = Uri.parse(ApiConstants.startLiveUrl(debateId));
+    final res = await _safe('start-live', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
+    return _unit(res);
+  }
+
+  @override
   Future<Either<Failure, Unit>> sendPoi({
     required int debateId,
     required int phaseId,

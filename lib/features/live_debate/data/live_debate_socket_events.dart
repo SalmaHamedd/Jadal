@@ -23,7 +23,11 @@ enum LiveEventType {
   // Client-published peer flashes.
   poiRaised('poi_raised'),
   poiAnswered('poi_answered'),
-  // Chair-published timer (§7) + frontend team chat (peer-to-peer).
+  // V11 §0: server-authoritative timer broadcast (pause/resume/no-judge). This
+  // REPLACES the chair-peer `time_update` as the source of truth.
+  timerUpdate('timer_update'),
+  // Legacy chair-published timer (§7) — retired as the source of truth, kept so
+  // an in-flight message from an old client still decodes harmlessly.
   timeUpdate('time_update'),
   timeControl('time_control'),
   teamChat('team_chat'),
@@ -72,11 +76,22 @@ class LiveEvent {
   int? get stagePhaseId => (data['stage_phase_id'] as num?)?.toInt();
   int? get byUserId => (data['by_user_id'] as num?)?.toInt();
 
-  // time_update / time_control (chair-published)
+  // time_update / time_control (chair-published, legacy)
   int get elapsedSeconds => (data['elapsedSeconds'] as num?)?.toInt() ?? 0;
   bool get isPaused => data['isPaused'] == true;
   String? get timestamp => data['timestamp'] as String?;
   String? get action => data['action'] as String?;
+
+  // timer_update (server-authoritative, V11 §0)
+  String? get currentStageStartedAt => data['current_stage_started_at'] as String?;
+  String? get serverNow => data['server_now'] as String?;
+  bool get timerIsPaused => data['timer_is_paused'] == true;
+  int get timerPausedElapsedSeconds =>
+      (data['timer_paused_elapsed_seconds'] as num?)?.toInt() ?? 0;
+  String? get pauseReason => data['reason'] as String?;
+
+  // poi_answered: whether the POI was accepted (asker may speak) or refused.
+  bool get poiAccepted => data['accepted'] == true;
 
   // lobby_overlay
   bool get lobbyOverlayEnabled => data['enabled'] == true;
@@ -113,11 +128,19 @@ abstract class LiveDebateSocket {
         'by_user_id': byUserId,
       });
 
-  static List<int> poiAnswered({int? stagePhaseId, required int byUserId}) =>
+  /// [accepted] = the speaker accepted the asker (they may speak) vs refused.
+  /// Carries the ASKER's id in `by_user_id` so every device clears that asker's
+  /// badge and the asker learns the outcome (B1/B2).
+  static List<int> poiAnswered({
+    int? stagePhaseId,
+    required int byUserId,
+    bool accepted = false,
+  }) =>
       _encode({
         'event': LiveEventType.poiAnswered.wire,
         'stage_phase_id': stagePhaseId,
         'by_user_id': byUserId,
+        'accepted': accepted,
       });
 
   static List<int> timeUpdate({

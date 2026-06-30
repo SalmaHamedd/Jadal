@@ -32,6 +32,9 @@ class ApiConstants {
   static String teamSpeakersUrl(int id) => '$baseUrl/debates/$id/team-speakers';
   static String nextStageUrl(int id) => '$baseUrl/debates/$id/next-stage';
   static String rollbackToLobbyUrl(int id) => '$baseUrl/debates/$id/rollback-to-lobby';
+  // V11: server-authoritative timer (pause/resume) + intro phase (start-live).
+  static String timerUrl(int id) => '$baseUrl/debates/$id/timer';
+  static String startLiveUrl(int id) => '$baseUrl/debates/$id/start-live';
   static String poiUrl(int id, int phaseId) => '$baseUrl/debates/$id/stages/$phaseId/poi';
   static String resultUrl(int id) => '$baseUrl/debates/$id/result';
   static String revealResultUrl(int id) => '$baseUrl/debates/$id/result/reveal';
@@ -41,4 +44,13 @@ class ApiConstants {
 
   /// Self-registration for a debate (as = debater | judge | team).
   static String registerUrl(int id) => '$baseUrl/debates/$id/register';
+
+  // ── Debater statistics (read-only, §"Debater Statistics API") ────────────────
+  // {debater} is the debater's user id. Auth: bearer + check.status.
+  static String _statsBase(int debaterId) => '$baseUrl/debaters/$debaterId/stats';
+  static String winRateUrl(int debaterId) => '${_statsBase(debaterId)}/win-rate';
+  static String avgScoreUrl(int debaterId) => '${_statsBase(debaterId)}/avg-score';
+  static String bestSpeakerUrl(int debaterId) => '${_statsBase(debaterId)}/best-speaker';
+  static String scoreRankingUrl(int debaterId) => '${_statsBase(debaterId)}/score-ranking';
+  static String improvementUrl(int debaterId) => '${_statsBase(debaterId)}/improvement';
 }

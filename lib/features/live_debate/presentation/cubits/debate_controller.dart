@@ -196,6 +196,25 @@ abstract class DebateController extends Cubit<DebateStates> {
   Set<String> get presentIds;
 
   void setLobbyMode(bool enabled);
+
+  // ── Intro phase + chair timer control (V11) ─────────────────────────────────
+  /// The live session has started but no speech yet (chair welcome). Test mode:
+  /// always false (the mock goes straight to a speech).
+  bool get isIntro => false;
+
+  /// During the intro, the user id / name shown in the main speaker card (the
+  /// chair). Null/empty outside the intro or in test mode.
+  String? get introHostId => null;
+  String get introHostName => '';
+
+  /// Chair: enter the live session from the lobby (intro). Test mode: no-op
+  /// (toggling goes straight to the first speech as before).
+  Future<void> startLive() async {}
+
+  /// Chair: pause/resume the server-authoritative timer (the stop/resume button).
+  /// Test mode: toggles the local clock.
+  void toggleTimerPause() {}
+
   void muteAll();
   void forceMute(String targetSid);
   void forceCameraOff(String targetSid);

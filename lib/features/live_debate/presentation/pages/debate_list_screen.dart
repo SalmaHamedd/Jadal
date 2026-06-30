@@ -3,11 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/jadal_blob_background.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_list_model.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_status.dart';
+import '../../../statistics/presentation/pages/debater_stats_screen.dart';
 import '../cubits/debate_list_cubit.dart';
 import '../utils/debate_date.dart';
 import '../utils/debate_theme.dart';
@@ -37,7 +38,7 @@ class DebateListScreen extends StatelessWidget {
 
     return DefaultTabController(
       length: tabs.length,
-      child: JadalBlobBackground(
+      child: JadalGradientBackground(
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
@@ -46,6 +47,17 @@ class DebateListScreen extends StatelessWidget {
             scrolledUnderElevation: 0,
             title: Text(loc.debatesTitle,
                 style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+            actions: [
+              // TEMP entry to the statistics feature (until it gets a proper home
+              // in the app's navigation) — opens the signed-in user's own stats.
+              IconButton(
+                tooltip: 'Statistics',
+                icon: const Icon(Icons.insights_rounded),
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const DebaterStatsScreen()),
+                ),
+              ),
+            ],
             bottom: TabBar(
               isScrollable: true,
               // Removes the empty gap the scrollable TabBar leaves at the start/end.

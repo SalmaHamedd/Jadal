@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../../../di/injection_container.dart' as di;
@@ -12,6 +13,7 @@ import '../cubits/connection_cubit.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_access.dart';
 import '../utils/debate_theme.dart';
+import '../widgets/debate_screen_header.dart';
 import 'debate_room_screen.dart';
 import 'prep_room_screen.dart';
 import 'result_room_screen.dart';
@@ -49,40 +51,47 @@ class _LobbyView extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: DebateTheme.background(context),
-      appBar: AppBar(
-        title: Text(loc.lobbyTitle,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-      ),
-      body: BlocBuilder<DebateController, DebateStates>(
-        builder: (context, state) {
-          // Backend mode shows a loader until live-state arrives; test mode is
-          // always ready.
-          if (!cubit.isReady) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          final data = cubit.data;
-          // After the chair closes the room with an unshared result, only the
-          // chair sees a "share result" action here → flips the debate to done (§U4b).
-          final showShare = cubit.canManageResult &&
-              cubit.isRoomClosed &&
-              cubit.resultView != null &&
-              !cubit.resultShared;
-          return ListView(
-            padding: const EdgeInsets.all(16),
+      body: JadalGradientBackground(
+        child: SafeArea(
+          child: Column(
             children: [
-              if (showShare)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _ShareResultBanner(cubit: cubit),
+              DebateScreenHeader(title: loc.lobbyTitle),
+              Expanded(
+                child: BlocBuilder<DebateController, DebateStates>(
+                  builder: (context, state) {
+                    // Backend mode shows a loader until live-state arrives.
+                    if (!cubit.isReady) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final data = cubit.data;
+                    // After the chair closes the room with an unshared result,
+                    // only the chair sees a "share result" action here → flips the
+                    // debate to done (§U4b).
+                    final showShare = cubit.canManageResult &&
+                        cubit.isRoomClosed &&
+                        cubit.resultView != null &&
+                        !cubit.resultShared;
+                    return ListView(
+                      padding: const EdgeInsets.all(16),
+                      children: [
+                        if (showShare)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: _ShareResultBanner(cubit: cubit),
+                          ),
+                        for (final room in data.rooms)
+                          Padding(
+                            padding: const EdgeInsets.only(bottom: 14),
+                            child: _RoomCard(room: room),
+                          ),
+                      ],
+                    );
+                  },
                 ),
-              for (final room in data.rooms)
-                Padding(
-                  padding: const EdgeInsets.only(bottom: 14),
-                  child: _RoomCard(room: room),
-                ),
+              ),
             ],
-          );
-        },
+          ),
+        ),
       ),
     );
   }

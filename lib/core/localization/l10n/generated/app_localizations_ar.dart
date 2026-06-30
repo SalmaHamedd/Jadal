@@ -299,6 +299,15 @@ class AppLocalizationsAr extends AppLocalizations {
   String get youJoinedLiveSession => 'لقد انضممت إلى الجلسة المباشرة.';
 
   @override
+  String get goLiveSession => 'بدء الجلسة المباشرة';
+
+  @override
+  String get introductionsLabel => 'التقديم';
+
+  @override
+  String get poiAcceptedNews => 'تم قبول مداخلتك';
+
+  @override
   String get audience => 'الجمهور';
 
   @override

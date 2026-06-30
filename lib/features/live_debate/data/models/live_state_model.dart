@@ -102,6 +102,17 @@ class DebateInfo {
   /// debate is STILL `live`. Gate the result UI on this (or `rooms.result.open`),
   /// NEVER on `status == completed`.
   final DateTime? speechesCompletedAt;
+
+  /// V11 §1: set when the chair enters the live session from the lobby (intro
+  /// phase) while `current_stage` stays 0. Distinguishes intro from open lobby.
+  final DateTime? liveStartedAt;
+
+  // V11 §0: server-authoritative timer. `serverNow` is the server clock at
+  // response time → the client measures its offset once and computes elapsed
+  // without any peer dependency. Paused state + the frozen elapsed are persisted.
+  final DateTime? serverNow;
+  final bool timerIsPaused;
+  final int timerPausedElapsedSeconds;
   final String? cancellationReason;
   final DateTime? scheduledAt;
   final DateTime? startedAt;
@@ -119,6 +130,10 @@ class DebateInfo {
     required this.currentStage,
     required this.currentStageStartedAt,
     required this.speechesCompletedAt,
+    required this.liveStartedAt,
+    required this.serverNow,
+    required this.timerIsPaused,
+    required this.timerPausedElapsedSeconds,
     required this.cancellationReason,
     required this.scheduledAt,
     required this.startedAt,
@@ -137,6 +152,10 @@ class DebateInfo {
         currentStage: asInt(j['current_stage']) ?? 0,
         currentStageStartedAt: asDate(j['current_stage_started_at']),
         speechesCompletedAt: asDate(j['speeches_completed_at']),
+        liveStartedAt: asDate(j['live_started_at']),
+        serverNow: asDate(j['server_now']),
+        timerIsPaused: asBool(j['timer_is_paused']),
+        timerPausedElapsedSeconds: asInt(j['timer_paused_elapsed_seconds']) ?? 0,
         cancellationReason: asString(j['cancellation_reason']),
         scheduledAt: asDate(j['scheduled_at']),
         startedAt: asDate(j['started_at']),
@@ -152,6 +171,11 @@ class DebateInfo {
 
   /// FE-3: speeches are done (result phase open) while still `live`.
   bool get speechesCompleted => speechesCompletedAt != null;
+
+  /// V11 §1: the "intro" phase — live session entered (chair welcome) but no
+  /// speech has started yet (`current_stage == 0` + `live_started_at` set).
+  bool get isIntroPhase =>
+      currentStage == 0 && liveStartedAt != null && !isCompleted && !isCancelled;
 }
 
 /// `live-state.rooms` — the four rooms with pre-join gating.

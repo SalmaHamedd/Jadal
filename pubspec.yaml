@@ -37,6 +37,9 @@ dependencies:
   fl_chart: ^0.69.0
   # Lightweight audio playback for the debate protected-period bell (§8.3).
   audioplayers: ^6.1.0
+  # Export the debater-statistics analysis as a styled .xlsx sheet + share it.
+  excel: ^4.0.6
+  share_plus: ^10.1.4
 
 dev_dependencies:
   flutter_test:

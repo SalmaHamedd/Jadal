@@ -299,6 +299,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get youJoinedLiveSession => 'You\'ve joined the live session.';
 
   @override
+  String get goLiveSession => 'Go to live session';
+
+  @override
+  String get introductionsLabel => 'Introductions';
+
+  @override
+  String get poiAcceptedNews => 'Your POI was accepted';
+
+  @override
   String get audience => 'Audience';
 
   @override

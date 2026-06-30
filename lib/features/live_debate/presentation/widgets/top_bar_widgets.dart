@@ -5,7 +5,6 @@ import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/framework_chips.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/avatar_palette.dart';
@@ -115,8 +114,10 @@ class _AudienceDialogState extends State<AudienceDialog> {
         cubit.data.oppositionTeam.debaterById(me) != null;
     final seen = <String>{};
     final out = <_Viewer>[];
-    // Judges always appear (incl. me when I'm the judge/chair).
+    // A4: only the judges ACTUALLY in the room (real presence), not the whole
+    // judge roster pinned. Mock reports everyone present → the demo is unchanged.
     for (final j in cubit.data.judges) {
+      if (!cubit.isUserPresent(j.id)) continue;
       if (seen.add(j.id)) {
         out.add(_Viewer(id: j.id, name: j.name, role: loc.judgeRole, isMe: j.id == me));
       }
@@ -198,15 +199,24 @@ class _AudienceDialogState extends State<AudienceDialog> {
                           ),
                           child: Row(
                             children: [
-                              CircleAvatar(
-                                radius: 18,
-                                backgroundColor: avatarColorFor(m.id),
+                              // Neutral initial avatar (no rainbow colours) — a
+                              // soft brand-blue chip keeps the list calm.
+                              Container(
+                                width: 38,
+                                height: 38,
+                                alignment: Alignment.center,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: JadalColors.primaryBlue.withValues(
+                                    alpha: DebateTheme.isDark(context) ? 0.18 : 0.10,
+                                  ),
+                                ),
                                 child: Text(
                                   avatarInitial(m.name),
                                   style: const TextStyle(
-                                    color: Colors.white,
+                                    color: JadalColors.primaryBlue,
                                     fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w700,
+                                    fontWeight: FontWeight.w800,
                                   ),
                                 ),
                               ),
@@ -253,7 +263,9 @@ class _AudienceDialogState extends State<AudienceDialog> {
   }
 }
 
-/// Small dialog: motion title + the categories it belongs to + tags (if any).
+/// The motion, presented as a centred "quote": a big quote glyph over the motion
+/// text, with its frameworks/tags shown only as calm neutral pills underneath
+/// (their brand colours are intentionally dropped — design over branding).
 class MotionDialog extends StatelessWidget {
   final Motion motion;
   const MotionDialog({super.key, required this.motion});
@@ -262,56 +274,60 @@ class MotionDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = context.loc;
     final size = MediaQuery.of(context).size;
+    final hasMeta = motion.frameworks.isNotEmpty || motion.tags.isNotEmpty;
+
     return JadalDialog(
       width: size.width * 0.86,
-      height: size.height * 0.42,
+      height: size.height * 0.46,
       firstColor: JadalColors.primaryBlue,
       secondColor: JadalColors.primaryOrange,
       bodyColor: DebateTheme.surface(context),
       icon: Icons.campaign_rounded,
       title: loc.motion,
       body: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.fromLTRB(22, 14, 22, 18),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            if (motion.frameworks.isNotEmpty) ...[
-              _LabeledChips(
-                label: loc.categories,
-                child: FrameworkChips(frameworks: motion.frameworks),
-              ),
-              const SizedBox(height: 10),
-            ],
-            if (motion.tags.isNotEmpty) ...[
-              _LabeledChips(
-                label: loc.tags,
-                child: TagChips(tags: motion.tags),
-              ),
-              const SizedBox(height: 12),
-            ],
             Expanded(
-              child: Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: DebateTheme.surfaceElevated(context),
-                  borderRadius: BorderRadius.circular(widgetBorderRadius),
-                ),
+              child: Center(
                 child: SingleChildScrollView(
-                  child: Text(
-                    motion.text,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      fontSize: 15,
-                      height: 1.4,
-                      color: DebateTheme.textPrimary(context),
-                    ),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.format_quote_rounded,
+                        size: 46,
+                        color: JadalColors.primaryOrange.withValues(alpha: 0.45),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        motion.text,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w800,
+                          fontSize: 19,
+                          height: 1.5,
+                          color: DebateTheme.textPrimary(context),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
             ),
+            if (hasMeta) ...[
+              const SizedBox(height: 14),
+              Wrap(
+                spacing: 8,
+                runSpacing: 8,
+                alignment: WrapAlignment.center,
+                children: [
+                  for (final f in motion.frameworks) _MetaPill(label: f.name, filled: true),
+                  for (final t in motion.tags) _MetaPill(label: t, filled: false),
+                ],
+              ),
+            ],
           ],
         ),
       ),
@@ -319,32 +335,35 @@ class MotionDialog extends StatelessWidget {
   }
 }
 
-/// A label followed by a wrap of chips (frameworks or tags).
-class _LabeledChips extends StatelessWidget {
+/// A small, neutral pill for a framework (soft fill) or tag (outline) — no brand
+/// colour, so the motion stays the focus.
+class _MetaPill extends StatelessWidget {
   final String label;
-  final Widget child;
-  const _LabeledChips({required this.label, required this.child});
+  final bool filled;
+  const _MetaPill({required this.label, required this.filled});
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.only(top: 4),
-          child: Text(
-            '$label:',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w800,
-              color: DebateTheme.textSecondary(context),
-              fontSize: 12,
-            ),
-          ),
+    final dark = DebateTheme.isDark(context);
+    final muted = DebateTheme.textSecondary(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: filled
+            ? (dark ? Colors.white.withValues(alpha: 0.07) : muted.withValues(alpha: 0.08))
+            : Colors.transparent,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: muted.withValues(alpha: filled ? 0.0 : 0.30)),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Cairo',
+          fontSize: 11.5,
+          fontWeight: FontWeight.w700,
+          color: muted,
         ),
-        const SizedBox(width: 8),
-        Expanded(child: child),
-      ],
+      ),
     );
   }
 }
