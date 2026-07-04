@@ -13,7 +13,7 @@ class CreateBlogCubit extends Cubit<CreateBlogState> {
     required String content,
     String? coverImageUrl,
     List<int>? categoryIds,
-    List<int>? tagIds,
+    List<int>? tagIds, String? coverImage,
   }) async {
     emit(CreateBlogLoading());
     final result = await _repository.createBlog(

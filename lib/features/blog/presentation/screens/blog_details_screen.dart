@@ -40,7 +40,9 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   Future<void> _loadSavedReaction() async {
     final userId = await _prefs.getValue<int>('user_id');
     if (userId != null) {
-      final reaction = await _prefs.getValue<String>('reaction_${userId}_${widget.slug}');
+      final reaction = await _prefs.getValue<String>(
+        'reaction_${userId}_${widget.slug}',
+      );
       if (mounted) setState(() => _optimisticReaction = reaction);
     }
   }
@@ -70,8 +72,10 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
 
     if (currentReaction == type) {
       newReaction = null;
-      if (type == 'like') newLikes = currentLikes - 1;
-      else newDislikes = currentDislikes - 1;
+      if (type == 'like')
+        newLikes = currentLikes - 1;
+      else
+        newDislikes = currentDislikes - 1;
     } else {
       newReaction = type;
       if (type == 'like') {
@@ -131,7 +135,11 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
         setState(() => _isDeleting = false);
       },
       (_) {
-        JadalSnackBar.show(context, 'تم حذف المقال بنجاح', type: SnackBarType.success);
+        JadalSnackBar.show(
+          context,
+          'تم حذف المقال بنجاح',
+          type: SnackBarType.success,
+        );
         Navigator.pop(context, true);
       },
     );
@@ -145,14 +153,17 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     return MultiBlocProvider(
       providers: [
         BlocProvider<BlogDetailsCubit>(
-          create: (_) => BlogDetailsCubit(repository)..loadBlogDetails(widget.slug),
+          create: (_) =>
+              BlogDetailsCubit(repository)..loadBlogDetails(widget.slug),
         ),
         BlocProvider<BlogReactionCubit>(
           create: (_) => BlogReactionCubit(repository),
         ),
       ],
       child: Scaffold(
-        backgroundColor: isDark ? JadalColors.darkBackground : JadalColors.lightBackground,
+        backgroundColor: isDark
+            ? JadalColors.darkBackground
+            : JadalColors.lightBackground,
         appBar: AppBar(
           title: const Text('تفاصيل المقال'),
           foregroundColor: Colors.white,
@@ -206,7 +217,10 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                   child: Column(
                     children: [
                       if (blog.coverImageUrl != null)
-                        BlogCoverImage(imageUrl: blog.coverImageUrl!, isDark: isDark),
+                        BlogCoverImage(
+                          imageUrl: blog.coverImageUrl!,
+                          isDark: isDark,
+                        ),
                       Padding(
                         padding: EdgeInsets.all(context.wp(5)),
                         child: Column(
@@ -216,9 +230,15 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                               blog.title,
                               style: TextStyle(
                                 fontFamily: 'Cairo',
-                                fontSize: context.fontSize(24, min: 20, max: 28),
+                                fontSize: context.fontSize(
+                                  24,
+                                  min: 20,
+                                  max: 28,
+                                ),
                                 fontWeight: FontWeight.bold,
-                                color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                                color: isDark
+                                    ? JadalColors.darkTextPrimary
+                                    : JadalColors.lightTextPrimary,
                               ),
                             ),
                             const SizedBox(height: 12),
@@ -228,7 +248,11 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                               isDark: isDark,
                             ),
                             const SizedBox(height: 16),
-                            Divider(color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey[300]),
+                            Divider(
+                              color: isDark
+                                  ? JadalColors.darkSurfaceElevated
+                                  : Colors.grey[300],
+                            ),
                             const SizedBox(height: 16),
                             Text(
                               blog.content,
@@ -236,7 +260,9 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                                 fontFamily: 'Cairo',
                                 fontSize: context.fontSize(16),
                                 height: 1.8,
-                                color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+                                color: isDark
+                                    ? JadalColors.darkTextSecondary
+                                    : JadalColors.lightTextSecondary,
                               ),
                             ),
                             const SizedBox(height: 24),
@@ -245,8 +271,10 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                               likes: _optimisticLikes,
                               dislikes: _optimisticDislikes,
                               currentReaction: _optimisticReaction,
-                              onLikePressed: () => _handleReaction(context, 'like'),
-                              onDislikePressed: () => _handleReaction(context, 'dislike'),
+                              onLikePressed: () =>
+                                  _handleReaction(context, 'like'),
+                              onDislikePressed: () =>
+                                  _handleReaction(context, 'dislike'),
                               isReacting: _isReacting,
                               isDark: isDark,
                             ),
@@ -263,7 +291,11 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
+                    Icon(
+                      Icons.error_outline,
+                      size: 60,
+                      color: JadalColors.judgesGrey,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'حدث خطأ: ${detailsState.message}',
@@ -272,12 +304,19 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                     ),
                     const SizedBox(height: 24),
                     ElevatedButton(
-                      onPressed: () => context.read<BlogDetailsCubit>().loadBlogDetails(widget.slug),
+                      onPressed: () => context
+                          .read<BlogDetailsCubit>()
+                          .loadBlogDetails(widget.slug),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: JadalColors.primaryOrange,
                         foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 24,
+                          vertical: 12,
+                        ),
                       ),
                       child: const Text('إعادة المحاولة'),
                     ),

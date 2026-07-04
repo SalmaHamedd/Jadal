@@ -71,7 +71,8 @@ class HomeBlogSection extends StatelessWidget {
                       await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BlogDetailsScreen(slug: blog.slug),
+                          builder: (context) =>
+                              BlogDetailsScreen(slug: blog.slug),
                         ),
                       );
                       if (context.mounted) {

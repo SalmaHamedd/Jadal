@@ -9,6 +9,7 @@ import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.d
 import 'package:jadal_app/features/blog/domain/entities/category.dart';
 import 'package:jadal_app/features/blog/domain/entities/tag.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/create_blog_cubit.dart';
+import 'package:jadal_app/features/blog/presentation/widgets/multi_select_field.dart';
 
 class CreateBlogScreen extends StatefulWidget {
   const CreateBlogScreen({super.key});
@@ -26,14 +27,14 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   List<Tag> _selectedTags = [];
 
   late CreateBlogCubit _cubit;
-  late final Future<Map<String, List<dynamic>>> _metaFuture; 
+  late final Future<Map<String, List<dynamic>>> _metaFuture;
 
   @override
   void initState() {
     super.initState();
     final repository = BlogRepositoryImpl();
     _cubit = CreateBlogCubit(repository);
-    _metaFuture = _fetchMeta(); 
+    _metaFuture = _fetchMeta();
   }
 
   @override
@@ -54,10 +55,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       (failure) => <Category>[],
       (data) => data,
     );
-    final tags = tagsResult.fold(
-      (failure) => <Tag>[],
-      (data) => data,
-    );
+    final tags = tagsResult.fold((failure) => <Tag>[], (data) => data);
     return {'categories': categories, 'tags': tags};
   }
 
@@ -134,15 +132,23 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
         bloc: _cubit,
         listener: (context, state) {
           if (state is CreateBlogSuccess) {
-            JadalSnackBar.show(context, state.message, type: SnackBarType.success);
+            JadalSnackBar.show(
+              context,
+              state.message,
+              type: SnackBarType.success,
+            );
             Navigator.pop(context, true);
           } else if (state is CreateBlogError) {
-            JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+            JadalSnackBar.show(
+              context,
+              state.message,
+              type: SnackBarType.error,
+            );
           }
         },
         builder: (context, state) {
           return FutureBuilder<Map<String, List<dynamic>>>(
-            future: _metaFuture, 
+            future: _metaFuture,
             builder: (context, snapshot) {
               if (snapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -171,7 +177,8 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 );
               }
 
-              final categories = snapshot.data?['categories'] as List<Category>? ?? [];
+              final categories =
+                  snapshot.data?['categories'] as List<Category>? ?? [];
               final tags = snapshot.data?['tags'] as List<Tag>? ?? [];
 
               return SingleChildScrollView(
@@ -181,7 +188,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   children: [
                     const Text(
                       'أضف مقالك الجديد',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     const Text(
@@ -199,7 +209,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
 
                     Container(
                       decoration: BoxDecoration(
-                        color: isDark ? JadalColors.darkSurfaceElevated : const Color(0xFFF1F4F9),
+                        color: isDark
+                            ? JadalColors.darkSurfaceElevated
+                            : const Color(0xFFF1F4F9),
                         borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
                       ),
                       child: TextFormField(
@@ -215,13 +227,21 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                           hintText: 'المحتوى *',
                           hintStyle: TextStyle(
                             fontFamily: 'Cairo',
-                            color: isDark ? JadalColors.darkTextSecondary : Colors.grey[500],
-                            fontSize: context.fontSize(12.5, min: 11.5, max: 15),
+                            color: isDark
+                                ? JadalColors.darkTextSecondary
+                                : Colors.grey[500],
+                            fontSize: context.fontSize(
+                              12.5,
+                              min: 11.5,
+                              max: 15,
+                            ),
                           ),
                         ),
                         style: TextStyle(
                           fontFamily: 'Cairo',
-                          color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                           fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                         ),
                       ),
@@ -235,12 +255,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    _buildSelectionField(
-                      context: context,
-                      isDark: isDark,
-                      isMobile: isMobile,
+                    MultiSelectField<Category>(
                       label: 'التصنيفات (اختياري)',
-                      selectedNames: _selectedCategories.map((c) => c.name).toList(),
+                      selectedItems: _selectedCategories,
+                      displayName: (c) => c.name,
                       onTap: () {
                         _showMultiSelectDialog(
                           items: categories,
@@ -292,13 +310,16 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                           return;
                         }
 
-                        final categoryIds = _selectedCategories.map((c) => c.id).toList();
+                        final categoryIds = _selectedCategories
+                            .map((c) => c.id)
+                            .toList();
                         final tagIds = _selectedTags.map((t) => t.id).toList();
 
                         _cubit.createBlog(
                           title: title,
                           content: content,
-                          coverImageUrl: _coverImageController.text.trim().isEmpty
+                          coverImageUrl:
+                              _coverImageController.text.trim().isEmpty
                               ? null
                               : _coverImageController.text.trim(),
                           categoryIds: categoryIds,
@@ -329,7 +350,9 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
         decoration: BoxDecoration(
-          color: isDark ? JadalColors.darkSurfaceElevated : const Color(0xFFF1F4F9),
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : const Color(0xFFF1F4F9),
           borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
           border: Border.all(
             color: isDark ? const Color(0xFF2A3A55) : const Color(0xFFD8DEE7),
@@ -344,13 +367,15 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: Text(
-                selectedNames.isEmpty
-                    ? label
-                    : selectedNames.join('، '),
+                selectedNames.isEmpty ? label : selectedNames.join('، '),
                 style: TextStyle(
                   color: selectedNames.isEmpty
-                      ? (isDark ? JadalColors.darkTextSecondary : Colors.grey[600])
-                      : (isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary),
+                      ? (isDark
+                            ? JadalColors.darkTextSecondary
+                            : Colors.grey[600])
+                      : (isDark
+                            ? JadalColors.darkTextPrimary
+                            : JadalColors.lightTextPrimary),
                   fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                 ),
               ),

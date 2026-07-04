@@ -24,7 +24,10 @@ class BlogListSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.wp(4), vertical: context.hp(1)),
+                padding: EdgeInsets.symmetric(
+                  horizontal: context.wp(4),
+                  vertical: context.hp(1),
+                ),
                 child: Text(
                   'جميع المقالات',
                   style: TextStyle(
@@ -47,7 +50,8 @@ class BlogListSection extends StatelessWidget {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BlogDetailsScreen(slug: blog.slug),
+                            builder: (context) =>
+                                BlogDetailsScreen(slug: blog.slug),
                           ),
                         );
                         if (context.mounted) {

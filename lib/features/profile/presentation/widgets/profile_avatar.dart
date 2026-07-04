@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 
 class ProfileAvatar extends StatelessWidget {
   final String name;
@@ -15,20 +16,19 @@ class ProfileAvatar extends StatelessWidget {
     if (avatarUrl != null && avatarUrl!.isNotEmpty) {
       return CircleAvatar(
         radius: context.wp(15),
-        backgroundImage: NetworkImage(avatarUrl!),
+        backgroundImage: CachedNetworkImageProvider(avatarUrl!),
         backgroundColor: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
         child: null,
       );
     }
 
-
     return CircleAvatar(
       radius: context.wp(15),
-      backgroundColor: isDark ? AppColors.lighterDarkColor : AppColors.light,
+      backgroundColor: isDark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface,
       child: Icon(
         Icons.person,
         size: context.wp(18),
-        color: isDark ? AppColors.medium : AppColors.medium,
+        color: isDark ? JadalColors.darkTextSecondary : JadalColors.judgesGrey,
       ),
     );
   }

@@ -7,7 +7,11 @@ class BlogCoverImage extends StatelessWidget {
   final String imageUrl;
   final bool isDark;
 
-  const BlogCoverImage({super.key, required this.imageUrl, required this.isDark});
+  const BlogCoverImage({
+    super.key,
+    required this.imageUrl,
+    required this.isDark,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +42,10 @@ class BlogCoverImage extends StatelessWidget {
               gradient: LinearGradient(
                 begin: Alignment.bottomCenter,
                 end: Alignment.topCenter,
-                colors: [Colors.black.withValues(alpha: 0.6), Colors.transparent],
+                colors: [
+                  Colors.black.withValues(alpha: 0.6),
+                  Colors.transparent,
+                ],
               ),
             ),
             height: context.hp(6),

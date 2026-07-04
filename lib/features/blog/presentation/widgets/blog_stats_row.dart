@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/features/blog/presentation/widgets/reaction_button.dart';
 
 class BlogStatsRow extends StatelessWidget {
   final int views;
   final int likes;
   final int dislikes;
-  final String? currentReaction; 
+  final String? currentReaction;
   final VoidCallback onLikePressed;
   final VoidCallback onDislikePressed;
   final bool isReacting;
@@ -27,7 +28,10 @@ class BlogStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: context.hp(1), horizontal: context.wp(3)),
+      padding: EdgeInsets.symmetric(
+        vertical: context.hp(1),
+        horizontal: context.wp(3),
+      ),
       decoration: BoxDecoration(
         color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
@@ -50,46 +54,20 @@ class BlogStatsRow extends StatelessWidget {
             ],
           ),
 
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.thumb_up, size: 20),
-                color: currentReaction == 'like' ? JadalColors.primaryOrange : JadalColors.judgesGrey,
-                onPressed: isReacting ? null : onLikePressed,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '$likes',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: currentReaction == 'like' ? JadalColors.primaryOrange : JadalColors.judgesGrey,
-                ),
-              ),
-            ],
+          ReactionButton(
+            icon: Icons.thumb_up,
+            count: likes,
+            isActive: currentReaction == 'like',
+            onPressed: onLikePressed,
+            isLoading: isReacting,
           ),
 
-          Row(
-            children: [
-              IconButton(
-                icon: Icon(Icons.thumb_down, size: 20),
-                color: currentReaction == 'dislike' ? JadalColors.primaryOrange : JadalColors.judgesGrey,
-                onPressed: isReacting ? null : onDislikePressed,
-                padding: EdgeInsets.zero,
-                constraints: const BoxConstraints(),
-              ),
-              const SizedBox(width: 4),
-              Text(
-                '$dislikes',
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: currentReaction == 'dislike' ? JadalColors.primaryOrange : JadalColors.judgesGrey,
-                ),
-              ),
-            ],
+          ReactionButton(
+            icon: Icons.thumb_down,
+            count: dislikes,
+            isActive: currentReaction == 'dislike',
+            onPressed: onDislikePressed,
+            isLoading: isReacting,
           ),
         ],
       ),

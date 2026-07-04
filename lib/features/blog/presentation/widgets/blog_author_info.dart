@@ -22,7 +22,9 @@ class BlogAuthorInfo extends StatelessWidget {
         CircleAvatar(
           radius: context.wp(3.5),
           backgroundColor: JadalColors.primaryBlue,
-          backgroundImage: author.avatarUrl != null ? NetworkImage(author.avatarUrl!) : null,
+          backgroundImage: author.avatarUrl != null
+              ? NetworkImage(author.avatarUrl!)
+              : null,
           child: author.avatarUrl == null
               ? Icon(Icons.person, size: context.wp(4), color: Colors.white)
               : null,
@@ -38,7 +40,9 @@ class BlogAuthorInfo extends StatelessWidget {
                   fontFamily: 'Cairo',
                   fontSize: context.fontSize(14),
                   fontWeight: FontWeight.w600,
-                  color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                  color: isDark
+                      ? JadalColors.darkTextPrimary
+                      : JadalColors.lightTextPrimary,
                 ),
               ),
               Text(

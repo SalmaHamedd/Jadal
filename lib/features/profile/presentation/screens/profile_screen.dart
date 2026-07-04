@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -83,106 +84,111 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return const Center(child: CircularProgressIndicator());
           } else if (state is ProfileLoaded) {
             final profile = state.profile;
-            return SingleChildScrollView(
-              child: Padding(
-                padding: EdgeInsets.all(context.wp(5)),
-                child: Column(
-                  children: [
-                    ProfileAvatar(
-                      name: profile.name,
-                      avatarUrl: profile.avatarUrl,
-                    ),
-                    SizedBox(height: context.hp(1)),
-                    Text(
-                      profile.name,
-                      style: TextStyle(
-                        fontSize: context.fontSize(24),
-                        fontWeight: FontWeight.bold,
+            return RefreshIndicator(
+              onRefresh: () => _cubit.loadProfile(),
+              color: JadalColors.primaryOrange,
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                child: Padding(
+                  padding: EdgeInsets.all(context.wp(5)),
+                  child: Column(
+                    children: [
+                      ProfileAvatar(
+                        name: profile.name,
+                        avatarUrl: profile.avatarUrl,
                       ),
-                    ),
-                    Text(
-                      profile.email,
-                      style: TextStyle(
-                        fontSize: context.fontSize(16),
-                        color: Colors.grey[600],
+                      SizedBox(height: context.hp(1)),
+                      Text(
+                        profile.name,
+                        style: TextStyle(
+                          fontSize: context.fontSize(24),
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: context.hp(1)),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: ProfileActionButton(
-                            text: 'Edit Profile',
-                            icon: Icons.edit,
-                            onPressed: () async {
-                              final result = await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => EditProfileScreen(
-                                    currentName: profile.name,
-                                    currentPhone: profile.phone ?? '',
-                                    currentAvatarUrl: profile.avatarUrl,
+                      Text(
+                        profile.email,
+                        style: TextStyle(
+                          fontSize: context.fontSize(16),
+                          color: Colors.grey[600],
+                        ),
+                      ),
+                      SizedBox(height: context.hp(1)),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: ProfileActionButton(
+                              text: 'Edit Profile',
+                              icon: Icons.edit,
+                              onPressed: () async {
+                                final result = await Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => EditProfileScreen(
+                                      currentName: profile.name,
+                                      currentPhone: profile.phone ?? '',
+                                      currentAvatarUrl: profile.avatarUrl,
+                                    ),
                                   ),
-                                ),
-                              );
-                              if (result != null) _cubit.loadProfile();
-                            },
+                                );
+                                if (result != null) _cubit.loadProfile();
+                              },
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: ProfileActionButton(
+                              text: 'Change Password',
+                              icon: Icons.lock,
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ChangePasswordScreen(),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      SizedBox(height: context.hp(3)),
+                      ProfileInfoCard(
+                        icon: Icons.badge,
+                        label: 'Role',
+                        value: profile.role,
+                      ),
+                      ProfileInfoCard(
+                        icon: Icons.star,
+                        label: 'Points',
+                        value: '${profile.points}',
+                      ),
+                      ProfileInfoCard(
+                        icon: Icons.phone,
+                        label: 'Phone',
+                        value: profile.phone ?? 'Not provided',
+                      ),
+                      ProfileInfoCard(
+                        icon: Icons.calendar_today,
+                        label: 'Joined',
+                        value: profile.createdAt.split('T')[0],
+                      ),
+                      SizedBox(height: context.hp(1)),
+                      Center(
+                        child: SizedBox(
+                          width: MediaQuery.of(context).size.width * 0.5,
                           child: ProfileActionButton(
-                            text: 'Change Password',
-                            icon: Icons.lock,
+                            text: 'Logout',
+                            icon: Icons.logout,
+                            textColor: Colors.red,
+                            borderColor: Colors.red,
                             onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => const ChangePasswordScreen(),
-                                ),
-                              );
+                              _showLogoutConfirmation();
                             },
                           ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: context.hp(3)),
-                    ProfileInfoCard(
-                      icon: Icons.badge,
-                      label: 'Role',
-                      value: profile.role,
-                    ),
-                    ProfileInfoCard(
-                      icon: Icons.star,
-                      label: 'Points',
-                      value: '${profile.points}',
-                    ),
-                    ProfileInfoCard(
-                      icon: Icons.phone,
-                      label: 'Phone',
-                      value: profile.phone ?? 'Not provided',
-                    ),
-                    ProfileInfoCard(
-                      icon: Icons.calendar_today,
-                      label: 'Joined',
-                      value: profile.createdAt.split('T')[0],
-                    ),
-                    SizedBox(height: context.hp(1)),
-                    Center(
-                      child: SizedBox(
-                        width: MediaQuery.of(context).size.width * 0.5,
-                        child: ProfileActionButton(
-                          text: 'Logout',
-                          icon: Icons.logout,
-                          textColor: Colors.red,
-                          borderColor: Colors.red,
-                          onPressed: () {
-                            _showLogoutConfirmation();
-                          },
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             );

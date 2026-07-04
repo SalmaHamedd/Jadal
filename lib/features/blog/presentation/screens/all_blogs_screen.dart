@@ -8,6 +8,7 @@ import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
 import 'package:jadal_app/features/blog/presentation/screens/create_blog_screen.dart';
+import 'package:jadal_app/features/blog/presentation/widgets/create_blog_box.dart';
 
 class AllBlogsScreen extends StatelessWidget {
   const AllBlogsScreen({super.key});
@@ -55,7 +56,7 @@ class AllBlogsScreen extends StatelessWidget {
                   itemCount: blogs.length + 1,
                   itemBuilder: (context, index) {
                     if (index == 0) {
-                      return _CreateBlogBox(
+                      return CreateBlogBox(
                         onTap: () => _navigateToCreateBlog(context),
                       );
                     }
@@ -66,7 +67,8 @@ class AllBlogsScreen extends StatelessWidget {
                         await Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => BlogDetailsScreen(slug: blog.slug),
+                            builder: (context) =>
+                                BlogDetailsScreen(slug: blog.slug),
                           ),
                         );
                         if (context.mounted) {
@@ -107,63 +109,5 @@ class AllBlogsScreen extends StatelessWidget {
     if (result == true && context.mounted) {
       context.read<BlogCubit>().loadBlogs();
     }
-  }
-}
-
-class _CreateBlogBox extends StatelessWidget {
-  final VoidCallback onTap;
-
-  const _CreateBlogBox({required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      margin: EdgeInsets.only(bottom: context.hp(1.5)),
-      padding: EdgeInsets.symmetric(horizontal: context.wp(4), vertical: context.hp(1.5)),
-      decoration: BoxDecoration(
-        color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(12),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: context.wp(4),
-              backgroundColor: JadalColors.primaryOrange,
-              child: const Icon(
-                Icons.edit,
-                color: Colors.white,
-                size: 22,
-              ),
-            ),
-            SizedBox(width: context.wp(3)),
-            Expanded(
-              child: Text(
-                'ماذا تريد أن تكتب؟ انشر مقالاً جديداً...',
-                style: TextStyle(
-                  color: isDark ? JadalColors.darkTextSecondary : Colors.grey[600],
-                  fontSize: context.fontSize(15),
-                ),
-              ),
-            ),
-            Icon(
-              Icons.arrow_forward_ios,
-              size: 16,
-              color: isDark ? JadalColors.darkTextSecondary : Colors.grey[400],
-            ),
-          ],
-        ),
-      ),
-    );
   }
 }
