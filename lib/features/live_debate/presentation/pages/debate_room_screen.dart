@@ -174,7 +174,22 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
               },
             ),
           ],
-          child: _gatedBody(context),
+          child: Stack(
+            children: [
+              _gatedBody(context),
+              // Chair next-stage guard: a blocking, dimmed loading overlay while the
+              // next-stage request is in flight so a double-tap can't skip a speech.
+              BlocBuilder<DebateController, DebateStates>(
+                buildWhen: (_, s) => s is StageAdvancingChangedState,
+                builder: (context, _) {
+                  if (!context.read<DebateController>().isAdvancingStage) {
+                    return const SizedBox.shrink();
+                  }
+                  return const Positioned.fill(child: _StageAdvancingOverlay());
+                },
+              ),
+            ],
+          ),
         ),
         ),
       ),
@@ -386,6 +401,27 @@ class _LobbyModeView extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// A dimmed, tap-absorbing overlay with a centred spinner shown while the chair's
+/// next-stage request is in flight — prevents a double-tap skipping a speech.
+class _StageAdvancingOverlay extends StatelessWidget {
+  const _StageAdvancingOverlay();
+
+  @override
+  Widget build(BuildContext context) {
+    return ColoredBox(
+      // A modal barrier: absorbs taps so the next-stage control can't be hit again.
+      color: Colors.black.withValues(alpha: 0.35),
+      child: const Center(
+        child: SizedBox(
+          width: 44,
+          height: 44,
+          child: CircularProgressIndicator(strokeWidth: 3),
+        ),
+      ),
     );
   }
 }

@@ -8,6 +8,7 @@ import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_models.dart';
 import '../../data/models/live_state_model.dart';
+import '../../data/models/registration_models.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_status.dart';
@@ -165,6 +166,8 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
             ],
           ),
         ),
+        // While registration is open, surface who's registered so far (V12 §3).
+        if (isRegistration) _RegistrantsBar(debateId: widget.debateId),
         // Judges + teams — nothing to show during registration.
         if (!isRegistration) ...[
           // Judges sit in the same calm section card as Format (the user didn't
@@ -195,6 +198,10 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
   /// announced stage sides aren't fixed yet → both render neutral (first/second).
   Widget _teamsRow(BuildContext context, LiveStateModel state, {required bool neutral}) {
     final loc = context.loc;
+    // Neutral (announced) cards use a muted slate instead of the old flat grey:
+    // a deep blue-grey that reads as a calm, sides-not-set tint and blends into
+    // both the light and dark backgrounds (white header text stays readable).
+    const neutralTeam = Color(0xFF44546E);
     return Padding(
       padding: const EdgeInsets.only(bottom: 12),
       child: IntrinsicHeight(
@@ -206,8 +213,9 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
                 title: neutral ? loc.firstTeam : loc.proposition,
                 info: state.proposition,
                 color: neutral
-                    ? JadalColors.judgesGrey
+                    ? neutralTeam
                     : DebateTheme.sideColor(DebateSide.proposition),
+                neutral: neutral,
                 showOrder: !neutral,
               ),
             ),
@@ -217,8 +225,9 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
                 title: neutral ? loc.secondTeam : loc.opposition,
                 info: state.opposition,
                 color: neutral
-                    ? JadalColors.judgesGrey
+                    ? neutralTeam
                     : DebateTheme.sideColor(DebateSide.opposition),
+                neutral: neutral,
                 showOrder: !neutral,
               ),
             ),
@@ -539,12 +548,16 @@ class _TeamColumn extends StatelessWidget {
   final SideInfo info;
   final Color color;
 
+  /// Announced (sides not set) → the calm slate treatment with a touch more fill.
+  final bool neutral;
+
   /// Live/sides-known → speaking order + reply tags; announced → plain roster.
   final bool showOrder;
   const _TeamColumn({
     required this.title,
     required this.info,
     required this.color,
+    this.neutral = false,
     required this.showOrder,
   });
 
@@ -566,10 +579,12 @@ class _TeamColumn extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         // A gentle team-tinted fill, kept subtle now the page background carries
-        // colour of its own — no bright coloured glow competing with it.
-        color: color.withValues(alpha: dark ? 0.12 : 0.06),
+        // colour of its own — no bright coloured glow competing with it. The
+        // neutral (announced) slate gets a hair more fill so it reads as a solid
+        // calm panel rather than washed-out grey.
+        color: color.withValues(alpha: neutral ? (dark ? 0.18 : 0.10) : (dark ? 0.12 : 0.06)),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: 0.24)),
+        border: Border.all(color: color.withValues(alpha: neutral ? 0.30 : 0.24)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: dark ? 0.22 : 0.05),
@@ -942,6 +957,293 @@ class _ErrorView extends StatelessWidget {
               icon: const Icon(Icons.refresh_rounded),
               label: Text(loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
             ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// While the debate is open for registration, three count buttons (Teams /
+/// Judges / Solo) over `GET /registrations` (V12 §3); each opens a list dialog.
+class _RegistrantsBar extends StatefulWidget {
+  final int debateId;
+  const _RegistrantsBar({required this.debateId});
+
+  @override
+  State<_RegistrantsBar> createState() => _RegistrantsBarState();
+}
+
+class _RegistrantsBarState extends State<_RegistrantsBar> {
+  late final Future<Either<Failure, DebateRegistrations>> _future =
+      di.sl<LiveDebateRepository>().getRegistrations(widget.debateId);
+
+  @override
+  Widget build(BuildContext context) {
+    return _Section(
+      title: 'Registrants',
+      child: FutureBuilder<Either<Failure, DebateRegistrations>>(
+        future: _future,
+        builder: (context, snap) {
+          if (!snap.hasData) {
+            return const Padding(
+              padding: EdgeInsets.symmetric(vertical: 10),
+              child: Center(
+                child: SizedBox(
+                  width: 22,
+                  height: 22,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+              ),
+            );
+          }
+          return snap.data!.fold(
+            (f) => Text(
+              f.message,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 12.5,
+                color: DebateTheme.textSecondary(context),
+              ),
+            ),
+            (reg) => Row(
+              children: [
+                Expanded(
+                  child: _CountButton(
+                    icon: Icons.groups_rounded,
+                    label: 'Teams',
+                    count: reg.teams.length,
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => _RegistrantListDialog(
+                        title: 'Registered teams',
+                        icon: Icons.groups_rounded,
+                        rows: [
+                          for (final t in reg.teams)
+                            (name: t.teamName, sub: '${t.membersCount} members'),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _CountButton(
+                    icon: Icons.gavel_rounded,
+                    label: 'Judges',
+                    count: reg.judges.length,
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => _RegistrantListDialog(
+                        title: 'Registered judges',
+                        icon: Icons.gavel_rounded,
+                        rows: [for (final u in reg.judges) (name: u.name, sub: null)],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: _CountButton(
+                    icon: Icons.person_rounded,
+                    label: 'Solo',
+                    count: reg.solo.length,
+                    onTap: () => showDialog(
+                      context: context,
+                      builder: (_) => _RegistrantListDialog(
+                        title: 'Solo applicants',
+                        icon: Icons.person_rounded,
+                        rows: [for (final u in reg.solo) (name: u.name, sub: null)],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CountButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final int count;
+  final VoidCallback onTap;
+  const _CountButton({
+    required this.icon,
+    required this.label,
+    required this.count,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = DebateTheme.isDark(context);
+    return Material(
+      color: dark
+          ? Colors.white.withValues(alpha: 0.05)
+          : JadalColors.primaryBlue.withValues(alpha: 0.05),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+          child: Column(
+            children: [
+              Icon(icon, color: JadalColors.primaryBlue, size: 22),
+              const SizedBox(height: 6),
+              Text(
+                '$count',
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontWeight: FontWeight.w800,
+                  fontSize: 18,
+                  color: DebateTheme.textPrimary(context),
+                ),
+              ),
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 11.5,
+                  color: DebateTheme.textSecondary(context),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// A simple list dialog for a registrant group (teams/judges/solo).
+class _RegistrantListDialog extends StatelessWidget {
+  final String title;
+  final IconData icon;
+  final List<({String name, String? sub})> rows;
+  const _RegistrantListDialog({
+    required this.title,
+    required this.icon,
+    required this.rows,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Dialog(
+      backgroundColor: DebateTheme.surface(context),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 16, 8),
+              child: Row(
+                children: [
+                  Icon(icon, color: JadalColors.primaryBlue),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      title,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: DebateTheme.textPrimary(context),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: Icon(Icons.close_rounded,
+                        color: DebateTheme.textSecondary(context), size: 20),
+                  ),
+                ],
+              ),
+            ),
+            if (rows.isEmpty)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 20, 26),
+                child: Text('None yet.',
+                    style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+              )
+            else
+              Flexible(
+                child: ListView.separated(
+                  shrinkWrap: true,
+                  padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+                  itemCount: rows.length,
+                  separatorBuilder: (_, _) => const SizedBox(height: 8),
+                  itemBuilder: (context, i) {
+                    final r = rows[i];
+                    final initial =
+                        r.name.isNotEmpty ? r.name.substring(0, 1).toUpperCase() : '?';
+                    return Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      decoration: BoxDecoration(
+                        color: DebateTheme.surfaceElevated(context),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 34,
+                            height: 34,
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: JadalColors.primaryBlue.withValues(alpha: 0.10),
+                            ),
+                            child: Text(
+                              initial,
+                              style: const TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w800,
+                                color: JadalColors.primaryBlue,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  r.name.isNotEmpty ? r.name : '—',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 14,
+                                    color: DebateTheme.textPrimary(context),
+                                  ),
+                                ),
+                                if (r.sub != null)
+                                  Text(
+                                    r.sub!,
+                                    style: TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontSize: 11.5,
+                                      color: DebateTheme.textSecondary(context),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ),
           ],
         ),
       ),

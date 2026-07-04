@@ -7,6 +7,7 @@ import 'package:jadal_app/features/auth/presentation/screens/reset_password_scre
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../cubit/forgot_password_cubit.dart';
 import '../widgets/auth_button.dart';
@@ -46,9 +47,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final size = mq.size;
     final isMobile = context.isMobile;
 
-    final scaffoldBg = isDark
-        ? JadalColors.darkSurface
-        : JadalColors.lightBackground;
     final cardBg = isDark
         ? JadalColors.darkBackground
         : JadalColors.lightSurface;
@@ -69,8 +67,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     final iconCircle = isMobile ? 60.0 : 72.0;
 
     return Scaffold(
-      backgroundColor: scaffoldBg,
-      body: Stack(
+      backgroundColor: Colors.transparent,
+      body: JadalGradientBackground(
+        child: Stack(
         fit: StackFit.expand,
         children: [
           Positioned(
@@ -324,6 +323,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

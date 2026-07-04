@@ -135,6 +135,8 @@
   "themeToggleTest": "Toggle theme (test only)",
   "noMessages": "No messages yet",
   "messageHint": "Message your team…",
+  "newMessages": "New messages",
+  "micMutedWhileSpeaking": "You're on — but your mic is off. Unmute to be heard.",
 
   "submitResult": "Submit result",
   "submitResultTitle": "Submit Result",

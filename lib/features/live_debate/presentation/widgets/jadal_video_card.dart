@@ -49,8 +49,10 @@ class JadalVideoCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final scale = (mainAxis / 168).clamp(0.5, 2.2);
-    // The mic badge shouldn't balloon on the big main card — cap it tighter.
-    final micScale = scale.clamp(0.65, 1.0).toDouble();
+    // The mic badge was reading too small on the big main card, so nudge the cap
+    // up a little (and the floor up for the small grid tiles) — bigger, but still
+    // balanced so it never balloons.
+    final micScale = scale.clamp(0.78, 1.28).toDouble();
     final live = showVideo && videoTrack != null;
     final radius = borderRadius ?? widgetBorderRadius;
 

@@ -125,6 +125,11 @@ class SpeakersSection extends StatelessWidget {
                   isPresent: present,
                   showVideo: showVid,
                   videoTrack: present ? cubit.videoTrackForUser(debater.id) : null,
+                  micOn: present && cubit.micOnForUser(debater.id),
+                  isSpeaking: present && cubit.speakingForUser(debater.id),
+                  levelProvider: cubit.isLocalUserId(debater.id)
+                      ? () => cubit.localAudioLevel
+                      : null,
                   onPoiTap: (asking && canAnswer)
                       ? () => showPoiAcceptRefuse(context, cubit, askerUserId: debater.id)
                       : null,

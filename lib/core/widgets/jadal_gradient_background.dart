@@ -33,10 +33,12 @@ class JadalGradientBackground extends StatelessWidget {
     // Opaque tint = base nudged toward a brand colour by [t] (kept small).
     Color tint(Color c, double t) => Color.lerp(base, c, t)!;
 
-    // Dark needs a touch more lift to be perceptible against the navy base.
-    final tBlue = isDark ? 0.14 : 0.06;
-    final tDeep = isDark ? 0.16 : 0.05;
-    final tOrange = isDark ? 0.12 : 0.06;
+    // Dark gets a touch more presence; light gets a bit more still (it was so
+    // faint you had to look for it). Orange is nudged the least in dark since it
+    // already reads brightest there.
+    final tBlue = isDark ? 0.17 : 0.10;
+    final tDeep = isDark ? 0.19 : 0.09;
+    final tOrange = isDark ? 0.13 : 0.10;
 
     return DecoratedBox(
       decoration: BoxDecoration(

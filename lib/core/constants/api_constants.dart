@@ -45,6 +45,12 @@ class ApiConstants {
   /// Self-registration for a debate (as = debater | judge | team).
   static String registerUrl(int id) => '$baseUrl/debates/$id/register';
 
+  /// V12 §1 — teams the caller may register for this debate (lead/coach).
+  static String registerableTeamsUrl(int id) => '$baseUrl/debates/$id/registerable-teams';
+
+  /// V12 §3 — who registered so far, split into teams / judges / solo.
+  static String registrationsUrl(int id) => '$baseUrl/debates/$id/registrations';
+
   // ── Debater statistics (read-only, §"Debater Statistics API") ────────────────
   // {debater} is the debater's user id. Auth: bearer + check.status.
   static String _statsBase(int debaterId) => '$baseUrl/debaters/$debaterId/stats';

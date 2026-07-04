@@ -132,6 +132,8 @@
   "themeToggleTest": "تبديل السمة (للاختبار فقط)",
   "noMessages": "لا توجد رسائل بعد",
   "messageHint": "راسل فريقك…",
+  "newMessages": "رسائل جديدة",
+  "micMutedWhileSpeaking": "حان دورك — لكن الميكروفون مغلق. افتحه ليسمعك الجميع.",
 
   "submitResult": "إرسال النتيجة",
   "submitResultTitle": "إرسال النتيجة",

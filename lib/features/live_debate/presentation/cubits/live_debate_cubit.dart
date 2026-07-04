@@ -88,7 +88,11 @@ class LiveDebateCubit extends DebateController {
   /// correct state without anyone leaving — and (with the new logging) prints the
   /// fresh backend payload + digest every tick so issues are diagnosable live.
   Timer? _pollTimer;
-  static const Duration kLiveStatePollInterval = Duration(seconds: 10);
+  // Tightened from 10s → 5s so a missed broadcast (stage/timer/presence) is
+  // reconciled about twice as fast. The real "wrong timer for a few seconds after
+  // next-stage" fix is refreshing live-state right on `stage_changed` (below); the
+  // poll is just the safety net, so this stays moderate to avoid extra load.
+  static const Duration kLiveStatePollInterval = Duration(seconds: 5);
   int _pollCount = 0;
 
   @override
@@ -160,6 +164,15 @@ class LiveDebateCubit extends DebateController {
   final Set<String> _micLockedIds = {};
   final Set<String> _cameraLockedIds = {};
   bool _roomClosed = false;
+
+  /// Unread team-chat messages (arrived while the chat dialog was closed) →
+  /// drives the toolbar chat button's notification dot. Reset when the chat opens.
+  int _unreadTeamChat = 0;
+  bool _chatOpen = false;
+
+  /// The chair's next-stage POST is in flight → the room shows a blocking overlay
+  /// so a double-tap can't skip a speech.
+  bool _advancingStage = false;
 
   /// Issue 10: emit the "go to the shared result" navigation exactly once,
   /// whether it's triggered by the chair sharing or by the inbound
@@ -746,6 +759,13 @@ class LiveDebateCubit extends DebateController {
           message: event.message ?? '',
           ts: event.ts,
         ));
+        // Notification dot: count messages for MY team from someone else while the
+        // chat is closed (so the toolbar button nudges the user to check it).
+        if (!_chatOpen &&
+            (event.teamId ?? '') == myTeamId &&
+            event.senderId != _myUserId.toString()) {
+          _unreadTeamChat++;
+        }
         emit(TeamChatUpdatedState());
         break;
       case LiveEventType.forceMute:
@@ -810,6 +830,12 @@ class LiveDebateCubit extends DebateController {
     emit(SpeakerChangedState());
     emit(DebateTimelineEventState(DebateTimelineEvent.speechStarted));
     startTimer();
+    // Sync the AUTHORITATIVE timer + stage duration together with the stage
+    // switch: the broadcast can omit/mis-carry the duration, which briefly showed
+    // the wrong (default) time until the next poll corrected it. Re-fetching
+    // live-state here (the backend persists the stage before broadcasting, same
+    // as the chair's own path) makes the timer land on the right value at once.
+    _refreshLiveState();
   }
 
   void _publish(List<int> bytes) {
@@ -988,21 +1014,36 @@ class LiveDebateCubit extends DebateController {
   /// Chair's next-state button → POST /next-stage (start / next / complete).
   /// Everyone else updates from the resulting `stage_changed`/`debate_completed`.
   @override
+  bool get isAdvancingStage => _advancingStage;
+
+  @override
   void advanceDebate() {
     if (!isAuthority) {
       dlog('action', 'advanceDebate IGNORED — not authority (role=${_debateRole.wire})');
       return;
     }
+    // Guard against the chair double-tapping a laggy server into skipping a
+    // speech; the room paints a blocking overlay while this is true.
+    if (_advancingStage) {
+      dlog('action', 'advanceDebate IGNORED — a next-stage request is already in flight');
+      return;
+    }
+    _advancingStage = true;
+    emit(StageAdvancingChangedState());
     dlog('action', 'NEXT-STAGE ▸ POST next-stage (currentStage=$_currentStage, '
         'isLastStep=$isLastStep)');
     repo.nextStage(debateId).then((res) => res.fold(
           (f) {
             dlog('action', 'next-stage FAILED: ${f.message}');
+            _advancingStage = false;
+            emit(StageAdvancingChangedState());
             emit(DebateErrorState(f.message));
           },
           (_) {
             dlog('action', 'next-stage OK — refreshing live-state (FE-1 safety net)');
             _refreshLiveState();
+            _advancingStage = false;
+            emit(StageAdvancingChangedState());
           },
         ));
   }
@@ -1546,6 +1587,19 @@ class LiveDebateCubit extends DebateController {
   @override
   List<TeamChatMessage> chatFor(String viewerTeamId) =>
       _chat.where((m) => m.teamId == viewerTeamId).toList();
+
+  @override
+  int get unreadTeamChatCount => _unreadTeamChat;
+
+  @override
+  void setTeamChatOpen(bool open) {
+    _chatOpen = open;
+    // Opening the chat clears the notification dot.
+    if (open && _unreadTeamChat != 0) {
+      _unreadTeamChat = 0;
+      emit(TeamChatUpdatedState());
+    }
+  }
 
   // ──────────────────────────────────────────────────────────────────────────
   // Role → controls gating (§8)

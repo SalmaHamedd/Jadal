@@ -57,6 +57,10 @@ abstract class JadalColors {
   static const Color oppositionColor  = Color(0xFFEA7C1C);
   // Neutral
   static const Color judgesGrey = Color(0xFF9A9A9A);
+  // Positive / negative accents, tuned to sit beside the brand blue & orange
+  // (a deep emerald + a muted crimson — confident but not neon).
+  static const Color positiveGreen = Color(0xFF1FA463);
+  static const Color negativeRed   = Color(0xFFD84857);
   // Light theme
   static const Color lightBg            = Color(0xFFFBF6F0);
   static const Color lightBackground    = Color(0xFFFBF6F0);

@@ -368,13 +368,13 @@ class _RoomCard extends StatelessWidget {
     }
   }
 
-  void _showNeedsOrder(BuildContext context, DebateController cubit) {
+  Future<void> _showNeedsOrder(BuildContext context, DebateController cubit) {
     final loc = context.loc;
     final data = cubit.data;
     final side = data.propositionTeam.debaterById(data.currentUserId) != null
         ? DebateSide.proposition
         : DebateSide.opposition;
-    showDialog(
+    return showDialog(
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
@@ -397,10 +397,10 @@ class _RoomCard extends StatelessWidget {
     );
   }
 
-  void _push(BuildContext context, DebateController cubit, Widget screen) {
+  Future<void> _push(BuildContext context, DebateController cubit, Widget screen) {
     // Carry the ConnectionCubit so prep/result rooms get the action row too (§9.3).
     final connection = context.read<ConnectionCubit>();
-    Navigator.of(context).push(MaterialPageRoute(
+    return Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: cubit),
@@ -411,12 +411,12 @@ class _RoomCard extends StatelessWidget {
     ));
   }
 
-  void _pushRoom(BuildContext context, DebateController cubit, LiveJoinRole role) {
+  Future<void> _pushRoom(BuildContext context, DebateController cubit, LiveJoinRole role) {
     final connection = context.read<ConnectionCubit>();
     if (role == LiveJoinRole.audience) {
       JadalSnackBar.show(context, context.loc.joiningAsAudience, type: SnackBarType.success);
     }
-    Navigator.of(context).push(MaterialPageRoute(
+    return Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => MultiBlocProvider(
         providers: [
           BlocProvider.value(value: cubit),
@@ -431,7 +431,10 @@ class _RoomCard extends StatelessWidget {
 class _RoomAccess {
   final String status;
   final bool locked;
-  final VoidCallback? onJoin;
+
+  /// Async so the join button can show a spinner and block re-taps while the
+  /// room-token fetch / navigation is in flight (prevents entering twice on lag).
+  final Future<void> Function()? onJoin;
   const _RoomAccess({required this.status, required this.locked, required this.onJoin});
 }
 
@@ -482,40 +485,90 @@ class _ShareResultBanner extends StatelessWidget {
 /// Compact per-room join button (§U3): solid side colour for prop/opp (light
 /// when locked, main when joinable); the blue↔orange gradient for the live room
 /// and result (grey when locked).
-class _RoomJoinButton extends StatelessWidget {
+///
+/// Stateful so it can show a spinner and swallow further taps while the join is
+/// in flight — a laggy room-token fetch used to let an impatient user tap several
+/// times and get pushed into the room more than once.
+class _RoomJoinButton extends StatefulWidget {
   final DebateRoomType type;
   final bool enabled;
-  final VoidCallback? onPressed;
+  final Future<void> Function()? onPressed;
   const _RoomJoinButton({required this.type, required this.enabled, required this.onPressed});
 
+  @override
+  State<_RoomJoinButton> createState() => _RoomJoinButtonState();
+}
+
+class _RoomJoinButtonState extends State<_RoomJoinButton> {
   static const double _w = 82;
   static const double _h = 36;
+  bool _busy = false;
+
+  Future<void> _handle() async {
+    if (_busy || widget.onPressed == null) return;
+    setState(() => _busy = true);
+    try {
+      await widget.onPressed!();
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    final gradient = type == DebateRoomType.liveDebate || type == DebateRoomType.result;
+    final gradient =
+        widget.type == DebateRoomType.liveDebate || widget.type == DebateRoomType.result;
 
-    if (gradient && enabled) {
-      return SizedBox(
-        width: _w,
-        child: JadalGradientButton(text: loc.join, height: _h, onPressed: onPressed),
-      );
-    }
-
-    final Color fill = switch (type) {
-      DebateRoomType.proposition => enabled
+    final Color fill = switch (widget.type) {
+      DebateRoomType.proposition => widget.enabled
           ? JadalColors.primaryBlue
           : Color.lerp(JadalColors.primaryBlue, Colors.white, 0.55)!,
-      DebateRoomType.opposition => enabled
+      DebateRoomType.opposition => widget.enabled
           ? JadalColors.primaryOrange
           : Color.lerp(JadalColors.primaryOrange, Colors.white, 0.55)!,
       // Live / result locked → light grey.
       _ => Color.lerp(JadalColors.judgesGrey, Colors.white, 0.35)!,
     };
 
+    // While joining, show a spinner chip in place of the button (same footprint)
+    // so the layout never jumps and the tap can't be repeated.
+    if (_busy) {
+      return Container(
+        width: _w,
+        height: _h,
+        alignment: Alignment.center,
+        decoration: BoxDecoration(
+          gradient: gradient
+              ? const LinearGradient(
+                  begin: AlignmentDirectional.topStart,
+                  end: AlignmentDirectional.bottomEnd,
+                  colors: [JadalColors.primaryOrange, JadalColors.primaryBlue],
+                )
+              : null,
+          color: gradient ? null : fill,
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: const SizedBox(
+          width: 16,
+          height: 16,
+          child: CircularProgressIndicator(
+            strokeWidth: 2,
+            valueColor: AlwaysStoppedAnimation(Colors.white),
+          ),
+        ),
+      );
+    }
+
+    if (gradient && widget.enabled) {
+      return SizedBox(
+        width: _w,
+        child: JadalGradientButton(text: loc.join, height: _h, onPressed: _handle),
+      );
+    }
+
     return GestureDetector(
-      onTap: enabled ? onPressed : null,
+      onTap: widget.enabled ? _handle : null,
       child: Container(
         width: _w,
         height: _h,

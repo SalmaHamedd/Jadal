@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/services/token_storage.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../../../di/injection_container.dart' as di;
+import '../../data/models/registration_models.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_registration.dart';
 import '../utils/debate_theme.dart';
@@ -35,21 +36,68 @@ class _RegistrationSheet extends StatefulWidget {
 }
 
 class _RegistrationSheetState extends State<_RegistrationSheet> {
-  bool _busy = false;
+  /// Which action is mid-flight (spinner shows *inside* that button so the sheet
+  /// never reflows / shrinks — the old whole-content swap was the "weird shrink").
+  RegistrationKind? _submitting;
+
+  /// Resolving the role-gated option set on open.
+  bool _resolving = true;
+  bool _showTeam = false;
+  bool _showJudge = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveOptions();
+  }
+
+  /// The visible options depend on the caller's account role (§UX):
+  ///  • judge   → Register as Judge (+ Solo, everyone can go solo)
+  ///  • trainer → Register your Team (+ Solo)
+  ///  • debater → Solo; plus Team **only if they lead a registerable team**
+  ///  • unknown/legacy session (role not cached) → be permissive: show all.
+  Future<void> _resolveOptions() async {
+    final role = (await TokenStorage.getRole())?.toLowerCase();
+    var showTeam = false;
+    var showJudge = false;
+    switch (role) {
+      case 'judge':
+        showJudge = true;
+      case 'trainer':
+      case 'coach':
+        showTeam = true;
+      case 'debater':
+        // A debater only leads (never coaches) teams, so a non-empty
+        // registerable-teams list means they're a team leader here.
+        final res =
+            await di.sl<LiveDebateRepository>().getRegisterableTeams(widget.debateId);
+        showTeam = res.fold((_) => false, (r) => r.teams.isNotEmpty);
+      default:
+        // No cached role → don't hide anything.
+        showTeam = true;
+        showJudge = true;
+    }
+    if (!mounted) return;
+    setState(() {
+      _showTeam = showTeam;
+      _showJudge = showJudge;
+      _resolving = false;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 12),
+        padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               width: 42,
               height: 4,
-              margin: const EdgeInsets.only(bottom: 10),
+              margin: const EdgeInsets.only(bottom: 12),
               decoration: BoxDecoration(
                 color: DebateTheme.textSecondary(context).withValues(alpha: 0.4),
                 borderRadius: BorderRadius.circular(2),
@@ -64,100 +112,136 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
                 color: DebateTheme.textPrimary(context),
               ),
             ),
-            const SizedBox(height: 8),
-            if (_busy)
-              const Padding(
-                padding: EdgeInsets.all(24),
-                child: CircularProgressIndicator(),
+            const SizedBox(height: 16),
+            if (_resolving)
+              const SizedBox(
+                height: 76,
+                child: Center(
+                  child: SizedBox(
+                    width: 26,
+                    height: 26,
+                    child: CircularProgressIndicator(strokeWidth: 2.4),
+                  ),
+                ),
               )
             else ...[
-              _option(context, Icons.groups_rounded, loc.registerAsTeam, RegistrationKind.team),
-              _option(context, Icons.person_rounded, loc.registerAsSolo, RegistrationKind.solo),
-              _option(context, Icons.gavel_rounded, loc.registerAsJudge, RegistrationKind.judge),
+              if (_showTeam)
+                _actionButton(
+                  context,
+                  icon: Icons.groups_rounded,
+                  label: loc.registerAsTeam,
+                  color: JadalColors.primaryBlue,
+                  kind: RegistrationKind.team,
+                  onTap: _onTeam,
+                ),
+              _actionButton(
+                context,
+                icon: Icons.person_rounded,
+                label: loc.registerAsSolo,
+                color: JadalColors.deepBlue,
+                kind: RegistrationKind.solo,
+                onTap: () => _submit(RegistrationKind.solo, null),
+              ),
+              if (_showJudge)
+                _actionButton(
+                  context,
+                  icon: Icons.gavel_rounded,
+                  label: loc.registerAsJudge,
+                  color: JadalColors.primaryOrange,
+                  kind: RegistrationKind.judge,
+                  onTap: () => _submit(RegistrationKind.judge, null),
+                ),
             ],
-            const SizedBox(height: 8),
           ],
         ),
       ),
     );
   }
 
-  Widget _option(BuildContext context, IconData icon, String label, RegistrationKind kind) {
-    return ListTile(
-      leading: Icon(icon, color: JadalColors.primaryBlue),
-      title: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontWeight: FontWeight.w600,
-          color: DebateTheme.textPrimary(context),
+  /// A full-width brand button. When [kind] is mid-flight it swaps its icon for a
+  /// spinner and every button disables — the footprint stays fixed.
+  Widget _actionButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Color color,
+    required RegistrationKind kind,
+    required VoidCallback onTap,
+  }) {
+    final loading = _submitting == kind;
+    final anyBusy = _submitting != null;
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 10),
+      child: SizedBox(
+        width: double.infinity,
+        height: 54,
+        child: FilledButton.icon(
+          onPressed: anyBusy ? null : onTap,
+          style: FilledButton.styleFrom(
+            backgroundColor: color,
+            disabledBackgroundColor: color.withValues(alpha: 0.5),
+            foregroundColor: Colors.white,
+            disabledForegroundColor: Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+          ),
+          icon: loading
+              ? const SizedBox(
+                  width: 18,
+                  height: 18,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2.2,
+                    valueColor: AlwaysStoppedAnimation(Colors.white),
+                  ),
+                )
+              : Icon(icon),
+          label: Text(
+            label,
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+          ),
         ),
       ),
-      onTap: () => _choose(kind),
     );
   }
 
-  Future<void> _choose(RegistrationKind kind) async {
-    int? teamId;
-    if (kind == RegistrationKind.team) {
-      // The team variant needs a team id; the caller must be its leader/coach.
-      teamId = await _askTeamId();
-      if (teamId == null) return; // cancelled
+  Future<void> _onTeam() async {
+    // Show the spinner on the team button across both the pick and the submit.
+    setState(() => _submitting = RegistrationKind.team);
+    final teamId = await _pickTeam();
+    if (teamId == null) {
+      if (mounted) setState(() => _submitting = null); // cancelled / none / error
+      return;
     }
-    await _submit(kind, teamId);
+    await _submit(RegistrationKind.team, teamId);
   }
 
-  Future<int?> _askTeamId() async {
-    final loc = context.loc;
-    final controller = TextEditingController();
+  /// Fetches the teams the caller may register for this debate and lets them pick
+  /// one (ineligible teams are shown disabled with the reason).
+  Future<int?> _pickTeam() async {
+    final res = await di.sl<LiveDebateRepository>().getRegisterableTeams(widget.debateId);
+    if (!mounted) return null;
+
+    final failure = res.fold((l) => l, (_) => null);
+    if (failure != null) {
+      if (widget.rootContext.mounted) {
+        JadalSnackBar.show(widget.rootContext, failure.message, type: SnackBarType.error);
+      }
+      return null;
+    }
+    final data = res.fold((_) => null, (r) => r)!;
+    if (data.teams.isEmpty) {
+      JadalSnackBar.show(context, 'No teams you can register for this debate.',
+          type: SnackBarType.warning);
+      return null;
+    }
+    if (!mounted) return null;
     return showDialog<int>(
       context: context,
-      builder: (dctx) => AlertDialog(
-        backgroundColor: DebateTheme.surface(dctx),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        title: Text(loc.registerAsTeam, style: const TextStyle(fontFamily: 'Cairo')),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              loc.teamRegisterPrompt,
-              style: TextStyle(
-                  fontFamily: 'Cairo', fontSize: 12, color: DebateTheme.textSecondary(dctx)),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: controller,
-              autofocus: true,
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(dctx)),
-              decoration: InputDecoration(
-                labelText: loc.teamIdLabel,
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(dctx).pop(),
-            child: Text(loc.cancel),
-          ),
-          TextButton(
-            onPressed: () {
-              final id = int.tryParse(controller.text.trim());
-              if (id != null) Navigator.of(dctx).pop(id);
-            },
-            child: Text(loc.confirm),
-          ),
-        ],
-      ),
+      builder: (_) => _TeamPickerDialog(data: data),
     );
   }
 
   Future<void> _submit(RegistrationKind kind, int? teamId) async {
-    setState(() => _busy = true);
+    setState(() => _submitting = kind);
     final repo = di.sl<LiveDebateRepository>();
     final res = await repo.register(
       DebateRegistration(debateId: widget.debateId, kind: kind, teamId: teamId),
@@ -168,6 +252,161 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     res.fold(
       (f) => JadalSnackBar.show(widget.rootContext, f.message, type: SnackBarType.error),
       (msg) => JadalSnackBar.show(widget.rootContext, msg, type: SnackBarType.success),
+    );
+  }
+}
+
+/// Picker dialog for the team-registration variant (V12 §1): eligible teams are
+/// tappable; ineligible ones are shown disabled with their reason.
+class _TeamPickerDialog extends StatelessWidget {
+  final RegisterableTeams data;
+  const _TeamPickerDialog({required this.data});
+
+  static String _reasonLabel(String? reason) => switch (reason) {
+        'already_registered' => 'Already registered',
+        'too_few_members' => 'Needs 3+ members',
+        'registration_closed' => 'Registration closed',
+        _ => 'Not eligible',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    return Dialog(
+      backgroundColor: DebateTheme.surface(context),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 18, 16, 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.groups_rounded, color: JadalColors.primaryBlue),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: Text(
+                      loc.registerAsTeam,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w800,
+                        fontSize: 16,
+                        color: DebateTheme.textPrimary(context),
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    visualDensity: VisualDensity.compact,
+                    onPressed: () => Navigator.of(context).maybePop(),
+                    icon: Icon(Icons.close_rounded,
+                        color: DebateTheme.textSecondary(context), size: 20),
+                  ),
+                ],
+              ),
+            ),
+            Flexible(
+              child: ListView.separated(
+                shrinkWrap: true,
+                padding: const EdgeInsets.fromLTRB(14, 6, 14, 16),
+                itemCount: data.teams.length,
+                separatorBuilder: (_, _) => const SizedBox(height: 8),
+                itemBuilder: (context, i) {
+                  final t = data.teams[i];
+                  return _TeamTile(
+                    team: t,
+                    onTap: t.eligible ? () => Navigator.of(context).pop(t.id) : null,
+                  );
+                },
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamTile extends StatelessWidget {
+  final RegisterableTeam team;
+  final VoidCallback? onTap;
+  const _TeamTile({required this.team, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final eligible = team.eligible;
+    final primary = DebateTheme.textPrimary(context);
+    final muted = DebateTheme.textSecondary(context);
+    return Material(
+      color: DebateTheme.surfaceElevated(context).withValues(alpha: eligible ? 1 : 0.6),
+      borderRadius: BorderRadius.circular(14),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(14),
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+          child: Row(
+            children: [
+              Container(
+                width: 40,
+                height: 40,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: JadalColors.primaryBlue.withValues(alpha: eligible ? 0.12 : 0.06),
+                ),
+                child: Icon(Icons.groups_rounded,
+                    size: 20, color: eligible ? JadalColors.primaryBlue : muted),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      team.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 14,
+                        color: eligible ? primary : muted,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${team.membersCount} members',
+                      style: TextStyle(fontFamily: 'Cairo', fontSize: 11.5, color: muted),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              if (eligible)
+                Icon(Icons.chevron_right_rounded, color: muted)
+              else
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: muted.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    _TeamPickerDialog._reasonLabel(team.ineligibleReason),
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: muted,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 }

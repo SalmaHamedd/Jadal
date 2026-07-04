@@ -6,6 +6,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import 'debate_settings_sheet.dart';
+import 'team_chat_dialog.dart';
 
 /// Bottom action row (§8.6): camera, mic, ask-POI, random-news, the key
 /// next-state button (start → next → finish) and the 3-dots settings menu.
@@ -87,6 +88,9 @@ class DebateActionRow extends StatelessWidget {
                       // the open lobby has its own "Back to debate" button (FE-2).
                       if (cubit.canControlStage && !cubit.isLobbyMode)
                         _NextButton(cubit: cubit),
+                      // Team chat lives in the toolbar now (out of the 3-dots), with
+                      // an unread dot so a new message gets noticed.
+                      if (cubit.canOpenChat) _ChatButton(cubit: cubit),
                       _ActionButton(
                         icon: Icons.more_vert_rounded,
                         onPressed: () => DebateSettingsSheet.show(context, cubit),
@@ -143,6 +147,64 @@ class _ActionButton extends StatelessWidget {
       borderColor: color.withValues(alpha: highlight ? 0.6 : 0.25),
       fillColor: color.withValues(alpha: highlight ? 0.16 : 0.06),
       child: Icon(icon, color: color, size: 20),
+    );
+  }
+}
+
+/// Team-chat toolbar button: opens the team chat dialog and carries an unread
+/// notification dot when messages arrived while it was closed (§UX).
+class _ChatButton extends StatelessWidget {
+  final DebateController cubit;
+  const _ChatButton({required this.cubit});
+
+  void _open(BuildContext context) {
+    // The dialog itself flips the cubit's "chat open" flag (init/dispose), so the
+    // unread counter clears on open and resumes counting on close.
+    showDialog(
+      context: context,
+      builder: (_) => BlocProvider.value(
+        value: cubit,
+        child: TeamChatDialog(teamId: cubit.myTeamId),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final unread = cubit.unreadTeamChatCount;
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _ActionButton(
+          icon: Icons.forum_rounded,
+          onPressed: () => _open(context),
+        ),
+        if (unread > 0)
+          PositionedDirectional(
+            top: -1,
+            end: -1,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: JadalColors.primaryOrange,
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: DebateTheme.surfaceElevated(context), width: 1.5),
+              ),
+              child: Text(
+                unread > 9 ? '9+' : '$unread',
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  color: Colors.white,
+                  fontSize: 9,
+                  fontWeight: FontWeight.w800,
+                  height: 1,
+                ),
+              ),
+            ),
+          ),
+      ],
     );
   }
 }

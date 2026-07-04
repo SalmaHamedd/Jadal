@@ -5,6 +5,7 @@ import '../../domain/debate_registration.dart';
 import '../models/debate_list_model.dart';
 import '../models/debate_result_model.dart';
 import '../models/live_state_model.dart';
+import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
 
 /// REST surface for the backend live-debate mode (§6/§7). All calls send the
@@ -88,4 +89,12 @@ abstract class LiveDebateRepository {
   /// `POST /debates/{id}/register` — self-register as a team / solo debater /
   /// judge. Returns the backend's (bilingual) success message on 201.
   Future<Either<Failure, String>> register(DebateRegistration request);
+
+  /// V12 §1 — `GET /debates/{id}/registerable-teams`: the teams the caller may
+  /// register for this debate (each with an eligibility flag).
+  Future<Either<Failure, RegisterableTeams>> getRegisterableTeams(int debateId);
+
+  /// V12 §3 — `GET /debates/{id}/registrations`: who registered so far, split
+  /// into teams / judges / solo (for the three registrant dialogs).
+  Future<Either<Failure, DebateRegistrations>> getRegistrations(int debateId);
 }

@@ -9,6 +9,7 @@ import 'package:jadal_app/features/profile/presentation/screens/profile_screen.d
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../../live_debate/presentation/pages/debate_list_screen.dart';
 import '../cubit/login_cubit.dart';
@@ -56,8 +57,6 @@ class _LoginScreenState extends State<LoginScreen> {
     final size = mq.size;
     final isMobile = context.isMobile;
 
-    final scaffoldBg =
-    isDark ? JadalColors.darkSurface : JadalColors.lightBackground;
     final cardBg = isDark ? JadalColors.darkBackground : JadalColors.lightSurface;
     final textPrimary =
     isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
@@ -70,8 +69,9 @@ class _LoginScreenState extends State<LoginScreen> {
     final logoSize = isMobile ? 65.0 : 80.0;
 
     return Scaffold(
-      backgroundColor: scaffoldBg,
-      body: Stack(
+      backgroundColor: Colors.transparent,
+      body: JadalGradientBackground(
+        child: Stack(
         fit: StackFit.expand,
         children: [
           Positioned(
@@ -291,6 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ],
+        ),
       ),
     );
   }

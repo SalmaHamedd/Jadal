@@ -389,6 +389,13 @@ class AppLocalizationsAr extends AppLocalizations {
   String get messageHint => 'راسل فريقك…';
 
   @override
+  String get newMessages => 'رسائل جديدة';
+
+  @override
+  String get micMutedWhileSpeaking =>
+      'حان دورك — لكن الميكروفون مغلق. افتحه ليسمعك الجميع.';
+
+  @override
   String get submitResult => 'إرسال النتيجة';
 
   @override

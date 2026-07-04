@@ -197,6 +197,19 @@ abstract class DebateController extends Cubit<DebateStates> {
 
   void setLobbyMode(bool enabled);
 
+  /// Team-chat messages the local user hasn't seen yet (chat closed when they
+  /// arrived). Drives the unread dot on the toolbar chat button. Default 0.
+  int get unreadTeamChatCount => 0;
+
+  /// Told by the chat dialog when it opens/closes so inbound messages only count
+  /// as "unread" while the chat is closed. Default no-op.
+  void setTeamChatOpen(bool open) {}
+
+  /// The chair's next-stage request is currently in flight → the room shows a
+  /// blocking loading overlay to prevent a double-tap skipping a speech. Default
+  /// false (only the server-driven cubit sets it).
+  bool get isAdvancingStage => false;
+
   // ── Intro phase + chair timer control (V11) ─────────────────────────────────
   /// The live session has started but no speech yet (chair welcome). Test mode:
   /// always false (the mock goes straight to a speech).
@@ -220,6 +233,15 @@ abstract class DebateController extends Cubit<DebateStates> {
   void forceCameraOff(String targetSid);
   void sendTeamChat({required String teamId, required String message});
   List<TeamChatMessage> chatFor(String viewerTeamId);
+
+  /// The local user's own team id (prop if they're on it, else opp) — used to
+  /// scope team chat and its unread counter to the correct side.
+  String get myTeamId {
+    final me = data.currentUserId;
+    final prop = data.propositionTeam;
+    if (prop.debaterById(me) != null) return prop.teamId;
+    return data.oppositionTeam.teamId;
+  }
 
   // ── Moderation publish-lock (§U4b) ─────────────────────────────────────────
   // "Mute all = prevent publishing" + per-user lock. Concrete no-op defaults so

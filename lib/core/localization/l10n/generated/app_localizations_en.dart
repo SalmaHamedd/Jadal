@@ -389,6 +389,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get messageHint => 'Message your team…';
 
   @override
+  String get newMessages => 'New messages';
+
+  @override
+  String get micMutedWhileSpeaking =>
+      'You\'re on — but your mic is off. Unmute to be heard.';
+
+  @override
   String get submitResult => 'Submit result';
 
   @override

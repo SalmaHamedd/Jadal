@@ -15,6 +15,7 @@ import '../../domain/debate_registration.dart';
 import '../models/debate_list_model.dart';
 import '../models/debate_result_model.dart';
 import '../models/live_state_model.dart';
+import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
 import 'live_debate_repository.dart';
 
@@ -317,5 +318,21 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
         reqBody: body);
     // Surface the backend's bilingual success message ("…| Registered…").
     return res.map((b) => asString(b?['message']) ?? 'Registered successfully.');
+  }
+
+  @override
+  Future<Either<Failure, RegisterableTeams>> getRegisterableTeams(int debateId) async {
+    final uri = Uri.parse(ApiConstants.registerableTeamsUrl(debateId));
+    final res = await _safe('registerable-teams[$debateId]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return _model(res, RegisterableTeams.fromJson);
+  }
+
+  @override
+  Future<Either<Failure, DebateRegistrations>> getRegistrations(int debateId) async {
+    final uri = Uri.parse(ApiConstants.registrationsUrl(debateId));
+    final res = await _safe('registrations[$debateId]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return _model(res, DebateRegistrations.fromJson);
   }
 }

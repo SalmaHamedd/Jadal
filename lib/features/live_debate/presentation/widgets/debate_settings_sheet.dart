@@ -6,7 +6,6 @@ import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
-import 'team_chat_dialog.dart';
 
 /// The 3-dots settings menu (§8.5): mute-all, open-lobby toggle, team chat,
 /// leave-with-confirm and the (test-only) theme toggle.
@@ -60,8 +59,10 @@ class DebateSettingsSheet {
                       Navigator.of(sheetCtx).pop();
                     },
                   ),
-                // Chair-only: open-lobby / stage control (§8).
-                if (cubit.canControlStage)
+                // Chair-only: open-lobby / stage control (§8). Hidden once the
+                // speeches are done (result phase / waiting / shared result) — the
+                // room stays in the open lobby then, so the toggle is meaningless.
+                if (cubit.canControlStage && !cubit.resultPhaseOpen)
                   _Item(
                     icon: cubit.isLobbyMode ? Icons.grid_view_rounded : Icons.grid_on_rounded,
                     label: loc.openLobbyMode,
@@ -75,22 +76,6 @@ class DebateSettingsSheet {
                     onTap: () {
                       cubit.setLobbyMode(!cubit.isLobbyMode);
                       Navigator.of(sheetCtx).pop();
-                    },
-                  ),
-                // Debater-only (not the current speaker): team chat (§8).
-                if (cubit.canOpenChat)
-                  _Item(
-                    icon: Icons.chat_rounded,
-                    label: loc.teamChat,
-                    onTap: () {
-                      Navigator.of(sheetCtx).pop();
-                      showDialog(
-                        context: context,
-                        builder: (_) => BlocProvider.value(
-                          value: cubit,
-                          child: TeamChatDialog(teamId: _myTeamId(cubit)),
-                        ),
-                      );
                     },
                   ),
                 // FE-6: chair shares the STORED result from the LIVE room (not the
@@ -141,14 +126,6 @@ class DebateSettingsSheet {
     );
   }
 
-  /// The viewer's own team id (so team chat is scoped correctly for either side).
-  static String _myTeamId(DebateController cubit) {
-    final me = cubit.data.currentUserId;
-    final prop = cubit.data.propositionTeam;
-    if (prop.debaterById(me) != null) return prop.teamId;
-    return cubit.data.oppositionTeam.teamId;
-  }
-
   static Future<void> _confirmLeave(
       BuildContext context, BuildContext sheetCtx, DebateController cubit) async {
     final loc = context.loc;
@@ -171,12 +148,16 @@ class DebateSettingsSheet {
       ),
     );
     if (confirmed == true) {
-      // Pop the sheet + the room FIRST (→ rooms list, a single pop), then
-      // disconnect so the room's disconnect-listener doesn't pop a second time
-      // (which used to overshoot to the debate detail screen, §U4b).
-      if (sheetCtx.mounted) Navigator.of(sheetCtx).pop();
-      if (context.mounted) Navigator.of(context).maybePop();
+      if (!context.mounted) return;
+      // Leave → back to the debate DETAILS screen, not the rooms list (§UX). The
+      // stack is Details → RoomsList(lobby) → Room, so we pop the settings sheet,
+      // then the room (its disconnect-listener is now gone, so it can't pop again),
+      // disconnect while the lobby still owns the cubit, then pop the rooms list.
+      final nav = Navigator.of(context);
+      if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(); // close settings sheet
+      nav.pop(); // room → rooms list
       await cubit.disconnect();
+      if (nav.mounted && nav.canPop()) nav.pop(); // rooms list → details
     }
   }
 

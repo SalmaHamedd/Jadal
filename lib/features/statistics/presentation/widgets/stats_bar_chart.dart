@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 import '../../data/models/debater_stats_models.dart';
 import 'stats_theme.dart';
 
+/// Horizontal footprint of a single bar = caption width (28) + 2×padding (5).
+/// Groups are sized as `barCount × _kBarSlot` so every bar fits exactly and the
+/// group never overflows — extra bars just widen the group and scroll.
+const double _kBarSlot = 38;
+const double _kBarCaptionWidth = 28;
+const double _kBarHPad = 5;
+
 /// A grouped bar chart for the bucketed stats (win-rate / avg-score /
 /// best-speaker). The whole point is the *motion*: every bar's height is driven
 /// by a [TweenAnimationBuilder], so when the filter changes and new numbers
@@ -95,14 +102,23 @@ class _BucketGroup extends StatelessWidget {
   Widget build(BuildContext context) {
     // Align this bucket's bars to the chart's series order so colours stay put.
     final byKey = {for (final s in bucket.series) s.key: s};
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 10),
+    // Each group is wide enough that its (two-line) label is readable — so only
+    // ~3–4 buckets show at once and the rest scroll, instead of cramming many
+    // unreadable columns. Multi-series groups grow with their bar count: we size
+    // the group to fit *every* bar (each bar's footprint is 20px + 2×7 padding =
+    // 34px) with no upper cap, so when comparing by position the group simply
+    // gets wider and the outer horizontal scroll takes over — bars never spill
+    // past the box (the old 360 cap caused the out-of-bounds overflow).
+    final groupWidth = (keys.length * _kBarSlot).clamp(80.0, double.infinity);
+    return SizedBox(
+      width: groupWidth,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           SizedBox(
             height: chartHeight,
             child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 for (final k in keys)
@@ -118,22 +134,66 @@ class _BucketGroup extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 8),
-          SizedBox(
-            width: keys.length * 30,
-            child: Text(
-              bucket.label,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 11.5,
-                fontWeight: FontWeight.w700,
-                color: StatsTheme.textSecondary(context),
-              ),
+          _BucketLabel(raw: bucket.label),
+        ],
+      ),
+    );
+  }
+}
+
+/// The x-axis label for a bucket. A `YYYY-MM` bucket renders as the month name
+/// over the year (e.g. "May" / "2025"); a `YYYY` bucket is just the year; and
+/// the `all` bucket reads "All time".
+class _BucketLabel extends StatelessWidget {
+  final String raw;
+  const _BucketLabel({required this.raw});
+
+  static const _months = [
+    'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+    'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final primary = StatsTheme.textPrimary(context);
+    final muted = StatsTheme.textSecondary(context);
+
+    final parts = raw.split('-');
+    if (parts.length == 2 &&
+        int.tryParse(parts[0]) != null &&
+        int.tryParse(parts[1]) != null) {
+      final m = int.parse(parts[1]).clamp(1, 12);
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            _months[m - 1],
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 12,
+              fontWeight: FontWeight.w800,
+              color: primary,
             ),
           ),
+          Text(
+            parts[0],
+            style: TextStyle(fontFamily: 'Cairo', fontSize: 10, color: muted),
+          ),
         ],
+      );
+    }
+
+    final text = raw.toLowerCase() == 'all' ? 'All time' : raw;
+    return Text(
+      text,
+      maxLines: 1,
+      overflow: TextOverflow.ellipsis,
+      textAlign: TextAlign.center,
+      style: TextStyle(
+        fontFamily: 'Cairo',
+        fontSize: 12,
+        fontWeight: FontWeight.w700,
+        color: primary,
       ),
     );
   }
@@ -160,7 +220,7 @@ class _Bar extends StatelessWidget {
     final fraction = axisMax <= 0 ? 0.0 : value / axisMax;
 
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 5),
+      padding: const EdgeInsets.symmetric(horizontal: _kBarHPad),
       child: TweenAnimationBuilder<double>(
         // Animating `end` makes the bar grow on first paint and *morph* to the
         // new height whenever the filters change the value.
@@ -172,16 +232,24 @@ class _Bar extends StatelessWidget {
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              // Caption fades in as the bar approaches full height.
+              // Caption fades in as the bar approaches full height. Constrained
+              // to the bar's slot so a wide value (e.g. "100%") can never make
+              // the column wider than its footprint and overflow the group.
               Opacity(
                 opacity: (t * 1.4).clamp(0.0, 1.0),
-                child: Text(
-                  entry.caption(kind),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 10.5,
-                    fontWeight: FontWeight.w800,
-                    color: StatsTheme.textPrimary(context),
+                child: SizedBox(
+                  width: _kBarCaptionWidth,
+                  child: Text(
+                    entry.caption(kind),
+                    maxLines: 1,
+                    overflow: TextOverflow.visible,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontFamily: 'Cairo',
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w800,
+                      color: StatsTheme.textPrimary(context),
+                    ),
                   ),
                 ),
               ),

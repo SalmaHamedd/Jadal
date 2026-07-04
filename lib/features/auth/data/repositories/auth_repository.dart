@@ -33,6 +33,8 @@ class ApiAuthRepository implements AuthRepository {
         await PreferencesDatabase().setToken(token);
         await PreferencesDatabase().setValue('user_id', data['user']['id']);
         final user = UserModel.fromJson(data['user']);
+        // Cache the account role for role-gated UI (registration options, etc.).
+        await TokenStorage.saveRole(user.role);
         return Right(user);
       }
 

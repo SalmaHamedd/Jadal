@@ -6,6 +6,7 @@ import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../data/models/debate_models.dart';
 import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
+import 'call_indicators.dart';
 
 /// One debater card in the speakers section (§8.3 C). Role header on top, then a
 /// body that reflects **real presence**: the debater's camera (if on), their
@@ -30,6 +31,13 @@ class SpeakerCard extends StatelessWidget {
   final bool showVideo;
   final VideoTrack? videoTrack;
 
+  /// Mic state for the small in-card speaking/mute badge (present debaters only).
+  final bool micOn;
+  final bool isSpeaking;
+
+  /// Live 0..1 level for the badge's meter (local user only; null otherwise).
+  final double Function()? levelProvider;
+
   /// Tapping the POI bubble (only meaningful for the current main speaker).
   final VoidCallback? onPoiTap;
 
@@ -43,6 +51,9 @@ class SpeakerCard extends StatelessWidget {
     this.isPresent = true,
     this.showVideo = false,
     this.videoTrack,
+    this.micOn = false,
+    this.isSpeaking = false,
+    this.levelProvider,
     this.onPoiTap,
   });
 
@@ -136,6 +147,20 @@ class SpeakerCard extends StatelessWidget {
                                   ),
                                 ),
                               ),
+                            // Small speaking / mute badge — sized down so it fits
+                            // the little card (§UX). Muted → red mic-off; talking →
+                            // animated bars in the side colour.
+                            PositionedDirectional(
+                              top: 4,
+                              end: 4,
+                              child: MicVolumeIndicator(
+                                micOn: micOn,
+                                isSpeaking: isSpeaking,
+                                scale: 0.62,
+                                activeColor: sideColor,
+                                levelProvider: levelProvider,
+                              ),
+                            ),
                             PositionedDirectional(
                               bottom: 6,
                               start: 8,

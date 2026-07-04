@@ -842,6 +842,18 @@ abstract class AppLocalizations {
   /// **'Message your team…'**
   String get messageHint;
 
+  /// No description provided for @newMessages.
+  ///
+  /// In en, this message translates to:
+  /// **'New messages'**
+  String get newMessages;
+
+  /// No description provided for @micMutedWhileSpeaking.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re on — but your mic is off. Unmute to be heard.'**
+  String get micMutedWhileSpeaking;
+
   /// No description provided for @submitResult.
   ///
   /// In en, this message translates to:

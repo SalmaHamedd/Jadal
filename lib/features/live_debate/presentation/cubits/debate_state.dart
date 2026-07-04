@@ -50,6 +50,11 @@ class LobbyModeChangedState extends DebateStates {}
 
 class TeamChatUpdatedState extends DebateStates {}
 
+/// The chair's next-stage request is in flight → the room shows a blocking
+/// loading overlay so a laggy server can't be double-tapped into skipping a
+/// speech (§UX).
+class StageAdvancingChangedState extends DebateStates {}
+
 class DebateFinishedState extends DebateStates {}
 
 /// Backend mode: a fresh `live-state` was fetched and applied (§7) — rebuild

@@ -62,6 +62,11 @@ class MainSpeakerCard extends StatelessWidget {
               );
         final speaker = cubit.debaterAt(side, slot.orderIndex);
         final speakerPresent = cubit.isUserPresent(speaker.id);
+        // §UX: if the person holding the floor is ME and my mic is off, nudge me —
+        // I'm "on" but no one can hear me.
+        final iAmMutedSpeaker = cubit.isLocalUserId(speaker.id) &&
+            speakerPresent &&
+            !cubit.micOnForUser(speaker.id);
         const cardRadius = widgetBorderRadius + 4;
         final total = cubit.timeline.totalTrackedSeconds;
         final progress = total <= 0
@@ -172,6 +177,14 @@ class MainSpeakerCard extends StatelessWidget {
                   end: 0,
                   child: Center(child: _RoleChip(label: cubit.roleLabelForSlot(slot), color: accent)),
                 ),
+                // "You're muted" nudge for the local speaker (§UX).
+                if (iAmMutedSpeaker)
+                  Positioned(
+                    left: 14,
+                    right: 14,
+                    bottom: 34,
+                    child: Center(child: _MutedSpeakerHint(text: loc.micMutedWhileSpeaking)),
+                  ),
                 // Timer (top-start) — always visible.
                 PositionedDirectional(
                   top: 12,
@@ -286,6 +299,48 @@ class _ProgressRingPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _ProgressRingPainter old) =>
       old.progress != progress || old.gradient != gradient;
+}
+
+/// A gentle "you're muted" pill shown on the main card when the local user holds
+/// the floor with their mic off (§UX).
+class _MutedSpeakerHint extends StatelessWidget {
+  final String text;
+  const _MutedSpeakerHint({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    const red = Color(0xFFE53935);
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: Colors.black.withValues(alpha: 0.62),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: red.withValues(alpha: 0.8), width: 1.2),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Icon(Icons.mic_off_rounded, color: red, size: 16),
+          const SizedBox(width: 8),
+          Flexible(
+            child: Text(
+              text,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontFamily: 'Cairo',
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 12,
+                height: 1.3,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _RoleChip extends StatelessWidget {

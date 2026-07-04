@@ -4,10 +4,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../data/models/debater_stats_models.dart';
 import 'stats_theme.dart';
 
-/// Stat 5 — the improvement index. A horizontal −50..+50 meter with an animated
-/// thumb at the index (coloured by band), an avg-score sparkline that draws
-/// itself in, and the component breakdown. Falls back to a friendly empty state
-/// when there isn't enough history, while still showing the sparkline.
+/// Stat 5 — the improvement index. A −50..+50 **scale** (red → neutral → green)
+/// with a fixed needle marking where the debater sits (a read-out, not a slider
+/// you can drag), an avg-score sparkline, and the component breakdown. Numbers
+/// read green when positive and red when negative, matching the scale's ends.
 class StatsImprovementView extends StatelessWidget {
   final ImprovementStat data;
   const StatsImprovementView({super.key, required this.data});
@@ -20,19 +20,13 @@ class StatsImprovementView extends StatelessWidget {
     'sharp_decline': 'Sharp decline',
   };
 
-  Color _bandColor(String? band) => switch (band) {
-        'strong_upward' => const Color(0xFF2E9E5B),
-        'improving' => const Color(0xFF5BB97A),
-        'stable' => JadalColors.judgesGrey,
-        'regressing' => const Color(0xFFE8954B),
-        'sharp_decline' => const Color(0xFFE53935),
-        _ => JadalColors.judgesGrey,
-      };
+  static Color signColor(double v) =>
+      v >= 0 ? JadalColors.positiveGreen : JadalColors.negativeRed;
 
   @override
   Widget build(BuildContext context) {
     final hasIndex = data.hasEnoughHistory;
-    final color = _bandColor(data.band);
+    final color = hasIndex ? signColor(data.index!) : JadalColors.judgesGrey;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -65,9 +59,9 @@ class StatsImprovementView extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 16),
-          _Meter(index: data.index!, color: color),
-          const SizedBox(height: 20),
+          const SizedBox(height: 18),
+          _Gauge(index: data.index!),
+          const SizedBox(height: 22),
         ] else ...[
           _InsufficientBanner(reason: data.reason),
           const SizedBox(height: 16),
@@ -92,56 +86,146 @@ class StatsImprovementView extends StatelessWidget {
   }
 }
 
-class _Meter extends StatelessWidget {
+/// The static read-out scale: a muted red→neutral→green track with a
+/// sign-coloured fill sweeping out from the zero midpoint to the debater's
+/// index, topped by a slim caret pointer. Reading it as a measurement (how far
+/// from neutral, and which way) — not a slider you can drag. −50/0/+50 labels
+/// anchor the scale.
+class _Gauge extends StatelessWidget {
   final double index; // −50..+50
-  final Color color;
-  const _Meter({required this.index, required this.color});
+  const _Gauge({required this.index});
+
+  static const double _trackH = 9;
 
   @override
   Widget build(BuildContext context) {
     final fraction = ((index + 50) / 100).clamp(0.0, 1.0);
-    return LayoutBuilder(
-      builder: (context, c) {
-        return SizedBox(
-          height: 26,
-          child: Stack(
-            alignment: Alignment.centerLeft,
-            children: [
-              Container(
-                height: 10,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(6),
-                  gradient: const LinearGradient(
-                    colors: [Color(0xFFE53935), JadalColors.judgesGrey, Color(0xFF2E9E5B)],
-                  ),
-                ),
-              ),
-              TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: fraction),
+    final sign = StatsImprovementView.signColor(index);
+    final muted = StatsTheme.textSecondary(context);
+
+    return Column(
+      children: [
+        SizedBox(
+          height: 24,
+          child: LayoutBuilder(
+            builder: (context, c) {
+              final w = c.maxWidth;
+              return TweenAnimationBuilder<double>(
+                // Animate out from the neutral midpoint so the fill visibly
+                // "grows" toward the score in its direction.
+                tween: Tween(begin: 0.5, end: fraction),
                 duration: const Duration(milliseconds: 900),
                 curve: Curves.easeOutCubic,
-                builder: (context, t, _) => Padding(
-                  padding: EdgeInsets.only(left: (c.maxWidth - 22) * t),
-                  child: Container(
-                    width: 22,
-                    height: 22,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: color,
-                      border: Border.all(color: Colors.white, width: 3),
-                      boxShadow: [
-                        BoxShadow(color: color.withValues(alpha: 0.5), blurRadius: 8),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ],
+                builder: (context, t, _) {
+                  final mid = w / 2;
+                  final x = (w * t).clamp(0.0, w);
+                  final fillLeft = x < mid ? x : mid;
+                  final fillWidth = (x - mid).abs();
+                  const caretW = 13.0;
+                  return Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      // Muted base track — the full scale.
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: Container(
+                          height: _trackH,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(_trackH / 2),
+                            gradient: LinearGradient(
+                              colors: [
+                                JadalColors.negativeRed.withValues(alpha: 0.30),
+                                muted.withValues(alpha: 0.22),
+                                JadalColors.positiveGreen.withValues(alpha: 0.30),
+                              ],
+                              stops: const [0.0, 0.5, 1.0],
+                            ),
+                          ),
+                        ),
+                      ),
+                      // Deviation fill from the zero midpoint to the value.
+                      Positioned(
+                        left: fillLeft,
+                        bottom: 0,
+                        child: Container(
+                          width: fillWidth.clamp(0.0, w),
+                          height: _trackH,
+                          decoration: BoxDecoration(
+                            color: sign,
+                            borderRadius: BorderRadius.circular(_trackH / 2),
+                            boxShadow: [
+                              BoxShadow(
+                                color: sign.withValues(alpha: 0.35),
+                                blurRadius: 6,
+                                spreadRadius: -1,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Subtle zero anchor tick at the midpoint.
+                      Positioned(
+                        left: mid - 0.5,
+                        bottom: -2,
+                        child: Container(
+                          width: 1,
+                          height: _trackH + 4,
+                          color: muted.withValues(alpha: 0.55),
+                        ),
+                      ),
+                      // Slim caret pointing down at the value (an annotation, not
+                      // a draggable handle).
+                      Positioned(
+                        left: (x - caretW / 2).clamp(0.0, w - caretW),
+                        top: 0,
+                        child: CustomPaint(
+                          size: const Size(caretW, 8),
+                          painter: _CaretPainter(sign),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
           ),
-        );
-      },
+        ),
+        const SizedBox(height: 6),
+        Row(
+          children: [
+            Text('−50', style: _scaleStyle(muted)),
+            const Spacer(),
+            Text('0', style: _scaleStyle(muted)),
+            const Spacer(),
+            Text('+50', style: _scaleStyle(muted)),
+          ],
+        ),
+      ],
     );
   }
+
+  TextStyle _scaleStyle(Color c) =>
+      TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w700, color: c);
+}
+
+class _CaretPainter extends CustomPainter {
+  final Color color;
+  _CaretPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final path = Path()
+      ..moveTo(0, 0)
+      ..lineTo(size.width, 0)
+      ..lineTo(size.width / 2, size.height)
+      ..close();
+    canvas.drawPath(path, Paint()..color = color);
+  }
+
+  @override
+  bool shouldRepaint(covariant _CaretPainter old) => old.color != color;
 }
 
 class _Sparkline extends StatelessWidget {
@@ -200,7 +284,6 @@ class _SparklinePainter extends CustomPainter {
       return Offset(x, y);
     }
 
-    // Reveal the line left-to-right by drawing only up to `progress`.
     final shown = (progress * (n - 1)).clamp(0.0, (n - 1).toDouble());
     final full = shown.floor();
     final frac = shown - full;
@@ -215,7 +298,6 @@ class _SparklinePainter extends CustomPainter {
       path.lineTo(a.dx + (b.dx - a.dx) * frac, a.dy + (b.dy - a.dy) * frac);
     }
 
-    // Area fill under the revealed segment.
     final last = full < n - 1 && frac > 0
         ? Offset(
             pointAt(full).dx + (pointAt(full + 1).dx - pointAt(full).dx) * frac,
@@ -238,7 +320,6 @@ class _SparklinePainter extends CustomPainter {
         ..strokeJoin = StrokeJoin.round,
     );
 
-    // Dots on revealed points.
     final dot = Paint()..color = line;
     for (var i = 0; i <= full; i++) {
       canvas.drawCircle(pointAt(i), 3, dot);
@@ -256,10 +337,10 @@ class _Components extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final rows = <(String, String)>[
-      ('Score trend', c.slopeScore.toStringAsFixed(1)),
-      ('Win-rate trend', c.slopeWinrate.toStringAsFixed(2)),
-      ('Consistency', c.consistency.toStringAsFixed(2)),
+    final rows = <(String, double, String)>[
+      ('Score trend', c.slopeScore, c.slopeScore.toStringAsFixed(1)),
+      ('Win-rate trend', c.slopeWinrate, c.slopeWinrate.toStringAsFixed(2)),
+      ('Consistency', c.consistency, c.consistency.toStringAsFixed(2)),
     ];
     return Column(
       children: [
@@ -278,12 +359,12 @@ class _Components extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  r.$2,
+                  r.$3,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 13,
                     fontWeight: FontWeight.w800,
-                    color: StatsTheme.textPrimary(context),
+                    color: StatsImprovementView.signColor(r.$2),
                   ),
                 ),
               ],
