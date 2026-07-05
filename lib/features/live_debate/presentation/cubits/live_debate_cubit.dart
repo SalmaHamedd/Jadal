@@ -165,6 +165,26 @@ class LiveDebateCubit extends DebateController {
   final Set<String> _cameraLockedIds = {};
   bool _roomClosed = false;
 
+  // ── Muted-but-speaking detection ─────────────────────────────────────────────
+  // While the local user is the main speaker or a judge WITH their mic off, an
+  // unpublished probe audio track + the LiveKit visualizer watch the real mic
+  // level; sustained voice above the threshold flips [mutedSpeakingActive] and
+  // the room shows the top banner. Nothing is ever published from the probe.
+  LocalAudioTrack? _mutedVoiceTrack;
+  AudioVisualizer? _mutedVoiceVisualizer;
+  EventsListener<AudioVisualizerEvent>? _mutedVoiceListener;
+  bool _mutedSpeakingDetected = false;
+  bool _mutedBannerDismissed = false;
+  int _mutedVoiceHits = 0;
+  bool _mutedMonitorStarting = false;
+
+  /// Average band magnitude (0..1) the voice must exceed to count as speaking.
+  static const double kMutedVoiceThreshold = 0.25;
+
+  /// Consecutive visualizer windows above the threshold before the banner shows
+  /// (debounces coughs / bumps).
+  static const int kMutedVoiceHitsToShow = 3;
+
   /// Unread team-chat messages (arrived while the chat dialog was closed) →
   /// drives the toolbar chat button's notification dot. Reset when the chat opens.
   int _unreadTeamChat = 0;
@@ -288,6 +308,12 @@ class LiveDebateCubit extends DebateController {
     _logLiveStateDigest(s);
     _logRoleResolution('live-state applied');
     _maybeAnnounceAuthorityGain();
+    // Media rights depend on the stage/format (live debate is audio-only): the
+    // moment this device loses a right its own track goes off — e.g. the chair's
+    // intro camera the instant the first speaker starts. Also re-decide whether
+    // the muted-voice probe should run (the floor / judge role may have moved).
+    _enforcePublishLock();
+    _syncMutedVoiceMonitor();
     if (s.debate.isCompleted) emit(DebateFinishedState());
     emit(LiveStateUpdatedState());
   }
@@ -878,6 +904,10 @@ class LiveDebateCubit extends DebateController {
         '| userId=$_myUserId canPublishNow=$canPublishNow');
     _room?.localParticipant?.setMicrophoneEnabled(isMicEnabled);
     localAudioTrack = _localAudioTrack();
+    // Opening the mic resolves the "talking while muted" situation → clear the
+    // banner and (re)decide whether the probe should run at all.
+    if (isMicEnabled) _clearMutedSpeaking();
+    _syncMutedVoiceMonitor();
     emit(MicToggledState());
     emit(LocalTrackUpdatedState());
   }
@@ -891,6 +921,118 @@ class LiveDebateCubit extends DebateController {
     localVideoTrack = _localVideoTrack();
     emit(CameraToggledState());
     emit(LocalTrackUpdatedState());
+  }
+
+  // ── Muted-but-speaking detection ─────────────────────────────────────────────
+
+  @override
+  bool get mutedSpeakingActive => _mutedSpeakingDetected && !_mutedBannerDismissed;
+
+  @override
+  void dismissMutedSpeakingBanner() {
+    if (_mutedBannerDismissed) return;
+    dlog('media', 'muted-speaking banner DISMISSED (swipe)');
+    _mutedBannerDismissed = true;
+    emit(MutedSpeakingChangedState());
+  }
+
+  /// The probe only runs while it can matter: connected, mic OFF, and the local
+  /// user is either the one holding the floor or a judge.
+  bool get _shouldMonitorMutedVoice =>
+      _room != null &&
+      !isMicEnabled &&
+      (_iAmCurrentSpeaker || _debateRole.isJudge);
+
+  /// Start/stop the probe to match [_shouldMonitorMutedVoice]. Cheap to call on
+  /// every mic toggle / live-state apply — it only acts on a transition.
+  Future<void> _syncMutedVoiceMonitor() async {
+    final want = _shouldMonitorMutedVoice;
+    if (want && _mutedVoiceTrack == null && !_mutedMonitorStarting) {
+      _mutedMonitorStarting = true;
+      try {
+        final track = await LocalAudioTrack.create(const AudioCaptureOptions());
+        // Condition may have flipped while getUserMedia was in flight.
+        if (!_shouldMonitorMutedVoice || isClosed) {
+          await track.dispose();
+          return;
+        }
+        final visualizer = createVisualizer(
+          track,
+          options: const AudioVisualizerOptions(barCount: 7),
+        );
+        final listener = visualizer.createListener()
+          ..on<AudioVisualizerEvent>(_onMutedVoiceEvent);
+        _mutedVoiceTrack = track;
+        _mutedVoiceVisualizer = visualizer;
+        _mutedVoiceListener = listener;
+        await visualizer.start();
+        dlog('media', 'muted-voice probe STARTED '
+            '(threshold=$kMutedVoiceThreshold, role=${_debateRole.wire})');
+      } catch (e) {
+        dlog('media', 'muted-voice probe failed to start: $e');
+      } finally {
+        _mutedMonitorStarting = false;
+      }
+    } else if (!want && _mutedVoiceTrack != null) {
+      await _stopMutedVoiceMonitor();
+    }
+  }
+
+  void _onMutedVoiceEvent(AudioVisualizerEvent e) {
+    if (!_shouldMonitorMutedVoice) return;
+    double sum = 0;
+    var n = 0;
+    for (final v in e.event) {
+      if (v is num) {
+        sum += v.toDouble();
+        n++;
+      }
+    }
+    final avg = n == 0 ? 0.0 : sum / n;
+    if (avg >= kMutedVoiceThreshold) {
+      _mutedVoiceHits++;
+      if (_mutedVoiceHits >= kMutedVoiceHitsToShow && !_mutedSpeakingDetected) {
+        _mutedSpeakingDetected = true;
+        dlog('media', 'MUTED-SPEAKING detected (avg=${avg.toStringAsFixed(2)} '
+            '≥ $kMutedVoiceThreshold) → showing banner');
+        if (!isClosed) emit(MutedSpeakingChangedState());
+      }
+    } else {
+      _mutedVoiceHits = 0;
+    }
+  }
+
+  Future<void> _stopMutedVoiceMonitor() async {
+    final track = _mutedVoiceTrack;
+    final visualizer = _mutedVoiceVisualizer;
+    final listener = _mutedVoiceListener;
+    if (track == null && visualizer == null) return;
+    _mutedVoiceTrack = null;
+    _mutedVoiceVisualizer = null;
+    _mutedVoiceListener = null;
+    dlog('media', 'muted-voice probe STOPPED');
+    try {
+      await visualizer?.stop();
+      await visualizer?.dispose();
+    } catch (_) {}
+    try {
+      await listener?.dispose();
+    } catch (_) {}
+    try {
+      await track?.stop();
+      await track?.dispose();
+    } catch (_) {}
+    _clearMutedSpeaking();
+  }
+
+  /// Reset detection + the swipe-dismiss suppression (mic opened / role or
+  /// speaker changed / probe stopped).
+  void _clearMutedSpeaking() {
+    _mutedVoiceHits = 0;
+    final wasVisible = mutedSpeakingActive;
+    _mutedSpeakingDetected = false;
+    _mutedBannerDismissed = false;
+    if (wasVisible && !isClosed) emit(MutedSpeakingChangedState());
   }
 
   @override
@@ -1347,6 +1489,9 @@ class LiveDebateCubit extends DebateController {
       },
       (_) async {
         await _refreshLiveState(); // picks up live_started_at → isIntro
+        // Open lobby → live session: the media sweep (mute all + cameras off).
+        // The chair may still open their own camera during the intro.
+        _enforceLiveFormatMedia();
         emit(LobbyModeChangedState());
       },
     );
@@ -1382,12 +1527,14 @@ class LiveDebateCubit extends DebateController {
         emit(LobbyModeChangedState());
       }
     } else if (_lobbyOverlay) {
-      // Resume the paused speaker exactly where they stopped.
+      // Resume the paused speaker exactly where they stopped. Back to the live
+      // format ⇒ the media sweep: mute all + every camera off (audio-only).
       dlog('action', 'OPEN-LOBBY resume ▸ continue stage $_currentStage');
       _lobbyOverlay = false;
       _publish(LiveDebateSocket.lobbyOverlay(enabled: false));
       repo.setTimer(debateId: debateId, action: 'resume');
       resumeTimer();
+      _enforceLiveFormatMedia();
       emit(LobbyModeChangedState());
     } else if (_currentStage <= 0 && !isIntro) {
       // C3: open lobby (pre-live) → enter the INTRO (chair welcome), not P1.
@@ -1431,6 +1578,23 @@ class LiveDebateCubit extends DebateController {
       final uid = int.tryParse(p.identity);
       if (uid != null && !_isUserExempt(uid)) _publish(LiveDebateSocket.forceMute(uid));
     }
+  }
+
+  /// Entering the live-debate format ("back to debate" / "go live") always
+  /// applies: mute all (usual exemptions — judges + whoever holds the floor)
+  /// plus camera off for EVERYONE with no exemptions, since live debate renders
+  /// no video at all (the chair's intro-only camera right lives in
+  /// [canEnableCameraNow], not here). Chair-only; each remote enforces its own
+  /// side again via [_enforcePublishLock] when the new stage reaches it.
+  void _enforceLiveFormatMedia() {
+    if (!isAuthority) return;
+    dlog('action', 'live-format media sweep ▸ mute all + camera off for all');
+    muteAll();
+    for (final p in participants) {
+      final uid = int.tryParse(p.identity);
+      if (uid != null) _publish(LiveDebateSocket.forceCameraOff(uid));
+    }
+    _enforcePublishLock(); // the chair's own device follows the same rules
   }
 
   @override
@@ -1486,6 +1650,12 @@ class LiveDebateCubit extends DebateController {
 
   @override
   bool get canEnableCameraNow {
+    // The live-debate format is audio-only — video streaming is not rendered at
+    // all — so NOBODY may open a camera there (judges and viewers of every kind
+    // included). The one exception: the chair during the intro (welcome), before
+    // the first speaker starts. The open lobby / result phase (isLobbyMode) keeps
+    // the usual lock rules below.
+    if (!isLobbyMode && !(isIntro && isAuthority)) return false;
     if (_amExemptFromLock) return true;
     if (_cameraAllOff) return false;
     return !_cameraLockedIds.contains(_myUserId.toString());
@@ -1811,11 +1981,13 @@ class LiveDebateCubit extends DebateController {
   }
 
   @override
-  Future<void> sendDebateRating(int rating) async {
+  Future<void> sendDebateRating(int rating, {String? comment}) async {
+    final content = comment?.trim();
     final res = await repo.sendFeedback(
       debateId: debateId,
       type: 'rating_debate',
       rating: rating,
+      content: (content == null || content.isEmpty) ? null : content,
     );
     res.fold(
           (f) => emit(DebateErrorState(f.message)),
@@ -1831,6 +2003,7 @@ class LiveDebateCubit extends DebateController {
   Future<void> disconnect() async {
     dlog('leave', 'LEAVE ▸ local user leaving the room (userId=$_myUserId)');
     _stopLiveStatePolling();
+    await _stopMutedVoiceMonitor();
     await _room?.disconnect();
     await _roomEvents?.dispose();
     _connectionQualityTimer?.cancel();
@@ -1842,6 +2015,7 @@ class LiveDebateCubit extends DebateController {
   @override
   Future<void> close() async {
     _stopLiveStatePolling();
+    await _stopMutedVoiceMonitor();
     await _room?.dispose();
     await _roomEvents?.dispose();
     _connectionQualityTimer?.cancel();

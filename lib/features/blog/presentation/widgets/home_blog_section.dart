@@ -31,6 +31,7 @@ class HomeBlogSection extends StatelessWidget {
                     Text(
                       'أحدث المقالات',
                       style: TextStyle(
+                        fontFamily: 'Cairo',
                         fontSize: context.fontSize(18),
                         fontWeight: FontWeight.bold,
                         color: JadalColors.primaryBlue,
@@ -49,6 +50,7 @@ class HomeBlogSection extends StatelessWidget {
                         child: Text(
                           'عرض الكل',
                           style: TextStyle(
+                            fontFamily: 'Cairo',
                             color: JadalColors.primaryOrange,
                             fontWeight: FontWeight.w600,
                           ),

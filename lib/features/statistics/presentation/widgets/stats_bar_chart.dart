@@ -10,6 +10,13 @@ const double _kBarSlot = 38;
 const double _kBarCaptionWidth = 28;
 const double _kBarHPad = 5;
 
+/// Vertical space reserved under the plot for the x-axis labels, and inside the
+/// plot for the value caption above each bar. Both are HARD bounds: the label /
+/// caption render inside fixed-height boxes with a scale-down fit, so no font
+/// metric (Cairo is tall) or text scale can ever overflow the chart's bottom.
+const double _kLabelSpace = 42;
+const double _kCaptionH = 16;
+
 /// A grouped bar chart for the bucketed stats (win-rate / avg-score /
 /// best-speaker). The whole point is the *motion*: every bar's height is driven
 /// by a [TweenAnimationBuilder], so when the filter changes and new numbers
@@ -51,10 +58,11 @@ class StatsBarChart extends StatelessWidget {
           ),
         // Plot: y-axis gridlines behind, scrollable bucket groups in front.
         SizedBox(
-          height: _chartHeight + 34,
+          height: _chartHeight + _kLabelSpace,
           child: Stack(
             children: [
-              Positioned.fill(bottom: 34, child: const _GridLines(max: _axisMax)),
+              Positioned.fill(
+                  bottom: _kLabelSpace, child: const _GridLines(max: _axisMax)),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.only(left: 30),
@@ -133,8 +141,16 @@ class _BucketGroup extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 8),
-          _BucketLabel(raw: bucket.label),
+          const SizedBox(height: 6),
+          // Fixed-height slot + scale-down fit → the (two-line) label can never
+          // spill past the chart's bottom, whatever the font/scale.
+          SizedBox(
+            height: _kLabelSpace - 6,
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: _BucketLabel(raw: bucket.label),
+            ),
+          ),
         ],
       ),
     );
@@ -172,12 +188,14 @@ class _BucketLabel extends StatelessWidget {
               fontFamily: 'Cairo',
               fontSize: 12,
               fontWeight: FontWeight.w800,
+              height: 1.15,
               color: primary,
             ),
           ),
           Text(
             parts[0],
-            style: TextStyle(fontFamily: 'Cairo', fontSize: 10, color: muted),
+            style: TextStyle(
+                fontFamily: 'Cairo', fontSize: 10, height: 1.15, color: muted),
           ),
         ],
       );
@@ -228,27 +246,32 @@ class _Bar extends StatelessWidget {
         duration: const Duration(milliseconds: 750),
         curve: Curves.easeOutCubic,
         builder: (context, t, _) {
-          final barHeight = (chartHeight - 22) * t;
+          // Caption slot (_kCaptionH) + 4 gap + bar ≤ chartHeight, always.
+          final maxBar = chartHeight - _kCaptionH - 4;
+          final barHeight = (maxBar * t).clamp(2.0, maxBar);
           return Column(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               // Caption fades in as the bar approaches full height. Constrained
-              // to the bar's slot so a wide value (e.g. "100%") can never make
-              // the column wider than its footprint and overflow the group.
+              // to the bar's slot (width) AND a fixed-height box with scale-down
+              // fit (height) so a wide value / tall font can never overflow.
               Opacity(
                 opacity: (t * 1.4).clamp(0.0, 1.0),
                 child: SizedBox(
                   width: _kBarCaptionWidth,
-                  child: Text(
-                    entry.caption(kind),
-                    maxLines: 1,
-                    overflow: TextOverflow.visible,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w800,
-                      color: StatsTheme.textPrimary(context),
+                  height: _kCaptionH,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      entry.caption(kind),
+                      maxLines: 1,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontSize: 10.5,
+                        fontWeight: FontWeight.w800,
+                        height: 1.1,
+                        color: StatsTheme.textPrimary(context),
+                      ),
                     ),
                   ),
                 ),
@@ -256,7 +279,7 @@ class _Bar extends StatelessWidget {
               const SizedBox(height: 4),
               Container(
                 width: 20,
-                height: barHeight.clamp(2.0, chartHeight),
+                height: barHeight,
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.bottomCenter,

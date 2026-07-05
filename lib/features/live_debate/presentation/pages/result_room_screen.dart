@@ -196,8 +196,10 @@ void _confirmCloseNoResult(BuildContext context, DebateController cubit) {
   );
 }
 
-/// A 1–5 star rating, enabled once the result is revealed and the debate is
-/// completed (§10). Submits via [DebateController.sendDebateRating].
+/// A 1–5 star rating with an optional free-text explanation (§10). The stars
+/// stay editable — nothing is sent while picking. One request per explicit
+/// Submit tap ([DebateController.sendDebateRating]); after a submit the rating
+/// can still be changed and re-submitted ("update").
 class _RatingBar extends StatefulWidget {
   final DebateController cubit;
   const _RatingBar({required this.cubit});
@@ -207,8 +209,39 @@ class _RatingBar extends StatefulWidget {
 }
 
 class _RatingBarState extends State<_RatingBar> {
+  final _commentController = TextEditingController();
   int _rating = 0;
-  bool _sent = false;
+  int _sentRating = 0;
+  String _sentComment = '';
+  bool _sending = false;
+
+  @override
+  void dispose() {
+    _commentController.dispose();
+    super.dispose();
+  }
+
+  bool get _hasSent => _sentRating > 0;
+
+  /// Submit enabled only when there's a rating and something actually changed
+  /// since the last send — so re-tapping can't fire duplicate requests.
+  bool get _canSubmit =>
+      !_sending &&
+      _rating > 0 &&
+      (_rating != _sentRating || _commentController.text.trim() != _sentComment);
+
+  Future<void> _submit() async {
+    final rating = _rating;
+    final comment = _commentController.text.trim();
+    setState(() => _sending = true);
+    await widget.cubit.sendDebateRating(rating, comment: comment);
+    if (!mounted) return;
+    setState(() {
+      _sending = false;
+      _sentRating = rating;
+      _sentComment = comment;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -225,29 +258,22 @@ class _RatingBarState extends State<_RatingBar> {
       child: Column(
         children: [
           Text(
-            _sent ? loc.ratingThanks : loc.rateDebate,
+            _hasSent ? loc.ratingThanks : loc.rateDebate,
             style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
               color: DebateTheme.textPrimary(context),
             ),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 4),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var i = 1; i <= 5; i++)
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  onPressed: _sent
-                      ? null
-                      : () {
-                          setState(() {
-                            _rating = i;
-                            _sent = true;
-                          });
-                          widget.cubit.sendDebateRating(i);
-                        },
+                  onPressed:
+                      _sending ? null : () => setState(() => _rating = i),
                   icon: Icon(
                     i <= _rating ? Icons.star_rounded : Icons.star_outline_rounded,
                     color: const Color(0xFFF5C542),
@@ -255,6 +281,63 @@ class _RatingBarState extends State<_RatingBar> {
                   ),
                 ),
             ],
+          ),
+          const SizedBox(height: 6),
+          TextField(
+            controller: _commentController,
+            enabled: !_sending,
+            maxLines: 2,
+            minLines: 1,
+            onChanged: (_) => setState(() {}),
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: 13,
+              color: DebateTheme.textPrimary(context),
+            ),
+            decoration: InputDecoration(
+              hintText: loc.ratingCommentHint,
+              hintStyle: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 12.5,
+                color: DebateTheme.textSecondary(context),
+              ),
+              isDense: true,
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: JadalColors.primaryBlue.withValues(alpha: 0.25),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(12),
+                borderSide: BorderSide(
+                  color: JadalColors.primaryBlue.withValues(alpha: 0.25),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            height: 42,
+            child: FilledButton.icon(
+              onPressed: _canSubmit ? _submit : null,
+              icon: _sending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(
+                          strokeWidth: 2, color: Colors.white),
+                    )
+                  : const Icon(Icons.send_rounded, size: 18),
+              label: Text(
+                _hasSent ? loc.updateRating : loc.submitRating,
+                style: const TextStyle(
+                    fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+              ),
+            ),
           ),
         ],
       ),

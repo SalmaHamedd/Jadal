@@ -1,17 +1,12 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
-import 'package:jadal_app/features/profile/domain/entities/profile.dart';
-import 'package:jadal_app/features/profile/presentation/screens/profile_screen.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
-import '../../../live_debate/presentation/pages/debate_list_screen.dart';
 import '../cubit/login_cubit.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
@@ -65,56 +60,14 @@ class _LoginScreenState extends State<LoginScreen> {
     final accentLink =
     isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
 
-    final blobSize = isMobile ? 220.0 : 280.0;
     final logoSize = isMobile ? 65.0 : 80.0;
 
+    // No decorative blobs here anymore — the shared JadalGradientBackground is
+    // the whole backdrop, exactly like every other screen in the app.
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: JadalGradientBackground(
-        child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            top: 160,
-            left: -30,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.105)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: 520,
-            right: -130,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.105)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: -120,
-            right: -70,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.105)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: 770,
-            left: -80,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.105)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          SafeArea(
+        child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final maxWidth =
@@ -289,20 +242,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 );
               },
             ),
-          ),
-        ],
         ),
-      ),
-    );
-  }
-
-  Widget _blurBlob({required Color color, required double size}) {
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

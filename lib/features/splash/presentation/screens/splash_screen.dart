@@ -4,14 +4,10 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/features/splash/presentation/screens/permission_settings_dialog.dart';
-import 'package:jadal_app/features/temp_home/presentation/screens/temp_home_screen.dart';
 
-import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../di/injection_container.dart' as di;
 import '../../../auth/presentation/screens/login_screen.dart';
-import '../../../home/presentation/screens/home_screen.dart';
-import '../../../live_debate/presentation/pages/debate_list_screen.dart';
+import '../../../main/presentation/screens/main_screen.dart';
 import '../cubit/splash_cubit.dart';
 
 class SplashScreen extends StatelessWidget {
@@ -121,13 +117,12 @@ class _SplashViewState extends State<_SplashView> with TickerProviderStateMixin 
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.loc;
     final size = MediaQuery.of(context).size;
 
     return BlocListener<SplashCubit, SplashState>(
       listener: (context, state) {
         if (state is SplashNavigateToLogin) _navigate(const LoginScreen());
-        if (state is SplashNavigateToHome)  _navigate(const DebateListScreen());
+        if (state is SplashNavigateToHome)  _navigate(const MainScreen());
         if (state is SplashNavigateToPermissions) {
           PermissionSettingsDialog.show(
             context,

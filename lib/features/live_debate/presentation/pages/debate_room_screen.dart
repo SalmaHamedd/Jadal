@@ -188,6 +188,30 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
                   return const Positioned.fill(child: _StageAdvancingOverlay());
                 },
               ),
+              // "You're talking but muted" — a push-notification-style banner
+              // dropping from the top when the voice probe catches the muted
+              // speaker/judge. Swipe left/right to dismiss; opening the mic
+              // clears it from the cubit side.
+              BlocBuilder<DebateController, DebateStates>(
+                buildWhen: (_, s) =>
+                    s is MutedSpeakingChangedState ||
+                    s is MicToggledState ||
+                    s is PublishLockChangedState,
+                builder: (context, _) {
+                  final cubit = context.read<DebateController>();
+                  return Positioned(
+                    top: 6,
+                    left: 12,
+                    right: 12,
+                    child: _MutedSpeakingBanner(
+                      visible: cubit.mutedSpeakingActive,
+                      canUnmute: cubit.canPublishNow,
+                      onUnmute: cubit.toggleMic,
+                      onDismissed: cubit.dismissMutedSpeakingBanner,
+                    ),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -368,6 +392,19 @@ class _LobbyModeView extends StatelessWidget {
         isLocal: cubit.isLocalUserId(id),
       ));
     }
+    // The loop above only walks REMOTE participants, so an off-roster LOCAL
+    // viewer never saw their own tile (their friends did, via the remote pass).
+    // Give the local user a tile too when the roster missed them.
+    final meId = cubit.data.currentUserId;
+    if (meId.isNotEmpty && !shownIds.contains(meId)) {
+      tiles.add(GridParticipant(
+        id: meId,
+        name: cubit.localParticipant?.name.isNotEmpty == true
+            ? cubit.localParticipant!.name
+            : loc.youTag,
+        isLocal: true,
+      ));
+    }
     return Column(
       children: [
         // "Back to debate" is chair-only — and gone once the result phase opens
@@ -401,6 +438,125 @@ class _LobbyModeView extends StatelessWidget {
           },
         ),
       ],
+    );
+  }
+}
+
+/// The push-notification-style banner shown when the local muted speaker/judge
+/// is caught talking: slides down from the top, offers a one-tap unmute, and is
+/// swipe-dismissible left/right.
+class _MutedSpeakingBanner extends StatelessWidget {
+  final bool visible;
+  final bool canUnmute;
+  final VoidCallback onUnmute;
+  final VoidCallback onDismissed;
+  const _MutedSpeakingBanner({
+    required this.visible,
+    required this.canUnmute,
+    required this.onUnmute,
+    required this.onDismissed,
+  });
+
+  static const _red = Color(0xFFE53935);
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 320),
+      switchInCurve: Curves.easeOutCubic,
+      switchOutCurve: Curves.easeIn,
+      transitionBuilder: (child, animation) => SlideTransition(
+        position: Tween<Offset>(
+          begin: const Offset(0, -1.6),
+          end: Offset.zero,
+        ).animate(animation),
+        child: FadeTransition(opacity: animation, child: child),
+      ),
+      child: !visible
+          ? const SizedBox.shrink()
+          : Dismissible(
+              key: const ValueKey('muted-speaking-banner'),
+              direction: DismissDirection.horizontal,
+              onDismissed: (_) => onDismissed(),
+              child: Material(
+                color: Colors.transparent,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  decoration: BoxDecoration(
+                    color: DebateTheme.surfaceElevated(context),
+                    borderRadius: BorderRadius.circular(16),
+                    border: Border.all(color: _red.withValues(alpha: 0.55), width: 1.2),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.30),
+                        blurRadius: 16,
+                        offset: const Offset(0, 6),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 36,
+                        height: 36,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: _red.withValues(alpha: 0.15),
+                        ),
+                        child: const Icon(Icons.mic_off_rounded, color: _red, size: 20),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              loc.mutedSpeakingTitle,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontWeight: FontWeight.w800,
+                                fontSize: 13.5,
+                                color: DebateTheme.textPrimary(context),
+                              ),
+                            ),
+                            Text(
+                              loc.mutedSpeakingBody,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontFamily: 'Cairo',
+                                fontSize: 11.5,
+                                height: 1.25,
+                                color: DebateTheme.textSecondary(context),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      if (canUnmute) ...[
+                        const SizedBox(width: 8),
+                        FilledButton(
+                          onPressed: onUnmute,
+                          style: FilledButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 12),
+                          ),
+                          child: Text(
+                            loc.unmuteAction,
+                            style: const TextStyle(
+                              fontFamily: 'Cairo',
+                              fontWeight: FontWeight.w700,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ),
+              ),
+            ),
     );
   }
 }

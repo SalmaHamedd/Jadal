@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
@@ -15,11 +15,17 @@ class AllBlogsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // Same package as the rest of the app: transparent app bar over the shared
+    // gradient backdrop (design only — the blog logic is untouched).
+    return JadalGradientBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('جميع المقالات'),
-        foregroundColor: Colors.white,
+        title: const Text('جميع المقالات',
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: BlocProvider(
         create: (_) {
@@ -97,6 +103,7 @@ class AllBlogsScreen extends StatelessWidget {
             return const SizedBox();
           },
         ),
+      ),
       ),
     );
   }

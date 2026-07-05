@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/features/auth/presentation/screens/reset_password_screen.dart';
@@ -63,56 +61,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ? const Color(0xFFF59A4A)
         : JadalColors.primaryOrange;
 
-    final blobSize = isMobile ? 220.0 : 280.0;
     final iconCircle = isMobile ? 60.0 : 72.0;
 
+    // Blob-free: the shared JadalGradientBackground is the whole backdrop, the
+    // same as the rest of the app.
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: JadalGradientBackground(
-        child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Positioned(
-            top: 120,
-            left: -100,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: 500,
-            right: -100,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: -70,
-            right: -70,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          Positioned(
-            top: 770,
-            left: -80,
-            child: _blurBlob(
-              color: isDark
-                  ? JadalColors.primaryOrange.withValues(alpha: 0.14)
-                  : JadalColors.primaryBlue.withValues(alpha: 0.14),
-              size: blobSize,
-            ),
-          ),
-          SafeArea(
+        child: SafeArea(
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final maxWidth = constraints.maxWidth >= 600
@@ -321,20 +277,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 );
               },
             ),
-          ),
-        ],
         ),
-      ),
-    );
-  }
-
-  Widget _blurBlob({required Color color, required double size}) {
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

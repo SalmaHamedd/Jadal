@@ -160,6 +160,19 @@
   "debateCancelledBody": "أُغلقت الغرفة الرئيسية دون إرسال نتيجة.",
   "rateDebate": "قيّم هذه المناظرة",
   "ratingThanks": "شكرًا لتقييمك!",
+  "ratingCommentHint": "أخبرنا المزيد عن تقييمك (اختياري)",
+  "submitRating": "إرسال التقييم",
+  "updateRating": "تحديث التقييم",
+
+  "navHome": "الرئيسية",
+  "navDebates": "المناظرات",
+  "navSearch": "بحث",
+  "navProfile": "حسابي",
+  "searchTitle": "البحث",
+
+  "mutedSpeakingTitle": "الميكروفون مغلق",
+  "mutedSpeakingBody": "يبدو أنك تتحدث، لكن لا أحد يسمعك.",
+  "unmuteAction": "فتح المايك",
 
   "debatesTitle": "المناظرات",
   "tabRegistration": "التسجيل",

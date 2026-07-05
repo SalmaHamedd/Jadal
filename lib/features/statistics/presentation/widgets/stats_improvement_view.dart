@@ -26,28 +26,31 @@ class StatsImprovementView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasIndex = data.hasEnoughHistory;
+    // Too few games → the index still renders, as a neutral 0.0 on the scale,
+    // with the "not enough history" banner explaining why.
+    final shownIndex = hasIndex ? data.index! : 0.0;
     final color = hasIndex ? signColor(data.index!) : JadalColors.judgesGrey;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        if (hasIndex) ...[
-          Center(
-            child: TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: data.index!),
-              duration: const Duration(milliseconds: 900),
-              curve: Curves.easeOutCubic,
-              builder: (context, v, _) => Text(
-                (v >= 0 ? '+' : '') + v.toStringAsFixed(1),
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 44,
-                  color: color,
-                ),
+        Center(
+          child: TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0, end: shownIndex),
+            duration: const Duration(milliseconds: 900),
+            curve: Curves.easeOutCubic,
+            builder: (context, v, _) => Text(
+              (v >= 0 ? '+' : '') + v.toStringAsFixed(1),
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontWeight: FontWeight.w900,
+                fontSize: 44,
+                color: color,
               ),
             ),
           ),
+        ),
+        if (hasIndex)
           Center(
             child: Text(
               _bandLabels[data.band] ?? (data.band ?? ''),
@@ -59,10 +62,10 @@ class StatsImprovementView extends StatelessWidget {
               ),
             ),
           ),
-          const SizedBox(height: 18),
-          _Gauge(index: data.index!),
-          const SizedBox(height: 22),
-        ] else ...[
+        const SizedBox(height: 18),
+        _Gauge(index: shownIndex),
+        const SizedBox(height: 22),
+        if (!hasIndex) ...[
           _InsufficientBanner(reason: data.reason),
           const SizedBox(height: 16),
         ],
@@ -122,6 +125,14 @@ class _Gauge extends StatelessWidget {
                   final fillLeft = x < mid ? x : mid;
                   final fillWidth = (x - mid).abs();
                   const caretW = 13.0;
+                  // The fill's edge that sits ON the zero line stays square so
+                  // it blends into the tick; only the far end is rounded.
+                  final positive = x >= mid;
+                  const endRadius = Radius.circular(_trackH / 2);
+                  final fillRadius = BorderRadius.horizontal(
+                    left: positive ? Radius.zero : endRadius,
+                    right: positive ? endRadius : Radius.zero,
+                  );
                   return Stack(
                     clipBehavior: Clip.none,
                     children: [
@@ -154,7 +165,7 @@ class _Gauge extends StatelessWidget {
                           height: _trackH,
                           decoration: BoxDecoration(
                             color: sign,
-                            borderRadius: BorderRadius.circular(_trackH / 2),
+                            borderRadius: fillRadius,
                             boxShadow: [
                               BoxShadow(
                                 color: sign.withValues(alpha: 0.35),

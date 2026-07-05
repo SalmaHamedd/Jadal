@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/widgets/locale_toggle_button.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/widgets/theme_toggle_button.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
@@ -11,6 +13,7 @@ import 'package:jadal_app/features/profile/presentation/screens/change_password_
 import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_info_card.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
+import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -63,6 +66,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      // Until a dedicated settings screen exists, the theme/language toggles
+      // live here (moved out of the main shell's — now removed — app bar).
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        actions: const [
+          LocaleToggleButton(),
+          SizedBox(width: 6),
+          ThemeToggleButton(),
+          SizedBox(width: 8),
+        ],
+      ),
       body: BlocConsumer<ProfileCubit, ProfileState>(
         bloc: _cubit,
         listener: (context, state) {
@@ -151,7 +167,22 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           ),
                         ],
                       ),
-                      SizedBox(height: context.hp(3)),
+                      SizedBox(height: context.hp(2)),
+                      // Entry point to the debater statistics screens (moved
+                      // here from the debates-list app bar).
+                      ProfileActionButton(
+                        text: 'Statistics',
+                        icon: Icons.insights_rounded,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const DebaterStatsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: context.hp(1)),
                       ProfileInfoCard(
                         icon: Icons.badge,
                         label: 'Role',

@@ -79,3 +79,8 @@ class NavigateToSharedResultState extends DebateStates {}
 
 /// The chair closed the room → every client is kicked back to the rooms list (§U4b).
 class RoomClosedState extends DebateStates {}
+
+/// The local muted-but-speaking detection flipped (started/stopped catching
+/// voice while the mic is off, or the banner was dismissed) → the room shows /
+/// hides the push-notification-style banner at the top.
+class MutedSpeakingChangedState extends DebateStates {}

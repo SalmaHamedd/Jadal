@@ -163,6 +163,19 @@
   "debateCancelledBody": "The main room was closed without submitting a result.",
   "rateDebate": "Rate this debate",
   "ratingThanks": "Thanks for your feedback!",
+  "ratingCommentHint": "Tell us more about your rating (optional)",
+  "submitRating": "Submit rating",
+  "updateRating": "Update rating",
+
+  "navHome": "Home",
+  "navDebates": "Debates",
+  "navSearch": "Search",
+  "navProfile": "Profile",
+  "searchTitle": "Search",
+
+  "mutedSpeakingTitle": "Your mic is off",
+  "mutedSpeakingBody": "You seem to be talking, but no one can hear you.",
+  "unmuteAction": "Unmute",
 
   "debatesTitle": "Debates",
   "tabRegistration": "Registration",

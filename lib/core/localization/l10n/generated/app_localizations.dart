@@ -1004,6 +1004,72 @@ abstract class AppLocalizations {
   /// **'Thanks for your feedback!'**
   String get ratingThanks;
 
+  /// No description provided for @ratingCommentHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Tell us more about your rating (optional)'**
+  String get ratingCommentHint;
+
+  /// No description provided for @submitRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit rating'**
+  String get submitRating;
+
+  /// No description provided for @updateRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Update rating'**
+  String get updateRating;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navDebates.
+  ///
+  /// In en, this message translates to:
+  /// **'Debates'**
+  String get navDebates;
+
+  /// No description provided for @navSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get navSearch;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @searchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get searchTitle;
+
+  /// No description provided for @mutedSpeakingTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your mic is off'**
+  String get mutedSpeakingTitle;
+
+  /// No description provided for @mutedSpeakingBody.
+  ///
+  /// In en, this message translates to:
+  /// **'You seem to be talking, but no one can hear you.'**
+  String get mutedSpeakingBody;
+
+  /// No description provided for @unmuteAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Unmute'**
+  String get unmuteAction;
+
   /// No description provided for @debatesTitle.
   ///
   /// In en, this message translates to:

@@ -8,7 +8,6 @@ import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_list_model.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_status.dart';
-import '../../../statistics/presentation/pages/debater_stats_screen.dart';
 import '../cubits/debate_list_cubit.dart';
 import '../utils/debate_date.dart';
 import '../utils/debate_theme.dart';
@@ -47,17 +46,7 @@ class DebateListScreen extends StatelessWidget {
             scrolledUnderElevation: 0,
             title: Text(loc.debatesTitle,
                 style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
-            actions: [
-              // TEMP entry to the statistics feature (until it gets a proper home
-              // in the app's navigation) — opens the signed-in user's own stats.
-              IconButton(
-                tooltip: 'Statistics',
-                icon: const Icon(Icons.insights_rounded),
-                onPressed: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const DebaterStatsScreen()),
-                ),
-              ),
-            ],
+            // The statistics entry moved to the Profile tab.
             bottom: TabBar(
               isScrollable: true,
               // Removes the empty gap the scrollable TabBar leaves at the start/end.

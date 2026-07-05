@@ -376,9 +376,22 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// otherwise cancels the debate (§10).
   Future<void> closeMain();
 
-  /// Submit a 1–5 debate rating. The UI only enables this once the result is
-  /// revealed and the debate is completed (§10).
-  Future<void> sendDebateRating(int rating);
+  /// Submit a 1–5 debate rating with an optional free-text explanation. Sent
+  /// once per explicit submit (never on every star change); the UI only enables
+  /// this once the result is revealed (§10).
+  Future<void> sendDebateRating(int rating, {String? comment});
+
+  // ── Muted-but-speaking banner ────────────────────────────────────────────────
+  // The local user (main speaker or a judge) has their mic OFF while the voice
+  // sensor catches them talking above a threshold → the room shows a top banner.
+  // Default off; only the backend cubit runs the sensor.
+
+  /// Whether the banner should be visible right now.
+  bool get mutedSpeakingActive => false;
+
+  /// User swiped the banner away — keep it hidden until the mic toggles or the
+  /// monitored condition resets.
+  void dismissMutedSpeakingBanner() {}
 
   // ── Backend integration seam (§7) ─────────────────────────────────────────────
   // Concrete defaults keep the test cubit unchanged; the backend cubit overrides.

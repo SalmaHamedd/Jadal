@@ -474,6 +474,40 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ratingThanks => 'Thanks for your feedback!';
 
   @override
+  String get ratingCommentHint => 'Tell us more about your rating (optional)';
+
+  @override
+  String get submitRating => 'Submit rating';
+
+  @override
+  String get updateRating => 'Update rating';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navDebates => 'Debates';
+
+  @override
+  String get navSearch => 'Search';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get searchTitle => 'Search';
+
+  @override
+  String get mutedSpeakingTitle => 'Your mic is off';
+
+  @override
+  String get mutedSpeakingBody =>
+      'You seem to be talking, but no one can hear you.';
+
+  @override
+  String get unmuteAction => 'Unmute';
+
+  @override
   String get debatesTitle => 'Debates';
 
   @override

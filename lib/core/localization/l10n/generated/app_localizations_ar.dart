@@ -473,6 +473,39 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ratingThanks => 'شكرًا لتقييمك!';
 
   @override
+  String get ratingCommentHint => 'أخبرنا المزيد عن تقييمك (اختياري)';
+
+  @override
+  String get submitRating => 'إرسال التقييم';
+
+  @override
+  String get updateRating => 'تحديث التقييم';
+
+  @override
+  String get navHome => 'الرئيسية';
+
+  @override
+  String get navDebates => 'المناظرات';
+
+  @override
+  String get navSearch => 'بحث';
+
+  @override
+  String get navProfile => 'حسابي';
+
+  @override
+  String get searchTitle => 'البحث';
+
+  @override
+  String get mutedSpeakingTitle => 'الميكروفون مغلق';
+
+  @override
+  String get mutedSpeakingBody => 'يبدو أنك تتحدث، لكن لا أحد يسمعك.';
+
+  @override
+  String get unmuteAction => 'فتح المايك';
+
+  @override
   String get debatesTitle => 'المناظرات';
 
   @override

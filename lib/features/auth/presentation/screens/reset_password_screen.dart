@@ -1,11 +1,10 @@
-import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/extensions/responsive_extension.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../cubit/reset_password_cubit.dart';
 import '../widgets/auth_button.dart';
@@ -69,55 +68,21 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     final size = mq.size;
     final isMobile = context.isMobile;
 
-    final scaffoldBg = isDark ? JadalColors.darkSurface : JadalColors.lightBackground;
     final cardBg = isDark ? JadalColors.darkBackground : JadalColors.lightSurface;
     final textPrimary = isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
     final textSecondary = isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
     final accentLink = isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
 
-    final blobSize = isMobile ? 220.0 : 280.0;
     final logoSize = isMobile ? 65.0 : 80.0;
 
+    // Blob-free: the shared JadalGradientBackground is the whole backdrop, the
+    // same as login / forgot-password and the rest of the app.
     return BlocProvider.value(
       value: _cubit,
       child: Scaffold(
-        backgroundColor: scaffoldBg,
-        body: Stack(
-          fit: StackFit.expand,
-          children: [
-            Positioned(
-              top: 160,
-              left: -30,
-              child: _blurBlob(
-                color: isDark ? JadalColors.primaryOrange.withAlpha(26) : JadalColors.primaryBlue.withAlpha(36),
-                size: blobSize,
-              ),
-            ),
-            Positioned(
-              top: 520,
-              right: -130,
-              child: _blurBlob(
-                color: isDark ? JadalColors.primaryOrange.withAlpha(26) : JadalColors.primaryBlue.withAlpha(36),
-                size: blobSize,
-              ),
-            ),
-            Positioned(
-              top: -120,
-              right: -70,
-              child: _blurBlob(
-                color: isDark ? JadalColors.primaryOrange.withAlpha(26) : JadalColors.primaryBlue.withAlpha(36),
-                size: blobSize,
-              ),
-            ),
-            Positioned(
-              top: 770,
-              left: -80,
-              child: _blurBlob(
-                color: isDark ? JadalColors.primaryOrange.withAlpha(26) : JadalColors.primaryBlue.withAlpha(36),
-                size: blobSize,
-              ),
-            ),
-            SafeArea(
+        backgroundColor: Colors.transparent,
+        body: JadalGradientBackground(
+          child: SafeArea(
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   final maxWidth = constraints.maxWidth >= 600 ? 460.0 : double.infinity;
@@ -286,20 +251,8 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                   );
                 },
               ),
-            ),
-          ],
+          ),
         ),
-      ),
-    );
-  }
-
-  Widget _blurBlob({required Color color, required double size}) {
-    return ImageFiltered(
-      imageFilter: ImageFilter.blur(sigmaX: 55, sigmaY: 55),
-      child: Container(
-        width: size,
-        height: size,
-        decoration: BoxDecoration(shape: BoxShape.circle, color: color),
       ),
     );
   }

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
@@ -122,11 +123,17 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final isMobile = context.isMobile;
 
-    return Scaffold(
+    // Same package as the rest of the app: transparent app bar over the shared
+    // gradient backdrop (design only — the create-blog logic is untouched).
+    return JadalGradientBackground(
+      child: Scaffold(
+      backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('إنشاء مقال جديد'),
-        foregroundColor: Colors.white,
+        title: const Text('إنشاء مقال جديد',
+            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        backgroundColor: Colors.transparent,
         elevation: 0,
+        scrolledUnderElevation: 0,
       ),
       body: BlocConsumer<CreateBlogCubit, CreateBlogState>(
         bloc: _cubit,
@@ -333,6 +340,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             },
           );
         },
+      ),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
@@ -160,14 +161,15 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
           create: (_) => BlogReactionCubit(repository),
         ),
       ],
-      child: Scaffold(
-        backgroundColor: isDark
-            ? JadalColors.darkBackground
-            : JadalColors.lightBackground,
+      child: JadalGradientBackground(
+        child: Scaffold(
+        backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('تفاصيل المقال'),
-          foregroundColor: Colors.white,
+          title: const Text('تفاصيل المقال',
+              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          backgroundColor: Colors.transparent,
           elevation: 0,
+          scrolledUnderElevation: 0,
           actions: [
             if (_isAuthor && !_isDeleting)
               IconButton(
@@ -326,6 +328,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
             }
             return const SizedBox();
           },
+        ),
         ),
       ),
     );

@@ -11,10 +11,6 @@ import 'core/app_cubit/app_states.dart';
 import 'core/localization/l10n/generated/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
-import 'features/auth/presentation/screens/login_screen.dart';
-import 'features/home/presentation/screens/home_screen.dart';
-import 'features/live_debate/presentation/pages/debate_list_screen.dart';
-import 'features/profile/presentation/screens/profile_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,7 +44,7 @@ class JadalApp extends StatelessWidget {
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: state.themeMode,
-            locale: Locale('en'),
+            locale: state.locale,
             supportedLocales: AppCubit.supportedLocales,
             localizationsDelegates: const [
               AppLocalizations.delegate,
@@ -56,7 +52,9 @@ class JadalApp extends StatelessWidget {
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            home: const LoginScreen(),
+            // The splash decides where to land: a stored token goes straight to
+            // the main shell (bottom navigation), otherwise the login screen.
+            home: const SplashScreen(),
           );
         },
       ),

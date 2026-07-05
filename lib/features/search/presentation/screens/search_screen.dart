@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
@@ -37,36 +38,82 @@ class _SearchScreenState extends State<SearchScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
+    final fieldFill = isDark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface;
+    final fieldText = isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
+    final fieldHint = isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
+
+    // No AppBar: the title + search field live in the body over the shared
+    // gradient (drawn by the MainScreen shell), matching the login/debates look.
     return Scaffold(
-      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-      appBar: AppBar(
-        title: TextField(
-          controller: _searchController,
-          focusNode: _focusNode,
-          decoration: InputDecoration(
-            hintText: 'ابحث عن مستخدمين أو فرق...',
-            hintStyle: TextStyle(
-              fontFamily: 'Cairo',
-              color: JadalColors.primaryBlue,
+      backgroundColor: Colors.transparent,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
+            child: Text(
+              context.loc.searchTitle,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 24,
+                fontWeight: FontWeight.w800,
+                color: titleColor,
+              ),
             ),
-            border: InputBorder.none,
           ),
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            color: Colors.white,
-            fontSize: context.fontSize(16),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 14, 16, 4),
+            child: Container(
+              decoration: BoxDecoration(
+                color: fieldFill,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: JadalColors.primaryBlue.withValues(alpha: 0.15),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: isDark ? 0.30 : 0.06),
+                    blurRadius: 12,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: TextField(
+                controller: _searchController,
+                focusNode: _focusNode,
+                decoration: InputDecoration(
+                  hintText: 'ابحث عن مستخدمين أو فرق...',
+                  hintStyle: TextStyle(fontFamily: 'Cairo', color: fieldHint),
+                  border: InputBorder.none,
+                  prefixIcon:
+                      const Icon(Icons.search_rounded, color: JadalColors.primaryOrange),
+                  contentPadding:
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  color: fieldText,
+                  fontSize: context.fontSize(16),
+                ),
+                textInputAction: TextInputAction.search,
+                onSubmitted: (value) {
+                  if (value.trim().isNotEmpty) {
+                    _cubit.search(value);
+                  }
+                },
+              ),
+            ),
           ),
-          textDirection: TextDirection.rtl,
-          onSubmitted: (value) {
-            if (value.trim().isNotEmpty) {
-              _cubit.search(value);
-            }
-          },
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+          Expanded(child: _buildResults(context)),
+        ],
       ),
-      body: BlocConsumer<SearchCubit, SearchState>(
+    );
+  }
+
+  Widget _buildResults(BuildContext context) {
+    return BlocConsumer<SearchCubit, SearchState>(
         bloc: _cubit,
         listener: (context, state) {
           if (state is SearchError) {
@@ -157,7 +204,6 @@ class _SearchScreenState extends State<SearchScreen> {
           }
           return const SizedBox();
         },
-      ),
     );
   }
 }
