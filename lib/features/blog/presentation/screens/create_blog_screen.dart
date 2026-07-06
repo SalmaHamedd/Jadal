@@ -1,5 +1,7 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
@@ -22,19 +24,21 @@ class CreateBlogScreen extends StatefulWidget {
 class _CreateBlogScreenState extends State<CreateBlogScreen> {
   final _titleController = TextEditingController();
   final _contentController = TextEditingController();
-  final _coverImageController = TextEditingController();
+
+  File? _coverImageFile;
 
   List<Category> _selectedCategories = [];
   List<Tag> _selectedTags = [];
 
+  late final BlogRepositoryImpl _repository;
   late CreateBlogCubit _cubit;
   late final Future<Map<String, List<dynamic>>> _metaFuture;
 
   @override
   void initState() {
     super.initState();
-    final repository = BlogRepositoryImpl();
-    _cubit = CreateBlogCubit(repository);
+    _repository = BlogRepositoryImpl();
+    _cubit = CreateBlogCubit(_repository);
     _metaFuture = _fetchMeta();
   }
 
@@ -42,15 +46,46 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
   void dispose() {
     _titleController.dispose();
     _contentController.dispose();
-    _coverImageController.dispose();
     _cubit.close();
     super.dispose();
   }
 
+  static const int _maxCoverImageBytes = 8 * 1024 * 1024; // 8 MB
+
+  Future<void> _pickCoverImage() async {
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+    );
+    if (picked == null) return;
+
+    final file = File(picked.path);
+    final sizeInBytes = await file.length();
+    if (sizeInBytes > _maxCoverImageBytes) {
+      if (mounted) {
+        JadalSnackBar.show(
+          context,
+          'حجم الصورة كبير جداً، الحد الأقصى 8 ميجابايت',
+          type: SnackBarType.error,
+        );
+      }
+      return;
+    }
+
+    setState(() {
+      _coverImageFile = file;
+    });
+  }
+
+  void _removeCoverImage() {
+    setState(() {
+      _coverImageFile = null;
+    });
+  }
+
   Future<Map<String, List<dynamic>>> _fetchMeta() async {
-    final repository = BlogRepositoryImpl();
-    final categoriesResult = await repository.getCategories();
-    final tagsResult = await repository.getTags();
+    final categoriesResult = await _repository.getCategories();
+    final tagsResult = await _repository.getTags();
 
     final categories = categoriesResult.fold(
       (failure) => <Category>[],
@@ -255,11 +290,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     ),
                     const SizedBox(height: 16),
 
-                    AuthTextField(
-                      label: 'رابط الصورة (اختياري)',
-                      icon: Icons.image,
-                      controller: _coverImageController,
-                    ),
+                    _buildCoverImagePicker(isDark: isDark, isMobile: isMobile),
                     const SizedBox(height: 16),
 
                     MultiSelectField<Category>(
@@ -325,10 +356,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                         _cubit.createBlog(
                           title: title,
                           content: content,
-                          coverImageUrl:
-                              _coverImageController.text.trim().isEmpty
-                              ? null
-                              : _coverImageController.text.trim(),
+                          coverImageUrl: _coverImageFile,
                           categoryIds: categoryIds,
                           tagIds: tagIds,
                         );
@@ -341,6 +369,79 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
           );
         },
       ),
+      ),
+    );
+  }
+
+  Widget _buildCoverImagePicker({
+    required bool isDark,
+    required bool isMobile,
+  }) {
+    if (_coverImageFile != null) {
+      return Stack(
+        children: [
+          ClipRRect(
+            borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
+            child: Image.file(
+              _coverImageFile!,
+              width: double.infinity,
+              height: 160,
+              fit: BoxFit.cover,
+            ),
+          ),
+          Positioned(
+            top: 8,
+            left: 8,
+            child: GestureDetector(
+              onTap: _removeCoverImage,
+              child: Container(
+                padding: const EdgeInsets.all(4),
+                decoration: const BoxDecoration(
+                  color: Colors.black54,
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.close, color: Colors.white, size: 18),
+              ),
+            ),
+          ),
+        ],
+      );
+    }
+
+    return GestureDetector(
+      onTap: _pickCoverImage,
+      child: Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+        decoration: BoxDecoration(
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : const Color(0xFFF1F4F9),
+          borderRadius: BorderRadius.circular(isMobile ? 12 : 14),
+          border: Border.all(
+            color: isDark ? const Color(0xFF2A3A55) : const Color(0xFFD8DEE7),
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(
+              Icons.image,
+              color: isDark ? JadalColors.darkTextSecondary : Colors.grey[600],
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'اختر صورة الغلاف (اختياري)',
+                style: TextStyle(
+                  color: isDark
+                      ? JadalColors.darkTextSecondary
+                      : Colors.grey[600],
+                  fontSize: context.fontSize(12.5, min: 11.5, max: 15),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
@@ -21,7 +23,7 @@ abstract class BlogRepository {
   Future<Either<Failure, BlogDetails>> createBlog({
     required String title,
     required String content,
-    String? coverImageUrl,
+    File? coverImageUrl,
     List<int>? categoryIds,
     List<int>? tagIds,
   });

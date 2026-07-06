@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
@@ -11,9 +13,9 @@ class CreateBlogCubit extends Cubit<CreateBlogState> {
   Future<void> createBlog({
     required String title,
     required String content,
-    String? coverImageUrl,
+    File? coverImageUrl,
     List<int>? categoryIds,
-    List<int>? tagIds, String? coverImage,
+    List<int>? tagIds,
   }) async {
     emit(CreateBlogLoading());
     final result = await _repository.createBlog(

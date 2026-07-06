@@ -27,14 +27,17 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   String? _optimisticReaction;
   bool _isReacting = false;
   int? _blogId;
+  String _blogTitle = '';
   bool _isDeleting = false;
   bool _isAuthor = false;
 
   final PreferencesDatabase _prefs = PreferencesDatabase();
+  late final BlogRepository _repository;
 
   @override
   void initState() {
     super.initState();
+    _repository = BlogRepositoryImpl();
     _loadSavedReaction();
   }
 
@@ -94,10 +97,10 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
       _optimisticReaction = newReaction;
     });
 
-    _isReacting = true;
+    setState(() => _isReacting = true);
     final cubit = ctx.read<BlogReactionCubit>();
     await cubit.reactToBlog(_blogId!, type);
-    _isReacting = false;
+    if (mounted) setState(() => _isReacting = false);
   }
 
   Future<void> _confirmDelete(int blogId, String title) async {
@@ -128,8 +131,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     if (_isDeleting) return;
     setState(() => _isDeleting = true);
 
-    final repository = BlogRepositoryImpl();
-    final result = await repository.deleteBlog(blogId);
+    final result = await _repository.deleteBlog(blogId);
     result.fold(
       (failure) {
         JadalSnackBar.show(context, failure.message, type: SnackBarType.error);
@@ -148,17 +150,16 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final BlogRepository repository = BlogRepositoryImpl();
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return MultiBlocProvider(
       providers: [
         BlocProvider<BlogDetailsCubit>(
           create: (_) =>
-              BlogDetailsCubit(repository)..loadBlogDetails(widget.slug),
+              BlogDetailsCubit(_repository)..loadBlogDetails(widget.slug),
         ),
         BlocProvider<BlogReactionCubit>(
-          create: (_) => BlogReactionCubit(repository),
+          create: (_) => BlogReactionCubit(_repository),
         ),
       ],
       child: JadalGradientBackground(
@@ -174,7 +175,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
             if (_isAuthor && !_isDeleting)
               IconButton(
                 icon: const Icon(Icons.delete_outline),
-                onPressed: () => _confirmDelete(_blogId!, ''),
+                onPressed: () => _confirmDelete(_blogId!, _blogTitle),
                 tooltip: 'حذف المقال',
               ),
           ],
@@ -187,6 +188,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
               final blog = detailsState.blogDetails;
               if (_blogId == null) {
                 _blogId = blog.id;
+                _blogTitle = blog.title;
                 _optimisticLikes = blog.likesCount;
                 _optimisticDislikes = blog.dislikesCount;
                 _prefs.getValue<int>('user_id').then((userId) {

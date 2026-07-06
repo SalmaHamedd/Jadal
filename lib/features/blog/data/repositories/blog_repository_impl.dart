@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
@@ -135,53 +136,68 @@ class BlogRepositoryImpl implements BlogRepository {
     }
   }
 
- @override
-Future<Either<Failure, BlogDetails>> createBlog({
-  required String title,
-  required String content,
-  String? coverImageUrl,
-  List<int>? categoryIds,
-  List<int>? tagIds,
-}) async {
-  try {
-    final token = await PreferencesDatabase().getToken();
-    if (token == null) return Left(AuthFailure('Not authenticated'));
+  @override
+  Future<Either<Failure, BlogDetails>> createBlog({
+    required String title,
+    required String content,
+    File? coverImageUrl,
+    List<int>? categoryIds,
+    List<int>? tagIds,
+  }) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
 
-    final Map<String, dynamic> body = {
-      'title': title,
-      'content': content,
-      'cover_image_url': coverImageUrl,
-      'category_ids': categoryIds ?? [],
-      'tag_ids': tagIds ?? [],
-    };
+      final request = http.MultipartRequest(
+        'POST',
+        Uri.parse(ApiConstants.blogUrl),
+      );
 
-    final response = await client.post(
-      Uri.parse(ApiConstants.blogUrl),
-      headers: {
-        'Content-Type': 'application/json',
+      request.headers.addAll({
         'Authorization': 'Bearer $token',
-      },
-      body: jsonEncode(body),
-    );
+        'Accept': 'application/json',
+      });
 
-    final json = jsonDecode(response.body);
-    final String message = json['message'] ?? 'Unknown error';
+      request.fields['title'] = title;
+      request.fields['content'] = content;
 
-    if (response.statusCode == 201 || response.statusCode == 200) {
-      if (json['success'] == true) {
-        final data = json['data'];
-        final blogDetails = BlogDetailsModel.fromJson({'data': data});
-        return Right(blogDetails);
+      final ids = categoryIds ?? [];
+      for (var i = 0; i < ids.length; i++) {
+        request.fields['category_ids[$i]'] = ids[i].toString();
+      }
+
+      final tIds = tagIds ?? [];
+      for (var i = 0; i < tIds.length; i++) {
+        request.fields['tag_ids[$i]'] = tIds[i].toString();
+      }
+
+      if (coverImageUrl != null) {
+        request.files.add(
+          await http.MultipartFile.fromPath('cover_image', coverImageUrl.path),
+        );
+      }
+
+      final streamedResponse = await client.send(request);
+      final response = await http.Response.fromStream(streamedResponse);
+
+      final json = jsonDecode(response.body);
+      final String message = json['message'] ?? 'Unknown error';
+
+      if (response.statusCode == 201 || response.statusCode == 200) {
+        if (json['success'] == true) {
+          final data = json['data'];
+          final blogDetails = BlogDetailsModel.fromJson({'data': data});
+          return Right(blogDetails);
+        } else {
+          return Left(ServerFailure(message));
+        }
       } else {
         return Left(ServerFailure(message));
       }
-    } else {
-      return Left(ServerFailure(message));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
     }
-  } catch (e) {
-    return Left(NetworkFailure('Network error: $e'));
   }
-}
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() async {
