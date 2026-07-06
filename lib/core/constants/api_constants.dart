@@ -12,6 +12,7 @@ class ApiConstants {
   static const String blog = '/blog';
   static const String adminCategories = '/admin/blog/categories';
   static const String adminTags = '/admin/blog/tags';
+  static const String surveys = '/surveys';
 
   static String get loginUrl => '$baseUrl$login';
   static String get forgotPasswordUrl => '$baseUrl$forgotPassword';
@@ -24,6 +25,9 @@ class ApiConstants {
   static String get blogUrl => '$baseUrl$blog';
   static String get categoriesUrl => '$baseUrl$adminCategories';
   static String get tagsUrl => '$baseUrl$adminTags';
+  static String get surveysUrl => '$baseUrl$surveys';
+  static String surveyDetailsUrl(int id) => '$surveysUrl/$id';
+  static String surveyRespondUrl(int id) => '$surveysUrl/$id/respond';
 
   // `Accept: application/json` (mandatory) + the Sanctum bearer.
   static String get debatesUrl => '$baseUrl/debates';

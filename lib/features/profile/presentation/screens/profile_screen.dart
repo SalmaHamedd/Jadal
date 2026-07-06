@@ -14,6 +14,7 @@ import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.d
 import 'package:jadal_app/features/profile/presentation/widgets/profile_info_card.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
+import 'package:jadal_app/features/surveys/presentation/screens/surveys_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -178,6 +179,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const DebaterStatsScreen(),
+                            ),
+                          );
+                        },
+                      ),
+                      SizedBox(height: context.hp(1)),
+                      ProfileActionButton(
+                        text: 'Surveys',
+                        icon: Icons.poll_outlined,
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => const SurveysScreen(),
                             ),
                           );
                         },

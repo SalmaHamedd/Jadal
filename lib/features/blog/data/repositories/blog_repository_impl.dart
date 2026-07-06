@@ -136,68 +136,68 @@ class BlogRepositoryImpl implements BlogRepository {
     }
   }
 
-  @override
-  Future<Either<Failure, BlogDetails>> createBlog({
-    required String title,
-    required String content,
-    File? coverImageUrl,
-    List<int>? categoryIds,
-    List<int>? tagIds,
-  }) async {
-    try {
-      final token = await PreferencesDatabase().getToken();
-      if (token == null) return Left(AuthFailure('Not authenticated'));
+ @override
+Future<Either<Failure, BlogDetails>> createBlog({
+  required String title,
+  required String content,
+  File? coverImageUrl,
+  List<int>? categoryIds,
+  List<int>? tagIds,
+}) async {
+  try {
+    final token = await PreferencesDatabase().getToken();
+    if (token == null) return Left(AuthFailure('Not authenticated'));
 
-      final request = http.MultipartRequest(
-        'POST',
-        Uri.parse(ApiConstants.blogUrl),
+    final request = http.MultipartRequest(
+      'POST',
+      Uri.parse(ApiConstants.blogUrl),
+    );
+
+    request.headers.addAll({
+      'Authorization': 'Bearer $token',
+      'Accept': 'application/json',
+    });
+
+    request.fields['title'] = title;
+    request.fields['content'] = content;
+
+    final ids = categoryIds ?? [];
+    for (var i = 0; i < ids.length; i++) {
+      request.fields['category_ids[$i]'] = ids[i].toString();
+    }
+
+    final tIds = tagIds ?? [];
+    for (var i = 0; i < tIds.length; i++) {
+      request.fields['tag_ids[$i]'] = tIds[i].toString();
+    }
+
+    if (coverImageUrl != null) {
+      request.files.add(
+        await http.MultipartFile.fromPath('cover_image', coverImageUrl.path),
       );
+    }
 
-      request.headers.addAll({
-        'Authorization': 'Bearer $token',
-        'Accept': 'application/json',
-      });
+    final streamedResponse = await client.send(request);
+    final response = await http.Response.fromStream(streamedResponse);
 
-      request.fields['title'] = title;
-      request.fields['content'] = content;
+    final json = jsonDecode(response.body);
+    final String message = json['message'] ?? 'Unknown error';
 
-      final ids = categoryIds ?? [];
-      for (var i = 0; i < ids.length; i++) {
-        request.fields['category_ids[$i]'] = ids[i].toString();
-      }
-
-      final tIds = tagIds ?? [];
-      for (var i = 0; i < tIds.length; i++) {
-        request.fields['tag_ids[$i]'] = tIds[i].toString();
-      }
-
-      if (coverImageUrl != null) {
-        request.files.add(
-          await http.MultipartFile.fromPath('cover_image', coverImageUrl.path),
-        );
-      }
-
-      final streamedResponse = await client.send(request);
-      final response = await http.Response.fromStream(streamedResponse);
-
-      final json = jsonDecode(response.body);
-      final String message = json['message'] ?? 'Unknown error';
-
-      if (response.statusCode == 201 || response.statusCode == 200) {
-        if (json['success'] == true) {
-          final data = json['data'];
-          final blogDetails = BlogDetailsModel.fromJson({'data': data});
-          return Right(blogDetails);
-        } else {
-          return Left(ServerFailure(message));
-        }
+    if (response.statusCode == 201 || response.statusCode == 200) {
+      if (json['success'] == true) {
+        final data = json['data'];
+        final blogDetails = BlogDetailsModel.fromJson({'data': data});
+        return Right(blogDetails);
       } else {
         return Left(ServerFailure(message));
       }
-    } catch (e) {
-      return Left(NetworkFailure('Network error: $e'));
+    } else {
+      return Left(ServerFailure(message));
     }
+  } catch (e) {
+    return Left(NetworkFailure('Network error: $e'));
   }
+}
 
   @override
   Future<Either<Failure, List<Category>>> getCategories() async {

@@ -48,7 +48,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
     super.dispose();
   }
 
-  void _submit() {
+  void _submit(BuildContext context) {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? true)) return;
     context.read<ResetPasswordCubit>().resetPassword(
@@ -191,7 +191,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                       controller: _confirmController,
                                       focusNode: _confirmFocus,
                                       textInputAction: TextInputAction.done,
-                                      onSubmitted: (_) => _submit(),
+                                      onSubmitted: (_) => _submit(context),
                                     );
                                   },
                                 ),
@@ -226,7 +226,7 @@ class _ResetPasswordScreenState extends State<ResetPasswordScreen> {
                                   builder: (context, state) => AuthButton(
                                     text: loc.resetPasswordButton,
                                     isLoading: state is ResetPasswordLoading,
-                                    onPressed: _submit,
+                                    onPressed: () => _submit(context),
                                   ),
                                 ),
                                 const SizedBox(height: 12),
