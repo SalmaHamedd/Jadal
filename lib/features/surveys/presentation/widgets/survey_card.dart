@@ -9,7 +9,8 @@ class SurveyCard extends StatelessWidget {
 
   const SurveyCard({super.key, required this.survey, required this.onTap});
 
-  String _formatCloses(DateTime date) {
+  String _formatCloses(DateTime? date) {
+    if (date == null) return 'بدون موعد إغلاق';
     final now = DateTime.now();
     final diff = date.difference(now);
     if (diff.isNegative) return 'مغلق';

@@ -24,7 +24,7 @@ class SurveyDetailsModel extends SurveyDetails {
       targetRoles: (json['target_roles'] as List? ?? [])
           .map((e) => e.toString())
           .toList(),
-      closesAt: DateTime.parse(json['closes_at']),
+      closesAt: json['closes_at'] != null ? DateTime.parse(json['closes_at']) : null,
       isClosed: json['is_closed'] ?? false,
       createdBy: SurveyCreatorModel.fromJson(json['created_by'] ?? {}),
       alreadyResponded: json['already_responded'] ?? false,

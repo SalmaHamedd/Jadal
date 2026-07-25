@@ -143,4 +143,5 @@ class SurveyRepositoryImpl implements SurveyRepository {
       return Left(NetworkFailure('Network error: $e'));
     }
   }
+
 }

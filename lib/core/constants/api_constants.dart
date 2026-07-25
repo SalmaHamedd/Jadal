@@ -10,6 +10,7 @@ class ApiConstants {
   static const String logout = '/auth/logout';
   static const String search = '/search';
   static const String blog = '/blog';
+  static const String teams = '/teams';
   static const String adminCategories = '/admin/blog/categories';
   static const String adminTags = '/admin/blog/tags';
   static const String surveys = '/surveys';
@@ -23,11 +24,17 @@ class ApiConstants {
   static String get logoutUrl => '$baseUrl$logout';
   static String get searchUrl => '$baseUrl$search';
   static String get blogUrl => '$baseUrl$blog';
+  static String get teamsUrl => '$baseUrl$teams';
   static String get categoriesUrl => '$baseUrl$adminCategories';
   static String get tagsUrl => '$baseUrl$adminTags';
   static String get surveysUrl => '$baseUrl$surveys';
   static String surveyDetailsUrl(int id) => '$surveysUrl/$id';
   static String surveyRespondUrl(int id) => '$surveysUrl/$id/respond';
+
+  static const String trainerSurveys = '/trainer/surveys';
+  static String get trainerSurveysUrl => '$baseUrl$trainerSurveys';
+  static String trainerSurveyDetailsUrl(int id) => '$trainerSurveysUrl/$id';
+  static String trainerSurveyResultsUrl(int id) => '$trainerSurveysUrl/$id/results';
 
   // `Accept: application/json` (mandatory) + the Sanctum bearer.
   static String get debatesUrl => '$baseUrl/debates';

@@ -6,7 +6,7 @@ class Survey {
   final String title;
   final String description;
   final List<String> targetRoles;
-  final DateTime closesAt;
+  final DateTime? closesAt;
   final bool isClosed;
   final SurveyCreator createdBy;
   final bool alreadyResponded;

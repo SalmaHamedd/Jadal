@@ -76,6 +76,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       if (!status.isGranted) {
         final requested = await Permission.camera.request();
         if (!requested.isGranted) {
+          if (!mounted) return;
           JadalSnackBar.show(context, 'Camera permission required', type: SnackBarType.error);
           return;
         }

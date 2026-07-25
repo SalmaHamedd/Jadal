@@ -15,6 +15,7 @@ import 'package:jadal_app/features/profile/presentation/widgets/profile_info_car
 import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/surveys_screen.dart';
+import 'package:jadal_app/features/surveys/presentation/screens/trainer_surveys_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -137,7 +138,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               text: 'Edit Profile',
                               icon: Icons.edit,
                               onPressed: () async {
-                                final result = await Navigator.push(
+                                await Navigator.push(
                                   context,
                                   MaterialPageRoute(
                                     builder: (context) => EditProfileScreen(
@@ -147,7 +148,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                     ),
                                   ),
                                 );
-                                if (result != null) _cubit.loadProfile();
+                                // Always reload: an avatar-only change closes
+                                // the screen via the "X" button, which pops
+                                // with no result, but the backend still has
+                                // a new avatar we need to reflect here.
+                                if (context.mounted) _cubit.loadProfile();
                               },
                             ),
                           ),
@@ -196,6 +201,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           );
                         },
                       ),
+                      if (profile.role == 'trainer') ...[
+                        SizedBox(height: context.hp(1)),
+                        ProfileActionButton(
+                          text: 'My Team Surveys',
+                          icon: Icons.groups_2_outlined,
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const TrainerSurveysScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                       SizedBox(height: context.hp(1)),
                       ProfileInfoCard(
                         icon: Icons.badge,
