@@ -18,6 +18,7 @@ import '../features/profile/data/repositories/profile_repository.dart';
 import '../features/splash/data/permissions_service.dart';
 import '../features/statistics/data/repositories/debater_stats_repository.dart';
 import '../features/statistics/data/repositories/debater_stats_repository_impl.dart';
+import '../features/statistics/data/repositories/leaderboard_repository.dart';
 import '../features/splash/presentation/cubit/splash_cubit.dart';
 
 final sl = GetIt.instance;
@@ -36,6 +37,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ProfileRepository());
   // Debater statistics (read-only API).
   sl.registerLazySingleton<DebaterStatsRepository>(() => DebaterStatsRepositoryImpl());
+  // V2 §3 — public leaderboards (home preview + public stats screen).
+  sl.registerLazySingleton(() => LeaderboardRepository());
   // param1 = the backend debate id to load (from the list → detail → join flow,
   // §13). Null falls back to `DebateModeConfig.devDebateId`.
   sl.registerFactoryParam<DebateController, int?, void>(

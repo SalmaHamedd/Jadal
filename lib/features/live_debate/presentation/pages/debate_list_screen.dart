@@ -1,23 +1,55 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_list_model.dart';
 import '../../data/repositories/live_debate_repository.dart';
+import '../../domain/debate_search_filter.dart';
 import '../../domain/debate_status.dart';
 import '../cubits/debate_list_cubit.dart';
 import '../utils/debate_date.dart';
 import '../utils/debate_theme.dart';
+import '../widgets/debate_filter_dialog.dart';
 import 'backend_debate_detail_screen.dart';
+import '../../../main/presentation/screens/main_screen.dart';
 
 /// Backend debate list with stage tabs (§13): one `GET /debates?status=…` per
 /// tab (Registration / Announced / Sides selected / Live / Done / Cancelled),
 /// with `meta`-driven pagination. Tapping a card opens the live-state detail.
-class DebateListScreen extends StatelessWidget {
+/// A search bar + filter button (§8) replace the tabbed view with a single
+/// searched/filtered result list whenever a query or filter is active.
+class DebateListScreen extends StatefulWidget {
   const DebateListScreen({super.key});
+
+  @override
+  State<DebateListScreen> createState() => _DebateListScreenState();
+}
+
+class _DebateListScreenState extends State<DebateListScreen> {
+  bool _searching = false;
+  final _searchController = TextEditingController();
+  String _query = '';
+  DebateSearchFilter _filter = const DebateSearchFilter();
+
+  bool get _isFiltering => _query.isNotEmpty || !_filter.isEmpty;
+
+  Future<void> _openFilterDialog() async {
+    final result = await showDialog<DebateSearchFilter>(
+      context: context,
+      builder: (_) => DebateFilterDialog(initial: _filter),
+    );
+    if (result != null) setState(() => _filter = result);
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -44,26 +76,201 @@ class DebateListScreen extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: 0,
-            title: Text(loc.debatesTitle,
-                style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+            leading: _searching
+                ? null
+                : IconButton(
+                    icon: const Icon(Icons.menu_rounded),
+                    onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+                  ),
+            title: _searching
+                ? TextField(
+                    controller: _searchController,
+                    autofocus: true,
+                    style: const TextStyle(fontFamily: 'Cairo'),
+                    decoration: InputDecoration(
+                      hintText: loc.debatesTitle,
+                      border: InputBorder.none,
+                    ),
+                    onChanged: (v) => setState(() => _query = v),
+                  )
+                : Text(loc.debatesTitle,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+            actions: [
+              IconButton(
+                icon: Icon(_searching ? Icons.close : Icons.search),
+                onPressed: () => setState(() {
+                  if (_searching) {
+                    _searchController.clear();
+                    _query = '';
+                  }
+                  _searching = !_searching;
+                }),
+              ),
+              IconButton(
+                icon: Badge(
+                  isLabelVisible: !_filter.isEmpty,
+                  smallSize: 8,
+                  child: const Icon(Icons.filter_list_rounded),
+                ),
+                onPressed: _openFilterDialog,
+              ),
+            ],
             // The statistics entry moved to the Profile tab.
-            bottom: TabBar(
-              isScrollable: true,
-              // Removes the empty gap the scrollable TabBar leaves at the start/end.
-              tabAlignment: TabAlignment.start,
-              indicatorColor: tabColor,
-              indicatorWeight: 3,
-              labelColor: tabColor,
-              unselectedLabelColor: JadalColors.judgesGrey,
-              labelStyle: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
-              tabs: [for (final t in tabs) Tab(text: t.label)],
-            ),
+            bottom: _isFiltering
+                ? null
+                : TabBar(
+                    isScrollable: true,
+                    // Removes the empty gap the scrollable TabBar leaves at the start/end.
+                    tabAlignment: TabAlignment.start,
+                    indicatorColor: tabColor,
+                    indicatorWeight: 3,
+                    labelColor: tabColor,
+                    unselectedLabelColor: JadalColors.judgesGrey,
+                    labelStyle: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                    tabs: [for (final t in tabs) Tab(text: t.label)],
+                  ),
           ),
-          body: TabBarView(
-            children: [for (final t in tabs) _StatusTab(status: t.status)],
-          ),
+          body: _isFiltering
+              ? _SearchResultsView(query: _query, filter: _filter)
+              : TabBarView(
+                  children: [for (final t in tabs) _StatusTab(status: t.status)],
+                ),
         ),
       ),
+    );
+  }
+}
+
+/// The combined search+filter result list (§8) — a flat paginated list
+/// (no status tabs) driven by `GET /debates/search`.
+class _SearchResultsView extends StatefulWidget {
+  final String query;
+  final DebateSearchFilter filter;
+  const _SearchResultsView({required this.query, required this.filter});
+
+  @override
+  State<_SearchResultsView> createState() => _SearchResultsViewState();
+}
+
+class _SearchResultsViewState extends State<_SearchResultsView> {
+  final _scroll = ScrollController();
+  final List<DebateListItem> _items = [];
+  int _page = 1;
+  bool _loading = false;
+  bool _hasMore = true;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(_onScroll);
+    _load();
+  }
+
+  @override
+  void didUpdateWidget(covariant _SearchResultsView old) {
+    super.didUpdateWidget(old);
+    if (old.query != widget.query || old.filter != widget.filter) {
+      _items.clear();
+      _page = 1;
+      _hasMore = true;
+      _load();
+    }
+  }
+
+  void _onScroll() {
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 300) _load();
+  }
+
+  Future<void> _load() async {
+    if (_loading || !_hasMore) return;
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final res = await di.sl<LiveDebateRepository>().searchDebates(
+          widget.filter.copyWith(q: widget.query.isEmpty ? null : widget.query),
+          page: _page,
+        );
+    if (!mounted) return;
+    res.fold(
+      (f) => setState(() {
+        _error = f.message;
+        _loading = false;
+      }),
+      (pageData) => setState(() {
+        _items.addAll(pageData.items);
+        _hasMore = pageData.items.isNotEmpty;
+        _page++;
+        _loading = false;
+      }),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    if (_items.isEmpty && _loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+    if (_items.isEmpty && _error != null) {
+      return _ErrorRetry(message: _error!, onRetry: _load);
+    }
+    if (_items.isEmpty) {
+      return ListView(
+        physics: const AlwaysScrollableScrollPhysics(),
+        children: [
+          SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+          Center(
+            child: Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: DebateTheme.textSecondary(context).withValues(alpha: 0.06),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Image.asset(
+                AppImageAsset.emptyDebatesIllustration,
+                height: 160,
+                errorBuilder: (_, _, _) => const SizedBox(height: 160),
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Center(
+            child: Text(loc.noDebatesHere,
+                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+          ),
+        ],
+      );
+    }
+    final showFooter = _hasMore || _loading;
+    return ListView.separated(
+      controller: _scroll,
+      physics: const AlwaysScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
+      itemCount: _items.length + (showFooter ? 1 : 0),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
+      itemBuilder: (context, i) {
+        if (i >= _items.length) {
+          return const Padding(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        final item = _items[i];
+        return _DebateListCard(
+          item: item,
+          onTap: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => BackendDebateDetailScreen(debateId: item.id, title: item.title),
+          )),
+        );
+      },
     );
   }
 }
@@ -130,7 +337,22 @@ class _StatusListState extends State<_StatusList> {
               ? ListView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   children: [
-                    SizedBox(height: MediaQuery.of(context).size.height * 0.3),
+                    SizedBox(height: MediaQuery.of(context).size.height * 0.18),
+                    Center(
+                      child: Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: DebateTheme.textSecondary(context).withValues(alpha: 0.06),
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: Image.asset(
+                          AppImageAsset.emptyDebatesIllustration,
+                          height: 160,
+                          errorBuilder: (_, _, _) => const SizedBox(height: 160),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Center(
                       child: Text(loc.noDebatesHere,
                           style: TextStyle(

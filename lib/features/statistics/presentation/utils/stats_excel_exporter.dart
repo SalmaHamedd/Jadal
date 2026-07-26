@@ -1,5 +1,6 @@
 import 'package:excel/excel.dart';
 
+import '../../data/models/activity_stat_model.dart';
 import '../../data/models/debater_stats_models.dart';
 
 /// Builds the "debate sheet" — a styled `.xlsx` export of whatever analysis is
@@ -51,6 +52,7 @@ class StatsExcelExporter {
     BucketedStat? bucketed,
     ScoreRanking? ranking,
     ImprovementStat? improvement,
+    ActivityStat? activity,
   }) {
     final excel = Excel.createExcel();
     const sheetName = 'Analysis';
@@ -80,6 +82,9 @@ class StatsExcelExporter {
       case StatKind.improvement:
         if (improvement == null) return null;
         row = _writeImprovement(sheet, row, improvement);
+      case StatKind.activity:
+        if (activity == null) return null;
+        row = _writeActivity(sheet, row, activity);
     }
 
     sheet.setColumnWidth(0, 24);
@@ -103,7 +108,7 @@ class StatsExcelExporter {
         kind == StatKind.bestSpeaker;
     final rows = <(String, String)>[
       ('Period', '${f.from ?? '—'}  to  ${f.to ?? '—'}'),
-      if (isBucketed) ('Group by', f.groupBy.name),
+      if (isBucketed || kind == StatKind.activity) ('Group by', f.groupBy.name),
       if (isBucketed)
         ('Compare', f.series == StatsSeries.none ? 'Combined' : 'By ${f.series.name}'),
       if (kind == StatKind.ranking) ('Order', mode.name),
@@ -251,6 +256,81 @@ class StatsExcelExporter {
     return row;
   }
 
+  static int _writeActivity(Sheet s, int row, ActivityStat data) {
+    _put(s, 0, row, TextCellValue('Total activity points'), _labelStyle);
+    _put(
+      s,
+      1,
+      row,
+      DoubleCellValue(_round1(data.totalValue)),
+      CellStyle(
+        bold: true,
+        fontColorHex: data.totalValue >= 0 ? _green : _red,
+        backgroundColorHex: _white,
+      ),
+    );
+    row += 2;
+
+    // Totals breakdown — the "what made this number" block.
+    final totals = <(String, ActivitySignal)>[
+      ('Registrations', data.totalBreakdown.registration),
+      ('Attendance', data.totalBreakdown.attendance),
+      ('Watched debates', data.totalBreakdown.viewing),
+      ('Missed debates', data.totalBreakdown.penalty),
+    ];
+    for (final t in totals) {
+      _put(s, 0, row, TextCellValue(t.$1), _labelStyle);
+      _put(
+        s,
+        1,
+        row,
+        DoubleCellValue(_round1(t.$2.points)),
+        CellStyle(
+          bold: true,
+          fontColorHex: t.$2.points >= 0 ? _green : _red,
+          backgroundColorHex: _white,
+        ),
+      );
+      _put(s, 2, row, IntCellValue(t.$2.count), _cellStyle);
+      row++;
+    }
+
+    row += 1;
+    const headers = [
+      'Period',
+      'Points',
+      'Registration',
+      'Attendance',
+      'Viewing',
+      'Penalty',
+    ];
+    for (var c = 0; c < headers.length; c++) {
+      _put(s, c, row, TextCellValue(headers[c]), _headerStyle);
+    }
+    row++;
+    for (final b in data.buckets) {
+      _put(s, 0, row, TextCellValue(b.label), _cellStyle);
+      _put(
+        s,
+        1,
+        row,
+        DoubleCellValue(_round1(b.value)),
+        CellStyle(
+          bold: true,
+          fontColorHex: b.value >= 0 ? _green : _red,
+          backgroundColorHex: _white,
+          horizontalAlign: HorizontalAlign.Center,
+        ),
+      );
+      _put(s, 2, row, DoubleCellValue(_round1(b.breakdown.registration.points)), _cellStyle);
+      _put(s, 3, row, DoubleCellValue(_round1(b.breakdown.attendance.points)), _cellStyle);
+      _put(s, 4, row, DoubleCellValue(_round1(b.breakdown.viewing.points)), _cellStyle);
+      _put(s, 5, row, DoubleCellValue(_round1(b.breakdown.penalty.points)), _cellStyle);
+      row++;
+    }
+    return row;
+  }
+
   // ── helpers ───────────────────────────────────────────────────────────────
 
   static void _put(Sheet s, int col, int row, CellValue value, CellStyle style) {
@@ -268,5 +348,6 @@ class StatsExcelExporter {
         StatKind.bestSpeaker => 'Best-speaker rate',
         StatKind.ranking => 'Score ranking',
         StatKind.improvement => 'Improvement',
+        StatKind.activity => 'Activity',
       };
 }

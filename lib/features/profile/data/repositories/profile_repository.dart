@@ -7,6 +7,9 @@ import 'package:jadal_app/core/constants/api_constants.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/profile/data/models/profile_model.dart';
+import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
+import 'package:jadal_app/features/profile/domain/entities/public_user_profile.dart';
+import 'package:jadal_app/features/profile/domain/entities/team_membership.dart';
 
 class ProfileRepository {
   Future<Either<Failure, Profile>> getProfile() async {
@@ -42,6 +45,8 @@ class ProfileRepository {
   Future<Either<Failure, Profile>> updateProfile({
     required String name,
     required String phone,
+    String? birthDate,
+    String? location,
   }) async {
     try {
       final token = await PreferencesDatabase().getToken();
@@ -55,7 +60,12 @@ class ProfileRepository {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer $token',
         },
-        body: jsonEncode({'name': name, 'phone': phone}),
+        body: jsonEncode({
+          'name': name,
+          'phone': phone,
+          'birth_date': ?birthDate,
+          'location': ?location,
+        }),
       );
 
       final Map<String, dynamic> responseBody = jsonDecode(response.body);
@@ -65,6 +75,37 @@ class ProfileRepository {
         final data = responseBody['data'];
         final updatedProfile = ProfileModel.fromJson(data);
         return Right(updatedProfile);
+      }
+
+      return Left(ServerFailure(message));
+    } catch (e) {
+      return Left(NetworkFailure('Network error'));
+    }
+  }
+
+  /// V2 §9 — flip the statistics-visibility opt-out. Returns the updated
+  /// profile (same envelope as every other PUT /profile call).
+  Future<Either<Failure, Profile>> setStatsVisibility(bool visible) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) {
+        return Left(AuthFailure('No authentication token found'));
+      }
+
+      final response = await http.put(
+        Uri.parse(ApiConstants.profileUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+        body: jsonEncode({'stats_visible': visible}),
+      );
+
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      final String message = responseBody['message'] ?? 'Unknown error';
+
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        return Right(ProfileModel.fromJson(responseBody['data']));
       }
 
       return Left(ServerFailure(message));
@@ -138,6 +179,76 @@ class ProfileRepository {
       } else {
         return Left(ServerFailure(json['message'] ?? 'Upload failed'));
       }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  // ── Public profile / achievements / team history (sprinkles §6) ────────────
+
+  Future<Either<Failure, PublicUserProfile>> getUserProfile(int userId) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('No authentication token found'));
+
+      final response = await http.get(
+        Uri.parse(ApiConstants.userProfileUrl(userId)),
+        headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+      );
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        return Right(PublicUserProfile.fromJson(responseBody['data']));
+      }
+      return Left(ServerFailure(responseBody['message'] ?? 'Unknown error'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  Future<Either<Failure, List<Achievement>>> getUserAchievements(
+    int userId, {
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('No authentication token found'));
+
+      final uri = Uri.parse(ApiConstants.userAchievementsUrl(userId))
+          .replace(queryParameters: {'page': '$page', 'per_page': '$perPage'});
+      final response = await http
+          .get(uri, headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'});
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        final data = responseBody['data'];
+        final list = data is Map ? data['items'] ?? data['data'] : data;
+        return Right(Achievement.listFromJson(list is List ? list : const []));
+      }
+      return Left(ServerFailure(responseBody['message'] ?? 'Unknown error'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  Future<Either<Failure, List<TeamMembership>>> getUserTeams(
+    int userId, {
+    bool history = false,
+  }) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('No authentication token found'));
+
+      final url = history
+          ? ApiConstants.userTeamsHistoryUrl(userId)
+          : ApiConstants.userTeamsUrl(userId);
+      final response = await http
+          .get(Uri.parse(url), headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'});
+      final Map<String, dynamic> responseBody = jsonDecode(response.body);
+      if (response.statusCode == 200 && responseBody['success'] == true) {
+        final data = responseBody['data'];
+        return Right(TeamMembership.listFromJson(data is List ? data : const []));
+      }
+      return Left(ServerFailure(responseBody['message'] ?? 'Unknown error'));
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));
     }

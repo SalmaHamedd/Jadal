@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -137,14 +138,14 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
-                  child: const Text('إلغاء'),
+                  child: Text(context.loc.cancel),
                 ),
                 TextButton(
                   onPressed: () {
                     onConfirm(tempSelected);
                     Navigator.pop(context);
                   },
-                  child: const Text('تأكيد'),
+                  child: Text(context.loc.confirm),
                 ),
               ],
             );
@@ -165,8 +166,8 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       child: Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: const Text('إنشاء مقال جديد',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        title: Text(context.loc.createNewArticle,
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -203,7 +204,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
-                        'خطأ في تحميل الخيارات: ${snapshot.error}',
+                        context.loc.optionsLoadError('${snapshot.error}'),
                         textAlign: TextAlign.center,
                       ),
                       const SizedBox(height: 16),
@@ -213,7 +214,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                             _metaFuture = _fetchMeta();
                           });
                         },
-                        child: const Text('إعادة المحاولة'),
+                        child: Text(context.loc.retry),
                       ),
                     ],
                   ),
@@ -229,22 +230,22 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'أضف مقالك الجديد',
-                      style: TextStyle(
+                    Text(
+                      context.loc.addYourNewArticle,
+                      style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     const SizedBox(height: 8),
-                    const Text(
-                      'سيتم إرسال المقال للمراجعة قبل النشر',
-                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    Text(
+                      context.loc.articleReviewNote,
+                      style: const TextStyle(color: Colors.grey, fontSize: 14),
                     ),
                     const SizedBox(height: 24),
 
                     AuthTextField(
-                      label: 'عنوان المقال *',
+                      label: context.loc.articleTitleRequiredLabel,
                       icon: Icons.title,
                       controller: _titleController,
                     ),
@@ -267,7 +268,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                             horizontal: 14,
                             vertical: isMobile ? 14 : 16,
                           ),
-                          hintText: 'المحتوى *',
+                          hintText: context.loc.contentRequiredLabel,
                           hintStyle: TextStyle(
                             fontFamily: 'Cairo',
                             color: isDark
@@ -295,14 +296,14 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     const SizedBox(height: 16),
 
                     MultiSelectField<Category>(
-                      label: 'التصنيفات (اختياري)',
+                      label: context.loc.categoriesOptionalLabel,
                       selectedItems: _selectedCategories,
                       displayName: (c) => c.name,
                       onTap: () {
                         _showMultiSelectDialog(
                           items: categories,
                           selectedItems: _selectedCategories,
-                          title: 'اختر التصنيفات',
+                          title: context.loc.chooseCategories,
                           onConfirm: (selected) {
                             setState(() {
                               _selectedCategories = selected.cast<Category>();
@@ -317,13 +318,13 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                       context: context,
                       isDark: isDark,
                       isMobile: isMobile,
-                      label: 'الوسوم (اختياري)',
+                      label: context.loc.tagsOptionalLabel,
                       selectedNames: _selectedTags.map((t) => t.name).toList(),
                       onTap: () {
                         _showMultiSelectDialog(
                           items: tags,
                           selectedItems: _selectedTags,
-                          title: 'اختر الوسوم',
+                          title: context.loc.chooseTags,
                           onConfirm: (selected) {
                             setState(() {
                               _selectedTags = selected.cast<Tag>();
@@ -335,7 +336,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                     const SizedBox(height: 24),
 
                     AuthButton(
-                      text: 'نشر المقال',
+                      text: context.loc.publishArticle,
                       isLoading: state is CreateBlogLoading,
                       onPressed: () {
                         final title = _titleController.text.trim();
@@ -343,7 +344,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                         if (title.isEmpty || content.isEmpty) {
                           JadalSnackBar.show(
                             context,
-                            'العنوان والمحتوى مطلوبان',
+                            context.loc.titleContentRequired,
                             type: SnackBarType.error,
                           );
                           return;

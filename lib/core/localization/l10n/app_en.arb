@@ -233,5 +233,67 @@
   "connectingToRoom": "Connecting to the debate room…",
   "connectionFailed": "Couldn't connect to the room. Please try again.",
   "notJoinedYet": "Hasn't joined yet",
-  "waitingToJoin": "Waiting to join"
+  "waitingToJoin": "Waiting to join",
+
+  "greetingWithName": "Welcome, {name} 👋",
+  "@greetingWithName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "greeting": "Welcome 👋",
+  "topDebaters": "Top debaters",
+  "showMore": "Show more",
+
+  "latestArticles": "Latest articles",
+  "viewAll": "View all",
+  "noArticles": "No articles",
+  "errorWithMessage": "Error: {message}",
+  "@errorWithMessage": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+
+  "searchUsersTeamsHint": "Search for users or teams…",
+  "searchUsersTeamsPrompt": "Search for users or teams",
+  "noResults": "No results",
+  "usersSection": "Users",
+  "teamsSection": "Teams",
+  "roleDebater": "Debater",
+  "roleTrainer": "Coach",
+  "roleAdmin": "Admin",
+  "membersCountLabel": "{count} members",
+  "@membersCountLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "coachNameLabel": "Coach: {name}",
+  "@coachNameLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "searchArticlesHint": "Search articles…",
+  "allArticles": "All articles",
+  "newArticle": "New article",
+  "createArticle": "Create article",
+  "deleteArticle": "Delete article",
+  "deleteArticleConfirm": "Are you sure you want to delete \"{title}\"?",
+  "@deleteArticleConfirm": {
+    "placeholders": { "title": { "type": "String" } }
+  },
+  "delete": "Delete",
+  "articleDeleted": "Article deleted successfully",
+  "articleDetails": "Article details",
+  "createNewArticle": "Create a new article",
+  "addYourNewArticle": "Add your new article",
+  "articleReviewNote": "The article will be sent for review before publishing",
+  "articleTitleRequiredLabel": "Article title *",
+  "contentRequiredLabel": "Content *",
+  "imageUrlOptionalLabel": "Image link (optional)",
+  "categoriesOptionalLabel": "Categories (optional)",
+  "chooseCategories": "Choose categories",
+  "tagsOptionalLabel": "Tags (optional)",
+  "chooseTags": "Choose tags",
+  "publishArticle": "Publish article",
+  "titleContentRequired": "Title and content are required",
+  "optionsLoadError": "Failed to load options: {error}",
+  "@optionsLoadError": {
+    "placeholders": { "error": { "type": "String" } }
+  }
 }

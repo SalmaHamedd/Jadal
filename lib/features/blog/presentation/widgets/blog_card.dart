@@ -1,9 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/constants/appImgaeAsset.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
+import 'package:jadal_app/features/blog/presentation/widgets/blog_chips.dart';
 
 class BlogCard extends StatelessWidget {
   final Blog blog;
@@ -38,28 +40,37 @@ class BlogCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              if (blog.coverImageUrl != null && blog.coverImageUrl!.isNotEmpty)
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: CachedNetworkImage(
-                    imageUrl: blog.coverImageUrl!,
-                    height: context.hp(18),
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    placeholder: (_, __) => Container(
-                      height: context.hp(18),
-                      color: Colors.grey[300],
-                      child: const Center(child: CircularProgressIndicator()),
-                    ),
-                    errorWidget: (_, __, ___) => Container(
-                      height: context.hp(18),
-                      color: Colors.grey[300],
-                      child: const Icon(Icons.broken_image, size: 40),
-                    ),
-                  ),
-                ),
-              if (blog.coverImageUrl != null && blog.coverImageUrl!.isNotEmpty)
-                SizedBox(height: context.hp(1.5)),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: (blog.coverImageUrl != null && blog.coverImageUrl!.isNotEmpty)
+                    ? CachedNetworkImage(
+                        imageUrl: blog.coverImageUrl!,
+                        height: context.hp(18),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        placeholder: (_, __) => Container(
+                          height: context.hp(18),
+                          color: Colors.grey[300],
+                          child: const Center(child: CircularProgressIndicator()),
+                        ),
+                        errorWidget: (_, __, ___) => Image.asset(
+                          AppImageAsset.blogArticlePlaceholder,
+                          height: context.hp(18),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                        ),
+                      )
+                    // Every card reserves the same image height whether or not
+                    // the blog has a cover, so cards stay visually balanced
+                    // instead of an image-less one reading as "oddly small".
+                    : Image.asset(
+                        AppImageAsset.blogArticlePlaceholder,
+                        height: context.hp(18),
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      ),
+              ),
+              SizedBox(height: context.hp(1.5)),
               Text(
                 blog.title,
                 style: TextStyle(
@@ -72,6 +83,10 @@ class BlogCard extends StatelessWidget {
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
+              if (blog.categories.isNotEmpty || blog.tags.isNotEmpty) ...[
+                SizedBox(height: context.hp(0.6)),
+                BlogChips(categories: blog.categories, tags: blog.tags),
+              ],
               SizedBox(height: context.hp(0.8)),
               Text(
                 blog.excerpt,

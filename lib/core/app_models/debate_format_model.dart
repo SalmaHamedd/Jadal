@@ -57,22 +57,18 @@ class DebateFormatModel {
     this.phases = const [],
   });
 
-  /// Parses `live-state.format` (the object-only shape).
-  factory DebateFormatModel.fromLiveState(Map<String, dynamic> j) => DebateFormatModel(
-        speechTimeSeconds: (j['speech_time_seconds'] as num?)?.toInt(),
-        hasReplySpeech: j['has_reply_speech'] as bool?,
-        replyTimeSeconds: (j['reply_time_seconds'] as num?)?.toInt(),
-        motionRevealOffsetHours: j['motion_reveal_offset_hours'] as num?,
-        prepRoomsOpenOffsetHours: j['prep_rooms_open_offset_hours'] as num?,
-        speakersPerSide: (j['speakers_per_side'] as num?)?.toInt(),
-        totalStages: (j['total_stages'] as num?)?.toInt(),
-      );
-
-  /// Parses `GET /debates[].format`, handling the polymorphic `phase_config`.
-  factory DebateFormatModel.fromDebateList(Map<String, dynamic> j) {
+  /// Parses format data from either `live-state.format` or
+  /// `GET /debates[].format` — as of the sprinkles-round backend response,
+  /// live-state.format is a strict superset of the debate-list shape (it now
+  /// also carries `id`/`name`/`description`/`phase_config`), so both shapes
+  /// can be parsed the same way: flat top-level scalars are read directly,
+  /// and `phase_config` is handled polymorphically (List → [phases], Map →
+  /// fallback scalars for the older debate-list shape where they only ever
+  /// lived nested inside `phase_config`).
+  factory DebateFormatModel.fromJson(Map<String, dynamic> j) {
     final pc = j['phase_config'];
     List<PhaseConfig> phases = const [];
-    int? speech, reply;
+    int? speech, reply, speakers, stages;
     bool? hasReply;
     num? motionOffset, prepOffset;
     if (pc is List) {
@@ -87,20 +83,39 @@ class DebateFormatModel {
       hasReply = m['has_reply_speech'] as bool?;
       motionOffset = m['motion_reveal_offset_hours'] as num?;
       prepOffset = m['prep_rooms_open_offset_hours'] as num?;
+      speakers = (m['speakers_per_side'] as num?)?.toInt();
+      stages = (m['total_stages'] as num?)?.toInt();
     }
     return DebateFormatModel(
       id: (j['id'] as num?)?.toInt(),
       name: j['name'] as String?,
       description: j['description'] as String?,
-      speechTimeSeconds: speech,
-      hasReplySpeech: hasReply,
-      replyTimeSeconds: reply,
-      motionRevealOffsetHours: motionOffset,
-      prepRoomsOpenOffsetHours: prepOffset,
+      speechTimeSeconds: (j['speech_time_seconds'] as num?)?.toInt() ?? speech,
+      hasReplySpeech: j['has_reply_speech'] as bool? ?? hasReply,
+      replyTimeSeconds: (j['reply_time_seconds'] as num?)?.toInt() ?? reply,
+      motionRevealOffsetHours: j['motion_reveal_offset_hours'] as num? ?? motionOffset,
+      prepRoomsOpenOffsetHours: j['prep_rooms_open_offset_hours'] as num? ?? prepOffset,
+      speakersPerSide: (j['speakers_per_side'] as num?)?.toInt() ?? speakers,
+      totalStages: (j['total_stages'] as num?)?.toInt() ?? stages,
       phases: phases,
     );
   }
 
+  /// Parses `live-state.format`. Kept as a named alias of [fromJson] so call
+  /// sites stay expressive about which payload they're reading.
+  factory DebateFormatModel.fromLiveState(Map<String, dynamic> j) =>
+      DebateFormatModel.fromJson(j);
+
+  /// Parses `GET /debates[].format`. Alias of [fromJson] — see its doc.
+  factory DebateFormatModel.fromDebateList(Map<String, dynamic> j) =>
+      DebateFormatModel.fromJson(j);
+
   /// Whether this format includes a reply speech (from either representation).
   bool get hasReply => hasReplySpeech ?? false;
+
+  /// Converts a backend `*_offset_hours` value (fractional hours, e.g. `0.5`
+  /// = 30 minutes — confirmed by backend) into a [Duration]. Route every
+  /// offset field through this one helper instead of ad-hoc per-field math.
+  static Duration hoursOffsetToDuration(num hours) =>
+      Duration(seconds: (hours * 3600).round());
 }

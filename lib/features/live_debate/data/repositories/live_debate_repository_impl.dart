@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:fpdart/fpdart.dart';
 import 'package:http/http.dart' as http;
 
+import '../../../../core/app_models/debate_format_model.dart';
+import '../../../../core/app_models/framework.dart';
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/function/json_utils.dart';
@@ -12,11 +14,14 @@ import '../../../../core/services/token_storage.dart';
 // raw bodies the live-debate diagnosis depends on, incl. the details fetch).
 import '../../presentation/utils/debate_log.dart';
 import '../../domain/debate_registration.dart';
+import '../../domain/debate_search_filter.dart';
 import '../models/debate_list_model.dart';
 import '../models/debate_result_model.dart';
+import '../models/filter_options_model.dart';
 import '../models/live_state_model.dart';
 import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
+import '../models/team_chat_history_model.dart';
 import 'live_debate_repository.dart';
 
 /// HTTP implementation of [LiveDebateRepository] (matches the app's
@@ -334,5 +339,101 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     final res = await _safe('registrations[$debateId]', uri, 'GET',
         () async => _client.get(uri, headers: await _headers(json: false)));
     return _model(res, DebateRegistrations.fromJson);
+  }
+
+  @override
+  Future<Either<Failure, List<TeamChatHistoryMessage>>> getChatHistory(int debateId) async {
+    final uri = Uri.parse(ApiConstants.chatUrl(debateId));
+    final res = await _safe('chat-history[$debateId]', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return _model(res, TeamChatHistoryMessage.listFromJson);
+  }
+
+  @override
+  Future<Either<Failure, TeamChatHistoryMessage>> sendChatMessage({
+    required int debateId,
+    required String message,
+  }) async {
+    final uri = Uri.parse(ApiConstants.chatUrl(debateId));
+    final body = jsonEncode({'message': message});
+    final res = await _safe('chat-send[$debateId]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers(), body: body),
+        reqBody: body);
+    return _model(res, TeamChatHistoryMessage.fromJson);
+  }
+
+  @override
+  Future<Either<Failure, Unit>> markChatRead(int debateId) async {
+    final uri = Uri.parse(ApiConstants.chatReadUrl(debateId));
+    final res = await _safe('chat-read[$debateId]', uri, 'POST',
+        () async => _client.post(uri, headers: await _headers()));
+    return _unit(res);
+  }
+
+  @override
+  Future<Either<Failure, DebateListPage>> searchDebates(
+    DebateSearchFilter filter, {
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    final uri = Uri.parse(ApiConstants.debatesSearchUrl)
+        .replace(queryParameters: filter.toQueryParameters(page: page, perPage: perPage));
+    final res = await _safe('debates-search', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.flatMap((body) {
+      if (body == null) return const Left(ServerFailure('Unexpected empty response'));
+      return Right(DebateListPage.fromEnvelope(body));
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<Framework>>> getMotionFrameworks() async {
+    final uri = Uri.parse(ApiConstants.motionFrameworksUrl);
+    final res = await _safe('motion-frameworks', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.map((body) => Framework.listFromJson(body?['data']));
+  }
+
+  @override
+  Future<Either<Failure, List<DebateFormatModel>>> getDebateFormats() async {
+    final uri = Uri.parse(ApiConstants.debateFormatsUrl);
+    final res = await _safe('debate-formats', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.map((body) {
+      final list = body?['data'];
+      if (list is! List) return <DebateFormatModel>[];
+      return list
+          .whereType<Map>()
+          .map((e) => DebateFormatModel.fromJson(e.cast<String, dynamic>()))
+          .toList();
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<String>>> getDebateTagsDistinct() async {
+    final uri = Uri.parse(ApiConstants.debateTagsDistinctUrl);
+    final res = await _safe('debate-tags-distinct', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.map((body) {
+      final tags = asMap(body?['data'])?['tags'];
+      return (tags is List) ? tags.map((e) => '$e').toList() : <String>[];
+    });
+  }
+
+  @override
+  Future<Either<Failure, List<JudgeOption>>> getJudgesList() async {
+    final uri = Uri.parse(ApiConstants.judgesListUrl);
+    final res = await _safe('judges-list', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.map((body) => JudgeOption.listFromJson(body?['data'] as List?));
+  }
+
+  @override
+  Future<Either<Failure, List<TeamOption>>> getTeamsOptions({String? search}) async {
+    final uri = Uri.parse(ApiConstants.teamsOptionsUrl)
+        .replace(queryParameters: {'search': ?search});
+    final res = await _safe('teams-options', uri, 'GET',
+        () async => _client.get(uri, headers: await _headers(json: false)));
+    return res.map((body) => TeamOption.listFromJson(body?['data'] as List?));
   }
 }

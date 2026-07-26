@@ -15,9 +15,16 @@ class EditProfileCubit extends Cubit<EditProfileState> {
   Future<void> updateProfile({
     required String name,
     required String phone,
+    String? birthDate,
+    String? location,
   }) async {
     emit(EditProfileLoading());
-    final result = await _repository.updateProfile(name: name, phone: phone);
+    final result = await _repository.updateProfile(
+      name: name,
+      phone: phone,
+      birthDate: birthDate,
+      location: location,
+    );
     result.fold(
       (failure) => emit(EditProfileError(failure.message)),
       (updatedProfile) => emit(EditProfileSuccess(updatedProfile)),

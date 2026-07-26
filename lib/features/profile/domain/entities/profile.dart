@@ -11,6 +11,14 @@ class Profile {
   final String? theme;
   final String? emailVerifiedAt;
   final String createdAt;
+  // Sprinkles §6.2: backend stores birthDate, computes+returns age; location
+  // is a plain editable string. All three ride on GET/PUT /profile now.
+  final int? age;
+  final String? location;
+  final String? birthDate;
+  // V2 §9: opt-OUT model — statistics are public unless the user turns this
+  // off. Toggled via PUT /profile { stats_visible }.
+  final bool statsVisible;
 
   const Profile({
     required this.id,
@@ -25,5 +33,9 @@ class Profile {
     this.theme,
     this.emailVerifiedAt,
     required this.createdAt,
+    this.age,
+    this.location,
+    this.birthDate,
+    this.statsVisible = true,
   });
 }

@@ -53,6 +53,11 @@ class ApiConstants {
   static String closeRoomUrl(int id) => '$baseUrl/debates/$id/close-room';
   static String get feedbackUrl => '$baseUrl/feedback';
 
+  // Persistent team chat (sprinkles §2) — additive to the peer `team_chat`
+  // data-channel event, which still handles live delivery unchanged.
+  static String chatUrl(int id) => '$baseUrl/debates/$id/chat';
+  static String chatReadUrl(int id) => '$baseUrl/debates/$id/chat/read';
+
   /// Self-registration for a debate (as = debater | judge | team).
   static String registerUrl(int id) => '$baseUrl/debates/$id/register';
 
@@ -70,4 +75,39 @@ class ApiConstants {
   static String bestSpeakerUrl(int debaterId) => '${_statsBase(debaterId)}/best-speaker';
   static String scoreRankingUrl(int debaterId) => '${_statsBase(debaterId)}/score-ranking';
   static String improvementUrl(int debaterId) => '${_statsBase(debaterId)}/improvement';
+  static String prepAttendanceUrl(int debaterId) => '${_statsBase(debaterId)}/prep-attendance';
+  static String trainerAttendanceUrl(int trainerId) =>
+      '$baseUrl/trainers/$trainerId/stats/attendance';
+  static String judgeAttendanceUrl(int judgeId) =>
+      '$baseUrl/judges/$judgeId/stats/attendance';
+
+  // ── Public profile / achievements / team history (sprinkles §6) ──────────────
+  static String userProfileUrl(int id) => '$baseUrl/users/$id';
+  static String userAchievementsUrl(int id) => '$baseUrl/users/$id/achievements';
+  static String userTeamsUrl(int id) => '$baseUrl/users/$id/teams';
+  static String userTeamsHistoryUrl(int id) => '$baseUrl/users/$id/teams/history';
+
+  // ── Debate search + filter option lists (sprinkles §8) ────────────────────────
+  static String get debatesSearchUrl => '$baseUrl/debates/search';
+  static String get debateFormatsUrl => '$baseUrl/debate-formats';
+  static String get debateTagsDistinctUrl => '$baseUrl/debates/tags/distinct';
+  static String get motionFrameworksUrl => '$baseUrl/motion-frameworks';
+  static String get judgesListUrl => '$baseUrl/judges';
+  static String get teamsOptionsUrl => '$baseUrl/teams/options';
+
+  // ── Blog search + filter option lists (sprinkles §10) ─────────────────────────
+  static String get blogAuthorsUrl => '$baseUrl/blog/authors';
+
+  // ── V2 §3 — public leaderboards (top-10; best_speaker is debaters-only) ──────
+  static String get leaderboardDebatersUrl => '$baseUrl/leaderboards/debaters';
+  static String get leaderboardTeamsUrl => '$baseUrl/leaderboards/teams';
+
+  // ── V2 §3 — coach team-summary (scalar per metric, averaged across teams) ────
+  static String trainerTeamSummaryUrl(int trainerId) =>
+      '$baseUrl/trainers/$trainerId/stats/team-summary';
+
+  // ── V2 §7 — participation/activity score (raw weighted points + breakdown) ───
+  static String debaterActivityUrl(int id) => '${_statsBase(id)}/activity';
+  static String trainerActivityUrl(int id) => '$baseUrl/trainers/$id/stats/activity';
+  static String judgeActivityUrl(int id) => '$baseUrl/judges/$id/stats/activity';
 }

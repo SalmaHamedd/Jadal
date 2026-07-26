@@ -13,6 +13,7 @@ import '../../data/models/debater_stats_models.dart';
 import '../../data/repositories/debater_stats_repository.dart';
 import '../cubits/debater_stats_cubit.dart';
 import '../utils/stats_excel_exporter.dart';
+import '../widgets/stats_activity_view.dart';
 import '../widgets/stats_bar_chart.dart';
 import '../widgets/stats_filter_bar.dart';
 import '../widgets/stats_improvement_view.dart';
@@ -128,6 +129,7 @@ class _StatsScaffold extends StatelessWidget {
   bool _hasData(DebaterStatsState s) => switch (s.kind) {
         StatKind.ranking => s.ranking != null,
         StatKind.improvement => s.improvement != null,
+        StatKind.activity => s.activity != null,
         _ => s.bucketed != null,
       };
 
@@ -142,6 +144,7 @@ class _StatsScaffold extends StatelessWidget {
         bucketed: state.bucketed,
         ranking: state.ranking,
         improvement: state.improvement,
+        activity: state.activity,
       );
       if (bytes == null) {
         messenger.showSnackBar(const SnackBar(content: Text('Nothing to export yet')));
@@ -222,6 +225,7 @@ class _KindSelector extends StatelessWidget {
     (kind: StatKind.bestSpeaker, label: 'Best speaker', icon: Icons.workspace_premium_rounded),
     (kind: StatKind.ranking, label: 'Ranking', icon: Icons.format_list_numbered_rounded),
     (kind: StatKind.improvement, label: 'Improvement', icon: Icons.trending_up_rounded),
+    (kind: StatKind.activity, label: 'Activity', icon: Icons.local_fire_department_rounded),
   ];
 
   @override
@@ -296,6 +300,7 @@ class _Content extends StatelessWidget {
   bool get _hasData => switch (state.kind) {
         StatKind.ranking => state.ranking != null,
         StatKind.improvement => state.improvement != null,
+        StatKind.activity => state.activity != null,
         _ => state.bucketed != null,
       };
 
@@ -347,6 +352,11 @@ class _Content extends StatelessWidget {
         return KeyedSubtree(
           key: const ValueKey('improvement'),
           child: StatsCard(child: StatsImprovementView(data: state.improvement!)),
+        );
+      case StatKind.activity:
+        return KeyedSubtree(
+          key: const ValueKey('activity'),
+          child: StatsCard(child: StatsActivityView(data: state.activity!)),
         );
       default:
         return KeyedSubtree(

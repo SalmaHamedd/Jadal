@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../data/models/activity_stat_model.dart';
 import '../../data/models/debater_stats_models.dart';
 import '../../data/repositories/debater_stats_repository.dart';
 
@@ -20,6 +21,7 @@ class DebaterStatsState {
   final BucketedStat? bucketed;
   final ScoreRanking? ranking;
   final ImprovementStat? improvement;
+  final ActivityStat? activity;
   final String? error;
 
   /// Monotonically increasing id of the latest fetch — lets the cubit drop the
@@ -35,6 +37,7 @@ class DebaterStatsState {
     this.bucketed,
     this.ranking,
     this.improvement,
+    this.activity,
     this.error,
     required this.requestId,
   });
@@ -60,6 +63,7 @@ class DebaterStatsState {
     BucketedStat? bucketed,
     ScoreRanking? ranking,
     ImprovementStat? improvement,
+    ActivityStat? activity,
     String? error,
     bool clearError = false,
     int? requestId,
@@ -73,6 +77,7 @@ class DebaterStatsState {
       bucketed: bucketed ?? this.bucketed,
       ranking: ranking ?? this.ranking,
       improvement: improvement ?? this.improvement,
+      activity: activity ?? this.activity,
       error: clearError ? null : (error ?? this.error),
       requestId: requestId ?? this.requestId,
     );
@@ -164,6 +169,13 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
         res.fold(
           (l) => emit(state.copyWith(status: StatsStatus.error, error: l.message)),
           (r) => emit(state.copyWith(status: StatsStatus.loaded, improvement: r)),
+        );
+      case StatKind.activity:
+        final res = await repo.getActivity(debaterId, filter);
+        if (id != state.requestId) return;
+        res.fold(
+          (l) => emit(state.copyWith(status: StatsStatus.error, error: l.message)),
+          (r) => emit(state.copyWith(status: StatsStatus.loaded, activity: r)),
         );
     }
   }

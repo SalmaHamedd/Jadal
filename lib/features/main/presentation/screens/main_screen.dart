@@ -1,18 +1,25 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/jadal_bottom_nav_bar.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../live_debate/presentation/pages/debate_list_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../../../search/presentation/screens/search_screen.dart';
+import '../widgets/jadal_app_drawer.dart';
+
+/// Global key so any nested tab screen (each has its own Scaffold) can open
+/// the shell's drawer via `mainScaffoldKey.currentState?.openDrawer()` — a
+/// plain `Scaffold.of(context).openDrawer()` from inside a tab would only
+/// find that tab's own nested Scaffold, not this one (§9).
+final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
 /// The app shell after login: the shared gradient backdrop with no AppBar (so
 /// the wash runs edge-to-edge) and the bottom navigation between the four
 /// sections — Home, Debates (backend list with its stage tabs), Search and
-/// Profile. Theme/locale toggles live in the Profile tab's app bar for now
-/// (until a dedicated settings screen exists).
+/// Profile. Also owns the nav drawer (§9); swipe-to-open is restricted to the
+/// Home tab so it doesn't fight with gestures on the other tabs.
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -41,40 +48,36 @@ class _MainScreenState extends State<MainScreen> {
     final loc = context.loc;
     return JadalGradientBackground(
       child: Scaffold(
+        key: mainScaffoldKey,
         backgroundColor: Colors.transparent,
+        drawer: const JadalAppDrawer(),
+        drawerEnableOpenDragGesture: _selectedIndex == 0,
         body: SafeArea(
           bottom: false,
           child: IndexedStack(index: _selectedIndex, children: _screens),
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-          selectedItemColor: JadalColors.primaryOrange,
-          unselectedItemColor: JadalColors.judgesGrey,
-          selectedLabelStyle:
-              const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
-          unselectedLabelStyle: const TextStyle(fontFamily: 'Cairo'),
+        bottomNavigationBar: JadalBottomNavBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
           items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home_outlined),
-              activeIcon: const Icon(Icons.home),
+            JadalNavItem(
+              icon: Icons.home_outlined,
+              activeIcon: Icons.home,
               label: loc.navHome,
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.forum_outlined),
-              activeIcon: const Icon(Icons.forum),
+            JadalNavItem(
+              icon: Icons.forum_outlined,
+              activeIcon: Icons.forum,
               label: loc.navDebates,
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.search_outlined),
-              activeIcon: const Icon(Icons.search),
+            JadalNavItem(
+              icon: Icons.search_outlined,
+              activeIcon: Icons.search,
               label: loc.navSearch,
             ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person_outline),
-              activeIcon: const Icon(Icons.person),
+            JadalNavItem(
+              icon: Icons.person_outline,
+              activeIcon: Icons.person,
               label: loc.navProfile,
             ),
           ],

@@ -14,6 +14,10 @@ class ProfileModel extends Profile {
     super.theme,
     super.emailVerifiedAt,
     required super.createdAt,
+    super.age,
+    super.location,
+    super.birthDate,
+    super.statsVisible,
   });
 
   factory ProfileModel.fromJson(Map<String, dynamic> json) {
@@ -30,6 +34,10 @@ class ProfileModel extends Profile {
       theme: json['theme'],
       emailVerifiedAt: json['email_verified_at'],
       createdAt: json['created_at'],
+      age: (json['age'] as num?)?.toInt(),
+      location: json['location'],
+      birthDate: json['birth_date'],
+      statsVisible: json['stats_visible'] is bool ? json['stats_visible'] : true,
     );
   }
 }

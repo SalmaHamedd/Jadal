@@ -1,0 +1,166 @@
+import 'package:flutter/material.dart';
+
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/jadal_gradient_background.dart';
+import '../../data/models/attendance_stat_model.dart';
+import '../../data/repositories/attendance_stats_repository.dart';
+import '../widgets/attendance_bar_chart.dart';
+import '../widgets/stats_theme.dart';
+
+/// Single-metric attendance screen shared by debater (prep-room), coach/
+/// trainer (own team's debates) and judge (assigned debates) — sprinkles
+/// §6.5. Each role hits its own endpoint but renders identically; only the
+/// title/subtitle copy changes.
+class AttendanceStatsScreen extends StatefulWidget {
+  final AttendanceRole role;
+  final int userId;
+  final String userName;
+  const AttendanceStatsScreen({
+    super.key,
+    required this.role,
+    required this.userId,
+    required this.userName,
+  });
+
+  @override
+  State<AttendanceStatsScreen> createState() => _AttendanceStatsScreenState();
+}
+
+class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
+  final _repo = AttendanceStatsRepository();
+  AttendanceStat? _stat;
+  String? _error;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    setState(() {
+      _loading = true;
+      _error = null;
+    });
+    final res = await _repo.getAttendance(widget.role, widget.userId);
+    if (!mounted) return;
+    res.fold(
+      (f) => setState(() {
+        _error = f.message;
+        _loading = false;
+      }),
+      (s) => setState(() {
+        _stat = s;
+        _loading = false;
+      }),
+    );
+  }
+
+  String get _subtitle => switch (widget.role) {
+        AttendanceRole.debater => 'How often you actually join your prep room',
+        AttendanceRole.trainer => 'How often you attend your team\'s debates',
+        AttendanceRole.judge => 'How often you attend debates you\'re assigned to',
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor:
+          StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: Text('${widget.userName} · Attendance',
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+      ),
+      body: JadalGradientBackground(
+        child: _loading
+            ? const Center(child: CircularProgressIndicator())
+            : _error != null
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(_error!,
+                              textAlign: TextAlign.center,
+                              style: const TextStyle(fontFamily: 'Cairo')),
+                          const SizedBox(height: 12),
+                          OutlinedButton(onPressed: _load, child: const Text('Retry')),
+                        ],
+                      ),
+                    ),
+                  )
+                : ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      Text(_subtitle,
+                          style: TextStyle(
+                              fontFamily: 'Cairo', color: StatsTheme.textSecondary(context))),
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(16),
+                        decoration: BoxDecoration(
+                          color: StatsTheme.isDark(context)
+                              ? JadalColors.darkSurface
+                              : JadalColors.lightSurface,
+                          borderRadius: BorderRadius.circular(18),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text(
+                                  '${((_stat?.rate ?? 0) * 100).round()}% overall',
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontWeight: FontWeight.w800,
+                                    fontSize: 16,
+                                    color: StatsTheme.textPrimary(context),
+                                  ),
+                                ),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                  decoration: BoxDecoration(
+                                    color: JadalColors.primaryOrange.withValues(alpha: 0.12),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: Text(
+                                    '${_stat?.attendedTotal ?? 0}/${_stat?.selectedTotal ?? 0} attended',
+                                    style: const TextStyle(
+                                      fontFamily: 'Cairo',
+                                      fontWeight: FontWeight.w800,
+                                      fontSize: 11.5,
+                                      color: JadalColors.primaryOrange,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            if ((_stat?.registered ?? 0) > (_stat?.selectedTotal ?? 0))
+                              Padding(
+                                padding: const EdgeInsets.only(top: 4),
+                                child: Text(
+                                  'Registered ${_stat!.registered} times — selection is the '
+                                  "admin's call, not held against you.",
+                                  style: TextStyle(
+                                    fontFamily: 'Cairo',
+                                    fontSize: 11,
+                                    color: StatsTheme.textSecondary(context),
+                                  ),
+                                ),
+                              ),
+                            const SizedBox(height: 14),
+                            AttendanceBarChart(buckets: _stat?.buckets ?? const []),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+      ),
+    );
+  }
+}

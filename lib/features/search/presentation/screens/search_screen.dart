@@ -8,6 +8,7 @@ import 'package:jadal_app/features/search/domain/repositories/search_repository.
 import 'package:jadal_app/features/search/presentation/cubit/search_cubit.dart';
 import 'package:jadal_app/features/search/presentation/widgets/search_user_card.dart';
 import 'package:jadal_app/features/search/presentation/widgets/search_team_card.dart';
+import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -52,15 +53,23 @@ class _SearchScreenState extends State<SearchScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
-            padding: const EdgeInsets.fromLTRB(20, 18, 20, 0),
-            child: Text(
-              context.loc.searchTitle,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 24,
-                fontWeight: FontWeight.w800,
-                color: titleColor,
-              ),
+            padding: const EdgeInsets.fromLTRB(8, 12, 20, 0),
+            child: Row(
+              children: [
+                IconButton(
+                  icon: const Icon(Icons.menu_rounded),
+                  onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+                ),
+                Text(
+                  context.loc.searchTitle,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                    color: titleColor,
+                  ),
+                ),
+              ],
             ),
           ),
           Padding(
@@ -84,7 +93,7 @@ class _SearchScreenState extends State<SearchScreen> {
                 controller: _searchController,
                 focusNode: _focusNode,
                 decoration: InputDecoration(
-                  hintText: 'ابحث عن مستخدمين أو فرق...',
+                  hintText: context.loc.searchUsersTeamsHint,
                   hintStyle: TextStyle(fontFamily: 'Cairo', color: fieldHint),
                   border: InputBorder.none,
                   prefixIcon:
@@ -130,7 +139,7 @@ class _SearchScreenState extends State<SearchScreen> {
           if (state is SearchInitial) {
             return Center(
               child: Text(
-                'ابحث عن مستخدمين أو فرق',
+                context.loc.searchUsersTeamsPrompt,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   color: JadalColors.judgesGrey,
@@ -147,7 +156,7 @@ class _SearchScreenState extends State<SearchScreen> {
             if (users.isEmpty && teams.isEmpty) {
               return Center(
                 child: Text(
-                  'لا توجد نتائج',
+                  context.loc.noResults,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     color: JadalColors.judgesGrey,
@@ -171,7 +180,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Padding(
                       padding: EdgeInsets.only(bottom: context.hp(2)),
                       child: Text(
-                        'المستخدمون',
+                        context.loc.usersSection,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: context.fontSize(18),
@@ -187,7 +196,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     Padding(
                       padding: EdgeInsets.only(bottom: context.hp(2)),
                       child: Text(
-                        'الفرق',
+                        context.loc.teamsSection,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: context.fontSize(18),

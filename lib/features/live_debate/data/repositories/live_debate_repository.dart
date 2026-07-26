@@ -1,12 +1,17 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/app_models/debate_format_model.dart';
+import '../../../../core/app_models/framework.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/debate_registration.dart';
+import '../../domain/debate_search_filter.dart';
 import '../models/debate_list_model.dart';
 import '../models/debate_result_model.dart';
+import '../models/filter_options_model.dart';
 import '../models/live_state_model.dart';
 import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
+import '../models/team_chat_history_model.dart';
 
 /// REST surface for the backend live-debate mode (§6/§7). All calls send the
 /// Sanctum bearer + `Accept: application/json` and return `Either<Failure, T>`.
@@ -97,4 +102,43 @@ abstract class LiveDebateRepository {
   /// V12 §3 — `GET /debates/{id}/registrations`: who registered so far, split
   /// into teams / judges / solo (for the three registrant dialogs).
   Future<Either<Failure, DebateRegistrations>> getRegistrations(int debateId);
+
+  // ── Persistent team chat (sprinkles §2) ───────────────────────────────────────
+  /// `GET /debates/{id}/chat` — the caller's own team chat history (team
+  /// resolved server-side, never passed by the client).
+  Future<Either<Failure, List<TeamChatHistoryMessage>>> getChatHistory(int debateId);
+
+  /// `POST /debates/{id}/chat` `{message}` — persists a message. Fire this
+  /// alongside the existing peer `team_chat` broadcast, not instead of it.
+  Future<Either<Failure, TeamChatHistoryMessage>> sendChatMessage({
+    required int debateId,
+    required String message,
+  });
+
+  /// `POST /debates/{id}/chat/read` — marks every message in the caller's team
+  /// chat as seen by them. No body.
+  Future<Either<Failure, Unit>> markChatRead(int debateId);
+
+  // ── Debate search + filter option lists (sprinkles §8) ────────────────────────
+  /// `GET /debates/search` — same paginated shape as [getDebates].
+  Future<Either<Failure, DebateListPage>> searchDebates(
+    DebateSearchFilter filter, {
+    int page = 1,
+    int perPage = 15,
+  });
+
+  /// `GET /motion-frameworks` — every framework defined in the system.
+  Future<Either<Failure, List<Framework>>> getMotionFrameworks();
+
+  /// `GET /debate-formats` — every structural debate format (WSDC/BP/etc).
+  Future<Either<Failure, List<DebateFormatModel>>> getDebateFormats();
+
+  /// `GET /debates/tags/distinct` — every distinct `debate.tag` value in use.
+  Future<Either<Failure, List<String>>> getDebateTagsDistinct();
+
+  /// `GET /judges` — active judges, name-sorted.
+  Future<Either<Failure, List<JudgeOption>>> getJudgesList();
+
+  /// `GET /teams/options` — light team list for filter dialogs (any auth user).
+  Future<Either<Failure, List<TeamOption>>> getTeamsOptions({String? search});
 }

@@ -673,4 +673,137 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get waitingToJoin => 'Waiting to join';
+
+  @override
+  String greetingWithName(String name) {
+    return 'Welcome, $name 👋';
+  }
+
+  @override
+  String get greeting => 'Welcome 👋';
+
+  @override
+  String get topDebaters => 'Top debaters';
+
+  @override
+  String get showMore => 'Show more';
+
+  @override
+  String get latestArticles => 'Latest articles';
+
+  @override
+  String get viewAll => 'View all';
+
+  @override
+  String get noArticles => 'No articles';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'Error: $message';
+  }
+
+  @override
+  String get searchUsersTeamsHint => 'Search for users or teams…';
+
+  @override
+  String get searchUsersTeamsPrompt => 'Search for users or teams';
+
+  @override
+  String get noResults => 'No results';
+
+  @override
+  String get usersSection => 'Users';
+
+  @override
+  String get teamsSection => 'Teams';
+
+  @override
+  String get roleDebater => 'Debater';
+
+  @override
+  String get roleTrainer => 'Coach';
+
+  @override
+  String get roleAdmin => 'Admin';
+
+  @override
+  String membersCountLabel(int count) {
+    return '$count members';
+  }
+
+  @override
+  String coachNameLabel(String name) {
+    return 'Coach: $name';
+  }
+
+  @override
+  String get searchArticlesHint => 'Search articles…';
+
+  @override
+  String get allArticles => 'All articles';
+
+  @override
+  String get newArticle => 'New article';
+
+  @override
+  String get createArticle => 'Create article';
+
+  @override
+  String get deleteArticle => 'Delete article';
+
+  @override
+  String deleteArticleConfirm(String title) {
+    return 'Are you sure you want to delete \"$title\"?';
+  }
+
+  @override
+  String get delete => 'Delete';
+
+  @override
+  String get articleDeleted => 'Article deleted successfully';
+
+  @override
+  String get articleDetails => 'Article details';
+
+  @override
+  String get createNewArticle => 'Create a new article';
+
+  @override
+  String get addYourNewArticle => 'Add your new article';
+
+  @override
+  String get articleReviewNote =>
+      'The article will be sent for review before publishing';
+
+  @override
+  String get articleTitleRequiredLabel => 'Article title *';
+
+  @override
+  String get contentRequiredLabel => 'Content *';
+
+  @override
+  String get imageUrlOptionalLabel => 'Image link (optional)';
+
+  @override
+  String get categoriesOptionalLabel => 'Categories (optional)';
+
+  @override
+  String get chooseCategories => 'Choose categories';
+
+  @override
+  String get tagsOptionalLabel => 'Tags (optional)';
+
+  @override
+  String get chooseTags => 'Choose tags';
+
+  @override
+  String get publishArticle => 'Publish article';
+
+  @override
+  String get titleContentRequired => 'Title and content are required';
+
+  @override
+  String optionsLoadError(String error) {
+    return 'Failed to load options: $error';
+  }
 }

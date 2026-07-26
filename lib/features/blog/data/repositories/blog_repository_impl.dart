@@ -9,6 +9,7 @@ import 'package:jadal_app/features/blog/data/models/blog_details_model.dart';
 import 'package:jadal_app/features/blog/data/models/category_model.dart';
 import 'package:jadal_app/features/blog/data/models/tag_model.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
+import 'package:jadal_app/features/blog/domain/entities/blog_author_option.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog_details.dart';
 import 'package:jadal_app/features/blog/domain/entities/category.dart';
 import 'package:jadal_app/features/blog/domain/entities/tag.dart';
@@ -58,6 +59,85 @@ class BlogRepositoryImpl implements BlogRepository {
       } else {
         return Left(ServerFailure('Server error: ${response.statusCode}'));
       }
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<Blog>>> searchBlogs({
+    String? q,
+    List<int> categoryIds = const [],
+    List<int> tagIds = const [],
+    int? publisherId,
+    bool? likedByMe,
+    int page = 1,
+    int perPage = 15,
+  }) async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final uri = Uri.parse(ApiConstants.blogUrl).replace(queryParameters: {
+        'page': '$page',
+        'per_page': '$perPage',
+        if (q != null && q.isNotEmpty) 'q': q,
+        if (categoryIds.isNotEmpty) 'category_id[]': categoryIds.map((e) => '$e').toList(),
+        if (tagIds.isNotEmpty) 'tag_id[]': tagIds.map((e) => '$e').toList(),
+        if (publisherId != null) 'publisher_id[]': ['$publisherId'],
+        if (likedByMe == true) 'liked_by_me': '1',
+      });
+
+      final response = await client.get(
+        uri,
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          final List<dynamic> data = json['data'];
+          final blogs = data.map((item) => BlogModel.fromJson(item)).toList();
+          return Right(blogs);
+        }
+        return Left(ServerFailure(json['message'] ?? 'Failed to search blogs'));
+      } else if (response.statusCode == 401) {
+        return Left(AuthFailure('Unauthenticated'));
+      }
+      return Left(ServerFailure('Server error: ${response.statusCode}'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<BlogAuthorOption>>> getAuthors() async {
+    try {
+      final token = await PreferencesDatabase().getToken();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.get(
+        Uri.parse(ApiConstants.blogAuthorsUrl),
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer $token',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final json = jsonDecode(response.body);
+        if (json['success'] == true) {
+          final data = json['data'] as List;
+          return Right(data
+              .map((e) => BlogAuthorOption(id: (e['id'] as num).toInt(), name: e['name'] as String? ?? ''))
+              .toList());
+        }
+        return Left(ServerFailure(json['message'] ?? 'Failed to load authors'));
+      }
+      return Left(ServerFailure('Server error: ${response.statusCode}'));
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));
     }

@@ -671,4 +671,136 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get waitingToJoin => 'بانتظار الانضمام';
+
+  @override
+  String greetingWithName(String name) {
+    return 'مرحباً بك، $name 👋';
+  }
+
+  @override
+  String get greeting => 'مرحباً بك 👋';
+
+  @override
+  String get topDebaters => 'أفضل المناظرين';
+
+  @override
+  String get showMore => 'عرض المزيد';
+
+  @override
+  String get latestArticles => 'أحدث المقالات';
+
+  @override
+  String get viewAll => 'عرض الكل';
+
+  @override
+  String get noArticles => 'لا توجد مقالات';
+
+  @override
+  String errorWithMessage(String message) {
+    return 'خطأ: $message';
+  }
+
+  @override
+  String get searchUsersTeamsHint => 'ابحث عن مستخدمين أو فرق...';
+
+  @override
+  String get searchUsersTeamsPrompt => 'ابحث عن مستخدمين أو فرق';
+
+  @override
+  String get noResults => 'لا توجد نتائج';
+
+  @override
+  String get usersSection => 'المستخدمون';
+
+  @override
+  String get teamsSection => 'الفرق';
+
+  @override
+  String get roleDebater => 'مناظر';
+
+  @override
+  String get roleTrainer => 'مدرب';
+
+  @override
+  String get roleAdmin => 'مدير';
+
+  @override
+  String membersCountLabel(int count) {
+    return '$count عضو';
+  }
+
+  @override
+  String coachNameLabel(String name) {
+    return 'المدرب: $name';
+  }
+
+  @override
+  String get searchArticlesHint => 'ابحث في المقالات...';
+
+  @override
+  String get allArticles => 'جميع المقالات';
+
+  @override
+  String get newArticle => 'مقال جديد';
+
+  @override
+  String get createArticle => 'إنشاء مقال';
+
+  @override
+  String get deleteArticle => 'حذف المقال';
+
+  @override
+  String deleteArticleConfirm(String title) {
+    return 'هل أنت متأكد من حذف المقال \"$title\"؟';
+  }
+
+  @override
+  String get delete => 'حذف';
+
+  @override
+  String get articleDeleted => 'تم حذف المقال بنجاح';
+
+  @override
+  String get articleDetails => 'تفاصيل المقال';
+
+  @override
+  String get createNewArticle => 'إنشاء مقال جديد';
+
+  @override
+  String get addYourNewArticle => 'أضف مقالك الجديد';
+
+  @override
+  String get articleReviewNote => 'سيتم إرسال المقال للمراجعة قبل النشر';
+
+  @override
+  String get articleTitleRequiredLabel => 'عنوان المقال *';
+
+  @override
+  String get contentRequiredLabel => 'المحتوى *';
+
+  @override
+  String get imageUrlOptionalLabel => 'رابط الصورة (اختياري)';
+
+  @override
+  String get categoriesOptionalLabel => 'التصنيفات (اختياري)';
+
+  @override
+  String get chooseCategories => 'اختر التصنيفات';
+
+  @override
+  String get tagsOptionalLabel => 'الوسوم (اختياري)';
+
+  @override
+  String get chooseTags => 'اختر الوسوم';
+
+  @override
+  String get publishArticle => 'نشر المقال';
+
+  @override
+  String get titleContentRequired => 'العنوان والمحتوى مطلوبان';
+
+  @override
+  String optionsLoadError(String error) {
+    return 'خطأ في تحميل الخيارات: $error';
+  }
 }

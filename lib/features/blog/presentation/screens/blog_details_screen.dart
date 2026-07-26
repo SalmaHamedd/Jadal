@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
@@ -11,6 +12,7 @@ import 'package:jadal_app/features/blog/presentation/cubit/blog_details_cubit.da
 import 'package:jadal_app/features/blog/presentation/cubit/blog_reaction_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_cover_image.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_author_info.dart';
+import 'package:jadal_app/features/blog/presentation/widgets/blog_chips.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_stats_row.dart';
 
 class BlogDetailsScreen extends StatefulWidget {
@@ -107,17 +109,17 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('حذف المقال'),
-        content: Text('هل أنت متأكد من حذف المقال "$title"؟'),
+        title: Text(context.loc.deleteArticle),
+        content: Text(context.loc.deleteArticleConfirm(title)),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('إلغاء'),
+            child: Text(context.loc.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('حذف'),
+            child: Text(context.loc.delete),
           ),
         ],
       ),
@@ -140,7 +142,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
       (_) {
         JadalSnackBar.show(
           context,
-          'تم حذف المقال بنجاح',
+          context.loc.articleDeleted,
           type: SnackBarType.success,
         );
         Navigator.pop(context, true);
@@ -166,8 +168,8 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
         child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text('تفاصيل المقال',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(context.loc.articleDetails,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
@@ -176,7 +178,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
               IconButton(
                 icon: const Icon(Icons.delete_outline),
                 onPressed: () => _confirmDelete(_blogId!, _blogTitle),
-                tooltip: 'حذف المقال',
+                tooltip: context.loc.deleteArticle,
               ),
           ],
         ),
@@ -251,6 +253,10 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                               publishedAt: blog.publishedAt,
                               isDark: isDark,
                             ),
+                            if (blog.categories.isNotEmpty || blog.tags.isNotEmpty) ...[
+                              const SizedBox(height: 12),
+                              BlogChips(categories: blog.categories, tags: blog.tags),
+                            ],
                             const SizedBox(height: 16),
                             Divider(
                               color: isDark
@@ -302,7 +308,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                     ),
                     const SizedBox(height: 16),
                     Text(
-                      'حدث خطأ: ${detailsState.message}',
+                      context.loc.errorWithMessage(detailsState.message),
                       style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
                       textAlign: TextAlign.center,
                     ),
@@ -322,7 +328,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                           vertical: 12,
                         ),
                       ),
-                      child: const Text('إعادة المحاولة'),
+                      child: Text(context.loc.retry),
                     ),
                   ],
                 ),

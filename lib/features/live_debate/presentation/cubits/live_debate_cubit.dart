@@ -185,9 +185,9 @@ class LiveDebateCubit extends DebateController {
   /// (debounces coughs / bumps).
   static const int kMutedVoiceHitsToShow = 3;
 
-  /// Unread team-chat messages (arrived while the chat dialog was closed) →
-  /// drives the toolbar chat button's notification dot. Reset when the chat opens.
-  int _unreadTeamChat = 0;
+  /// Whether the chat dialog is currently open — an incoming message is
+  /// marked seen immediately while true; [unreadTeamChatCount] is derived
+  /// from each message's `seenBy` (§2), not tracked as a separate counter.
   bool _chatOpen = false;
 
   /// The chair's next-stage POST is in flight → the room shows a blocking overlay
@@ -223,10 +223,35 @@ class LiveDebateCubit extends DebateController {
       },
     );
     await _refreshLiveState();
+    await _loadChatHistory();
     _startLiveStatePolling();
     _isReady = true;
     dlog('init', 'init complete — isReady=true');
     emit(DebateConnectedState());
+  }
+
+  /// Seeds `_chat` from the persisted history (§2) so a rejoining participant
+  /// sees the full team conversation instead of starting empty. Best-effort —
+  /// a failure here just leaves chat empty for this session, same as before.
+  Future<void> _loadChatHistory() async {
+    final res = await repo.getChatHistory(debateId);
+    res.fold(
+      (f) => dlog('chat', 'WARN could not load chat history: ${f.message}'),
+      (messages) {
+        final teamId = myTeamId;
+        if (teamId.isEmpty) return; // judge/viewer/trainer — no team chat
+        _chat.addAll(messages.map((m) => TeamChatMessage(
+              id: m.id,
+              teamId: teamId,
+              senderId: m.senderId,
+              senderName: m.senderName,
+              message: m.message,
+              ts: m.sentAt.millisecondsSinceEpoch,
+              seenBy: m.seenBy,
+            )));
+        dlog('chat', 'loaded ${messages.length} chat message(s) for team=$teamId');
+      },
+    );
   }
 
   Future<void> _refreshLiveState() async {
@@ -778,20 +803,21 @@ class LiveDebateCubit extends DebateController {
       case LiveEventType.teamChat:
         dlog('chat', 'TEAM CHAT received → team=${event.teamId} '
             'from=${event.senderName}: "${event.message}"');
+        final incomingSenderId = event.senderId ?? '';
+        // The unread dot is derived from seenBy (§2), not a separate counter.
+        // While the dialog is open the user is looking at this live, so mark
+        // it seen immediately; otherwise it stays unread until they open chat
+        // (setTeamChatOpen marks it locally + tells the backend).
+        final seenBy = {incomingSenderId, if (_chatOpen) _myUserId.toString()}
+            .toList();
         _chat.add(TeamChatMessage(
           teamId: event.teamId ?? '',
-          senderId: event.senderId ?? '',
+          senderId: incomingSenderId,
           senderName: event.senderName ?? '',
           message: event.message ?? '',
           ts: event.ts,
+          seenBy: seenBy,
         ));
-        // Notification dot: count messages for MY team from someone else while the
-        // chat is closed (so the toolbar button nudges the user to check it).
-        if (!_chatOpen &&
-            (event.teamId ?? '') == myTeamId &&
-            event.senderId != _myUserId.toString()) {
-          _unreadTeamChat++;
-        }
         emit(TeamChatUpdatedState());
         break;
       case LiveEventType.forceMute:
@@ -902,12 +928,30 @@ class LiveDebateCubit extends DebateController {
     isMicEnabled = !isMicEnabled;
     dlog('media', 'LOCAL mic ${isMicEnabled ? "ON (unmute)" : "OFF (mute)"} '
         '| userId=$_myUserId canPublishNow=$canPublishNow');
-    _room?.localParticipant?.setMicrophoneEnabled(isMicEnabled);
+    final muteFuture = _room?.localParticipant?.setMicrophoneEnabled(isMicEnabled);
     localAudioTrack = _localAudioTrack();
     // Opening the mic resolves the "talking while muted" situation → clear the
     // banner and (re)decide whether the probe should run at all.
     if (isMicEnabled) _clearMutedSpeaking();
-    _syncMutedVoiceMonitor();
+    // LiveKit's setMicrophoneEnabled(false) stops the native mic capture as
+    // part of muting; starting the muted-voice probe's own capture track
+    // before that settles races the same OS audio device and can silently
+    // fail to start, which is why the probe used to just never fire. Wait
+    // for the mute/unmute to finish before (re)syncing the probe.
+    if (muteFuture != null) {
+      muteFuture.then((_) {
+        _syncMutedVoiceMonitor();
+        // The synchronous read above ran before the mute settled and can hold
+        // a stale/torn-down handle — re-derive once the toggle is final so the
+        // UI reflects the real post-toggle track.
+        if (!isClosed) {
+          localAudioTrack = _localAudioTrack();
+          emit(LocalTrackUpdatedState());
+        }
+      });
+    } else {
+      _syncMutedVoiceMonitor();
+    }
     emit(MicToggledState());
     emit(LocalTrackUpdatedState());
   }
@@ -1650,13 +1694,17 @@ class LiveDebateCubit extends DebateController {
 
   @override
   bool get canEnableCameraNow {
-    // The live-debate format is audio-only — video streaming is not rendered at
-    // all — so NOBODY may open a camera there (judges and viewers of every kind
-    // included). The one exception: the chair during the intro (welcome), before
-    // the first speaker starts. The open lobby / result phase (isLobbyMode) keeps
-    // the usual lock rules below.
-    if (!isLobbyMode && !(isIntro && isAuthority)) return false;
+    // Judges + the current main speaker (+ an accepted POI asker) are always
+    // exempt from being locked out — checked FIRST, mirroring canPublishNow.
+    // A forced camera-off must only ever be a one-time nudge for them, never a
+    // dead toggle button they can't recover from.
     if (_amExemptFromLock) return true;
+    // The live-debate format is audio-only — video streaming is not rendered at
+    // all — so nobody else may open a camera there (judges and viewers of every
+    // kind included). The one exception: the chair during the intro (welcome),
+    // before the first speaker starts. The open lobby / result phase
+    // (isLobbyMode) keeps the usual lock rules below.
+    if (!isLobbyMode && !(isIntro && isAuthority)) return false;
     if (_cameraAllOff) return false;
     return !_cameraLockedIds.contains(_myUserId.toString());
   }
@@ -1743,6 +1791,7 @@ class LiveDebateCubit extends DebateController {
       senderName: senderName,
       message: message,
       ts: ts,
+      seenBy: [senderId],
     ));
     _publish(LiveDebateSocket.teamChat(
       teamId: teamId,
@@ -1752,6 +1801,10 @@ class LiveDebateCubit extends DebateController {
       ts: ts,
     ));
     emit(TeamChatUpdatedState());
+    // Persist alongside the peer broadcast (which already delivered it live) —
+    // this is what makes the message survive a leave+rejoin. Best-effort: a
+    // failure here doesn't affect the live delivery that already happened.
+    repo.sendChatMessage(debateId: debateId, message: message);
   }
 
   @override
@@ -1759,14 +1812,30 @@ class LiveDebateCubit extends DebateController {
       _chat.where((m) => m.teamId == viewerTeamId).toList();
 
   @override
-  int get unreadTeamChatCount => _unreadTeamChat;
+  int get unreadTeamChatCount {
+    final myId = _myUserId.toString();
+    return _chat
+        .where((m) => m.teamId == myTeamId && !m.seenBy.contains(myId))
+        .length;
+  }
 
   @override
   void setTeamChatOpen(bool open) {
     _chatOpen = open;
-    // Opening the chat clears the notification dot.
-    if (open && _unreadTeamChat != 0) {
-      _unreadTeamChat = 0;
+    if (!open) return;
+    // Mark everything currently unseen as seen-by-me locally (instant dot
+    // clear) and tell the backend so it survives a rejoin.
+    final myId = _myUserId.toString();
+    var changed = false;
+    for (var i = 0; i < _chat.length; i++) {
+      final m = _chat[i];
+      if (m.teamId == myTeamId && !m.seenBy.contains(myId)) {
+        _chat[i] = m.copyWith(seenBy: [...m.seenBy, myId]);
+        changed = true;
+      }
+    }
+    repo.markChatRead(debateId);
+    if (changed) {
       emit(TeamChatUpdatedState());
     }
   }

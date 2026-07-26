@@ -7,6 +7,7 @@ import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/function/json_utils.dart';
 import '../../../../core/services/token_storage.dart';
+import '../models/activity_stat_model.dart';
 import '../models/debater_stats_models.dart';
 import 'debater_stats_repository.dart';
 
@@ -107,4 +108,18 @@ class DebaterStatsRepositoryImpl implements DebaterStatsRepository {
         filter.toQuery(includeGrouping: false),
       ))
           .map(ImprovementStat.fromJson);
+
+  @override
+  Future<Either<Failure, ActivityStat>> getActivity(
+      int debaterId, StatsFilter filter) async {
+    // Activity takes only from/to/group_by — the framework/position/team
+    // dimensions don't exist for it, so don't send them.
+    final query = {
+      if (filter.from != null) 'from': filter.from!,
+      if (filter.to != null) 'to': filter.to!,
+      'group_by': filter.groupBy.wire,
+    };
+    return (await _getData(ApiConstants.debaterActivityUrl(debaterId), query))
+        .map(ActivityStat.fromJson);
+  }
 }

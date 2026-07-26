@@ -1,3 +1,4 @@
+import '../../../../core/app_models/debate_format_model.dart';
 import '../../../../core/app_models/motion.dart';
 import '../../domain/live_debate_data.dart';
 import '../models/debate_models.dart';
@@ -23,7 +24,8 @@ class BackendLiveDebateData implements LiveDebateData {
         (state.stages.isNotEmpty ? state.stages.first.durationSeconds : null) ??
         420;
     return DebateFormat(
-      preparationPeriod: Duration(minutes: (f.prepRoomsOpenOffsetHours ?? 60).round()),
+      preparationPeriod:
+          DebateFormatModel.hoursOffsetToDuration(f.prepRoomsOpenOffsetHours ?? 1),
       speechDuration: Duration(seconds: speech),
       // Backend has no protected/extra-time fields — POI windows come from the
       // manual rules (§9.1); keep a nominal protected window for tier coloring.

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_card.dart';
@@ -18,7 +19,7 @@ class BlogListSection extends StatelessWidget {
         } else if (state is BlogLoaded) {
           final blogs = state.blogs;
           if (blogs.isEmpty) {
-            return const Center(child: Text('لا توجد مقالات حالياً'));
+            return Center(child: Text(context.loc.noArticles));
           }
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +30,7 @@ class BlogListSection extends StatelessWidget {
                   vertical: context.hp(1),
                 ),
                 child: Text(
-                  'جميع المقالات',
+                  context.loc.allArticles,
                   style: TextStyle(
                     fontSize: context.fontSize(18),
                     fontWeight: FontWeight.bold,
@@ -65,7 +66,7 @@ class BlogListSection extends StatelessWidget {
             ],
           );
         } else if (state is BlogError) {
-          return Center(child: Text('خطأ: ${state.message}'));
+          return Center(child: Text(context.loc.errorWithMessage(state.message)));
         }
         return const SizedBox();
       },

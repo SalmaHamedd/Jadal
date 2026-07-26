@@ -5,9 +5,9 @@ import '../../../../core/function/json_utils.dart';
 /// envelope. Scores are on the platform's 0–100 scale; win-rates / best-speaker
 /// rates are 0–1 floats.
 
-/// Which of the five stats is on screen. The first three share the bucketed
-/// series shape; ranking and improvement have their own.
-enum StatKind { winRate, avgScore, bestSpeaker, ranking, improvement }
+/// Which stat is on screen. The first three share the bucketed series shape;
+/// ranking, improvement and activity (V2 §7) have their own.
+enum StatKind { winRate, avgScore, bestSpeaker, ranking, improvement, activity }
 
 /// Time bucket for the chart stats (1, 2, 2.5).
 enum StatsGroupBy { none, year, month }

@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 
+/// V2 §10 — one user row in the search results. The old card buried the
+/// points inside a plain subtitle string; here role and points read as
+/// distinct chips, and the avatar falls back to the name's initial (matching
+/// the leaderboard rows and drawer header) instead of a generic person icon.
 class SearchUserCard extends StatelessWidget {
   final SearchUser user;
 
@@ -18,21 +24,42 @@ class SearchUserCard extends StatelessWidget {
       color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
-        onTap: () {
-        },
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => UserProfileScreen(userId: user.id, userName: user.name),
+          ),
+        ),
         child: Padding(
-          padding: EdgeInsets.all(context.wp(3)),
+          padding: EdgeInsets.symmetric(horizontal: context.wp(3), vertical: context.hp(1.4)),
           child: Row(
             children: [
-              CircleAvatar(
-                radius: context.wp(8),
-                backgroundColor: JadalColors.primaryBlue,
-                backgroundImage: user.avatarUrl != null
-                    ? NetworkImage(user.avatarUrl!)
-                    : null,
-                child: user.avatarUrl == null
-                    ? Icon(Icons.person, size: context.wp(8), color: Colors.white)
-                    : null,
+              Container(
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: JadalColors.primaryBlue.withValues(alpha: 0.25),
+                    width: 2,
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: context.wp(6.5),
+                  backgroundColor: JadalColors.primaryBlue,
+                  backgroundImage:
+                      user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+                  child: user.avatarUrl == null
+                      ? Text(
+                          user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
+                          style: TextStyle(
+                            fontFamily: 'Cairo',
+                            fontWeight: FontWeight.w800,
+                            fontSize: context.fontSize(16),
+                            color: Colors.white,
+                          ),
+                        )
+                      : null,
+                ),
               ),
               SizedBox(width: context.wp(3)),
               Expanded(
@@ -41,31 +68,41 @@ class SearchUserCard extends StatelessWidget {
                   children: [
                     Text(
                       user.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                       style: TextStyle(
                         fontFamily: 'Cairo',
-                        fontSize: context.fontSize(16),
+                        fontSize: context.fontSize(15),
                         fontWeight: FontWeight.bold,
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
                       ),
                     ),
-                    SizedBox(height: context.hp(0.5)),
-                    Text(
-                      '${_roleText(user.role)} • ${user.points} نقطة',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: context.fontSize(13),
-                        color: isDark
-                            ? JadalColors.darkTextSecondary
-                            : JadalColors.lightTextSecondary,
-                      ),
+                    SizedBox(height: context.hp(0.6)),
+                    Row(
+                      children: [
+                        _Chip(
+                          label: _roleText(context, user.role),
+                          color: JadalColors.primaryBlue,
+                        ),
+                        const SizedBox(width: 6),
+                        _Chip(
+                          label: '${user.points}',
+                          color: JadalColors.primaryOrange,
+                          icon: Icons.star_rounded,
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
               Icon(
-                Icons.chevron_left,
+                // Always points "forward" — the old hardcoded chevron_left
+                // only looked right in Arabic (RTL).
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left
+                    : Icons.chevron_right,
                 color: JadalColors.primaryOrange,
                 size: context.wp(6),
               ),
@@ -76,18 +113,54 @@ class SearchUserCard extends StatelessWidget {
     );
   }
 
-  String _roleText(String role) {
+  String _roleText(BuildContext context, String role) {
     switch (role) {
       case 'debater':
-        return 'مناظر';
+        return context.loc.roleDebater;
       case 'judge':
-        return 'حكم';
+        return context.loc.judgeRole;
       case 'trainer':
-        return 'مدرب';
+        return context.loc.roleTrainer;
       case 'admin':
-        return 'مدير';
+        return context.loc.roleAdmin;
       default:
         return role;
     }
+  }
+}
+
+class _Chip extends StatelessWidget {
+  final String label;
+  final Color color;
+  final IconData? icon;
+  const _Chip({required this.label, required this.color, this.icon});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (icon != null) ...[
+            Icon(icon, size: 12, color: color),
+            const SizedBox(width: 3),
+          ],
+          Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Cairo',
+              fontSize: context.fontSize(11),
+              fontWeight: FontWeight.w800,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

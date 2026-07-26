@@ -1393,6 +1393,246 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting to join'**
   String get waitingToJoin;
+
+  /// No description provided for @greetingWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome, {name} 👋'**
+  String greetingWithName(String name);
+
+  /// No description provided for @greeting.
+  ///
+  /// In en, this message translates to:
+  /// **'Welcome 👋'**
+  String get greeting;
+
+  /// No description provided for @topDebaters.
+  ///
+  /// In en, this message translates to:
+  /// **'Top debaters'**
+  String get topDebaters;
+
+  /// No description provided for @showMore.
+  ///
+  /// In en, this message translates to:
+  /// **'Show more'**
+  String get showMore;
+
+  /// No description provided for @latestArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest articles'**
+  String get latestArticles;
+
+  /// No description provided for @viewAll.
+  ///
+  /// In en, this message translates to:
+  /// **'View all'**
+  String get viewAll;
+
+  /// No description provided for @noArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'No articles'**
+  String get noArticles;
+
+  /// No description provided for @errorWithMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Error: {message}'**
+  String errorWithMessage(String message);
+
+  /// No description provided for @searchUsersTeamsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for users or teams…'**
+  String get searchUsersTeamsHint;
+
+  /// No description provided for @searchUsersTeamsPrompt.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for users or teams'**
+  String get searchUsersTeamsPrompt;
+
+  /// No description provided for @noResults.
+  ///
+  /// In en, this message translates to:
+  /// **'No results'**
+  String get noResults;
+
+  /// No description provided for @usersSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Users'**
+  String get usersSection;
+
+  /// No description provided for @teamsSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get teamsSection;
+
+  /// No description provided for @roleDebater.
+  ///
+  /// In en, this message translates to:
+  /// **'Debater'**
+  String get roleDebater;
+
+  /// No description provided for @roleTrainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach'**
+  String get roleTrainer;
+
+  /// No description provided for @roleAdmin.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get roleAdmin;
+
+  /// No description provided for @membersCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String membersCountLabel(int count);
+
+  /// No description provided for @coachNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Coach: {name}'**
+  String coachNameLabel(String name);
+
+  /// No description provided for @searchArticlesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search articles…'**
+  String get searchArticlesHint;
+
+  /// No description provided for @allArticles.
+  ///
+  /// In en, this message translates to:
+  /// **'All articles'**
+  String get allArticles;
+
+  /// No description provided for @newArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'New article'**
+  String get newArticle;
+
+  /// No description provided for @createArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create article'**
+  String get createArticle;
+
+  /// No description provided for @deleteArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete article'**
+  String get deleteArticle;
+
+  /// No description provided for @deleteArticleConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete \"{title}\"?'**
+  String deleteArticleConfirm(String title);
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete'**
+  String get delete;
+
+  /// No description provided for @articleDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Article deleted successfully'**
+  String get articleDeleted;
+
+  /// No description provided for @articleDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Article details'**
+  String get articleDetails;
+
+  /// No description provided for @createNewArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a new article'**
+  String get createNewArticle;
+
+  /// No description provided for @addYourNewArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add your new article'**
+  String get addYourNewArticle;
+
+  /// No description provided for @articleReviewNote.
+  ///
+  /// In en, this message translates to:
+  /// **'The article will be sent for review before publishing'**
+  String get articleReviewNote;
+
+  /// No description provided for @articleTitleRequiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Article title *'**
+  String get articleTitleRequiredLabel;
+
+  /// No description provided for @contentRequiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Content *'**
+  String get contentRequiredLabel;
+
+  /// No description provided for @imageUrlOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Image link (optional)'**
+  String get imageUrlOptionalLabel;
+
+  /// No description provided for @categoriesOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Categories (optional)'**
+  String get categoriesOptionalLabel;
+
+  /// No description provided for @chooseCategories.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose categories'**
+  String get chooseCategories;
+
+  /// No description provided for @tagsOptionalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tags (optional)'**
+  String get tagsOptionalLabel;
+
+  /// No description provided for @chooseTags.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose tags'**
+  String get chooseTags;
+
+  /// No description provided for @publishArticle.
+  ///
+  /// In en, this message translates to:
+  /// **'Publish article'**
+  String get publishArticle;
+
+  /// No description provided for @titleContentRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title and content are required'**
+  String get titleContentRequired;
+
+  /// No description provided for @optionsLoadError.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load options: {error}'**
+  String optionsLoadError(String error);
 }
 
 class _AppLocalizationsDelegate

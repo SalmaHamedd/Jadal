@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../models/activity_stat_model.dart';
 import '../models/debater_stats_models.dart';
 
 /// Read-only access to the Debater Statistics API. `debaterId` is the debater's
@@ -20,4 +21,8 @@ abstract class DebaterStatsRepository {
   });
 
   Future<Either<Failure, ImprovementStat>> getImprovement(int debaterId, StatsFilter filter);
+
+  /// V2 §7 — raw weighted activity points + breakdown. Only from/to/group_by
+  /// apply; the other filter dimensions have no meaning for this stat.
+  Future<Either<Failure, ActivityStat>> getActivity(int debaterId, StatsFilter filter);
 }

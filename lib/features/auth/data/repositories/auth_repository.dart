@@ -36,6 +36,15 @@ class ApiAuthRepository implements AuthRepository {
         final user = UserModel.fromJson(data['user']);
         // Cache the account role for role-gated UI (registration options, etc.).
         await TokenStorage.saveRole(user.role);
+        // Sprinkles §9 — support contact info, editable server-side without an
+        // app release. Cached locally so the drawer can show it without
+        // re-hitting login.
+        final contact = data['contact'];
+        if (contact is Map) {
+          await PreferencesDatabase().setValue('contact_email', contact['email']);
+          await PreferencesDatabase().setValue('contact_phone', contact['phone']);
+          await PreferencesDatabase().setValue('contact_instagram', contact['instagram']);
+        }
         return Right(user);
       }
 

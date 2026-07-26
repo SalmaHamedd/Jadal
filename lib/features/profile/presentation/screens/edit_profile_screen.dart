@@ -15,12 +15,16 @@ class EditProfileScreen extends StatefulWidget {
   final String currentName;
   final String currentPhone;
   final String? currentAvatarUrl;
+  final String? currentLocation;
+  final String? currentBirthDate;
 
   const EditProfileScreen({
     super.key,
     required this.currentName,
     required this.currentPhone,
     this.currentAvatarUrl,
+    this.currentLocation,
+    this.currentBirthDate,
   });
 
   @override
@@ -30,27 +34,45 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _phoneController;
+  late final TextEditingController _locationController;
   late final EditProfileCubit _cubit;
   final ImagePicker _picker = ImagePicker();
   String? _avatarUrl;
+  DateTime? _birthDate;
 
   @override
   void initState() {
     super.initState();
     _nameController = TextEditingController(text: widget.currentName);
     _phoneController = TextEditingController(text: widget.currentPhone);
+    _locationController = TextEditingController(text: widget.currentLocation ?? '');
     final repository = ProfileRepository();
     _cubit = EditProfileCubit(repository);
     _avatarUrl = widget.currentAvatarUrl;
+    _birthDate = widget.currentBirthDate != null ? DateTime.tryParse(widget.currentBirthDate!) : null;
   }
 
   @override
   void dispose() {
     _nameController.dispose();
     _phoneController.dispose();
+    _locationController.dispose();
     _cubit.close();
     super.dispose();
   }
+
+  Future<void> _pickBirthDate() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _birthDate ?? DateTime(2000, 1, 1),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+    );
+    if (picked != null) setState(() => _birthDate = picked);
+  }
+
+  String _formatDate(DateTime d) =>
+      '${d.year.toString().padLeft(4, '0')}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
 
   Future<void> _pickAndUploadImage() async {
     final source = await showDialog<ImageSource>(
@@ -164,6 +186,24 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           icon: Icons.phone,
                           controller: _phoneController,
                         ),
+                        SizedBox(height: context.hp(2)),
+                        AuthTextField(
+                          label: 'Location',
+                          icon: Icons.location_on_outlined,
+                          controller: _locationController,
+                        ),
+                        SizedBox(height: context.hp(2)),
+                        InkWell(
+                          onTap: _pickBirthDate,
+                          child: InputDecorator(
+                            decoration: const InputDecoration(
+                              labelText: 'Birth date',
+                              prefixIcon: Icon(Icons.cake_outlined),
+                              border: OutlineInputBorder(),
+                            ),
+                            child: Text(_birthDate != null ? _formatDate(_birthDate!) : 'Not set'),
+                          ),
+                        ),
                         SizedBox(height: context.hp(3)),
                         AuthButton(
                           text: 'Save Changes',
@@ -171,6 +211,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             _cubit.updateProfile(
                               name: _nameController.text.trim(),
                               phone: _phoneController.text.trim(),
+                              location: _locationController.text.trim(),
+                              birthDate: _birthDate != null ? _formatDate(_birthDate!) : null,
                             );
                           },
                           isLoading: state is EditProfileLoading,

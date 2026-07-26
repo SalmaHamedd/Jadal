@@ -18,19 +18,38 @@ class SpeechSlot {
 }
 
 /// A received team-chat message (rendered only for same-team viewers).
+///
+/// [seenBy] mirrors the backend's persisted `seen_by` (sprinkles §2) — always
+/// includes the sender. The unread dot is derived from it (my id ∉ seenBy),
+/// not tracked as a separate counter. [id] is null only for the (rare) window
+/// between a locally-sent message and its `POST /chat` response landing.
 class TeamChatMessage {
+  final int? id;
   final String teamId;
   final String senderId;
   final String senderName;
   final String message;
   final int ts;
+  final List<String> seenBy;
   const TeamChatMessage({
+    this.id,
     required this.teamId,
     required this.senderId,
     required this.senderName,
     required this.message,
     required this.ts,
+    this.seenBy = const [],
   });
+
+  TeamChatMessage copyWith({int? id, List<String>? seenBy}) => TeamChatMessage(
+        id: id ?? this.id,
+        teamId: teamId,
+        senderId: senderId,
+        senderName: senderName,
+        message: message,
+        ts: ts,
+        seenBy: seenBy ?? this.seenBy,
+      );
 }
 
 /// The shared surface every live-debate **widget** reads from (§2).
@@ -234,13 +253,20 @@ abstract class DebateController extends Cubit<DebateStates> {
   void sendTeamChat({required String teamId, required String message});
   List<TeamChatMessage> chatFor(String viewerTeamId);
 
-  /// The local user's own team id (prop if they're on it, else opp) — used to
-  /// scope team chat and its unread counter to the correct side.
+  /// The local user's own team id — used to scope team chat and its unread
+  /// counter to the correct side. Checks both rosters explicitly rather than
+  /// falling back to "opposition" for anyone not found on proposition, since
+  /// that fallback used to also (wrongly) catch judges/viewers/trainers.
   String get myTeamId {
     final me = data.currentUserId;
     final prop = data.propositionTeam;
     if (prop.debaterById(me) != null) return prop.teamId;
-    return data.oppositionTeam.teamId;
+    final opp = data.oppositionTeam;
+    if (opp.debaterById(me) != null) return opp.teamId;
+    // Not a debater on either roster (judge/viewer/trainer) — there is no
+    // real team chat to scope to. Return a sentinel that can never match a
+    // real team id instead of silently guessing "opposition".
+    return '';
   }
 
   // ── Moderation publish-lock (§U4b) ─────────────────────────────────────────
