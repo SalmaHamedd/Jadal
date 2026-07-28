@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_status_chip.dart';
 
 class SurveyCard extends StatelessWidget {
   final Survey survey;
@@ -93,13 +94,13 @@ class SurveyCard extends StatelessWidget {
                 spacing: 8,
                 runSpacing: 8,
                 children: [
-                  _Badge(
+                  SurveyStatusChip(
                     label: closed ? 'مغلق' : _formatCloses(survey.closesAt),
                     color: closed ? JadalColors.judgesGrey : JadalColors.primaryBlue,
                     icon: closed ? Icons.lock_clock_outlined : Icons.schedule,
                   ),
                   if (responded)
-                    _Badge(
+                    const SurveyStatusChip(
                       label: 'تمت الإجابة',
                       color: JadalColors.positiveGreen,
                       icon: Icons.check_circle_outline,
@@ -109,41 +110,6 @@ class SurveyCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Badge extends StatelessWidget {
-  final String label;
-  final Color color;
-  final IconData icon;
-
-  const _Badge({required this.label, required this.color, required this.icon});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 13, color: color),
-          const SizedBox(width: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
       ),
     );
   }

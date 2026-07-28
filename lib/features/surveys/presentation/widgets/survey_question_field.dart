@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
 
 /// Renders the right input for a survey question (rating / mcq / open_text)
 /// and reports the current answer via [onChanged].
@@ -51,16 +52,8 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final q = widget.question;
 
-    return Container(
+    return SurveyPanel(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -9,6 +9,9 @@ import 'package:jadal_app/features/surveys/domain/repositories/trainer_survey_re
 import 'package:jadal_app/features/surveys/presentation/cubit/delete_trainer_survey_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/cubit/trainer_survey_details_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/trainer_survey_results_screen.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_status_chip.dart';
 
 class TrainerSurveyDetailScreen extends StatelessWidget {
   final int surveyId;
@@ -129,7 +132,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                 body: BlocBuilder<TrainerSurveyDetailsCubit, TrainerSurveyDetailsState>(
                   builder: (context, state) {
                     if (state is TrainerSurveyDetailsLoading) {
-                      return const Center(child: CircularProgressIndicator());
+                      return const SurveyLoadingView();
                     } else if (state is TrainerSurveyDetailsLoaded) {
                       final details = state.details;
                       return SingleChildScrollView(
@@ -166,14 +169,14 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                               spacing: 8,
                               runSpacing: 8,
                               children: [
-                                _StatusChip(
+                                SurveyStatusChip(
                                   label: details.isClosed ? 'مغلق' : 'مفتوح',
                                   color: details.isClosed
                                       ? JadalColors.judgesGrey
                                       : JadalColors.positiveGreen,
                                 ),
                                 if (details.closesAt != null)
-                                  _StatusChip(
+                                  SurveyStatusChip(
                                     label: 'ينتهي في ${_formatDate(details.closesAt!)}',
                                     color: JadalColors.primaryBlue,
                                   ),
@@ -193,21 +196,9 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 10),
                             ...details.questions.map(
-                              (q) => Container(
-                                width: double.infinity,
+                              (q) => SurveyPanel(
                                 margin: const EdgeInsets.only(bottom: 10),
                                 padding: const EdgeInsets.all(14),
-                                decoration: BoxDecoration(
-                                  color: isDark
-                                      ? JadalColors.darkSurface
-                                      : JadalColors.lightSurface,
-                                  borderRadius: BorderRadius.circular(12),
-                                  border: Border.all(
-                                    color: isDark
-                                        ? JadalColors.darkSurfaceElevated
-                                        : Colors.grey.shade200,
-                                  ),
-                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -246,34 +237,11 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                         ),
                       );
                     } else if (state is TrainerSurveyDetailsError) {
-                      return Center(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-                            const SizedBox(height: 16),
-                            Text(
-                              'حدث خطأ: ${state.message}',
-                              style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                              textAlign: TextAlign.center,
-                            ),
-                            const SizedBox(height: 24),
-                            ElevatedButton(
-                              onPressed: () => context
-                                  .read<TrainerSurveyDetailsCubit>()
-                                  .loadSurveyDetails(surveyId),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: JadalColors.primaryOrange,
-                                foregroundColor: Colors.white,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                              ),
-                              child: const Text('إعادة المحاولة'),
-                            ),
-                          ],
-                        ),
+                      return SurveyErrorView(
+                        message: state.message,
+                        onRetry: () => context
+                            .read<TrainerSurveyDetailsCubit>()
+                            .loadSurveyDetails(surveyId),
                       );
                     }
                     return const SizedBox();
@@ -302,31 +270,5 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
-  }
-}
-
-class _StatusChip extends StatelessWidget {
-  final String label;
-  final Color color;
-  const _StatusChip({required this.label, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
-      ),
-    );
   }
 }

@@ -7,6 +7,8 @@ import 'package:jadal_app/features/surveys/data/repositories/trainer_survey_repo
 import 'package:jadal_app/features/surveys/domain/entities/survey_results.dart';
 import 'package:jadal_app/features/surveys/domain/repositories/trainer_survey_repository.dart';
 import 'package:jadal_app/features/surveys/presentation/cubit/trainer_survey_results_cubit.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
 
 /// Shows the results for a trainer-created survey: a per-question summary
 /// (using the server-computed `aggregate` on each question) followed by a
@@ -40,37 +42,14 @@ class TrainerSurveyResultsScreen extends StatelessWidget {
               body: BlocBuilder<TrainerSurveyResultsCubit, TrainerSurveyResultsState>(
                 builder: (context, state) {
                   if (state is TrainerSurveyResultsLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const SurveyLoadingView();
                   } else if (state is TrainerSurveyResultsLoaded) {
                     return _ResultsBody(results: state.results);
                   } else if (state is TrainerSurveyResultsError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-                          const SizedBox(height: 16),
-                          Text(
-                            'حدث خطأ: ${state.message}',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () =>
-                                context.read<TrainerSurveyResultsCubit>().loadResults(surveyId),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: JadalColors.primaryOrange,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text('إعادة المحاولة'),
-                          ),
-                        ],
-                      ),
+                    return SurveyErrorView(
+                      message: state.message,
+                      onRetry: () =>
+                          context.read<TrainerSurveyResultsCubit>().loadResults(surveyId),
                     );
                   }
                   return const SizedBox();
@@ -93,12 +72,7 @@ class _ResultsBody extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (results.questions.isEmpty && results.responses.isEmpty) {
-      return Center(
-        child: Text(
-          'لا توجد ردود على هذا الاستطلاع بعد',
-          style: TextStyle(fontFamily: 'Cairo', fontSize: 15, color: JadalColors.judgesGrey),
-        ),
-      );
+      return const SurveyEmptyMessage(message: 'لا توجد ردود على هذا الاستطلاع بعد');
     }
 
     return SingleChildScrollView(
@@ -182,17 +156,9 @@ class _QuestionSummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
+    return SurveyPanel(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -322,17 +288,9 @@ class _RespondentCard extends StatelessWidget {
     final respondent = response.respondent;
     final initial = respondent.name.isNotEmpty ? respondent.name[0] : '?';
 
-    return Container(
-      width: double.infinity,
+    return SurveyPanel(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
-        ),
-      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

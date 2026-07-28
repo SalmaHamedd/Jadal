@@ -2,25 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
-import 'package:jadal_app/features/surveys/data/repositories/survey_repository_impl.dart';
-import 'package:jadal_app/features/surveys/domain/repositories/survey_repository.dart';
-import 'package:jadal_app/features/surveys/presentation/cubit/survey_cubit.dart';
-import 'package:jadal_app/features/surveys/presentation/screens/admin_survey_detail_screen.dart';
-import 'package:jadal_app/features/surveys/presentation/widgets/survey_card.dart';
+import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
+import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
+import 'package:jadal_app/features/teams/presentation/cubit/team_cubit.dart';
+import 'package:jadal_app/features/teams/presentation/screens/create_team_screen.dart';
+import 'package:jadal_app/features/teams/presentation/screens/team_detail_screen.dart';
+import 'package:jadal_app/features/teams/presentation/widgets/team_list_card.dart';
 
-/// Admin-only view of all surveys (there's no dedicated `/admin/surveys`
-/// list endpoint, so this reuses the general `GET /surveys` list — the same
-/// data source the respondent-facing SurveysScreen uses) with access to edit
-/// each survey via `PUT /admin/surveys/{id}`.
-class AdminSurveysScreen extends StatelessWidget {
-  const AdminSurveysScreen({super.key});
+/// The trainer's "My Teams" screen — list, create, and drill into a team to
+/// manage its roster. Mirrors the trainer surveys screen's structure.
+class TeamsScreen extends StatelessWidget {
+  const TeamsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final SurveyRepository repository = SurveyRepositoryImpl();
+    final TeamRepository repository = TeamRepositoryImpl();
 
     return BlocProvider(
-      create: (_) => SurveyCubit(repository)..loadSurveys(),
+      create: (_) => TeamCubit(repository)..loadTeams(),
       child: Builder(
         builder: (context) {
           return JadalGradientBackground(
@@ -28,30 +27,50 @@ class AdminSurveysScreen extends StatelessWidget {
               backgroundColor: Colors.transparent,
               appBar: AppBar(
                 title: const Text(
-                  'إدارة الاستطلاعات',
+                  'فرقي',
                   style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
               ),
-              body: BlocBuilder<SurveyCubit, SurveyState>(
+              floatingActionButton: FloatingActionButton.extended(
+                backgroundColor: JadalColors.primaryOrange,
+                foregroundColor: Colors.white,
+                icon: const Icon(Icons.add),
+                label: const Text(
+                  'فريق جديد',
+                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                ),
+                onPressed: () async {
+                  final created = await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CreateTeamScreen(repository: repository),
+                    ),
+                  );
+                  if (created == true && context.mounted) {
+                    context.read<TeamCubit>().loadTeams();
+                  }
+                },
+              ),
+              body: BlocBuilder<TeamCubit, TeamState>(
                 builder: (context, state) {
-                  if (state is SurveyLoading) {
+                  if (state is TeamLoading || state is TeamInitial) {
                     return const Center(child: CircularProgressIndicator());
-                  } else if (state is SurveyLoaded) {
-                    final surveys = state.surveys;
-                    if (surveys.isEmpty) {
+                  } else if (state is TeamLoaded) {
+                    final teams = state.teams;
+                    if (teams.isEmpty) {
                       return RefreshIndicator(
                         color: JadalColors.primaryOrange,
-                        onRefresh: () => context.read<SurveyCubit>().loadSurveys(),
+                        onRefresh: () => context.read<TeamCubit>().loadTeams(),
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: const [
                             SizedBox(height: 120),
                             Center(
                               child: Text(
-                                'لا توجد استطلاعات حالياً',
+                                'لا توجد فرق بعد',
                                 style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
                               ),
                             ),
@@ -61,33 +80,33 @@ class AdminSurveysScreen extends StatelessWidget {
                     }
                     return RefreshIndicator(
                       color: JadalColors.primaryOrange,
-                      onRefresh: () => context.read<SurveyCubit>().loadSurveys(),
+                      onRefresh: () => context.read<TeamCubit>().loadTeams(),
                       child: ListView.builder(
-                        padding: const EdgeInsets.all(12),
-                        itemCount: surveys.length,
+                        padding: const EdgeInsets.fromLTRB(12, 12, 12, 90),
+                        itemCount: teams.length,
                         itemBuilder: (context, index) {
-                          final survey = surveys[index];
-                          return SurveyCard(
-                            survey: survey,
+                          final team = teams[index];
+                          return TeamListCard(
+                            team: team,
                             onTap: () async {
                               await Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (_) => AdminSurveyDetailScreen(
-                                    surveyId: survey.id,
+                                  builder: (_) => TeamDetailScreen(
+                                    team: team,
                                     repository: repository,
                                   ),
                                 ),
                               );
                               if (context.mounted) {
-                                context.read<SurveyCubit>().loadSurveys();
+                                context.read<TeamCubit>().loadTeams();
                               }
                             },
                           );
                         },
                       ),
                     );
-                  } else if (state is SurveyError) {
+                  } else if (state is TeamError) {
                     return Center(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -101,7 +120,7 @@ class AdminSurveysScreen extends StatelessWidget {
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
-                            onPressed: () => context.read<SurveyCubit>().loadSurveys(),
+                            onPressed: () => context.read<TeamCubit>().loadTeams(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: JadalColors.primaryOrange,
                               foregroundColor: Colors.white,

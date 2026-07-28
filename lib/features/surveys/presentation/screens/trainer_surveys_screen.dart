@@ -8,6 +8,7 @@ import 'package:jadal_app/features/surveys/presentation/cubit/trainer_survey_cub
 import 'package:jadal_app/features/surveys/presentation/screens/create_trainer_survey_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/trainer_survey_detail_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_card.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
 
 class TrainerSurveysScreen extends StatelessWidget {
   const TrainerSurveysScreen({super.key});
@@ -55,25 +56,13 @@ class TrainerSurveysScreen extends StatelessWidget {
               body: BlocBuilder<TrainerSurveyCubit, TrainerSurveyState>(
                 builder: (context, state) {
                   if (state is TrainerSurveyLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const SurveyLoadingView();
                   } else if (state is TrainerSurveyLoaded) {
                     final surveys = state.surveys;
                     if (surveys.isEmpty) {
-                      return RefreshIndicator(
-                        color: JadalColors.primaryOrange,
+                      return SurveyEmptyState(
+                        message: 'لم تنشئ أي استطلاعات لفريقك بعد',
                         onRefresh: () => context.read<TrainerSurveyCubit>().loadSurveys(),
-                        child: ListView(
-                          physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
-                            SizedBox(height: 120),
-                            Center(
-                              child: Text(
-                                'لم تنشئ أي استطلاعات لفريقك بعد',
-                                style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                              ),
-                            ),
-                          ],
-                        ),
                       );
                     }
                     return RefreshIndicator(
@@ -105,32 +94,9 @@ class TrainerSurveysScreen extends StatelessWidget {
                       ),
                     );
                   } else if (state is TrainerSurveyError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-                          const SizedBox(height: 16),
-                          Text(
-                            'حدث خطأ: ${state.message}',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => context.read<TrainerSurveyCubit>().loadSurveys(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: JadalColors.primaryOrange,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-                            ),
-                            child: const Text('إعادة المحاولة'),
-                          ),
-                        ],
-                      ),
+                    return SurveyErrorView(
+                      message: state.message,
+                      onRetry: () => context.read<TrainerSurveyCubit>().loadSurveys(),
                     );
                   }
                   return const SizedBox();

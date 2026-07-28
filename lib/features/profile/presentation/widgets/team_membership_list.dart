@@ -2,14 +2,24 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/team_membership.dart';
+import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.dart';
 
-/// Current teams for a user, with a "show history" button that expands the
-/// past-memberships list in place (§6.4). Renders nothing if there are no
-/// current teams AND the caller hasn't asked to see history.
+/// Current teams for a user, as bordered cards (matching the survey/team
+/// cards elsewhere), with a "show history" toggle that expands the past
+/// memberships in place (§6.4). Renders nothing if there are no current
+/// teams AND the caller hasn't asked to see history. Cards navigate to
+/// [TeamInfoScreen]; the "leave team" action there only shows when
+/// [isOwnProfile] is true — you can't leave someone else's team.
 class TeamMembershipSection extends StatefulWidget {
   final int userId;
   final List<TeamMembership> current;
-  const TeamMembershipSection({super.key, required this.userId, required this.current});
+  final bool isOwnProfile;
+  const TeamMembershipSection({
+    super.key,
+    required this.userId,
+    required this.current,
+    this.isOwnProfile = true,
+  });
 
   @override
   State<TeamMembershipSection> createState() => _TeamMembershipSectionState();
@@ -39,87 +49,215 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
+
     if (widget.current.isEmpty && _history == null) {
-      return TextButton.icon(
-        onPressed: _loadingHistory ? null : _loadHistory,
-        icon: const Icon(Icons.history, size: 16),
-        label: const Text('Show team history', style: TextStyle(fontFamily: 'Cairo')),
+      return _HistoryToggle(
+        expanded: false,
+        loading: _loadingHistory,
+        onTap: _loadHistory,
       );
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final t in widget.current) _TeamTile(membership: t, textColor: textColor),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton.icon(
-            onPressed: _loadingHistory
-                ? null
-                : (_history == null ? _loadHistory : () => setState(() => _history = null)),
-            icon: Icon(_history == null ? Icons.history : Icons.expand_less, size: 16),
-            label: Text(
-              _history == null ? 'Show team history' : 'Hide history',
-              style: const TextStyle(fontFamily: 'Cairo'),
-            ),
+        for (final t in widget.current)
+          _TeamMembershipCard(
+            membership: t,
+            textColor: textColor,
+            isOwnProfile: widget.isOwnProfile,
+          ),
+        Padding(
+          padding: const EdgeInsets.only(top: 2),
+          child: _HistoryToggle(
+            expanded: _history != null,
+            loading: _loadingHistory,
+            onTap: _history == null ? _loadHistory : () => setState(() => _history = null),
           ),
         ),
-        if (_loadingHistory)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 8),
-            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
-          ),
         if (_history != null && !_loadingHistory)
           if (_history!.isEmpty)
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: 4),
-              child: Text('No past teams', style: TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8),
+              child: Text(
+                'لا توجد فرق سابقة',
+                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.5, color: JadalColors.judgesGrey),
+              ),
             )
           else
-            for (final t in _history!) _TeamTile(membership: t, textColor: textColor, past: true),
+            for (final t in _history!)
+              _TeamMembershipCard(
+                membership: t,
+                textColor: textColor,
+                past: true,
+                isOwnProfile: widget.isOwnProfile,
+              ),
       ],
     );
   }
 }
 
-class _TeamTile extends StatelessWidget {
+class _HistoryToggle extends StatelessWidget {
+  final bool expanded;
+  final bool loading;
+  final VoidCallback? onTap;
+  const _HistoryToggle({required this.expanded, required this.loading, this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: TextButton.icon(
+        onPressed: loading ? null : onTap,
+        style: TextButton.styleFrom(
+          foregroundColor: JadalColors.primaryBlue,
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+          visualDensity: VisualDensity.compact,
+        ),
+        icon: loading
+            ? const SizedBox(
+                height: 14,
+                width: 14,
+                child: CircularProgressIndicator(strokeWidth: 2),
+              )
+            : Icon(expanded ? Icons.expand_less_rounded : Icons.history_rounded, size: 17),
+        label: Text(
+          expanded ? 'إخفاء الفرق السابقة' : 'عرض الفرق السابقة',
+          style: const TextStyle(fontFamily: 'Cairo', fontSize: 12.5, fontWeight: FontWeight.w600),
+        ),
+      ),
+    );
+  }
+}
+
+class _TeamMembershipCard extends StatelessWidget {
   final TeamMembership membership;
   final Color textColor;
   final bool past;
-  const _TeamTile({required this.membership, required this.textColor, this.past = false});
+  final bool isOwnProfile;
+  const _TeamMembershipCard({
+    required this.membership,
+    required this.textColor,
+    this.past = false,
+    required this.isOwnProfile,
+  });
 
   String _elapsed() {
     final start = membership.joinedAt;
     if (start == null) return '';
     final end = membership.leftAt ?? DateTime.now();
     final days = end.difference(start).inDays;
-    if (days < 30) return '$days d';
-    if (days < 365) return '${(days / 30).round()} mo';
-    return '${(days / 365).round()} yr';
+    if (days < 30) return '$daysد';
+    if (days < 365) return '${(days / 30).round()}ش';
+    return '${(days / 365).round()}س';
   }
+
+  String _roleLabel() => switch (membership.role) {
+        'leader' => 'قائد',
+        'trainer' => 'مدرب',
+        _ => 'عضو',
+      };
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        children: [
-          Icon(Icons.groups_rounded, size: 16, color: past ? JadalColors.judgesGrey : JadalColors.primaryOrange),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(
-              membership.teamName,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 13,
-                color: past ? JadalColors.judgesGrey : textColor,
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final accent = past ? JadalColors.judgesGrey : JadalColors.primaryOrange;
+
+    return Card(
+      margin: const EdgeInsets.only(bottom: 8),
+      color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: BorderSide(
+          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+        ),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(12),
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => TeamInfoScreen(membership: membership, canLeave: isOwnProfile),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: accent.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: Icon(Icons.groups_rounded, color: accent, size: 18),
               ),
-            ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      membership.teamName,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        fontSize: 13.5,
+                        color: past ? JadalColors.judgesGrey : textColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        _Pill(label: _roleLabel(), color: past ? JadalColors.judgesGrey : JadalColors.primaryBlue),
+                        if (!past) ...[
+                          const SizedBox(width: 6),
+                          _Pill(label: 'حالي', color: JadalColors.positiveGreen),
+                        ],
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 6),
+              Text(
+                _elapsed(),
+                style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
+              ),
+              const SizedBox(width: 2),
+              Icon(Icons.chevron_right_rounded, size: 18, color: JadalColors.judgesGrey),
+            ],
           ),
-          Text(
-            _elapsed(),
-            style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
-          ),
-        ],
+        ),
+      ),
+    );
+  }
+}
+
+class _Pill extends StatelessWidget {
+  final String label;
+  final Color color;
+  const _Pill({required this.label, required this.color});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontFamily: 'Cairo',
+          fontSize: 10.5,
+          fontWeight: FontWeight.w700,
+          color: color,
+        ),
       ),
     );
   }

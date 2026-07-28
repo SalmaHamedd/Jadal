@@ -55,11 +55,8 @@ class _HomeScreenState extends State<HomeScreen> {
               fontWeight: FontWeight.w800,
               color: titleColor,
             );
-            // A plain (non-scrolling) Column, matching the other tabs' shared
-            // title styling, so the blog section's Expanded can genuinely fill
-            // whatever's left instead of fighting a scrollable ancestor.
             return SafeArea(
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: const EdgeInsets.fromLTRB(8, 4, 16, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -100,11 +97,10 @@ class _HomeScreenState extends State<HomeScreen> {
                     const SizedBox(height: 12),
                     // V2 §4 — top-3 of the points leaderboard, between the
                     // banner and the blog strip; "show more" → full public
-                    // statistics. The screen stays a fixed, non-scrolling
-                    // column — the blog strip flexes into whatever is left.
+                    // statistics.
                     const TopDebatersPreview(),
                     const SizedBox(height: 12),
-                    const Expanded(child: HomeBlogSection()),
+                    const HomeBlogSection(),
                   ],
                 ),
               ),

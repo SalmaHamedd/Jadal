@@ -25,6 +25,14 @@ class ApiConstants {
   static String get searchUrl => '$baseUrl$search';
   static String get blogUrl => '$baseUrl$blog';
   static String get teamsUrl => '$baseUrl$teams';
+  static String teamUrl(int id) => '$teamsUrl/$id';
+  static String teamMembersUrl(int id) => '$teamsUrl/$id/members';
+  static String teamMemberUrl(int id, int userId) => '$teamsUrl/$id/members/$userId';
+  static String teamMembersPriorityUrl(int id) => '$teamsUrl/$id/members/priority';
+  static String teamLeaveUrl(int id) => '$teamsUrl/$id/leave';
+  static String teamLeaveRequestsUrl(int id) => '$teamsUrl/$id/leave-requests';
+  static String teamLeaveRequestRespondUrl(int id, int requestId) =>
+      '$teamsUrl/$id/leave-requests/$requestId/respond';
   static String get categoriesUrl => '$baseUrl$adminCategories';
   static String get tagsUrl => '$baseUrl$adminTags';
   static String get surveysUrl => '$baseUrl$surveys';

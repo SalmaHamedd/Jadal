@@ -7,6 +7,7 @@ import 'package:jadal_app/features/surveys/domain/repositories/survey_repository
 import 'package:jadal_app/features/surveys/presentation/cubit/survey_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/survey_details_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_card.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
 
 class SurveysScreen extends StatelessWidget {
   const SurveysScreen({super.key});
@@ -33,25 +34,13 @@ class SurveysScreen extends StatelessWidget {
           child: BlocBuilder<SurveyCubit, SurveyState>(
             builder: (context, state) {
               if (state is SurveyLoading) {
-                return const Center(child: CircularProgressIndicator());
+                return const SurveyLoadingView();
               } else if (state is SurveyLoaded) {
                 final surveys = state.surveys;
                 if (surveys.isEmpty) {
-                  return RefreshIndicator(
-                    color: JadalColors.primaryOrange,
+                  return SurveyEmptyState(
+                    message: 'لا توجد استطلاعات حالياً',
                     onRefresh: () => context.read<SurveyCubit>().loadSurveys(),
-                    child: ListView(
-                      physics: const AlwaysScrollableScrollPhysics(),
-                      children: const [
-                        SizedBox(height: 120),
-                        Center(
-                          child: Text(
-                            'لا توجد استطلاعات حالياً',
-                            style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                          ),
-                        ),
-                      ],
-                    ),
                   );
                 }
                 return RefreshIndicator(
@@ -80,35 +69,9 @@ class SurveysScreen extends StatelessWidget {
                   ),
                 );
               } else if (state is SurveyError) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-                      const SizedBox(height: 16),
-                      Text(
-                        'حدث خطأ: ${state.message}',
-                        style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 24),
-                      ElevatedButton(
-                        onPressed: () => context.read<SurveyCubit>().loadSurveys(),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: JadalColors.primaryOrange,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
-                          ),
-                        ),
-                        child: const Text('إعادة المحاولة'),
-                      ),
-                    ],
-                  ),
+                return SurveyErrorView(
+                  message: state.message,
+                  onRetry: () => context.read<SurveyCubit>().loadSurveys(),
                 );
               }
               return const SizedBox();

@@ -140,7 +140,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                     color: Theme.of(context).brightness == Brightness.dark
                         ? JadalColors.darkTextPrimary
                         : JadalColors.lightTextPrimary)),
-            TeamMembershipSection(userId: p.id, current: _teams),
+            TeamMembershipSection(userId: p.id, current: _teams, isOwnProfile: false),
             const SizedBox(height: 20),
           ],
           if (p.role == 'debater' || p.role == 'judge') ...[

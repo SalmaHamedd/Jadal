@@ -10,6 +10,7 @@ import 'package:jadal_app/features/surveys/domain/repositories/survey_repository
 import 'package:jadal_app/features/surveys/presentation/cubit/survey_details_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/cubit/survey_response_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_question_field.dart';
+import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
 
 class SurveyDetailsScreen extends StatefulWidget {
   final int surveyId;
@@ -98,7 +99,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
               return BlocBuilder<SurveyDetailsCubit, SurveyDetailsState>(
                 builder: (context, detailsState) {
                   if (detailsState is SurveyDetailsLoading) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const SurveyLoadingView();
                   } else if (detailsState is SurveyDetailsLoaded) {
                     final details = detailsState.details;
                     final locked = details.isClosed || details.alreadyResponded || _submitted;
@@ -188,37 +189,11 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                       ),
                     );
                   } else if (detailsState is SurveyDetailsError) {
-                    return Center(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-                          const SizedBox(height: 16),
-                          Text(
-                            'حدث خطأ: ${detailsState.message}',
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => context
-                                .read<SurveyDetailsCubit>()
-                                .loadSurveyDetails(widget.surveyId),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: JadalColors.primaryOrange,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
-                            child: const Text('إعادة المحاولة'),
-                          ),
-                        ],
-                      ),
+                    return SurveyErrorView(
+                      message: detailsState.message,
+                      onRetry: () => context
+                          .read<SurveyDetailsCubit>()
+                          .loadSurveyDetails(widget.surveyId),
                     );
                   }
                   return const SizedBox();
