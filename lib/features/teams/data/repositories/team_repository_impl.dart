@@ -78,6 +78,28 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
+  Future<Either<Failure, Team>> getTeam(int teamId) async {
+    try {
+      final token = await _token();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.get(
+        Uri.parse(ApiConstants.teamUrl(teamId)),
+        headers: await _headers(),
+      );
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        return Right(TeamModel.fromJson(json['data'] ?? {}));
+      }
+      return Left(_failureFor(response.statusCode, json, 'Failed to load team'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
   Future<Either<Failure, Team>> createTeam({
     required String name,
     required int leaderId,

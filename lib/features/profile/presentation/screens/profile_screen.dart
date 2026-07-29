@@ -25,8 +25,6 @@ import 'package:jadal_app/features/statistics/data/repositories/attendance_stats
 import 'package:jadal_app/features/statistics/presentation/pages/attendance_stats_screen.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/coach_team_summary_screen.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
-import 'package:jadal_app/features/surveys/presentation/screens/surveys_screen.dart';
-import 'package:jadal_app/features/surveys/presentation/screens/trainer_surveys_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});

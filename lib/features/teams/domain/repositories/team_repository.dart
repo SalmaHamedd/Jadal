@@ -11,6 +11,11 @@ abstract class TeamRepository {
   /// join" view) — [search] filters by name in that case.
   Future<Either<Failure, List<Team>>> getTeams({String? search});
 
+  /// `GET /teams/{id}` — full detail for one team. Authorized for the
+  /// creating trainer, the team's leader, or any current member (not past
+  /// members). 403 if none of those apply, 404 if the team doesn't exist.
+  Future<Either<Failure, Team>> getTeam(int teamId);
+
   Future<Either<Failure, Team>> createTeam({
     required String name,
     required int leaderId,

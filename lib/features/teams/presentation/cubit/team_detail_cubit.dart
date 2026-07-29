@@ -10,9 +10,10 @@ import 'package:jadal_app/features/teams/domain/repositories/team_repository.dar
 part 'team_detail_state.dart';
 
 /// Owns one team's mutations (add/remove members, reorder priority,
-/// deactivate). There's no `GET /teams/{id}`, so this starts from the [Team]
-/// the caller already has (from the list) and keeps it in sync locally using
-/// the full team object every mutation endpoint echoes back.
+/// deactivate). Starts from the [Team] the caller already has (from the
+/// list) and keeps it in sync locally using the full team object every
+/// mutation endpoint echoes back — `GET /teams/{id}` exists but isn't
+/// needed here since every write already returns the updated team.
 class TeamDetailCubit extends Cubit<TeamDetailState> {
   final TeamRepository repository;
 

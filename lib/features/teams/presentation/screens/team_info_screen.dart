@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
@@ -13,15 +14,13 @@ import 'package:jadal_app/features/teams/domain/repositories/team_repository.dar
 import 'package:jadal_app/features/teams/presentation/cubit/team_join_cubit.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/team_leave_cubit.dart';
 
-/// A read-only team info view — reached from a profile's team list (with
-/// [membership] set, so it can show role/joined/left and a "leave team"
-/// action for the caller's own current membership), from search results, or
-/// from the "teams you can join" browse screen (with [canJoin] set). Shows
-/// the roster if it can be fetched (best-effort — there's no `GET
-/// /teams/{id}`, so this reuses `GET /teams` and matches by id; a trainer
-/// only sees teams they created there, a debater only sees active,
-/// non-random teams they're *not* already on — so this falls back to just
-/// the name whenever the team isn't in that list for the caller's role).
+/// A team info view — reached from a profile's team list (with [membership]
+/// set, so it can show role/joined/left and a "leave team" action for the
+/// caller's own current membership), from search results, or from the
+/// "teams you can join" browse screen (with [canJoin] set). Fetches full
+/// detail via `GET /teams/{id}`, which the backend authorizes for the
+/// team's trainer, its leader, or any current member — so this only falls
+/// back to the bare name/membership info on a genuine 403/404/network error.
 class TeamInfoScreen extends StatefulWidget {
   final int teamId;
   final String teamName;
@@ -46,6 +45,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
   final TeamRepository _repository = TeamRepositoryImpl();
   Team? _team;
   bool _loadingTeam = true;
+  Failure? _teamError;
 
   @override
   void initState() {
@@ -54,18 +54,20 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
   }
 
   Future<void> _loadTeam() async {
-    final result = await _repository.getTeams();
+    setState(() {
+      _loadingTeam = true;
+      _teamError = null;
+    });
+    final result = await _repository.getTeam(widget.teamId);
     if (!mounted) return;
     result.fold(
-      (_) => setState(() => _loadingTeam = false),
-      (teams) => setState(() {
-        for (final t in teams) {
-          if (t.id == widget.teamId) {
-            _team = t;
-            break;
-          }
-        }
+      (failure) => setState(() {
         _loadingTeam = false;
+        _teamError = failure;
+      }),
+      (team) => setState(() {
+        _loadingTeam = false;
+        _team = team;
       }),
     );
   }
@@ -356,27 +358,36 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                           padding: EdgeInsets.symmetric(vertical: 24),
                           child: Center(child: CircularProgressIndicator()),
                         )
-                      else if (_team != null && _team!.members.isNotEmpty) ...[
-                        _SectionHeader(
-                          title: 'الأعضاء',
-                          count: _team!.members.length,
-                        ),
-                        const SizedBox(height: 10),
-                        _SectionCard(
-                          padding: const EdgeInsets.symmetric(vertical: 4),
-                          children: [
-                            for (var i = 0; i < _team!.members.length; i++)
-                              _MemberRow(
-                                member: _team!.members[i],
-                                isLeader:
-                                    _team!.leader?.id ==
-                                    _team!.members[i].userId,
-                                isLast: i == _team!.members.length - 1,
-                              ),
-                          ],
-                        ),
+                      else if (_team != null) ...[
+                        if (_team!.members.isNotEmpty) ...[
+                          _SectionHeader(
+                            title: 'الأعضاء',
+                            count: _team!.members.length,
+                          ),
+                          const SizedBox(height: 10),
+                          _SectionCard(
+                            padding: const EdgeInsets.symmetric(vertical: 4),
+                            children: [
+                              for (var i = 0; i < _team!.members.length; i++)
+                                _MemberRow(
+                                  member: _team!.members[i],
+                                  isLeader:
+                                      _team!.leader?.id ==
+                                      _team!.members[i].userId,
+                                  isLast: i == _team!.members.length - 1,
+                                ),
+                            ],
+                          ),
+                        ] else
+                          Text(
+                            'لا يوجد أعضاء في هذا الفريق',
+                            style: TextStyle(
+                              fontFamily: 'Cairo',
+                              color: JadalColors.judgesGrey,
+                            ),
+                          ),
                       ] else
-                        const _UnavailableNotice(),
+                        _UnavailableNotice(error: _teamError),
                       if (canLeave) ...[
                         SizedBox(height: context.hp(4)),
                         SizedBox(
@@ -828,13 +839,20 @@ class _Chip extends StatelessWidget {
   }
 }
 
-/// Shown instead of the roster/leader when the team couldn't be fetched —
-/// `GET /teams` is role-scoped (a trainer only sees teams they created; a
-/// debater only sees active, non-random teams they're not already on), so
-/// this shows up whenever the team in question falls outside that view for
-/// the caller's role.
+/// Shown instead of the roster/leader when `GET /teams/{id}` couldn't be
+/// fetched — normally a 403 (caller is a past member, or otherwise
+/// unrelated to the team) or a 404, occasionally a network error.
 class _UnavailableNotice extends StatelessWidget {
-  const _UnavailableNotice();
+  final Failure? error;
+  const _UnavailableNotice({this.error});
+
+  String get _message {
+    final err = error;
+    if (err is ForbiddenFailure) return 'ليست لديك صلاحية لعرض تفاصيل هذا الفريق';
+    if (err is NotFoundFailure) return 'هذا الفريق غير موجود';
+    if (err is AuthFailure) return 'يرجى تسجيل الدخول لعرض تفاصيل الفريق';
+    return 'تعذر تحميل تفاصيل هذا الفريق حالياً';
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -860,7 +878,7 @@ class _UnavailableNotice extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              'تفاصيل إضافية (قائد الفريق وقائمة الأعضاء) غير متاحة لك حالياً لهذا الفريق',
+              _message,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 12.5,

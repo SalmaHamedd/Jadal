@@ -15,8 +15,9 @@ import 'package:jadal_app/features/teams/presentation/widgets/user_search_picker
 
 /// A trainer's single-team management screen: roster (drag to reorder
 /// priority, swipe/tap to remove), add members via search, and deactivate.
-/// There's no `GET /teams/{id}`, so [team] is whatever the caller already
-/// has (from the list) and gets replaced locally after each mutation.
+/// [team] is whatever the caller already has (from the list) and gets
+/// replaced locally after each mutation, since every write endpoint
+/// already echoes back the updated team.
 class TeamDetailScreen extends StatelessWidget {
   final Team team;
   final TeamRepository repository;
