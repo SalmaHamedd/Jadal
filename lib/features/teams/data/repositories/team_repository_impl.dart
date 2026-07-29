@@ -4,9 +4,11 @@ import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
+import 'package:jadal_app/features/teams/data/models/team_join_request_model.dart';
 import 'package:jadal_app/features/teams/data/models/team_leave_request_model.dart';
 import 'package:jadal_app/features/teams/data/models/team_model.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
+import 'package:jadal_app/features/teams/domain/entities/team_join_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_leave_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_member_priority.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
@@ -52,15 +54,15 @@ class TeamRepositoryImpl implements TeamRepository {
   }
 
   @override
-  Future<Either<Failure, List<Team>>> getTeams() async {
+  Future<Either<Failure, List<Team>>> getTeams({String? search}) async {
     try {
       final token = await _token();
       if (token == null) return Left(AuthFailure('Not authenticated'));
 
-      final response = await client.get(
-        Uri.parse(ApiConstants.teamsUrl),
-        headers: await _headers(),
+      final uri = Uri.parse(ApiConstants.teamsUrl).replace(
+        queryParameters: (search != null && search.isNotEmpty) ? {'search': search} : null,
       );
+      final response = await client.get(uri, headers: await _headers());
 
       final json = jsonDecode(response.body);
 
@@ -277,6 +279,82 @@ class TeamRepositoryImpl implements TeamRepository {
         return Right(TeamLeaveRequestModel.fromJson(json['data'] ?? {}));
       }
       return Left(_failureFor(response.statusCode, json, 'Failed to respond to leave request'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TeamJoinRequest>> joinTeam({
+    required int teamId,
+    String? reason,
+  }) async {
+    try {
+      final token = await _token();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.post(
+        Uri.parse(ApiConstants.teamJoinUrl(teamId)),
+        headers: await _headers(),
+        body: jsonEncode({if (reason != null && reason.isNotEmpty) 'reason': reason}),
+      );
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        return Right(TeamJoinRequestModel.fromJson(json['data'] ?? {}));
+      }
+      return Left(_failureFor(response.statusCode, json, 'Failed to submit join request'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<TeamJoinRequest>>> getJoinRequests(int teamId) async {
+    try {
+      final token = await _token();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.get(
+        Uri.parse(ApiConstants.teamJoinRequestsUrl(teamId)),
+        headers: await _headers(),
+      );
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        final List<dynamic> data = json['data'] ?? [];
+        return Right(data.map((item) => TeamJoinRequestModel.fromJson(item)).toList());
+      }
+      return Left(_failureFor(response.statusCode, json, 'Failed to load join requests'));
+    } catch (e) {
+      return Left(NetworkFailure('Network error: $e'));
+    }
+  }
+
+  @override
+  Future<Either<Failure, TeamJoinRequest>> respondToJoinRequest({
+    required int teamId,
+    required int requestId,
+    required bool accept,
+  }) async {
+    try {
+      final token = await _token();
+      if (token == null) return Left(AuthFailure('Not authenticated'));
+
+      final response = await client.patch(
+        Uri.parse(ApiConstants.teamJoinRequestRespondUrl(teamId, requestId)),
+        headers: await _headers(),
+        body: jsonEncode({'status': accept ? 'accepted' : 'rejected'}),
+      );
+
+      final json = jsonDecode(response.body);
+
+      if (response.statusCode == 200 && json['success'] == true) {
+        return Right(TeamJoinRequestModel.fromJson(json['data'] ?? {}));
+      }
+      return Left(_failureFor(response.statusCode, json, 'Failed to respond to join request'));
     } catch (e) {
       return Left(NetworkFailure('Network error: $e'));
     }

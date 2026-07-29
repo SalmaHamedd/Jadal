@@ -1,11 +1,15 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
+import 'package:jadal_app/features/teams/domain/entities/team_join_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_leave_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_member_priority.dart';
 
 abstract class TeamRepository {
-  Future<Either<Failure, List<Team>>> getTeams();
+  /// For a trainer: the teams they created. For a debater: active,
+  /// non-random teams they're not currently a member of (a "find a team to
+  /// join" view) — [search] filters by name in that case.
+  Future<Either<Failure, List<Team>>> getTeams({String? search});
 
   Future<Either<Failure, Team>> createTeam({
     required String name,
@@ -38,6 +42,19 @@ abstract class TeamRepository {
   Future<Either<Failure, List<TeamLeaveRequest>>> getLeaveRequests(int teamId);
 
   Future<Either<Failure, TeamLeaveRequest>> respondToLeaveRequest({
+    required int teamId,
+    required int requestId,
+    required bool accept,
+  });
+
+  Future<Either<Failure, TeamJoinRequest>> joinTeam({
+    required int teamId,
+    String? reason,
+  });
+
+  Future<Either<Failure, List<TeamJoinRequest>>> getJoinRequests(int teamId);
+
+  Future<Either<Failure, TeamJoinRequest>> respondToJoinRequest({
     required int teamId,
     required int requestId,
     required bool accept,

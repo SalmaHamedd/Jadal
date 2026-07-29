@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
 import 'package:jadal_app/features/search/presentation/cubit/search_cubit.dart';
@@ -21,12 +22,21 @@ class _SearchScreenState extends State<SearchScreen> {
   late SearchCubit _cubit;
   final TextEditingController _searchController = TextEditingController();
   final FocusNode _focusNode = FocusNode();
+  bool _isDebater = false;
 
   @override
   void initState() {
     super.initState();
     final SearchRepository repository = SearchRepositoryImpl();
     _cubit = SearchCubit(repository);
+    // Only debaters can request to join a team from here — the join button
+    // on each SearchTeamCard is gated on this.
+    ProfileRepository().getProfile().then((result) {
+      if (!mounted) return;
+      result.fold((_) {}, (profile) {
+        if (profile.role == 'debater') setState(() => _isDebater = true);
+      });
+    });
   }
 
   @override
@@ -205,7 +215,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         ),
                       ),
                     ),
-                    ...teams.map((t) => SearchTeamCard(team: t)),
+                    ...teams.map((t) => SearchTeamCard(team: t, canJoin: _isDebater)),
                   ],
                 ],
               ),

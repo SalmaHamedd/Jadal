@@ -5,6 +5,7 @@ import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
+import 'package:jadal_app/features/teams/domain/entities/team_join_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_leave_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_member.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_member_priority.dart';
@@ -119,6 +120,47 @@ class TeamDetailScreen extends StatelessWidget {
     return confirmed ?? false;
   }
 
+  Future<bool> _confirmRespondJoin(
+    BuildContext context,
+    TeamJoinRequest request,
+    bool accept,
+  ) async {
+    final name = request.user?.name ?? '';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(
+          accept ? 'قبول طلب الانضمام' : 'رفض طلب الانضمام',
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        ),
+        content: Text(
+          accept
+              ? 'سينضم $name إلى الفريق فوراً. هل تريد المتابعة؟'
+              : 'لن ينضم $name إلى الفريق. هل تريد رفض الطلب؟',
+          style: const TextStyle(fontFamily: 'Cairo'),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: Text(
+              accept ? 'قبول' : 'رفض',
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                color: accept ? JadalColors.positiveGreen : Colors.red,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return confirmed ?? false;
+  }
+
   Future<void> _openAddMembersSheet(BuildContext context) async {
     final cubit = context.read<TeamDetailCubit>();
     final excluded = cubit.state.team.members.map((m) => m.userId).toSet();
@@ -197,7 +239,9 @@ class TeamDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => TeamDetailCubit(repository, team)..loadLeaveRequests(),
+      create: (_) => TeamDetailCubit(repository, team)
+        ..loadLeaveRequests()
+        ..loadJoinRequests(),
       child: BlocConsumer<TeamDetailCubit, TeamDetailState>(
         listenWhen: (prev, curr) => prev.error != curr.error || prev.deactivated != curr.deactivated,
         listener: (context, state) {
@@ -281,6 +325,41 @@ class TeamDetailScreen extends StatelessWidget {
                           ),
                       ],
                     ),
+                    if (state.joinRequests.isNotEmpty) ...[
+                      SizedBox(height: context.hp(2.5)),
+                      Text(
+                        'طلبات الانضمام (${state.joinRequests.length})',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w700,
+                          fontSize: context.fontSize(16),
+                          color:
+                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 10),
+                      for (final request in state.joinRequests)
+                        _JoinRequestTile(
+                          request: request,
+                          busy: state.busy,
+                          onAccept: () async {
+                            final confirmed = await _confirmRespondJoin(context, request, true);
+                            if (confirmed && context.mounted) {
+                              context
+                                  .read<TeamDetailCubit>()
+                                  .respondToJoinRequest(request.id, accept: true);
+                            }
+                          },
+                          onReject: () async {
+                            final confirmed = await _confirmRespondJoin(context, request, false);
+                            if (confirmed && context.mounted) {
+                              context
+                                  .read<TeamDetailCubit>()
+                                  .respondToJoinRequest(request.id, accept: false);
+                            }
+                          },
+                        ),
+                    ],
                     if (state.leaveRequests.isNotEmpty) ...[
                       SizedBox(height: context.hp(2.5)),
                       Text(
@@ -415,6 +494,142 @@ class _StatusChip extends StatelessWidget {
           fontWeight: FontWeight.w600,
           color: color,
         ),
+      ),
+    );
+  }
+}
+
+class _JoinRequestTile extends StatelessWidget {
+  final TeamJoinRequest request;
+  final bool busy;
+  final VoidCallback onAccept;
+  final VoidCallback onReject;
+
+  const _JoinRequestTile({
+    required this.request,
+    required this.busy,
+    required this.onAccept,
+    required this.onReject,
+  });
+
+  String _formatDate(DateTime date) =>
+      '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final user = request.user;
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 10),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: JadalColors.primaryBlue.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: JadalColors.primaryBlue.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              CircleAvatar(
+                radius: 16,
+                backgroundColor: JadalColors.primaryBlue,
+                backgroundImage:
+                    user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
+                child: user?.avatarUrl == null
+                    ? Text(
+                        (user?.name.isNotEmpty ?? false) ? user!.name[0].toUpperCase() : '?',
+                        style: const TextStyle(
+                          fontFamily: 'Cairo',
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                          fontSize: 12,
+                        ),
+                      )
+                    : null,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      user?.name ?? 'عضو',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontFamily: 'Cairo',
+                        fontWeight: FontWeight.w700,
+                        color: isDark
+                            ? JadalColors.darkTextPrimary
+                            : JadalColors.lightTextPrimary,
+                      ),
+                    ),
+                    if (request.requestedAt != null)
+                      Text(
+                        'طلب في ${_formatDate(request.requestedAt!)}',
+                        style: TextStyle(
+                          fontFamily: 'Cairo',
+                          fontSize: 11,
+                          color: JadalColors.judgesGrey,
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          if (request.reason != null && request.reason!.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              request.reason!,
+              style: TextStyle(
+                fontFamily: 'Cairo',
+                fontSize: 12.5,
+                fontStyle: FontStyle.italic,
+                color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: busy ? null : onReject,
+                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
+                  label: const Text(
+                    'رفض',
+                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
+                  ),
+                  style: OutlinedButton.styleFrom(
+                    side: const BorderSide(color: Colors.red),
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: ElevatedButton.icon(
+                  onPressed: busy ? null : onAccept,
+                  icon: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
+                  label: const Text(
+                    'قبول',
+                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: JadalColors.positiveGreen,
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }

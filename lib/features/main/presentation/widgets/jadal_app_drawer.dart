@@ -12,6 +12,7 @@ import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/surveys_screen.dart';
 import 'package:jadal_app/features/surveys/presentation/screens/trainer_surveys_screen.dart';
+import 'package:jadal_app/features/teams/presentation/screens/joinable_teams_screen.dart';
 import 'package:jadal_app/features/teams/presentation/screens/teams_screen.dart';
 
 /// The app's nav drawer (§9) — opens from the layout "start" edge automatically
@@ -156,33 +157,49 @@ class JadalAppDrawer extends StatelessWidget {
               future: di.sl<ProfileRepository>().getProfile(),
               builder: (context, snapshot) {
                 final profile = snapshot.data?.toNullable();
-                if (profile == null || profile.role != 'trainer') return const SizedBox.shrink();
-                return Column(
-                  children: [
-                    ListTile(
-                      leading: const Icon(Icons.assignment_rounded),
-                      title: const Text('Trainer Surveys', style: TextStyle(fontFamily: 'Cairo')),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const TrainerSurveysScreen()),
-                        );
-                      },
-                    ),
-                    ListTile(
-                      leading: const Icon(Icons.groups_rounded),
-                      title: const Text('My Teams', style: TextStyle(fontFamily: 'Cairo')),
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (_) => const TeamsScreen()),
-                        );
-                      },
-                    ),
-                  ],
-                );
+                if (profile == null) return const SizedBox.shrink();
+                if (profile.role == 'trainer') {
+                  return Column(
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.assignment_rounded),
+                        title: const Text('Trainer Surveys', style: TextStyle(fontFamily: 'Cairo')),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TrainerSurveysScreen()),
+                          );
+                        },
+                      ),
+                      ListTile(
+                        leading: const Icon(Icons.groups_rounded),
+                        title: const Text('My Teams', style: TextStyle(fontFamily: 'Cairo')),
+                        onTap: () {
+                          Navigator.pop(context);
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const TeamsScreen()),
+                          );
+                        },
+                      ),
+                    ],
+                  );
+                }
+                if (profile.role == 'debater') {
+                  return ListTile(
+                    leading: const Icon(Icons.group_add_rounded),
+                    title: const Text('Join a Team', style: TextStyle(fontFamily: 'Cairo')),
+                    onTap: () {
+                      Navigator.pop(context);
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const JoinableTeamsScreen()),
+                      );
+                    },
+                  );
+                }
+                return const SizedBox.shrink();
               },
             ),
             const Spacer(),

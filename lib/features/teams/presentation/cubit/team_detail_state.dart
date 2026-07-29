@@ -7,6 +7,8 @@ class TeamDetailState extends Equatable {
   final bool deactivated;
   final List<TeamLeaveRequest> leaveRequests;
   final bool loadingLeaveRequests;
+  final List<TeamJoinRequest> joinRequests;
+  final bool loadingJoinRequests;
 
   const TeamDetailState({
     required this.team,
@@ -15,6 +17,8 @@ class TeamDetailState extends Equatable {
     this.deactivated = false,
     this.leaveRequests = const [],
     this.loadingLeaveRequests = false,
+    this.joinRequests = const [],
+    this.loadingJoinRequests = false,
   });
 
   TeamDetailState copyWith({
@@ -25,6 +29,8 @@ class TeamDetailState extends Equatable {
     bool? deactivated,
     List<TeamLeaveRequest>? leaveRequests,
     bool? loadingLeaveRequests,
+    List<TeamJoinRequest>? joinRequests,
+    bool? loadingJoinRequests,
   }) {
     return TeamDetailState(
       team: team ?? this.team,
@@ -33,10 +39,20 @@ class TeamDetailState extends Equatable {
       deactivated: deactivated ?? this.deactivated,
       leaveRequests: leaveRequests ?? this.leaveRequests,
       loadingLeaveRequests: loadingLeaveRequests ?? this.loadingLeaveRequests,
+      joinRequests: joinRequests ?? this.joinRequests,
+      loadingJoinRequests: loadingJoinRequests ?? this.loadingJoinRequests,
     );
   }
 
   @override
-  List<Object?> get props =>
-      [team, busy, error, deactivated, leaveRequests, loadingLeaveRequests];
+  List<Object?> get props => [
+        team,
+        busy,
+        error,
+        deactivated,
+        leaveRequests,
+        loadingLeaveRequests,
+        joinRequests,
+        loadingJoinRequests,
+      ];
 }

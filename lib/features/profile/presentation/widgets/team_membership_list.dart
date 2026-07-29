@@ -48,7 +48,9 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
+    final textColor = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.lightTextPrimary;
 
     if (widget.current.isEmpty && _history == null) {
       return _HistoryToggle(
@@ -72,7 +74,9 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
           child: _HistoryToggle(
             expanded: _history != null,
             loading: _loadingHistory,
-            onTap: _history == null ? _loadHistory : () => setState(() => _history = null),
+            onTap: _history == null
+                ? _loadHistory
+                : () => setState(() => _history = null),
           ),
         ),
         if (_history != null && !_loadingHistory)
@@ -81,7 +85,11 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
                 'لا توجد فرق سابقة',
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12.5, color: JadalColors.judgesGrey),
+                style: TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 12.5,
+                  color: JadalColors.judgesGrey,
+                ),
               ),
             )
           else
@@ -101,7 +109,11 @@ class _HistoryToggle extends StatelessWidget {
   final bool expanded;
   final bool loading;
   final VoidCallback? onTap;
-  const _HistoryToggle({required this.expanded, required this.loading, this.onTap});
+  const _HistoryToggle({
+    required this.expanded,
+    required this.loading,
+    this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -120,10 +132,17 @@ class _HistoryToggle extends StatelessWidget {
                 width: 14,
                 child: CircularProgressIndicator(strokeWidth: 2),
               )
-            : Icon(expanded ? Icons.expand_less_rounded : Icons.history_rounded, size: 17),
+            : Icon(
+                expanded ? Icons.expand_less_rounded : Icons.history_rounded,
+                size: 17,
+              ),
         label: Text(
           expanded ? 'إخفاء الفرق السابقة' : 'عرض الفرق السابقة',
-          style: const TextStyle(fontFamily: 'Cairo', fontSize: 12.5, fontWeight: FontWeight.w600),
+          style: const TextStyle(
+            fontFamily: 'Cairo',
+            fontSize: 12.5,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
     );
@@ -153,10 +172,10 @@ class _TeamMembershipCard extends StatelessWidget {
   }
 
   String _roleLabel() => switch (membership.role) {
-        'leader' => 'قائد',
-        'trainer' => 'مدرب',
-        _ => 'عضو',
-      };
+    'leader' => 'قائد',
+    'trainer' => 'مدرب',
+    _ => 'عضو',
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -170,7 +189,9 @@ class _TeamMembershipCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
         side: BorderSide(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : Colors.grey.shade200,
         ),
       ),
       child: InkWell(
@@ -178,7 +199,12 @@ class _TeamMembershipCard extends StatelessWidget {
         onTap: () => Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (_) => TeamInfoScreen(membership: membership, canLeave: isOwnProfile),
+            builder: (_) => TeamInfoScreen(
+              teamId: membership.teamId,
+              teamName: membership.teamName,
+              membership: membership,
+              canLeave: isOwnProfile,
+            ),
           ),
         ),
         child: Padding(
@@ -212,10 +238,18 @@ class _TeamMembershipCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Row(
                       children: [
-                        _Pill(label: _roleLabel(), color: past ? JadalColors.judgesGrey : JadalColors.primaryBlue),
+                        _Pill(
+                          label: _roleLabel(),
+                          color: past
+                              ? JadalColors.judgesGrey
+                              : JadalColors.primaryBlue,
+                        ),
                         if (!past) ...[
                           const SizedBox(width: 6),
-                          _Pill(label: 'حالي', color: JadalColors.positiveGreen),
+                          _Pill(
+                            label: 'حالي',
+                            color: JadalColors.positiveGreen,
+                          ),
                         ],
                       ],
                     ),
@@ -225,10 +259,18 @@ class _TeamMembershipCard extends StatelessWidget {
               const SizedBox(width: 6),
               Text(
                 _elapsed(),
-                style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
+                style: const TextStyle(
+                  fontFamily: 'Cairo',
+                  fontSize: 11,
+                  color: JadalColors.judgesGrey,
+                ),
               ),
               const SizedBox(width: 2),
-              Icon(Icons.chevron_right_rounded, size: 18, color: JadalColors.judgesGrey),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 18,
+                color: JadalColors.judgesGrey,
+              ),
             ],
           ),
         ),

@@ -33,6 +33,10 @@ class ApiConstants {
   static String teamLeaveRequestsUrl(int id) => '$teamsUrl/$id/leave-requests';
   static String teamLeaveRequestRespondUrl(int id, int requestId) =>
       '$teamsUrl/$id/leave-requests/$requestId/respond';
+  static String teamJoinUrl(int id) => '$teamsUrl/$id/join';
+  static String teamJoinRequestsUrl(int id) => '$teamsUrl/$id/join-requests';
+  static String teamJoinRequestRespondUrl(int id, int requestId) =>
+      '$teamsUrl/$id/join-requests/$requestId/respond';
   static String get categoriesUrl => '$baseUrl$adminCategories';
   static String get tagsUrl => '$baseUrl$adminTags';
   static String get surveysUrl => '$baseUrl$surveys';

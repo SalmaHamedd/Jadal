@@ -1,7 +1,9 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
+import 'package:jadal_app/features/teams/domain/entities/team_join_request.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_leave_request.dart';
+import 'package:jadal_app/features/teams/domain/entities/team_member.dart';
 import 'package:jadal_app/features/teams/domain/entities/team_member_priority.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
 
@@ -78,6 +80,60 @@ class TeamDetailCubit extends Cubit<TeamDetailState> {
               ? _teamWithoutMember(responded.user!.id)
               : state.team,
         ));
+      },
+    );
+  }
+
+  Team _teamWithMemberAdded(TeamMember member) => Team(
+        id: state.team.id,
+        name: state.team.name,
+        status: state.team.status,
+        isRandom: state.team.isRandom,
+        membersCount: state.team.membersCount + 1,
+        leader: state.team.leader,
+        createdBy: state.team.createdBy,
+        members: [...state.team.members, member],
+        createdAt: state.team.createdAt,
+        updatedAt: state.team.updatedAt,
+      );
+
+  Future<void> loadJoinRequests() async {
+    emit(state.copyWith(loadingJoinRequests: true));
+    final result = await repository.getJoinRequests(state.team.id);
+    result.fold(
+      (failure) => emit(state.copyWith(loadingJoinRequests: false, error: failure.message)),
+      (requests) => emit(state.copyWith(
+        loadingJoinRequests: false,
+        joinRequests: requests.where((r) => r.isPending).toList(),
+      )),
+    );
+  }
+
+  Future<void> respondToJoinRequest(int requestId, {required bool accept}) async {
+    emit(state.copyWith(busy: true, clearError: true));
+    final result = await repository.respondToJoinRequest(
+      teamId: state.team.id,
+      requestId: requestId,
+      accept: accept,
+    );
+    result.fold(
+      (failure) => emit(state.copyWith(busy: false, error: failure.message)),
+      (responded) {
+        final remaining = state.joinRequests.where((r) => r.id != requestId).toList();
+        final user = responded.user;
+        final alreadyMember = user != null &&
+            state.team.members.any((m) => m.userId == user.id);
+        final team = (accept && user != null && !alreadyMember)
+            ? _teamWithMemberAdded(TeamMember(
+                id: -responded.id,
+                userId: user.id,
+                priority: state.team.members.length + 1,
+                status: 'current',
+                joinedAt: DateTime.now(),
+                user: user,
+              ))
+            : state.team;
+        emit(state.copyWith(busy: false, joinRequests: remaining, team: team));
       },
     );
   }
