@@ -79,7 +79,10 @@ class HomeBlogSection extends StatelessWidget {
                         onTap: () async {
                           await Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => BlogDetailsScreen(slug: blog.slug)),
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  BlogDetailsScreen(slug: blog.slug, initialViews: blog.views),
+                            ),
                           );
                           if (context.mounted) context.read<BlogCubit>().loadBlogs();
                         },

@@ -178,6 +178,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
                     teamId: team.id,
                     teamName: team.name,
                     canJoin: true,
+                    initialTeam: team,
                   ),
                 ),
               );

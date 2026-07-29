@@ -156,7 +156,7 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                BlogDetailsScreen(slug: blog.slug),
+                                BlogDetailsScreen(slug: blog.slug, initialViews: blog.views),
                           ),
                         );
                         if (context.mounted) _refresh();

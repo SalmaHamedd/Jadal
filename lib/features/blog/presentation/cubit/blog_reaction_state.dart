@@ -1,29 +1,25 @@
 part of 'blog_reaction_cubit.dart';
 
-abstract class BlogReactionState extends Equatable {
-  const BlogReactionState();
-}
-
-class BlogReactionInitial extends BlogReactionState {
-  @override List<Object> get props => [];
-}
-
-class BlogReactionLoading extends BlogReactionState {
-  @override List<Object> get props => [];
-}
-
-class BlogReactionSuccess extends BlogReactionState {
-  final int likesCount;
-  final int dislikesCount;
+/// Single source of truth for a blog's like/dislike counts and the caller's
+/// own reaction — everything the reaction row needs, including which button
+/// (if any) has a request in flight, so only *that* button disables/spins.
+class BlogReactionState extends Equatable {
+  final int likes;
+  final int dislikes;
   final String? currentReaction;
+  final String? reactingType;
+  final String? error;
 
-  const BlogReactionSuccess(this.likesCount, this.dislikesCount, this.currentReaction);
+  const BlogReactionState({
+    this.likes = 0,
+    this.dislikes = 0,
+    this.currentReaction,
+    this.reactingType,
+    this.error,
+  });
 
-  @override List<Object?> get props => [likesCount, dislikesCount, currentReaction];
-}
+  bool get isReacting => reactingType != null;
 
-class BlogReactionError extends BlogReactionState {
-  final String message;
-  const BlogReactionError(this.message);
-  @override List<Object> get props => [message];
+  @override
+  List<Object?> get props => [likes, dislikes, currentReaction, reactingType, error];
 }

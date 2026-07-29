@@ -17,17 +17,19 @@ import 'package:jadal_app/features/blog/presentation/widgets/blog_stats_row.dart
 
 class BlogDetailsScreen extends StatefulWidget {
   final String slug;
-  const BlogDetailsScreen({super.key, required this.slug});
+  // The server bumps the view count on every `GET /blog/{slug}`, so the
+  // fresh count in the response already includes this very visit. Showing
+  // that immediately reads as "off by one" next to whatever the list screen
+  // showed before the tap, so we pin the display to that pre-visit number
+  // instead — the list picks up the real new count next time it refreshes.
+  final int? initialViews;
+  const BlogDetailsScreen({super.key, required this.slug, this.initialViews});
 
   @override
   State<BlogDetailsScreen> createState() => _BlogDetailsScreenState();
 }
 
 class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
-  late int _optimisticLikes;
-  late int _optimisticDislikes;
-  String? _optimisticReaction;
-  bool _isReacting = false;
   int? _blogId;
   String _blogTitle = '';
   bool _isDeleting = false;
@@ -40,69 +42,6 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
   void initState() {
     super.initState();
     _repository = BlogRepositoryImpl();
-    _loadSavedReaction();
-  }
-
-  Future<void> _loadSavedReaction() async {
-    final userId = await _prefs.getValue<int>('user_id');
-    if (userId != null) {
-      final reaction = await _prefs.getValue<String>(
-        'reaction_${userId}_${widget.slug}',
-      );
-      if (mounted) setState(() => _optimisticReaction = reaction);
-    }
-  }
-
-  Future<void> _saveReaction(String? reaction) async {
-    final userId = await _prefs.getValue<int>('user_id');
-    if (userId == null) return;
-    final key = 'reaction_${userId}_${widget.slug}';
-    if (reaction == null) {
-      await _prefs.removeValue(key);
-    } else {
-      await _prefs.setValue(key, reaction);
-    }
-    if (mounted) setState(() => _optimisticReaction = reaction);
-  }
-
-  Future<void> _handleReaction(BuildContext ctx, String type) async {
-    if (_isReacting || _blogId == null) return;
-
-    final currentLikes = _optimisticLikes;
-    final currentDislikes = _optimisticDislikes;
-    final currentReaction = _optimisticReaction;
-
-    int newLikes = currentLikes;
-    int newDislikes = currentDislikes;
-    String? newReaction;
-
-    if (currentReaction == type) {
-      newReaction = null;
-      if (type == 'like')
-        newLikes = currentLikes - 1;
-      else
-        newDislikes = currentDislikes - 1;
-    } else {
-      newReaction = type;
-      if (type == 'like') {
-        newLikes = currentLikes + 1;
-        if (currentReaction == 'dislike') newDislikes = currentDislikes - 1;
-      } else {
-        newDislikes = currentDislikes + 1;
-        if (currentReaction == 'like') newLikes = currentLikes - 1;
-      }
-    }
-
-    setState(() {
-      _optimisticLikes = newLikes;
-      _optimisticDislikes = newDislikes;
-      _optimisticReaction = newReaction;
-    });
-
-    setState(() => _isReacting = true);
-    final cubit = ctx.read<BlogReactionCubit>();
-    await cubit.reactToBlog(_blogId!, type);
-    if (mounted) setState(() => _isReacting = false);
   }
 
   Future<void> _confirmDelete(int blogId, String title) async {
@@ -191,8 +130,12 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
               if (_blogId == null) {
                 _blogId = blog.id;
                 _blogTitle = blog.title;
-                _optimisticLikes = blog.likesCount;
-                _optimisticDislikes = blog.dislikesCount;
+                context.read<BlogReactionCubit>().init(
+                      blogId: blog.id,
+                      slug: widget.slug,
+                      likes: blog.likesCount,
+                      dislikes: blog.dislikesCount,
+                    );
                 _prefs.getValue<int>('user_id').then((userId) {
                   if (mounted) {
                     setState(() {
@@ -202,24 +145,13 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                 });
               }
 
-              return BlocListener<BlogReactionCubit, BlogReactionState>(
+              return BlocConsumer<BlogReactionCubit, BlogReactionState>(
+                listenWhen: (prev, curr) => curr.error != null && prev.error != curr.error,
                 listener: (context, reactionState) {
-                  if (reactionState is BlogReactionSuccess) {
-                    setState(() {
-                      _optimisticLikes = reactionState.likesCount;
-                      _optimisticDislikes = reactionState.dislikesCount;
-                      _optimisticReaction = reactionState.currentReaction;
-                    });
-                    _saveReaction(reactionState.currentReaction);
-                  } else if (reactionState is BlogReactionError) {
-                    JadalSnackBar.show(context, reactionState.message);
-                    setState(() {
-                      _optimisticLikes = blog.likesCount;
-                      _optimisticDislikes = blog.dislikesCount;
-                    });
-                  }
+                  JadalSnackBar.show(context, reactionState.error!, type: SnackBarType.error);
+                  context.read<BlogReactionCubit>().dismissError();
                 },
-                child: SingleChildScrollView(
+                builder: (context, reactionState) => SingleChildScrollView(
                   child: Column(
                     children: [
                       if (blog.coverImageUrl != null)
@@ -277,15 +209,14 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                             ),
                             const SizedBox(height: 24),
                             BlogStatsRow(
-                              views: blog.views,
-                              likes: _optimisticLikes,
-                              dislikes: _optimisticDislikes,
-                              currentReaction: _optimisticReaction,
+                              views: widget.initialViews ?? blog.views,
+                              likes: reactionState.likes,
+                              dislikes: reactionState.dislikes,
+                              currentReaction: reactionState.currentReaction,
                               onLikePressed: () =>
-                                  _handleReaction(context, 'like'),
+                                  context.read<BlogReactionCubit>().react('like'),
                               onDislikePressed: () =>
-                                  _handleReaction(context, 'dislike'),
-                              isReacting: _isReacting,
+                                  context.read<BlogReactionCubit>().react('dislike'),
                               isDark: isDark,
                             ),
                             const SizedBox(height: 48),

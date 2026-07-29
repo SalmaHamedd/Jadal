@@ -10,7 +10,6 @@ class BlogStatsRow extends StatelessWidget {
   final String? currentReaction;
   final VoidCallback onLikePressed;
   final VoidCallback onDislikePressed;
-  final bool isReacting;
   final bool isDark;
 
   const BlogStatsRow({
@@ -21,53 +20,60 @@ class BlogStatsRow extends StatelessWidget {
     this.currentReaction,
     required this.onLikePressed,
     required this.onDislikePressed,
-    required this.isReacting,
     required this.isDark,
   });
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(
-        vertical: context.hp(1),
-        horizontal: context.wp(3),
-      ),
+      padding: EdgeInsets.symmetric(vertical: context.hp(1), horizontal: context.wp(3)),
       decoration: BoxDecoration(
         color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+            decoration: BoxDecoration(
+              color: JadalColors.primaryBlue.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.visibility_outlined, size: 16, color: JadalColors.primaryBlue),
+                const SizedBox(width: 6),
+                Text(
+                  '$views',
+                  style: const TextStyle(
+                    fontFamily: 'Cairo',
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: JadalColors.primaryBlue,
+                  ),
+                ),
+              ],
+            ),
+          ),
           Row(
             children: [
-              Icon(Icons.visibility, size: 18, color: JadalColors.primaryBlue),
-              const SizedBox(width: 6),
-              Text(
-                '$views',
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: JadalColors.primaryBlue,
-                ),
+              ReactionButton(
+                icon: Icons.thumb_up_alt_rounded,
+                count: likes,
+                isActive: currentReaction == 'like',
+                onPressed: onLikePressed,
+              ),
+              const SizedBox(width: 8),
+              ReactionButton(
+                icon: Icons.thumb_down_alt_rounded,
+                count: dislikes,
+                isActive: currentReaction == 'dislike',
+                onPressed: onDislikePressed,
+                activeColor: JadalColors.negativeRed,
               ),
             ],
-          ),
-
-          ReactionButton(
-            icon: Icons.thumb_up,
-            count: likes,
-            isActive: currentReaction == 'like',
-            onPressed: onLikePressed,
-            isLoading: isReacting,
-          ),
-
-          ReactionButton(
-            icon: Icons.thumb_down,
-            count: dislikes,
-            isActive: currentReaction == 'dislike',
-            onPressed: onDislikePressed,
-            isLoading: isReacting,
           ),
         ],
       ),

@@ -21,12 +21,16 @@ import 'package:jadal_app/features/teams/presentation/cubit/team_leave_cubit.dar
 /// detail via `GET /teams/{id}`, which the backend authorizes for the
 /// team's trainer, its leader, or any current member — so this only falls
 /// back to the bare name/membership info on a genuine 403/404/network error.
+/// If the caller already has the full [initialTeam] (e.g. the "browse teams
+/// to join" list, which the backend deliberately excludes from the 403
+/// above since you're not a member yet), pass it to skip the re-fetch.
 class TeamInfoScreen extends StatefulWidget {
   final int teamId;
   final String teamName;
   final TeamMembership? membership;
   final bool canLeave;
   final bool canJoin;
+  final Team? initialTeam;
 
   const TeamInfoScreen({
     super.key,
@@ -35,6 +39,7 @@ class TeamInfoScreen extends StatefulWidget {
     this.membership,
     this.canLeave = true,
     this.canJoin = false,
+    this.initialTeam,
   });
 
   @override
@@ -50,7 +55,12 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
   @override
   void initState() {
     super.initState();
-    _loadTeam();
+    if (widget.initialTeam != null) {
+      _team = widget.initialTeam;
+      _loadingTeam = false;
+    } else {
+      _loadTeam();
+    }
   }
 
   Future<void> _loadTeam() async {

@@ -52,7 +52,7 @@ class BlogListSection extends StatelessWidget {
                           context,
                           MaterialPageRoute(
                             builder: (context) =>
-                                BlogDetailsScreen(slug: blog.slug),
+                                BlogDetailsScreen(slug: blog.slug, initialViews: blog.views),
                           ),
                         );
                         if (context.mounted) {
