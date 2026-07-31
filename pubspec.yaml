@@ -46,6 +46,16 @@ dev_dependencies:
     sdk: flutter
 
   flutter_lints: ^6.0.0
+  flutter_launcher_icons: ^0.14.3
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  # Plain (non-adaptive) icon: the source is a flattened image with the logo's
+  # own cream backdrop baked in, not padded transparent artwork, so it isn't
+  # safe to feed as an adaptive-icon foreground layer (Android's mask shapes —
+  # circle/squircle/etc. — would clip the head shapes near the edges).
+  image_path: "assets/images/Jadal-logo.jpg"
 
 flutter:
   generate: true
