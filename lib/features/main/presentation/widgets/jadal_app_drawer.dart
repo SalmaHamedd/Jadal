@@ -6,6 +6,7 @@ import 'package:jadal_app/core/services/contact_info.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/widgets/theme_toggle_button.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
+import 'package:jadal_app/features/complaints/presentation/screens/my_complaints_screen.dart';
 import 'package:jadal_app/features/live_debate/presentation/pages/frameworks_list_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
@@ -150,6 +151,17 @@ class JadalAppDrawer extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (_) => const SurveysScreen()),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(Icons.report_gmailerrorred_rounded),
+              title: const Text('My Complaints', style: TextStyle(fontFamily: 'Cairo')),
+              onTap: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const MyComplaintsScreen()),
                 );
               },
             ),

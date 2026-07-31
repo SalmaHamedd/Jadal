@@ -19,6 +19,8 @@ import '../widgets/debate_screen_header.dart';
 import '../widgets/registration_sheet.dart';
 import '../widgets/result_summary_view.dart';
 import 'debate_lobby_screen.dart';
+import '../../../complaints/data/repositories/complaint_repository_impl.dart';
+import '../../../complaints/presentation/screens/create_complaint_screen.dart';
 
 /// Debate detail via `GET /live-state` (§13): motion (coloured framework chips +
 /// tags), judges, prop/opp speakers with their order + reply, the stages, and —
@@ -79,7 +81,25 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
         child: SafeArea(
           child: Column(
             children: [
-              DebateScreenHeader(title: widget.title ?? loc.debatesTitle),
+              DebateScreenHeader(
+                title: widget.title ?? loc.debatesTitle,
+                actions: [
+                  IconButton(
+                    tooltip: 'تقديم شكوى',
+                    icon: const Icon(Icons.report_gmailerrorred_rounded),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => CreateComplaintScreen(
+                          repository: ComplaintRepositoryImpl(),
+                          initialDebateId: widget.debateId,
+                          initialDebateTitle: widget.title ?? loc.debatesTitle,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
               Expanded(
                 child: FutureBuilder<Either<Failure, LiveStateModel>>(
                   future: _future,

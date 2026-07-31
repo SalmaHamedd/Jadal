@@ -14,6 +14,7 @@ class ApiConstants {
   static const String adminCategories = '/admin/blog/categories';
   static const String adminTags = '/admin/blog/tags';
   static const String surveys = '/surveys';
+  static const String complaints = '/complaints';
 
   static String get loginUrl => '$baseUrl$login';
   static String get forgotPasswordUrl => '$baseUrl$forgotPassword';
@@ -37,6 +38,8 @@ class ApiConstants {
   static String teamJoinRequestsUrl(int id) => '$teamsUrl/$id/join-requests';
   static String teamJoinRequestRespondUrl(int id, int requestId) =>
       '$teamsUrl/$id/join-requests/$requestId/respond';
+  static String get complaintsUrl => '$baseUrl$complaints';
+  static String get myComplaintsUrl => '$complaintsUrl/mine';
   static String get categoriesUrl => '$baseUrl$adminCategories';
   static String get tagsUrl => '$baseUrl$adminTags';
   static String get surveysUrl => '$baseUrl$surveys';
