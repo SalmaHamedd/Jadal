@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/trainer_survey_repository_impl.dart';
@@ -31,9 +32,9 @@ class TrainerSurveyResultsScreen extends StatelessWidget {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: AppBar(
-                title: const Text(
-                  'نتائج الاستطلاع',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                title: Text(
+                  context.loc.surveyResultsTitle,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -72,7 +73,7 @@ class _ResultsBody extends StatelessWidget {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
     if (results.questions.isEmpty && results.responses.isEmpty) {
-      return const SurveyEmptyMessage(message: 'لا توجد ردود على هذا الاستطلاع بعد');
+      return SurveyEmptyMessage(message: context.loc.surveyNoResponsesYet);
     }
 
     return SingleChildScrollView(
@@ -104,7 +105,9 @@ class _ResultsBody extends StatelessWidget {
                 Icon(Icons.people_outline, color: JadalColors.primaryOrange),
                 const SizedBox(width: 10),
                 Text(
-                  'إجمالي الردود: ${results.totalResponses ?? results.responses.length}',
+                  context.loc.surveyTotalResponsesLabel(
+                    results.totalResponses ?? results.responses.length,
+                  ),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
@@ -116,7 +119,7 @@ class _ResultsBody extends StatelessWidget {
           ),
           const SizedBox(height: 20),
           Text(
-            'ملخص الإجابات',
+            context.loc.surveyAnswersSummary,
             style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
@@ -129,7 +132,7 @@ class _ResultsBody extends StatelessWidget {
           if (results.responses.isNotEmpty) ...[
             const SizedBox(height: 20),
             Text(
-              'الردود (${results.responses.length})',
+              context.loc.surveyResponsesCountLabel(results.responses.length),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w700,
@@ -173,7 +176,7 @@ class _QuestionSummaryCard extends StatelessWidget {
           const SizedBox(height: 10),
           if ((question.totalAnswered ?? 0) == 0)
             Text(
-              'لا توجد إجابات على هذا السؤال بعد',
+              context.loc.surveyNoAnswersYet,
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
             )
           else if (question.isRating && question.average != null)
@@ -182,8 +185,11 @@ class _QuestionSummaryCard extends StatelessWidget {
                 Icon(Icons.star_rate_rounded, color: JadalColors.primaryOrange, size: 20),
                 const SizedBox(width: 6),
                 Text(
-                  'المتوسط: ${question.average!.toStringAsFixed(1)} / ${question.ratingMax} '
-                  '(${question.totalAnswered} رداً)',
+                  context.loc.surveyAverageLabel(
+                    question.average!.toStringAsFixed(1),
+                    '${question.ratingMax}',
+                    '${question.totalAnswered}',
+                  ),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w600,
@@ -196,7 +202,7 @@ class _QuestionSummaryCard extends StatelessWidget {
             _DistributionBars(distribution: question.distribution!, isDark: isDark)
           else if (question.isOpenText && question.textAnswers != null)
             Text(
-              '${question.textAnswers!.length} إجابة نصية (انظر أدناه)',
+              context.loc.surveyTextAnswersCount(question.textAnswers!.length),
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
             ),
         ],

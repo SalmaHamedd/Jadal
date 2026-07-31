@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
@@ -116,7 +117,7 @@ class _DebatePickerFieldState extends State<DebatePickerField> {
             color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
           ),
           decoration: InputDecoration(
-            hintText: 'ابحث عن المناظرة بعنوانها...',
+            hintText: context.loc.debateSearchHint,
             hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
             prefixIcon: const Icon(Icons.search),
             filled: true,
@@ -139,7 +140,7 @@ class _DebatePickerFieldState extends State<DebatePickerField> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'تعذر البحث: $_error',
+              context.loc.debateSearchFailed(_error ?? ''),
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.negativeRed),
             ),
           )
@@ -147,7 +148,7 @@ class _DebatePickerFieldState extends State<DebatePickerField> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'لا توجد نتائج',
+              context.loc.noResults,
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
             ),
           )

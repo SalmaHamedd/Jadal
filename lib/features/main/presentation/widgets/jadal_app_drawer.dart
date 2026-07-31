@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/localization/widgets/locale_toggle_button.dart';
 import 'package:jadal_app/core/services/contact_info.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
@@ -34,7 +35,7 @@ class JadalAppDrawer extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-              child: Text('Jadal',
+              child: Text(context.loc.appName,
                   style: TextStyle(
                       fontFamily: 'Cairo', fontSize: 22, fontWeight: FontWeight.w800, color: textColor)),
             ),
@@ -123,7 +124,7 @@ class JadalAppDrawer extends StatelessWidget {
             const Divider(height: 24),
             ListTile(
               leading: const Icon(Icons.insights_rounded),
-              title: const Text('Your analysis', style: TextStyle(fontFamily: 'Cairo')),
+              title: Text(context.loc.drawerAnalysis, style: const TextStyle(fontFamily: 'Cairo')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -134,7 +135,7 @@ class JadalAppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.category_rounded),
-              title: const Text('Frameworks in the system', style: TextStyle(fontFamily: 'Cairo')),
+              title: Text(context.loc.drawerFrameworks, style: const TextStyle(fontFamily: 'Cairo')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -145,7 +146,7 @@ class JadalAppDrawer extends StatelessWidget {
             ),
               ListTile(
               leading: const Icon(Icons.assignment_rounded),
-              title: const Text('Surveys', style: TextStyle(fontFamily: 'Cairo')),
+              title: Text(context.loc.drawerSurveys, style: const TextStyle(fontFamily: 'Cairo')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -156,7 +157,7 @@ class JadalAppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.report_gmailerrorred_rounded),
-              title: const Text('My Complaints', style: TextStyle(fontFamily: 'Cairo')),
+              title: Text(context.loc.drawerMyComplaints, style: const TextStyle(fontFamily: 'Cairo')),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -175,7 +176,8 @@ class JadalAppDrawer extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: const Icon(Icons.assignment_rounded),
-                        title: const Text('Trainer Surveys', style: TextStyle(fontFamily: 'Cairo')),
+                        title: Text(context.loc.drawerTrainerSurveys,
+                            style: const TextStyle(fontFamily: 'Cairo')),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
@@ -186,7 +188,8 @@ class JadalAppDrawer extends StatelessWidget {
                       ),
                       ListTile(
                         leading: const Icon(Icons.groups_rounded),
-                        title: const Text('My Teams', style: TextStyle(fontFamily: 'Cairo')),
+                        title: Text(context.loc.drawerMyTeams,
+                            style: const TextStyle(fontFamily: 'Cairo')),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
@@ -201,7 +204,7 @@ class JadalAppDrawer extends StatelessWidget {
                 if (profile.role == 'debater') {
                   return ListTile(
                     leading: const Icon(Icons.group_add_rounded),
-                    title: const Text('Join a Team', style: TextStyle(fontFamily: 'Cairo')),
+                    title: Text(context.loc.drawerJoinTeam, style: const TextStyle(fontFamily: 'Cairo')),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
@@ -226,7 +229,7 @@ class JadalAppDrawer extends StatelessWidget {
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('Contact us',
+                      Text(context.loc.drawerContactUs,
                           style: TextStyle(
                               fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 12, color: textColor)),
                       const SizedBox(height: 6),

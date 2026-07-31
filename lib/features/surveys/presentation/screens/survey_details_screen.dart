@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -44,7 +45,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
     if (!_allAnswered(details)) {
       JadalSnackBar.show(
         context,
-        'يرجى الإجابة على جميع الأسئلة قبل الإرسال',
+        context.loc.surveyAnswerAllQuestions,
         type: SnackBarType.warning,
       );
       return;
@@ -74,9 +75,9 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text(
-              'الاستطلاع',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            title: Text(
+              context.loc.surveyDetailsTitle,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -88,7 +89,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                 setState(() => _submitted = true);
                 JadalSnackBar.show(
                   context,
-                  'تم تقديم إجاباتك بنجاح',
+                  context.loc.surveySubmittedSuccess,
                   type: SnackBarType.success,
                 );
               } else if (state is SurveyResponseError) {
@@ -134,7 +135,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          if (locked) _buildLockedBanner(details, isDark),
+                          if (locked) _buildLockedBanner(context, details, isDark),
                           if (locked) const SizedBox(height: 20),
                           ...details.questions.asMap().entries.map((entry) {
                             final index = entry.key + 1;
@@ -176,9 +177,9 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                                           color: Colors.white,
                                         ),
                                       )
-                                    : const Text(
-                                        'إرسال الإجابات',
-                                        style: TextStyle(
+                                    : Text(
+                                        context.loc.surveySubmitAnswers,
+                                        style: const TextStyle(
                                           fontFamily: 'Cairo',
                                           fontWeight: FontWeight.w700,
                                         ),
@@ -206,17 +207,17 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
     );
   }
 
-  Widget _buildLockedBanner(SurveyDetails details, bool isDark) {
+  Widget _buildLockedBanner(BuildContext context, SurveyDetails details, bool isDark) {
     final String message;
     final IconData icon;
     final Color color;
 
     if (_submitted || details.alreadyResponded) {
-      message = 'لقد قمت بالإجابة على هذا الاستطلاع من قبل';
+      message = context.loc.surveyAlreadyAnsweredMessage;
       icon = Icons.check_circle_outline;
       color = JadalColors.positiveGreen;
     } else {
-      message = 'هذا الاستطلاع مغلق ولا يقبل إجابات جديدة';
+      message = context.loc.surveyClosedMessage;
       icon = Icons.lock_clock_outlined;
       color = JadalColors.judgesGrey;
     }

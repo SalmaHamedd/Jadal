@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -62,11 +63,11 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_members.length < 2) {
-      JadalSnackBar.show(context, 'أضف عضوين على الأقل', type: SnackBarType.warning);
+      JadalSnackBar.show(context, context.loc.teamAddAtLeastTwoMembers, type: SnackBarType.warning);
       return;
     }
     if (_leaderId == null) {
-      JadalSnackBar.show(context, 'اختر قائداً للفريق', type: SnackBarType.warning);
+      JadalSnackBar.show(context, context.loc.teamChooseLeader, type: SnackBarType.warning);
       return;
     }
     context.read<CreateTeamCubit>().submit(
@@ -84,9 +85,9 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text(
-              'فريق جديد',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            title: Text(
+              context.loc.teamNewTeamTitle,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -95,7 +96,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
           body: BlocConsumer<CreateTeamCubit, CreateTeamState>(
             listener: (context, state) {
               if (state is CreateTeamSuccess) {
-                JadalSnackBar.show(context, 'تم إنشاء الفريق بنجاح', type: SnackBarType.success);
+                JadalSnackBar.show(context, context.loc.teamCreatedSuccess, type: SnackBarType.success);
                 Navigator.pop(context, true);
               } else if (state is CreateTeamError) {
                 JadalSnackBar.show(context, state.message, type: SnackBarType.error);
@@ -113,15 +114,15 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AuthTextField(
-                        label: 'اسم الفريق',
+                        label: context.loc.teamNameField,
                         icon: Icons.groups_rounded,
                         controller: _nameController,
                         validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'اسم الفريق مطلوب' : null,
+                            (v == null || v.trim().isEmpty) ? context.loc.teamNameRequired : null,
                       ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'الأعضاء',
+                        context.loc.teamMembersHeader,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -131,7 +132,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'أضف عضوين على الأقل، ثم اختر قائد الفريق من بينهم',
+                        context.loc.teamAddMembersHint,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
@@ -152,7 +153,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                             final isLeader = m.id == _leaderId;
                             return InputChip(
                               label: Text(
-                                isLeader ? '${m.name} (قائد)' : m.name,
+                                isLeader ? context.loc.teamLeaderSuffix(m.name) : m.name,
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: isLeader ? FontWeight.w700 : FontWeight.w500,
@@ -173,7 +174,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                       ],
                       SizedBox(height: context.hp(4)),
                       AuthButton(
-                        text: 'إنشاء الفريق',
+                        text: context.loc.teamCreateButton,
                         isLoading: submitting,
                         onPressed: submitting ? null : () => _submit(context),
                       ),

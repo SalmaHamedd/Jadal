@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
@@ -71,8 +72,8 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
             StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Statistics',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(context.loc.statsTitle,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
         ),
         body: JadalGradientBackground(child: _resolving(context)),
       );
@@ -108,7 +109,7 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
                   _resolveSelf();
                 }),
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Retry', style: TextStyle(fontFamily: 'Cairo')),
+                label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
               ),
             ],
           ),
@@ -135,6 +136,10 @@ class _StatsScaffold extends StatelessWidget {
 
   Future<void> _export(BuildContext context, DebaterStatsState state) async {
     final messenger = ScaffoldMessenger.of(context);
+    final nothingToExport = context.loc.statsNothingToExport;
+    final shareText = context.loc.statsShareText;
+    final shareSubject = context.loc.statsShareSubject;
+    final exportFailed = context.loc.statsExportFailed;
     try {
       final bytes = StatsExcelExporter.build(
         kind: state.kind,
@@ -147,7 +152,7 @@ class _StatsScaffold extends StatelessWidget {
         activity: state.activity,
       );
       if (bytes == null) {
-        messenger.showSnackBar(const SnackBar(content: Text('Nothing to export yet')));
+        messenger.showSnackBar(SnackBar(content: Text(nothingToExport)));
         return;
       }
       final dir = await getTemporaryDirectory();
@@ -155,11 +160,11 @@ class _StatsScaffold extends StatelessWidget {
       await file.writeAsBytes(bytes, flush: true);
       await Share.shareXFiles(
         [XFile(file.path)],
-        text: 'Jadal debate analysis sheet',
-        subject: 'Jadal debate analysis',
+        text: shareText,
+        subject: shareSubject,
       );
     } catch (e) {
-      messenger.showSnackBar(SnackBar(content: Text('Export failed: $e')));
+      messenger.showSnackBar(SnackBar(content: Text(exportFailed('$e'))));
     }
   }
 
@@ -171,7 +176,7 @@ class _StatsScaffold extends StatelessWidget {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
-          debaterName == null ? 'Statistics' : '$debaterName · Statistics',
+          debaterName == null ? context.loc.statsTitle : context.loc.statsTitleWithName(debaterName!),
           style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
         ),
         actions: [
@@ -179,7 +184,7 @@ class _StatsScaffold extends StatelessWidget {
             builder: (context, state) {
               final canExport = _hasData(state);
               return IconButton(
-                tooltip: 'Export sheet',
+                tooltip: context.loc.statsExportTooltip,
                 icon: const Icon(Icons.ios_share_rounded),
                 onPressed: canExport ? () => _export(context, state) : null,
               );
@@ -219,26 +224,27 @@ class _KindSelector extends StatelessWidget {
   final StatKind active;
   const _KindSelector({required this.active});
 
-  static const _items = <({StatKind kind, String label, IconData icon})>[
-    (kind: StatKind.winRate, label: 'Win rate', icon: Icons.percent_rounded),
-    (kind: StatKind.avgScore, label: 'Avg score', icon: Icons.speed_rounded),
-    (kind: StatKind.bestSpeaker, label: 'Best speaker', icon: Icons.workspace_premium_rounded),
-    (kind: StatKind.ranking, label: 'Ranking', icon: Icons.format_list_numbered_rounded),
-    (kind: StatKind.improvement, label: 'Improvement', icon: Icons.trending_up_rounded),
-    (kind: StatKind.activity, label: 'Activity', icon: Icons.local_fire_department_rounded),
+  List<({StatKind kind, String label, IconData icon})> _items(BuildContext context) => [
+    (kind: StatKind.winRate, label: context.loc.statsKindWinRate, icon: Icons.percent_rounded),
+    (kind: StatKind.avgScore, label: context.loc.statsKindAvgScore, icon: Icons.speed_rounded),
+    (kind: StatKind.bestSpeaker, label: context.loc.statsKindBestSpeaker, icon: Icons.workspace_premium_rounded),
+    (kind: StatKind.ranking, label: context.loc.statsKindRanking, icon: Icons.format_list_numbered_rounded),
+    (kind: StatKind.improvement, label: context.loc.statsKindImprovement, icon: Icons.trending_up_rounded),
+    (kind: StatKind.activity, label: context.loc.statsKindActivity, icon: Icons.local_fire_department_rounded),
   ];
 
   @override
   Widget build(BuildContext context) {
     final cubit = context.read<DebaterStatsCubit>();
+    final items = _items(context);
     return SizedBox(
       height: 42,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        itemCount: _items.length,
+        itemCount: items.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, i) {
-          final item = _items[i];
+          final item = items[i];
           final selected = item.kind == active;
           return AnimatedContainer(
             duration: const Duration(milliseconds: 220),
@@ -309,7 +315,7 @@ class _Content extends StatelessWidget {
     // Nothing for this stat yet → full loader / first-load error.
     if (!_hasData) {
       if (state.status == StatsStatus.error) {
-        return _ErrorCard(message: state.error ?? 'Something went wrong', state: state);
+        return _ErrorCard(message: state.error ?? context.loc.statsSomethingWrong, state: state);
       }
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 60),
@@ -328,7 +334,7 @@ class _Content extends StatelessWidget {
         ),
         // A non-blocking error banner over stale data (e.g. an invalid filter).
         if (state.status == StatsStatus.error)
-          _ErrorBanner(message: state.error ?? 'Could not update with these filters'),
+          _ErrorBanner(message: state.error ?? context.loc.statsCouldNotUpdateFilters),
         // View-family switch: bucketed charts share one key so they MORPH between
         // win-rate/avg-score/best-speaker; ranking & improvement cross-fade.
         AnimatedSwitcher(
@@ -383,9 +389,9 @@ class _BucketedHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final title = switch (state.kind) {
-      StatKind.winRate => 'Win rate',
-      StatKind.avgScore => 'Average score',
-      StatKind.bestSpeaker => 'Best-speaker rate',
+      StatKind.winRate => context.loc.statsWinRateTitle,
+      StatKind.avgScore => context.loc.statsAvgScoreTitle,
+      StatKind.bestSpeaker => context.loc.statsBestSpeakerTitle,
       _ => '',
     };
     return Row(
@@ -407,7 +413,7 @@ class _BucketedHeader extends StatelessWidget {
             borderRadius: BorderRadius.circular(20),
           ),
           child: Text(
-            '${state.bucketed!.totalNDebates} debates',
+            context.loc.statsDebatesCount(state.bucketed!.totalNDebates),
             style: const TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w800,
@@ -491,7 +497,7 @@ class _ErrorCard extends StatelessWidget {
           OutlinedButton.icon(
             onPressed: cubit.load,
             icon: const Icon(Icons.refresh_rounded),
-            label: const Text('Retry', style: TextStyle(fontFamily: 'Cairo')),
+            label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
           ),
         ],
       ),

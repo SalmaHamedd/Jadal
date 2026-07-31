@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question_input.dart';
 
@@ -53,7 +54,7 @@ class SurveyQuestionEditorList extends StatelessWidget {
         OutlinedButton.icon(
           onPressed: _add,
           icon: const Icon(Icons.add),
-          label: const Text('إضافة سؤال', style: TextStyle(fontFamily: 'Cairo')),
+          label: Text(context.loc.surveyAddQuestion, style: const TextStyle(fontFamily: 'Cairo')),
           style: OutlinedButton.styleFrom(
             foregroundColor: JadalColors.primaryOrange,
             side: BorderSide(color: JadalColors.primaryOrange),
@@ -164,7 +165,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
             children: [
               Expanded(
                 child: Text(
-                  'سؤال ${widget.index + 1}',
+                  context.loc.surveyQuestionNumber(widget.index + 1),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w700,
@@ -185,7 +186,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
               color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
             ),
             decoration: InputDecoration(
-              hintText: 'نص السؤال',
+              hintText: context.loc.surveyQuestionTextHint,
               hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
               filled: true,
               fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
@@ -201,7 +202,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
           DropdownButtonFormField<String>(
             initialValue: q.type,
             decoration: InputDecoration(
-              labelText: 'نوع السؤال',
+              labelText: context.loc.surveyQuestionTypeLabel,
               labelStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
               filled: true,
               fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
@@ -211,10 +212,10 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
               ),
               contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
             ),
-            items: const [
-              DropdownMenuItem(value: 'rating', child: Text('تقييم رقمي')),
-              DropdownMenuItem(value: 'mcq', child: Text('اختيار من متعدد')),
-              DropdownMenuItem(value: 'open_text', child: Text('إجابة مفتوحة')),
+            items: [
+              DropdownMenuItem(value: 'rating', child: Text(context.loc.surveyTypeRating)),
+              DropdownMenuItem(value: 'mcq', child: Text(context.loc.surveyTypeMcq)),
+              DropdownMenuItem(value: 'open_text', child: Text(context.loc.surveyTypeOpenText)),
             ],
             onChanged: _changeType,
           ),
@@ -224,7 +225,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
               children: [
                 Expanded(
                   child: _NumberField(
-                    label: 'الحد الأدنى',
+                    label: context.loc.surveyMinValue,
                     value: q.ratingMin,
                     onChanged: (v) => widget.onChanged(q.copyWith(ratingMin: v)),
                   ),
@@ -232,7 +233,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _NumberField(
-                    label: 'الحد الأقصى',
+                    label: context.loc.surveyMaxValue,
                     value: q.ratingMax,
                     onChanged: (v) => widget.onChanged(q.copyWith(ratingMax: v)),
                   ),
@@ -240,7 +241,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                 const SizedBox(width: 8),
                 Expanded(
                   child: _NumberField(
-                    label: 'الخطوة',
+                    label: context.loc.surveyStepValue,
                     value: q.ratingStep,
                     onChanged: (v) => widget.onChanged(q.copyWith(ratingStep: v)),
                   ),
@@ -251,7 +252,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
           if (q.type == 'mcq') ...[
             const SizedBox(height: 10),
             Text(
-              'الخيارات (حد أدنى خياران)',
+              context.loc.surveyOptionsMinTwo,
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
             ),
             const SizedBox(height: 6),
@@ -270,7 +271,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                                   : JadalColors.lightTextPrimary,
                             ),
                             decoration: InputDecoration(
-                              hintText: 'خيار ${e.key + 1}',
+                              hintText: context.loc.surveyOptionHint(e.key + 1),
                               filled: true,
                               fillColor:
                                   isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
@@ -295,7 +296,7 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
             TextButton.icon(
               onPressed: _addOption,
               icon: const Icon(Icons.add, size: 18),
-              label: const Text('إضافة خيار', style: TextStyle(fontFamily: 'Cairo')),
+              label: Text(context.loc.surveyAddOption, style: const TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ],

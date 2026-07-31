@@ -374,6 +374,18 @@ abstract class AppLocalizations {
   /// **'OK'**
   String get ok;
 
+  /// No description provided for @logout.
+  ///
+  /// In en, this message translates to:
+  /// **'Logout'**
+  String get logout;
+
+  /// No description provided for @logoutConfirmMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to log out?'**
+  String get logoutConfirmMessage;
+
   /// No description provided for @permissionsRequiredTitle.
   ///
   /// In en, this message translates to:
@@ -1051,6 +1063,1506 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Search'**
   String get searchTitle;
+
+  /// No description provided for @drawerAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Your analysis'**
+  String get drawerAnalysis;
+
+  /// No description provided for @drawerFrameworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Frameworks in the system'**
+  String get drawerFrameworks;
+
+  /// No description provided for @drawerSurveys.
+  ///
+  /// In en, this message translates to:
+  /// **'Surveys'**
+  String get drawerSurveys;
+
+  /// No description provided for @drawerMyComplaints.
+  ///
+  /// In en, this message translates to:
+  /// **'My Complaints'**
+  String get drawerMyComplaints;
+
+  /// No description provided for @drawerTrainerSurveys.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainer Surveys'**
+  String get drawerTrainerSurveys;
+
+  /// No description provided for @drawerMyTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'My Teams'**
+  String get drawerMyTeams;
+
+  /// No description provided for @drawerJoinTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Join a Team'**
+  String get drawerJoinTeam;
+
+  /// No description provided for @drawerContactUs.
+  ///
+  /// In en, this message translates to:
+  /// **'Contact us'**
+  String get drawerContactUs;
+
+  /// No description provided for @profileStatistics.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get profileStatistics;
+
+  /// No description provided for @profileTeamAnalysis.
+  ///
+  /// In en, this message translates to:
+  /// **'Team analysis'**
+  String get profileTeamAnalysis;
+
+  /// No description provided for @profilePrepAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Prep attendance'**
+  String get profilePrepAttendance;
+
+  /// No description provided for @profileAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get profileAttendance;
+
+  /// No description provided for @editProfileChooseSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose source'**
+  String get editProfileChooseSource;
+
+  /// No description provided for @editProfileCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera'**
+  String get editProfileCamera;
+
+  /// No description provided for @editProfileGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Gallery'**
+  String get editProfileGallery;
+
+  /// No description provided for @cameraPermissionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission required'**
+  String get cameraPermissionRequired;
+
+  /// No description provided for @profileUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated successfully'**
+  String get profileUpdatedSuccess;
+
+  /// No description provided for @avatarUpdated.
+  ///
+  /// In en, this message translates to:
+  /// **'Avatar updated'**
+  String get avatarUpdated;
+
+  /// No description provided for @fieldName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get fieldName;
+
+  /// No description provided for @fieldPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get fieldPhone;
+
+  /// No description provided for @fieldLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get fieldLocation;
+
+  /// No description provided for @fieldBirthDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Birth date'**
+  String get fieldBirthDate;
+
+  /// No description provided for @notSet.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get notSet;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @userAchievementsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} — Achievements'**
+  String userAchievementsTitle(String name);
+
+  /// No description provided for @noAchievementsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No achievements yet'**
+  String get noAchievementsYet;
+
+  /// No description provided for @userDebatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} — Debates'**
+  String userDebatesTitle(String name);
+
+  /// No description provided for @latestDebates.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest debates'**
+  String get latestDebates;
+
+  /// No description provided for @showAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Show all'**
+  String get showAll;
+
+  /// No description provided for @noDebatesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No debates yet'**
+  String get noDebatesYet;
+
+  /// No description provided for @achievements.
+  ///
+  /// In en, this message translates to:
+  /// **'Achievements'**
+  String get achievements;
+
+  /// No description provided for @surveyDetailsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey'**
+  String get surveyDetailsTitle;
+
+  /// No description provided for @surveyNoneAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No surveys currently available'**
+  String get surveyNoneAvailable;
+
+  /// No description provided for @surveyAnswerAllQuestions.
+  ///
+  /// In en, this message translates to:
+  /// **'Please answer all questions before submitting'**
+  String get surveyAnswerAllQuestions;
+
+  /// No description provided for @surveySubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Your answers were submitted successfully'**
+  String get surveySubmittedSuccess;
+
+  /// No description provided for @surveySubmitAnswers.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit answers'**
+  String get surveySubmitAnswers;
+
+  /// No description provided for @surveyAlreadyAnsweredMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve already answered this survey'**
+  String get surveyAlreadyAnsweredMessage;
+
+  /// No description provided for @surveyClosedMessage.
+  ///
+  /// In en, this message translates to:
+  /// **'This survey is closed and no longer accepts answers'**
+  String get surveyClosedMessage;
+
+  /// No description provided for @trainerSurveysTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'My Team\'s Surveys'**
+  String get trainerSurveysTitle;
+
+  /// No description provided for @surveyNewSurvey.
+  ///
+  /// In en, this message translates to:
+  /// **'New survey'**
+  String get surveyNewSurvey;
+
+  /// No description provided for @trainerSurveyNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t created any surveys for your team yet'**
+  String get trainerSurveyNoneYet;
+
+  /// No description provided for @surveyDeleteTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete survey'**
+  String get surveyDeleteTitle;
+
+  /// No description provided for @surveyDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this survey? This can\'t be undone, and all its responses will be lost.'**
+  String get surveyDeleteConfirmBody;
+
+  /// No description provided for @surveyDeletedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey deleted'**
+  String get surveyDeletedMsg;
+
+  /// No description provided for @surveyDetailsHeaderTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey Details'**
+  String get surveyDetailsHeaderTitle;
+
+  /// No description provided for @surveyStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Open'**
+  String get surveyStatusOpen;
+
+  /// No description provided for @surveyStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get surveyStatusClosed;
+
+  /// No description provided for @surveyClosesOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes on {date}'**
+  String surveyClosesOnDate(String date);
+
+  /// No description provided for @surveyQuestionsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions'**
+  String get surveyQuestionsHeader;
+
+  /// No description provided for @surveyNoQuestionsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No questions for this survey yet'**
+  String get surveyNoQuestionsYet;
+
+  /// No description provided for @surveyTypeRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Numeric rating'**
+  String get surveyTypeRating;
+
+  /// No description provided for @surveyTypeMcq.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple choice'**
+  String get surveyTypeMcq;
+
+  /// No description provided for @surveyTypeOpenText.
+  ///
+  /// In en, this message translates to:
+  /// **'Open answer'**
+  String get surveyTypeOpenText;
+
+  /// No description provided for @surveyResultsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey Results'**
+  String get surveyResultsTitle;
+
+  /// No description provided for @surveyNoResponsesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No responses to this survey yet'**
+  String get surveyNoResponsesYet;
+
+  /// No description provided for @surveyTotalResponsesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total responses: {count}'**
+  String surveyTotalResponsesLabel(int count);
+
+  /// No description provided for @surveyAnswersSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Answers summary'**
+  String get surveyAnswersSummary;
+
+  /// No description provided for @surveyResponsesCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Responses ({count})'**
+  String surveyResponsesCountLabel(int count);
+
+  /// No description provided for @surveyNoAnswersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No answers to this question yet'**
+  String get surveyNoAnswersYet;
+
+  /// No description provided for @surveyAverageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Average: {avg} / {max} ({count} responses)'**
+  String surveyAverageLabel(String avg, String max, String count);
+
+  /// No description provided for @surveyTextAnswersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} text answers (see below)'**
+  String surveyTextAnswersCount(int count);
+
+  /// No description provided for @surveyTargetTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Target teams'**
+  String get surveyTargetTeams;
+
+  /// No description provided for @surveyChooseAtLeastOneTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose at least one team'**
+  String get surveyChooseAtLeastOneTeam;
+
+  /// No description provided for @surveyCloseDateOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing date (optional)'**
+  String get surveyCloseDateOptional;
+
+  /// No description provided for @surveyNoCloseDate.
+  ///
+  /// In en, this message translates to:
+  /// **'No closing date'**
+  String get surveyNoCloseDate;
+
+  /// No description provided for @surveyQuestionsRequiredLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Questions *'**
+  String get surveyQuestionsRequiredLabel;
+
+  /// No description provided for @surveyQuestionsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'At least one question required. The survey can\'t be edited after it\'s created, so review your questions before submitting.'**
+  String get surveyQuestionsHint;
+
+  /// No description provided for @surveyCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create survey'**
+  String get surveyCreateButton;
+
+  /// No description provided for @surveyTitleField.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey title'**
+  String get surveyTitleField;
+
+  /// No description provided for @surveyTitleRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Title is required'**
+  String get surveyTitleRequired;
+
+  /// No description provided for @surveyDescriptionOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get surveyDescriptionOptional;
+
+  /// No description provided for @surveyAddAtLeastOneTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one team'**
+  String get surveyAddAtLeastOneTeam;
+
+  /// No description provided for @surveyAddAtLeastOneQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least one question — participants can\'t answer a survey with no questions'**
+  String get surveyAddAtLeastOneQuestion;
+
+  /// No description provided for @surveyCompleteAllQuestionText.
+  ///
+  /// In en, this message translates to:
+  /// **'Complete the text of every question before saving'**
+  String get surveyCompleteAllQuestionText;
+
+  /// No description provided for @surveyMcqNeedsTwoOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'Multiple-choice questions need at least two options'**
+  String get surveyMcqNeedsTwoOptions;
+
+  /// No description provided for @surveyCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Survey created successfully'**
+  String get surveyCreatedSuccess;
+
+  /// No description provided for @surveyPartialSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'The survey was created, but its questions couldn\'t be saved: {message}. Surveys can\'t be edited after creation, so it will stay without questions — you may prefer to create a new one instead.'**
+  String surveyPartialSuccess(String message);
+
+  /// No description provided for @surveyClosesInDays.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes in {days} days'**
+  String surveyClosesInDays(int days);
+
+  /// No description provided for @surveyClosesInHours.
+  ///
+  /// In en, this message translates to:
+  /// **'Closes in {hours} hours'**
+  String surveyClosesInHours(int hours);
+
+  /// No description provided for @surveyClosesSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Closing soon'**
+  String get surveyClosesSoon;
+
+  /// No description provided for @surveyAnsweredChip.
+  ///
+  /// In en, this message translates to:
+  /// **'Answered'**
+  String get surveyAnsweredChip;
+
+  /// No description provided for @surveyWriteAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Write your answer here...'**
+  String get surveyWriteAnswerHint;
+
+  /// No description provided for @surveyAddQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Add question'**
+  String get surveyAddQuestion;
+
+  /// No description provided for @surveyQuestionNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Question {number}'**
+  String surveyQuestionNumber(int number);
+
+  /// No description provided for @surveyQuestionTextHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Question text'**
+  String get surveyQuestionTextHint;
+
+  /// No description provided for @surveyQuestionTypeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Question type'**
+  String get surveyQuestionTypeLabel;
+
+  /// No description provided for @surveyMinValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimum'**
+  String get surveyMinValue;
+
+  /// No description provided for @surveyMaxValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Maximum'**
+  String get surveyMaxValue;
+
+  /// No description provided for @surveyStepValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Step'**
+  String get surveyStepValue;
+
+  /// No description provided for @surveyOptionsMinTwo.
+  ///
+  /// In en, this message translates to:
+  /// **'Options (at least two)'**
+  String get surveyOptionsMinTwo;
+
+  /// No description provided for @surveyOptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Option {number}'**
+  String surveyOptionHint(int number);
+
+  /// No description provided for @surveyAddOption.
+  ///
+  /// In en, this message translates to:
+  /// **'Add option'**
+  String get surveyAddOption;
+
+  /// No description provided for @complaintNewComplaint.
+  ///
+  /// In en, this message translates to:
+  /// **'New complaint'**
+  String get complaintNewComplaint;
+
+  /// No description provided for @complaintNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t filed any complaints yet'**
+  String get complaintNoneYet;
+
+  /// No description provided for @complaintStatusOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Under review'**
+  String get complaintStatusOpen;
+
+  /// No description provided for @complaintStatusResolved.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolved'**
+  String get complaintStatusResolved;
+
+  /// No description provided for @complaintStatusRejected.
+  ///
+  /// In en, this message translates to:
+  /// **'Rejected'**
+  String get complaintStatusRejected;
+
+  /// No description provided for @complaintStatusClosed.
+  ///
+  /// In en, this message translates to:
+  /// **'Closed'**
+  String get complaintStatusClosed;
+
+  /// No description provided for @complaintDebateFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Debate #{id}'**
+  String complaintDebateFallback(int id);
+
+  /// No description provided for @complaintAdminResponseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Admin response'**
+  String get complaintAdminResponseLabel;
+
+  /// No description provided for @complaintChooseDebate.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose the debate this complaint is about'**
+  String get complaintChooseDebate;
+
+  /// No description provided for @complaintDescriptionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint description'**
+  String get complaintDescriptionLabel;
+
+  /// No description provided for @complaintDescriptionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint description is required'**
+  String get complaintDescriptionRequired;
+
+  /// No description provided for @complaintDescriptionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Explain the issue in detail...'**
+  String get complaintDescriptionHint;
+
+  /// No description provided for @complaintSubmitButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit complaint'**
+  String get complaintSubmitButton;
+
+  /// No description provided for @complaintSubmittedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Complaint submitted successfully'**
+  String get complaintSubmittedSuccess;
+
+  /// No description provided for @complaintDebateFieldLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Debate'**
+  String get complaintDebateFieldLabel;
+
+  /// No description provided for @debateSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a debate by title...'**
+  String get debateSearchHint;
+
+  /// No description provided for @debateSearchFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Search failed: {error}'**
+  String debateSearchFailed(String error);
+
+  /// No description provided for @teamSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search for a team by name...'**
+  String get teamSearchHint;
+
+  /// No description provided for @teamNoneAvailableToJoin.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams currently available to join'**
+  String get teamNoneAvailableToJoin;
+
+  /// No description provided for @teamLeaveDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave team'**
+  String get teamLeaveDialogTitle;
+
+  /// No description provided for @teamLeaveDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A leave request will be sent to the team\'s trainer for approval. Continue?'**
+  String get teamLeaveDialogBody;
+
+  /// No description provided for @teamReasonOptionalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason (optional)'**
+  String get teamReasonOptionalHint;
+
+  /// No description provided for @teamSendRequestButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Send request'**
+  String get teamSendRequestButton;
+
+  /// No description provided for @teamJoinDialogTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the team'**
+  String get teamJoinDialogTitle;
+
+  /// No description provided for @teamJoinDialogBody.
+  ///
+  /// In en, this message translates to:
+  /// **'A join request will be sent to the team\'s trainer for approval. Continue?'**
+  String get teamJoinDialogBody;
+
+  /// No description provided for @teamRoleLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Team leader'**
+  String get teamRoleLeader;
+
+  /// No description provided for @teamRoleTrainer.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainer'**
+  String get teamRoleTrainer;
+
+  /// No description provided for @teamRoleMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get teamRoleMember;
+
+  /// No description provided for @teamJoinedDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined on'**
+  String get teamJoinedDateLabel;
+
+  /// No description provided for @teamLeftDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Left on'**
+  String get teamLeftDateLabel;
+
+  /// No description provided for @teamTrainerLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Trainer'**
+  String get teamTrainerLabel;
+
+  /// No description provided for @teamMembersCountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get teamMembersCountLabel;
+
+  /// No description provided for @teamInfoTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team Info'**
+  String get teamInfoTitle;
+
+  /// No description provided for @teamLeaveRequestPendingMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request sent. Awaiting the trainer\'s approval'**
+  String get teamLeaveRequestPendingMsg;
+
+  /// No description provided for @teamLeaveRequestSentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request sent'**
+  String get teamLeaveRequestSentMsg;
+
+  /// No description provided for @teamJoinRequestPendingMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request sent. Awaiting the trainer\'s approval'**
+  String get teamJoinRequestPendingMsg;
+
+  /// No description provided for @teamJoinRequestSentMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request sent'**
+  String get teamJoinRequestSentMsg;
+
+  /// No description provided for @teamMembersHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Members'**
+  String get teamMembersHeader;
+
+  /// No description provided for @teamNoMembersYet.
+  ///
+  /// In en, this message translates to:
+  /// **'This team has no members yet'**
+  String get teamNoMembersYet;
+
+  /// No description provided for @teamLeaveTeamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave team'**
+  String get teamLeaveTeamAction;
+
+  /// No description provided for @teamJoinTeamAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Join the team'**
+  String get teamJoinTeamAction;
+
+  /// No description provided for @teamChipLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'Left the team'**
+  String get teamChipLeft;
+
+  /// No description provided for @teamChipCurrentMember.
+  ///
+  /// In en, this message translates to:
+  /// **'Current member'**
+  String get teamChipCurrentMember;
+
+  /// No description provided for @teamChipActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Team active'**
+  String get teamChipActive;
+
+  /// No description provided for @teamChipInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Team inactive'**
+  String get teamChipInactive;
+
+  /// No description provided for @teamForbiddenMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to view this team\'s details'**
+  String get teamForbiddenMsg;
+
+  /// No description provided for @teamNotFoundMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'This team doesn\'t exist'**
+  String get teamNotFoundMsg;
+
+  /// No description provided for @teamAuthRequiredMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Please sign in to view this team\'s details'**
+  String get teamAuthRequiredMsg;
+
+  /// No description provided for @teamLoadFailedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load this team\'s details right now'**
+  String get teamLoadFailedMsg;
+
+  /// No description provided for @teamDeactivateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate team'**
+  String get teamDeactivateTitle;
+
+  /// No description provided for @teamDeactivateConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to deactivate this team?'**
+  String get teamDeactivateConfirmBody;
+
+  /// No description provided for @teamCancelButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get teamCancelButton;
+
+  /// No description provided for @teamDeactivateConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Deactivate'**
+  String get teamDeactivateConfirmButton;
+
+  /// No description provided for @teamRemoveMemberTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove member'**
+  String get teamRemoveMemberTitle;
+
+  /// No description provided for @teamRemoveMemberBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove {name} from the team?'**
+  String teamRemoveMemberBody(String name);
+
+  /// No description provided for @teamRemoveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove'**
+  String get teamRemoveButton;
+
+  /// No description provided for @teamAcceptLeaveRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept leave request'**
+  String get teamAcceptLeaveRequestTitle;
+
+  /// No description provided for @teamRejectLeaveRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject leave request'**
+  String get teamRejectLeaveRequestTitle;
+
+  /// No description provided for @teamLeaveRequestAcceptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will leave the team immediately. Continue?'**
+  String teamLeaveRequestAcceptBody(String name);
+
+  /// No description provided for @teamLeaveRequestRejectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will remain a member of the team. Reject this request?'**
+  String teamLeaveRequestRejectBody(String name);
+
+  /// No description provided for @teamAcceptJoinRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept join request'**
+  String get teamAcceptJoinRequestTitle;
+
+  /// No description provided for @teamRejectJoinRequestTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject join request'**
+  String get teamRejectJoinRequestTitle;
+
+  /// No description provided for @teamJoinRequestAcceptBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will join the team immediately. Continue?'**
+  String teamJoinRequestAcceptBody(String name);
+
+  /// No description provided for @teamJoinRequestRejectBody.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} will not join the team. Reject this request?'**
+  String teamJoinRequestRejectBody(String name);
+
+  /// No description provided for @teamAcceptButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Accept'**
+  String get teamAcceptButton;
+
+  /// No description provided for @teamRejectButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get teamRejectButton;
+
+  /// No description provided for @teamAddMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add members'**
+  String get teamAddMembers;
+
+  /// No description provided for @teamAddCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Add ({count})'**
+  String teamAddCount(int count);
+
+  /// No description provided for @teamDeactivatedMsg.
+  ///
+  /// In en, this message translates to:
+  /// **'Team deactivated'**
+  String get teamDeactivatedMsg;
+
+  /// No description provided for @teamStatusActive.
+  ///
+  /// In en, this message translates to:
+  /// **'Active'**
+  String get teamStatusActive;
+
+  /// No description provided for @teamStatusInactive.
+  ///
+  /// In en, this message translates to:
+  /// **'Inactive'**
+  String get teamStatusInactive;
+
+  /// No description provided for @teamLeaderLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Leader: {name}'**
+  String teamLeaderLabel(String name);
+
+  /// No description provided for @teamJoinRequestsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Join requests ({count})'**
+  String teamJoinRequestsHeader(int count);
+
+  /// No description provided for @teamLeaveRequestsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave requests ({count})'**
+  String teamLeaveRequestsHeader(int count);
+
+  /// No description provided for @teamMembersHeaderCount.
+  ///
+  /// In en, this message translates to:
+  /// **'Members ({count})'**
+  String teamMembersHeaderCount(int count);
+
+  /// No description provided for @teamDragToReorderHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Drag the handle to change priority'**
+  String get teamDragToReorderHint;
+
+  /// No description provided for @teamRequestedOnDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Requested on {date}'**
+  String teamRequestedOnDate(String date);
+
+  /// No description provided for @teamNewTeamTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New team'**
+  String get teamNewTeamTitle;
+
+  /// No description provided for @teamAddAtLeastTwoMembers.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two members'**
+  String get teamAddAtLeastTwoMembers;
+
+  /// No description provided for @teamChooseLeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a team leader'**
+  String get teamChooseLeader;
+
+  /// No description provided for @teamCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Team created successfully'**
+  String get teamCreatedSuccess;
+
+  /// No description provided for @teamNameField.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name'**
+  String get teamNameField;
+
+  /// No description provided for @teamNameRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Team name is required'**
+  String get teamNameRequired;
+
+  /// No description provided for @teamAddMembersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Add at least two members, then choose the team\'s leader among them'**
+  String get teamAddMembersHint;
+
+  /// No description provided for @teamLeaderSuffix.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} (leader)'**
+  String teamLeaderSuffix(String name);
+
+  /// No description provided for @teamCreateButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Create team'**
+  String get teamCreateButton;
+
+  /// No description provided for @teamNoneYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams yet'**
+  String get teamNoneYet;
+
+  /// No description provided for @teamMembersCountShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String teamMembersCountShort(int count);
+
+  /// No description provided for @userSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search by name...'**
+  String get userSearchHint;
+
+  /// No description provided for @teamLoadListFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t load teams: {message}'**
+  String teamLoadListFailed(String message);
+
+  /// No description provided for @teamNoneAvailableForYou.
+  ///
+  /// In en, this message translates to:
+  /// **'No teams available to you yet'**
+  String get teamNoneAvailableForYou;
+
+  /// No description provided for @statsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Statistics'**
+  String get statsTitle;
+
+  /// No description provided for @statsTitleWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Statistics'**
+  String statsTitleWithName(String name);
+
+  /// No description provided for @statsNothingToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to export yet'**
+  String get statsNothingToExport;
+
+  /// No description provided for @statsShareText.
+  ///
+  /// In en, this message translates to:
+  /// **'Jadal debate analysis sheet'**
+  String get statsShareText;
+
+  /// No description provided for @statsShareSubject.
+  ///
+  /// In en, this message translates to:
+  /// **'Jadal debate analysis'**
+  String get statsShareSubject;
+
+  /// No description provided for @statsExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Export failed: {error}'**
+  String statsExportFailed(String error);
+
+  /// No description provided for @statsExportTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Export sheet'**
+  String get statsExportTooltip;
+
+  /// No description provided for @statsKindWinRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Win rate'**
+  String get statsKindWinRate;
+
+  /// No description provided for @statsKindAvgScore.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg score'**
+  String get statsKindAvgScore;
+
+  /// No description provided for @statsKindBestSpeaker.
+  ///
+  /// In en, this message translates to:
+  /// **'Best speaker'**
+  String get statsKindBestSpeaker;
+
+  /// No description provided for @statsKindRanking.
+  ///
+  /// In en, this message translates to:
+  /// **'Ranking'**
+  String get statsKindRanking;
+
+  /// No description provided for @statsKindImprovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Improvement'**
+  String get statsKindImprovement;
+
+  /// No description provided for @statsKindActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity'**
+  String get statsKindActivity;
+
+  /// No description provided for @statsSomethingWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get statsSomethingWrong;
+
+  /// No description provided for @statsWinRateTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Win rate'**
+  String get statsWinRateTitle;
+
+  /// No description provided for @statsAvgScoreTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Average score'**
+  String get statsAvgScoreTitle;
+
+  /// No description provided for @statsBestSpeakerTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Best-speaker rate'**
+  String get statsBestSpeakerTitle;
+
+  /// No description provided for @statsDebatesCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} debates'**
+  String statsDebatesCount(int count);
+
+  /// No description provided for @statsCouldNotUpdateFilters.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update with these filters'**
+  String get statsCouldNotUpdateFilters;
+
+  /// No description provided for @statsTopOfJadal.
+  ///
+  /// In en, this message translates to:
+  /// **'Top of Jadal'**
+  String get statsTopOfJadal;
+
+  /// No description provided for @statsScopeDebaters.
+  ///
+  /// In en, this message translates to:
+  /// **'Debaters'**
+  String get statsScopeDebaters;
+
+  /// No description provided for @statsScopeTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get statsScopeTeams;
+
+  /// No description provided for @statsMetricPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'Points'**
+  String get statsMetricPoints;
+
+  /// No description provided for @statsNoEntriesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No entries yet'**
+  String get statsNoEntriesYet;
+
+  /// No description provided for @statsTeamAnalysisTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Team analysis'**
+  String get statsTeamAnalysisTitle;
+
+  /// No description provided for @statsTeamAnalysisTitleWithName.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Team analysis'**
+  String statsTeamAnalysisTitleWithName(String name);
+
+  /// No description provided for @statsAveragedAcrossTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Averaged across your teams'**
+  String get statsAveragedAcrossTeams;
+
+  /// No description provided for @statsTeamsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} teams'**
+  String statsTeamsCount(int count);
+
+  /// No description provided for @statsAvgImprovement.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg improvement'**
+  String get statsAvgImprovement;
+
+  /// No description provided for @statsAvgWinRate.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg win rate'**
+  String get statsAvgWinRate;
+
+  /// No description provided for @statsAvgMemberActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg member activity'**
+  String get statsAvgMemberActivity;
+
+  /// No description provided for @statsAttendanceSubtitleDebater.
+  ///
+  /// In en, this message translates to:
+  /// **'How often you actually join your prep room'**
+  String get statsAttendanceSubtitleDebater;
+
+  /// No description provided for @statsAttendanceSubtitleTrainer.
+  ///
+  /// In en, this message translates to:
+  /// **'How often you attend your team\'s debates'**
+  String get statsAttendanceSubtitleTrainer;
+
+  /// No description provided for @statsAttendanceSubtitleJudge.
+  ///
+  /// In en, this message translates to:
+  /// **'How often you attend debates you\'re assigned to'**
+  String get statsAttendanceSubtitleJudge;
+
+  /// No description provided for @statsAttendanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} · Attendance'**
+  String statsAttendanceTitle(String name);
+
+  /// No description provided for @statsOverallPercent.
+  ///
+  /// In en, this message translates to:
+  /// **'{percent}% overall'**
+  String statsOverallPercent(int percent);
+
+  /// No description provided for @statsAttendedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{attended}/{selected} attended'**
+  String statsAttendedCount(int attended, int selected);
+
+  /// No description provided for @statsRegisteredNotHeldAgainst.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered {count} times — selection is the admin\'s call, not held against you.'**
+  String statsRegisteredNotHeldAgainst(int count);
+
+  /// No description provided for @statsFrameworksTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Frameworks'**
+  String get statsFrameworksTitle;
+
+  /// No description provided for @filterStatusScheduled.
+  ///
+  /// In en, this message translates to:
+  /// **'Scheduled'**
+  String get filterStatusScheduled;
+
+  /// No description provided for @filterStatusAnnounced.
+  ///
+  /// In en, this message translates to:
+  /// **'Announced'**
+  String get filterStatusAnnounced;
+
+  /// No description provided for @filterStatusSidesSelected.
+  ///
+  /// In en, this message translates to:
+  /// **'Sides selected'**
+  String get filterStatusSidesSelected;
+
+  /// No description provided for @filterStatusLive.
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get filterStatusLive;
+
+  /// No description provided for @filterStatusCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Completed'**
+  String get filterStatusCompleted;
+
+  /// No description provided for @filterStatusCancelled.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancelled'**
+  String get filterStatusCancelled;
+
+  /// No description provided for @filterFormatFallback.
+  ///
+  /// In en, this message translates to:
+  /// **'Format {id}'**
+  String filterFormatFallback(String id);
+
+  /// No description provided for @filterDebatesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter debates'**
+  String get filterDebatesTitle;
+
+  /// No description provided for @filterLabelStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Status'**
+  String get filterLabelStatus;
+
+  /// No description provided for @filterLabelFormat.
+  ///
+  /// In en, this message translates to:
+  /// **'Format'**
+  String get filterLabelFormat;
+
+  /// No description provided for @filterLabelMotionFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'Motion framework'**
+  String get filterLabelMotionFramework;
+
+  /// No description provided for @filterLabelDebateTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Debate tag'**
+  String get filterLabelDebateTag;
+
+  /// No description provided for @filterLabelJudge.
+  ///
+  /// In en, this message translates to:
+  /// **'Judge'**
+  String get filterLabelJudge;
+
+  /// No description provided for @filterLabelTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'Team'**
+  String get filterLabelTeam;
+
+  /// No description provided for @filterLabelUser.
+  ///
+  /// In en, this message translates to:
+  /// **'User'**
+  String get filterLabelUser;
+
+  /// No description provided for @filterSearchUsersHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search users…'**
+  String get filterSearchUsersHint;
+
+  /// No description provided for @filterClearButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get filterClearButton;
+
+  /// No description provided for @filterApplyButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Apply'**
+  String get filterApplyButton;
+
+  /// No description provided for @filterArticlesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter articles'**
+  String get filterArticlesTitle;
+
+  /// No description provided for @filterLabelCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get filterLabelCategory;
+
+  /// No description provided for @filterLabelTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag'**
+  String get filterLabelTag;
+
+  /// No description provided for @filterLabelPublisher.
+  ///
+  /// In en, this message translates to:
+  /// **'Publisher'**
+  String get filterLabelPublisher;
+
+  /// No description provided for @filterSearchAuthorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search authors…'**
+  String get filterSearchAuthorsHint;
+
+  /// No description provided for @filterLikedByMe.
+  ///
+  /// In en, this message translates to:
+  /// **'Liked by me'**
+  String get filterLikedByMe;
+
+  /// No description provided for @filterNoneAvailable.
+  ///
+  /// In en, this message translates to:
+  /// **'None available'**
+  String get filterNoneAvailable;
+
+  /// No description provided for @filterDateRangeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date range'**
+  String get filterDateRangeLabel;
+
+  /// No description provided for @filterFromLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get filterFromLabel;
+
+  /// No description provided for @filterToLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get filterToLabel;
 
   /// No description provided for @mutedSpeakingTitle.
   ///

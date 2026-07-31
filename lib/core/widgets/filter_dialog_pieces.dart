@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../localization/l10n/context_localiztion.dart';
 import '../theme/app_colors.dart';
 
 /// A generic (id, label) option for the multi-select pieces below — shared by
@@ -50,7 +51,7 @@ class MultiSelectChipGroup extends StatelessWidget {
             child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
           )
         else if (options.isEmpty)
-          Text('None available', style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey))
+          Text(context.loc.filterNoneAvailable, style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey))
         else
           Wrap(
             spacing: 8,
@@ -242,7 +243,7 @@ class DateRangeField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Date range',
+        Text(context.loc.filterDateRangeLabel,
             style: TextStyle(
               fontFamily: 'Cairo',
               fontWeight: FontWeight.w700,
@@ -255,14 +256,14 @@ class DateRangeField extends StatelessWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _pick(context, onFromChanged, from),
-                child: Text(from ?? 'From', style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                child: Text(from ?? context.loc.filterFromLabel, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _pick(context, onToChanged, to),
-                child: Text(to ?? 'To', style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                child: Text(to ?? context.loc.filterToLabel, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
               ),
             ),
           ],

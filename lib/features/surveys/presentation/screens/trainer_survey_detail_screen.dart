@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -23,25 +24,24 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'حذف الاستطلاع',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        title: Text(
+          context.loc.surveyDeleteTitle,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
-        content: const Text(
-          'هل أنت متأكد من حذف هذا الاستطلاع؟ لا يمكن التراجع عن هذا الإجراء، '
-          'وستفقد جميع الردود المرتبطة به.',
-          style: TextStyle(fontFamily: 'Cairo'),
+        content: Text(
+          context.loc.surveyDeleteConfirmBody,
+          style: const TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.cancel, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'حذف',
-              style: TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
+            child: Text(
+              context.loc.delete,
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -66,7 +66,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
           return BlocListener<DeleteTrainerSurveyCubit, DeleteTrainerSurveyState>(
             listener: (context, state) {
               if (state is DeleteTrainerSurveySuccess) {
-                JadalSnackBar.show(context, 'تم حذف الاستطلاع', type: SnackBarType.success);
+                JadalSnackBar.show(context, context.loc.surveyDeletedMsg, type: SnackBarType.success);
                 Navigator.pop(context, true);
               } else if (state is DeleteTrainerSurveyError) {
                 JadalSnackBar.show(context, state.message, type: SnackBarType.error);
@@ -76,9 +76,9 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: AppBar(
-                  title: const Text(
-                    'تفاصيل الاستطلاع',
-                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                  title: Text(
+                    context.loc.surveyDetailsHeaderTitle,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
                   ),
                   backgroundColor: Colors.transparent,
                   elevation: 0,
@@ -88,7 +88,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                       builder: (context, state) {
                         if (state is! TrainerSurveyDetailsLoaded) return const SizedBox();
                         return IconButton(
-                          tooltip: 'عرض النتائج',
+                          tooltip: context.loc.viewResults,
                           icon: const Icon(Icons.bar_chart_outlined),
                           onPressed: () {
                             Navigator.push(
@@ -108,7 +108,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                       builder: (context, state) {
                         final deleting = state is DeleteTrainerSurveyDeleting;
                         return IconButton(
-                          tooltip: 'حذف الاستطلاع',
+                          tooltip: context.loc.surveyDeleteTitle,
                           icon: deleting
                               ? const SizedBox(
                                   height: 18,
@@ -170,21 +170,24 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                               runSpacing: 8,
                               children: [
                                 SurveyStatusChip(
-                                  label: details.isClosed ? 'مغلق' : 'مفتوح',
+                                  label: details.isClosed
+                                      ? context.loc.surveyStatusClosed
+                                      : context.loc.surveyStatusOpen,
                                   color: details.isClosed
                                       ? JadalColors.judgesGrey
                                       : JadalColors.positiveGreen,
                                 ),
                                 if (details.closesAt != null)
                                   SurveyStatusChip(
-                                    label: 'ينتهي في ${_formatDate(details.closesAt!)}',
+                                    label: context.loc
+                                        .surveyClosesOnDate(_formatDate(details.closesAt!)),
                                     color: JadalColors.primaryBlue,
                                   ),
                               ],
                             ),
                             const SizedBox(height: 20),
                             Text(
-                              'الأسئلة',
+                              context.loc.surveyQuestionsHeader,
                               style: TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w700,
@@ -214,7 +217,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                                     ),
                                     const SizedBox(height: 4),
                                     Text(
-                                      _typeLabel(q.type),
+                                      _typeLabel(context, q.type),
                                       style: TextStyle(
                                         fontFamily: 'Cairo',
                                         fontSize: 12,
@@ -227,7 +230,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                             ),
                             if (details.questions.isEmpty)
                               Text(
-                                'لا توجد أسئلة لهذا الاستطلاع بعد',
+                                context.loc.surveyNoQuestionsYet,
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   color: JadalColors.judgesGrey,
@@ -255,14 +258,14 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
     );
   }
 
-  String _typeLabel(String type) {
+  String _typeLabel(BuildContext context, String type) {
     switch (type) {
       case 'rating':
-        return 'تقييم رقمي';
+        return context.loc.surveyTypeRating;
       case 'mcq':
-        return 'اختيار من متعدد';
+        return context.loc.surveyTypeMcq;
       case 'open_text':
-        return 'إجابة مفتوحة';
+        return context.loc.surveyTypeOpenText;
       default:
         return type;
     }

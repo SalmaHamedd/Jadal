@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/team_cubit.dart';
@@ -47,13 +48,13 @@ class TeamPickerField extends StatelessWidget {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          'تعذر تحميل الفرق: ${state.message}',
+                          context.loc.teamLoadListFailed(state.message),
                           style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
                         ),
                       ),
                       TextButton(
                         onPressed: () => context.read<TeamCubit>().loadTeams(),
-                        child: const Text('إعادة المحاولة', style: TextStyle(fontFamily: 'Cairo')),
+                        child: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
                       ),
                     ],
                   ),
@@ -66,9 +67,9 @@ class TeamPickerField extends StatelessWidget {
                       color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Text(
-                      'لا توجد فرق متاحة لك بعد',
-                      style: TextStyle(fontFamily: 'Cairo', fontSize: 13),
+                    child: Text(
+                      context.loc.teamNoneAvailableForYou,
+                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 13),
                     ),
                   );
                 }
@@ -97,8 +98,8 @@ class TeamPickerField extends StatelessWidget {
                         ),
                         subtitle: Text(
                           [
-                            '${team.membersCount} أعضاء',
-                            if (team.leaderName != null) 'القائد: ${team.leaderName}',
+                            context.loc.teamMembersCountShort(team.membersCount),
+                            if (team.leaderName != null) context.loc.teamLeaderLabel(team.leaderName!),
                           ].join(' • '),
                           style: const TextStyle(fontFamily: 'Cairo', fontSize: 11.5),
                         ),

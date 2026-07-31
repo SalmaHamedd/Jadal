@@ -49,6 +49,8 @@
   "emailEmpty": "Please enter your email",
   "checkYourEmail": "Check your email",
   "ok": "OK",
+  "logout": "Logout",
+  "logoutConfirmMessage": "Are you sure you want to log out?",
   "permissionsRequiredTitle": "Permissions required",
   "permissionsRequiredBody": "Jadal needs camera, microphone, and Bluetooth access to work properly during live debates.",
   "openSettings": "Open settings",
@@ -172,6 +174,381 @@
   "navSearch": "Search",
   "navProfile": "Profile",
   "searchTitle": "Search",
+
+  "drawerAnalysis": "Your analysis",
+  "drawerFrameworks": "Frameworks in the system",
+  "drawerSurveys": "Surveys",
+  "drawerMyComplaints": "My Complaints",
+  "drawerTrainerSurveys": "Trainer Surveys",
+  "drawerMyTeams": "My Teams",
+  "drawerJoinTeam": "Join a Team",
+  "drawerContactUs": "Contact us",
+
+  "profileStatistics": "Statistics",
+  "profileTeamAnalysis": "Team analysis",
+  "profilePrepAttendance": "Prep attendance",
+  "profileAttendance": "Attendance",
+
+  "editProfileChooseSource": "Choose source",
+  "editProfileCamera": "Camera",
+  "editProfileGallery": "Gallery",
+  "cameraPermissionRequired": "Camera permission required",
+  "profileUpdatedSuccess": "Profile updated successfully",
+  "avatarUpdated": "Avatar updated",
+  "fieldName": "Name",
+  "fieldPhone": "Phone",
+  "fieldLocation": "Location",
+  "fieldBirthDate": "Birth date",
+  "notSet": "Not set",
+  "saveChanges": "Save Changes",
+  "userAchievementsTitle": "{name} — Achievements",
+  "@userAchievementsTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "noAchievementsYet": "No achievements yet",
+  "userDebatesTitle": "{name} — Debates",
+  "@userDebatesTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "latestDebates": "Latest debates",
+  "showAll": "Show all",
+  "noDebatesYet": "No debates yet",
+  "achievements": "Achievements",
+
+  "surveyDetailsTitle": "Survey",
+  "surveyNoneAvailable": "No surveys currently available",
+  "surveyAnswerAllQuestions": "Please answer all questions before submitting",
+  "surveySubmittedSuccess": "Your answers were submitted successfully",
+  "surveySubmitAnswers": "Submit answers",
+  "surveyAlreadyAnsweredMessage": "You've already answered this survey",
+  "surveyClosedMessage": "This survey is closed and no longer accepts answers",
+  "trainerSurveysTitle": "My Team's Surveys",
+  "surveyNewSurvey": "New survey",
+  "trainerSurveyNoneYet": "You haven't created any surveys for your team yet",
+  "surveyDeleteTitle": "Delete survey",
+  "surveyDeleteConfirmBody": "Are you sure you want to delete this survey? This can't be undone, and all its responses will be lost.",
+  "surveyDeletedMsg": "Survey deleted",
+  "surveyDetailsHeaderTitle": "Survey Details",
+  "surveyStatusOpen": "Open",
+  "surveyStatusClosed": "Closed",
+  "surveyClosesOnDate": "Closes on {date}",
+  "@surveyClosesOnDate": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "surveyQuestionsHeader": "Questions",
+  "surveyNoQuestionsYet": "No questions for this survey yet",
+  "surveyTypeRating": "Numeric rating",
+  "surveyTypeMcq": "Multiple choice",
+  "surveyTypeOpenText": "Open answer",
+  "surveyResultsTitle": "Survey Results",
+  "surveyNoResponsesYet": "No responses to this survey yet",
+  "surveyTotalResponsesLabel": "Total responses: {count}",
+  "@surveyTotalResponsesLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyAnswersSummary": "Answers summary",
+  "surveyResponsesCountLabel": "Responses ({count})",
+  "@surveyResponsesCountLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyNoAnswersYet": "No answers to this question yet",
+  "surveyAverageLabel": "Average: {avg} / {max} ({count} responses)",
+  "@surveyAverageLabel": {
+    "placeholders": {
+      "avg": { "type": "String" },
+      "max": { "type": "String" },
+      "count": { "type": "String" }
+    }
+  },
+  "surveyTextAnswersCount": "{count} text answers (see below)",
+  "@surveyTextAnswersCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyTargetTeams": "Target teams",
+  "surveyChooseAtLeastOneTeam": "Choose at least one team",
+  "surveyCloseDateOptional": "Closing date (optional)",
+  "surveyNoCloseDate": "No closing date",
+  "surveyQuestionsRequiredLabel": "Questions *",
+  "surveyQuestionsHint": "At least one question required. The survey can't be edited after it's created, so review your questions before submitting.",
+  "surveyCreateButton": "Create survey",
+  "surveyTitleField": "Survey title",
+  "surveyTitleRequired": "Title is required",
+  "surveyDescriptionOptional": "Description (optional)",
+  "surveyAddAtLeastOneTeam": "Add at least one team",
+  "surveyAddAtLeastOneQuestion": "Add at least one question — participants can't answer a survey with no questions",
+  "surveyCompleteAllQuestionText": "Complete the text of every question before saving",
+  "surveyMcqNeedsTwoOptions": "Multiple-choice questions need at least two options",
+  "surveyCreatedSuccess": "Survey created successfully",
+  "surveyPartialSuccess": "The survey was created, but its questions couldn't be saved: {message}. Surveys can't be edited after creation, so it will stay without questions — you may prefer to create a new one instead.",
+  "@surveyPartialSuccess": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "surveyClosesInDays": "Closes in {days} days",
+  "@surveyClosesInDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "surveyClosesInHours": "Closes in {hours} hours",
+  "@surveyClosesInHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "surveyClosesSoon": "Closing soon",
+  "surveyAnsweredChip": "Answered",
+  "surveyWriteAnswerHint": "Write your answer here...",
+  "surveyAddQuestion": "Add question",
+  "surveyQuestionNumber": "Question {number}",
+  "@surveyQuestionNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "surveyQuestionTextHint": "Question text",
+  "surveyQuestionTypeLabel": "Question type",
+  "surveyMinValue": "Minimum",
+  "surveyMaxValue": "Maximum",
+  "surveyStepValue": "Step",
+  "surveyOptionsMinTwo": "Options (at least two)",
+  "surveyOptionHint": "Option {number}",
+  "@surveyOptionHint": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "surveyAddOption": "Add option",
+
+  "complaintNewComplaint": "New complaint",
+  "complaintNoneYet": "You haven't filed any complaints yet",
+  "complaintStatusOpen": "Under review",
+  "complaintStatusResolved": "Resolved",
+  "complaintStatusRejected": "Rejected",
+  "complaintStatusClosed": "Closed",
+  "complaintDebateFallback": "Debate #{id}",
+  "@complaintDebateFallback": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "complaintAdminResponseLabel": "Admin response",
+  "complaintChooseDebate": "Choose the debate this complaint is about",
+  "complaintDescriptionLabel": "Complaint description",
+  "complaintDescriptionRequired": "Complaint description is required",
+  "complaintDescriptionHint": "Explain the issue in detail...",
+  "complaintSubmitButton": "Submit complaint",
+  "complaintSubmittedSuccess": "Complaint submitted successfully",
+  "complaintDebateFieldLabel": "Debate",
+  "debateSearchHint": "Search for a debate by title...",
+  "debateSearchFailed": "Search failed: {error}",
+  "@debateSearchFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "teamSearchHint": "Search for a team by name...",
+  "teamNoneAvailableToJoin": "No teams currently available to join",
+  "teamLeaveDialogTitle": "Leave team",
+  "teamLeaveDialogBody": "A leave request will be sent to the team's trainer for approval. Continue?",
+  "teamReasonOptionalHint": "Reason (optional)",
+  "teamSendRequestButton": "Send request",
+  "teamJoinDialogTitle": "Join the team",
+  "teamJoinDialogBody": "A join request will be sent to the team's trainer for approval. Continue?",
+  "teamRoleLeader": "Team leader",
+  "teamRoleTrainer": "Trainer",
+  "teamRoleMember": "Member",
+  "teamJoinedDateLabel": "Joined on",
+  "teamLeftDateLabel": "Left on",
+  "teamTrainerLabel": "Trainer",
+  "teamMembersCountLabel": "Members",
+  "teamInfoTitle": "Team Info",
+  "teamLeaveRequestPendingMsg": "Leave request sent. Awaiting the trainer's approval",
+  "teamLeaveRequestSentMsg": "Leave request sent",
+  "teamJoinRequestPendingMsg": "Join request sent. Awaiting the trainer's approval",
+  "teamJoinRequestSentMsg": "Join request sent",
+  "teamMembersHeader": "Members",
+  "teamNoMembersYet": "This team has no members yet",
+  "teamLeaveTeamAction": "Leave team",
+  "teamJoinTeamAction": "Join the team",
+  "teamChipLeft": "Left the team",
+  "teamChipCurrentMember": "Current member",
+  "teamChipActive": "Team active",
+  "teamChipInactive": "Team inactive",
+  "teamForbiddenMsg": "You don't have permission to view this team's details",
+  "teamNotFoundMsg": "This team doesn't exist",
+  "teamAuthRequiredMsg": "Please sign in to view this team's details",
+  "teamLoadFailedMsg": "Couldn't load this team's details right now",
+  "teamDeactivateTitle": "Deactivate team",
+  "teamDeactivateConfirmBody": "Are you sure you want to deactivate this team?",
+  "teamCancelButton": "Cancel",
+  "teamDeactivateConfirmButton": "Deactivate",
+  "teamRemoveMemberTitle": "Remove member",
+  "teamRemoveMemberBody": "Remove {name} from the team?",
+  "@teamRemoveMemberBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamRemoveButton": "Remove",
+  "teamAcceptLeaveRequestTitle": "Accept leave request",
+  "teamRejectLeaveRequestTitle": "Reject leave request",
+  "teamLeaveRequestAcceptBody": "{name} will leave the team immediately. Continue?",
+  "@teamLeaveRequestAcceptBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamLeaveRequestRejectBody": "{name} will remain a member of the team. Reject this request?",
+  "@teamLeaveRequestRejectBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamAcceptJoinRequestTitle": "Accept join request",
+  "teamRejectJoinRequestTitle": "Reject join request",
+  "teamJoinRequestAcceptBody": "{name} will join the team immediately. Continue?",
+  "@teamJoinRequestAcceptBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamJoinRequestRejectBody": "{name} will not join the team. Reject this request?",
+  "@teamJoinRequestRejectBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamAcceptButton": "Accept",
+  "teamRejectButton": "Reject",
+  "teamAddMembers": "Add members",
+  "teamAddCount": "Add ({count})",
+  "@teamAddCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamDeactivatedMsg": "Team deactivated",
+  "teamStatusActive": "Active",
+  "teamStatusInactive": "Inactive",
+  "teamLeaderLabel": "Leader: {name}",
+  "@teamLeaderLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamJoinRequestsHeader": "Join requests ({count})",
+  "@teamJoinRequestsHeader": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamLeaveRequestsHeader": "Leave requests ({count})",
+  "@teamLeaveRequestsHeader": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamMembersHeaderCount": "Members ({count})",
+  "@teamMembersHeaderCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamDragToReorderHint": "Drag the handle to change priority",
+  "teamRequestedOnDate": "Requested on {date}",
+  "@teamRequestedOnDate": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "teamNewTeamTitle": "New team",
+  "teamAddAtLeastTwoMembers": "Add at least two members",
+  "teamChooseLeader": "Choose a team leader",
+  "teamCreatedSuccess": "Team created successfully",
+  "teamNameField": "Team name",
+  "teamNameRequired": "Team name is required",
+  "teamAddMembersHint": "Add at least two members, then choose the team's leader among them",
+  "teamLeaderSuffix": "{name} (leader)",
+  "@teamLeaderSuffix": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamCreateButton": "Create team",
+  "teamNoneYet": "No teams yet",
+  "teamMembersCountShort": "{count} members",
+  "@teamMembersCountShort": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "userSearchHint": "Search by name...",
+  "teamLoadListFailed": "Couldn't load teams: {message}",
+  "@teamLoadListFailed": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "teamNoneAvailableForYou": "No teams available to you yet",
+
+  "statsTitle": "Statistics",
+  "statsTitleWithName": "{name} · Statistics",
+  "@statsTitleWithName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsNothingToExport": "Nothing to export yet",
+  "statsShareText": "Jadal debate analysis sheet",
+  "statsShareSubject": "Jadal debate analysis",
+  "statsExportFailed": "Export failed: {error}",
+  "@statsExportFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "statsExportTooltip": "Export sheet",
+  "statsKindWinRate": "Win rate",
+  "statsKindAvgScore": "Avg score",
+  "statsKindBestSpeaker": "Best speaker",
+  "statsKindRanking": "Ranking",
+  "statsKindImprovement": "Improvement",
+  "statsKindActivity": "Activity",
+  "statsSomethingWrong": "Something went wrong",
+  "statsWinRateTitle": "Win rate",
+  "statsAvgScoreTitle": "Average score",
+  "statsBestSpeakerTitle": "Best-speaker rate",
+  "statsDebatesCount": "{count} debates",
+  "@statsDebatesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsCouldNotUpdateFilters": "Could not update with these filters",
+  "statsTopOfJadal": "Top of Jadal",
+  "statsScopeDebaters": "Debaters",
+  "statsScopeTeams": "Teams",
+  "statsMetricPoints": "Points",
+  "statsNoEntriesYet": "No entries yet",
+  "statsTeamAnalysisTitle": "Team analysis",
+  "statsTeamAnalysisTitleWithName": "{name} · Team analysis",
+  "@statsTeamAnalysisTitleWithName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsAveragedAcrossTeams": "Averaged across your teams",
+  "statsTeamsCount": "{count} teams",
+  "@statsTeamsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsAvgImprovement": "Avg improvement",
+  "statsAvgWinRate": "Avg win rate",
+  "statsAvgMemberActivity": "Avg member activity",
+  "statsAttendanceSubtitleDebater": "How often you actually join your prep room",
+  "statsAttendanceSubtitleTrainer": "How often you attend your team's debates",
+  "statsAttendanceSubtitleJudge": "How often you attend debates you're assigned to",
+  "statsAttendanceTitle": "{name} · Attendance",
+  "@statsAttendanceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsOverallPercent": "{percent}% overall",
+  "@statsOverallPercent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "statsAttendedCount": "{attended}/{selected} attended",
+  "@statsAttendedCount": {
+    "placeholders": { "attended": { "type": "int" }, "selected": { "type": "int" } }
+  },
+  "statsRegisteredNotHeldAgainst": "Registered {count} times — selection is the admin's call, not held against you.",
+  "@statsRegisteredNotHeldAgainst": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsFrameworksTitle": "Frameworks",
+  "filterStatusScheduled": "Scheduled",
+  "filterStatusAnnounced": "Announced",
+  "filterStatusSidesSelected": "Sides selected",
+  "filterStatusLive": "Live",
+  "filterStatusCompleted": "Completed",
+  "filterStatusCancelled": "Cancelled",
+  "filterFormatFallback": "Format {id}",
+  "@filterFormatFallback": {
+    "placeholders": { "id": { "type": "String" } }
+  },
+  "filterDebatesTitle": "Filter debates",
+  "filterLabelStatus": "Status",
+  "filterLabelFormat": "Format",
+  "filterLabelMotionFramework": "Motion framework",
+  "filterLabelDebateTag": "Debate tag",
+  "filterLabelJudge": "Judge",
+  "filterLabelTeam": "Team",
+  "filterLabelUser": "User",
+  "filterSearchUsersHint": "Search users…",
+  "filterClearButton": "Clear",
+  "filterApplyButton": "Apply",
+  "filterArticlesTitle": "Filter articles",
+  "filterLabelCategory": "Category",
+  "filterLabelTag": "Tag",
+  "filterLabelPublisher": "Publisher",
+  "filterSearchAuthorsHint": "Search authors…",
+  "filterLikedByMe": "Liked by me",
+  "filterNoneAvailable": "None available",
+  "filterDateRangeLabel": "Date range",
+  "filterFromLabel": "From",
+  "filterToLabel": "To",
 
   "mutedSpeakingTitle": "Your mic is off",
   "mutedSpeakingBody": "You seem to be talking, but no one can hear you.",

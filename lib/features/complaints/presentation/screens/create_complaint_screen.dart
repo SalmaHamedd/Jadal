@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -56,7 +57,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_debateId == null) {
-      JadalSnackBar.show(context, 'اختر المناظرة المتعلقة بالشكوى', type: SnackBarType.warning);
+      JadalSnackBar.show(context, context.loc.complaintChooseDebate, type: SnackBarType.warning);
       return;
     }
     context.read<CreateComplaintCubit>().submit(
@@ -73,9 +74,9 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text(
-              'شكوى جديدة',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            title: Text(
+              context.loc.complaintNewComplaint,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -84,7 +85,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
           body: BlocConsumer<CreateComplaintCubit, CreateComplaintState>(
             listener: (context, state) {
               if (state is CreateComplaintSuccess) {
-                JadalSnackBar.show(context, 'تم تقديم الشكوى بنجاح', type: SnackBarType.success);
+                JadalSnackBar.show(context, context.loc.complaintSubmittedSuccess, type: SnackBarType.success);
                 Navigator.pop(context, true);
               } else if (state is CreateComplaintError) {
                 JadalSnackBar.show(context, state.message, type: SnackBarType.error);
@@ -102,7 +103,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'المناظرة',
+                        context.loc.complaintDebateFieldLabel,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -148,7 +149,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                         ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'وصف الشكوى',
+                        context.loc.complaintDescriptionLabel,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -165,10 +166,11 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                           color:
                               isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'وصف الشكوى مطلوب' : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? context.loc.complaintDescriptionRequired
+                            : null,
                         decoration: InputDecoration(
-                          hintText: 'اشرح المشكلة بالتفصيل...',
+                          hintText: context.loc.complaintDescriptionHint,
                           hintStyle:
                               TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
                           filled: true,
@@ -203,9 +205,9 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                                     color: Colors.white,
                                   ),
                                 )
-                              : const Text(
-                                  'تقديم الشكوى',
-                                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                              : Text(
+                                  context.loc.complaintSubmitButton,
+                                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
                                 ),
                         ),
                       ),

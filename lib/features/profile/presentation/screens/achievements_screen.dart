@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
@@ -53,7 +54,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('${widget.userName} — Achievements',
+          title: Text(context.loc.userAchievementsTitle(widget.userName),
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -63,7 +64,10 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
             : _items.isEmpty && _error != null
                 ? Center(child: Text(_error!, style: const TextStyle(fontFamily: 'Cairo')))
                 : _items.isEmpty
-                    ? const Center(child: Text('No achievements yet', style: TextStyle(fontFamily: 'Cairo')))
+                    ? Center(
+                        child: Text(context.loc.noAchievementsYet,
+                            style: const TextStyle(fontFamily: 'Cairo')),
+                      )
                     : NotificationListener<ScrollNotification>(
                         onNotification: (n) {
                           if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) _loadMore();

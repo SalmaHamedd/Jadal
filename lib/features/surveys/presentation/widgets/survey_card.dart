@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_status_chip.dart';
@@ -10,14 +11,14 @@ class SurveyCard extends StatelessWidget {
 
   const SurveyCard({super.key, required this.survey, required this.onTap});
 
-  String _formatCloses(DateTime? date) {
-    if (date == null) return 'بدون موعد إغلاق';
+  String _formatCloses(BuildContext context, DateTime? date) {
+    if (date == null) return context.loc.surveyNoCloseDate;
     final now = DateTime.now();
     final diff = date.difference(now);
-    if (diff.isNegative) return 'مغلق';
-    if (diff.inDays >= 1) return 'يغلق خلال ${diff.inDays} يوم';
-    if (diff.inHours >= 1) return 'يغلق خلال ${diff.inHours} ساعة';
-    return 'يغلق قريباً';
+    if (diff.isNegative) return context.loc.surveyStatusClosed;
+    if (diff.inDays >= 1) return context.loc.surveyClosesInDays(diff.inDays);
+    if (diff.inHours >= 1) return context.loc.surveyClosesInHours(diff.inHours);
+    return context.loc.surveyClosesSoon;
   }
 
   @override
@@ -95,13 +96,13 @@ class SurveyCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   SurveyStatusChip(
-                    label: closed ? 'مغلق' : _formatCloses(survey.closesAt),
+                    label: closed ? context.loc.surveyStatusClosed : _formatCloses(context, survey.closesAt),
                     color: closed ? JadalColors.judgesGrey : JadalColors.primaryBlue,
                     icon: closed ? Icons.lock_clock_outlined : Icons.schedule,
                   ),
                   if (responded)
-                    const SurveyStatusChip(
-                      label: 'تمت الإجابة',
+                    SurveyStatusChip(
+                      label: context.loc.surveyAnsweredChip,
                       color: JadalColors.positiveGreen,
                       icon: Icons.check_circle_outline,
                     ),

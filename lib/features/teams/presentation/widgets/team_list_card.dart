@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
 
@@ -61,8 +62,8 @@ class TeamListCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       [
-                        '${team.membersCount} أعضاء',
-                        if (team.leaderName != null) 'القائد: ${team.leaderName}',
+                        context.loc.teamMembersCountShort(team.membersCount),
+                        if (team.leaderName != null) context.loc.teamLeaderLabel(team.leaderName!),
                       ].join(' • '),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -86,7 +87,7 @@ class TeamListCard extends StatelessWidget {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  team.isActive ? 'نشط' : 'غير نشط',
+                  team.isActive ? context.loc.teamStatusActive : context.loc.teamStatusInactive,
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontSize: 11,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
@@ -26,8 +27,8 @@ class PublicStatsScreen extends StatelessWidget {
             StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: const Text('Top of Jadal',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(context.loc.statsTopOfJadal,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
         ),
         body: const JadalGradientBackground(child: _Body()),
       ),
@@ -81,7 +82,9 @@ class _ScopeSwitch extends StatelessWidget {
           for (final scope in LeaderboardScope.values)
             Expanded(
               child: _ScopeButton(
-                label: scope == LeaderboardScope.debaters ? 'Debaters' : 'Teams',
+                label: scope == LeaderboardScope.debaters
+                    ? context.loc.statsScopeDebaters
+                    : context.loc.statsScopeTeams,
                 icon: scope == LeaderboardScope.debaters
                     ? Icons.person_rounded
                     : Icons.groups_rounded,
@@ -151,12 +154,12 @@ class _MetricChips extends StatelessWidget {
   final ValueChanged<LeaderboardMetric> onChanged;
   const _MetricChips({required this.state, required this.onChanged});
 
-  static String _label(LeaderboardMetric m) => switch (m) {
-        LeaderboardMetric.points => 'Points',
-        LeaderboardMetric.winRate => 'Win rate',
-        LeaderboardMetric.avgScore => 'Avg score',
-        LeaderboardMetric.bestSpeaker => 'Best speaker',
-        LeaderboardMetric.improvement => 'Improvement',
+  static String _label(BuildContext context, LeaderboardMetric m) => switch (m) {
+        LeaderboardMetric.points => context.loc.statsMetricPoints,
+        LeaderboardMetric.winRate => context.loc.statsKindWinRate,
+        LeaderboardMetric.avgScore => context.loc.statsKindAvgScore,
+        LeaderboardMetric.bestSpeaker => context.loc.statsKindBestSpeaker,
+        LeaderboardMetric.improvement => context.loc.statsKindImprovement,
       };
 
   @override
@@ -171,7 +174,7 @@ class _MetricChips extends StatelessWidget {
         itemBuilder: (context, i) {
           final metric = metrics[i];
           return StatsChip(
-            label: _label(metric),
+            label: _label(context, metric),
             selected: metric == state.metric,
             onTap: () => onChanged(metric),
           );
@@ -195,7 +198,7 @@ class _Board extends StatelessWidget {
             const Icon(Icons.error_outline_rounded, size: 44, color: JadalColors.judgesGrey),
             const SizedBox(height: 10),
             Text(
-              state.error ?? 'Something went wrong',
+              state.error ?? context.loc.statsSomethingWrong,
               textAlign: TextAlign.center,
               style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
             ),
@@ -203,7 +206,7 @@ class _Board extends StatelessWidget {
             OutlinedButton.icon(
               onPressed: context.read<LeaderboardCubit>().load,
               icon: const Icon(Icons.refresh_rounded),
-              label: const Text('Retry', style: TextStyle(fontFamily: 'Cairo')),
+              label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),
@@ -217,7 +220,7 @@ class _Board extends StatelessWidget {
       return StatsCard(
         child: Center(
           child: Text(
-            'No entries yet',
+            context.loc.statsNoEntriesYet,
             style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textSecondary(context)),
           ),
         ),

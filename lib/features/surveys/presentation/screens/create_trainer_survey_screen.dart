@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -74,13 +75,13 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_teamIds.isEmpty) {
-      JadalSnackBar.show(context, 'أضف فريقاً واحداً على الأقل', type: SnackBarType.warning);
+      JadalSnackBar.show(context, context.loc.surveyAddAtLeastOneTeam, type: SnackBarType.warning);
       return;
     }
     if (_questions.isEmpty) {
       JadalSnackBar.show(
         context,
-        'أضف سؤالاً واحداً على الأقل — لا يمكن للمشاركين الإجابة على استطلاع بلا أسئلة',
+        context.loc.surveyAddAtLeastOneQuestion,
         type: SnackBarType.warning,
       );
       return;
@@ -88,13 +89,13 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
     final cleanedQuestions = _questions.map((q) => q.cleaned).toList();
     for (final q in cleanedQuestions) {
       if (q.questionText.isEmpty) {
-        JadalSnackBar.show(context, 'أكمل نص كل الأسئلة قبل الحفظ', type: SnackBarType.warning);
+        JadalSnackBar.show(context, context.loc.surveyCompleteAllQuestionText, type: SnackBarType.warning);
         return;
       }
       if (q.type == 'mcq' && q.mcqOptions.length < 2) {
         JadalSnackBar.show(
           context,
-          'أسئلة الاختيار من متعدد تحتاج خيارين على الأقل',
+          context.loc.surveyMcqNeedsTwoOptions,
           type: SnackBarType.warning,
         );
         return;
@@ -119,9 +120,9 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
         child: Scaffold(
           backgroundColor: Colors.transparent,
           appBar: AppBar(
-            title: const Text(
-              'استطلاع جديد',
-              style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            title: Text(
+              context.loc.surveyNewSurvey,
+              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -130,14 +131,12 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
           body: BlocConsumer<CreateTrainerSurveyCubit, CreateTrainerSurveyState>(
             listener: (context, state) {
               if (state is CreateTrainerSurveySuccess) {
-                JadalSnackBar.show(context, 'تم إنشاء الاستطلاع بنجاح', type: SnackBarType.success);
+                JadalSnackBar.show(context, context.loc.surveyCreatedSuccess, type: SnackBarType.success);
                 Navigator.pop(context, true);
               } else if (state is CreateTrainerSurveyPartialSuccess) {
                 JadalSnackBar.show(
                   context,
-                  'تم إنشاء الاستطلاع لكن تعذر حفظ الأسئلة: ${state.message}. '
-                  'لا يمكن تعديل الاستطلاعات بعد إنشائها، لذا سيبقى بلا أسئلة. '
-                  'يُفضّل إنشاء استطلاع جديد بدلاً منه.',
+                  context.loc.surveyPartialSuccess(state.message),
                   type: SnackBarType.error,
                 );
               } else if (state is CreateTrainerSurveyError) {
@@ -156,22 +155,22 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       AuthTextField(
-                        label: 'عنوان الاستطلاع',
+                        label: context.loc.surveyTitleField,
                         icon: Icons.title,
                         controller: _titleController,
                         validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'العنوان مطلوب' : null,
+                            (v == null || v.trim().isEmpty) ? context.loc.surveyTitleRequired : null,
                       ),
                       SizedBox(height: context.hp(2)),
                       AuthTextField(
-                        label: 'الوصف (اختياري)',
+                        label: context.loc.surveyDescriptionOptional,
                         icon: Icons.description_outlined,
                         controller: _descriptionController,
                         textInputAction: TextInputAction.newline,
                       ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'الفرق المستهدفة',
+                        context.loc.surveyTargetTeams,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -181,7 +180,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'اختر فريقاً واحداً على الأقل',
+                        context.loc.surveyChooseAtLeastOneTeam,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
@@ -199,7 +198,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                       ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'موعد الإغلاق (اختياري)',
+                        context.loc.surveyCloseDateOptional,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -228,7 +227,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                                 child: Text(
                                   _closesAt != null
                                       ? _formatDateTime(_closesAt!)
-                                      : 'بدون موعد إغلاق',
+                                      : context.loc.surveyNoCloseDate,
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     color: isDark
@@ -248,7 +247,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                       ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'الأسئلة *',
+                        context.loc.surveyQuestionsRequiredLabel,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -258,8 +257,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'مطلوب سؤال واحد على الأقل. لا يمكن تعديل الاستطلاع بعد إنشائه، '
-                        'فتأكد من مراجعة الأسئلة قبل الإرسال',
+                        context.loc.surveyQuestionsHint,
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 12,
@@ -273,7 +271,7 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                       ),
                       SizedBox(height: context.hp(4)),
                       AuthButton(
-                        text: 'إنشاء الاستطلاع',
+                        text: context.loc.surveyCreateButton,
                         isLoading: submitting,
                         onPressed: submitting ? null : () => _submit(context),
                       ),

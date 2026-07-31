@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/filter_dialog_pieces.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
@@ -71,8 +72,8 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Filter articles',
-                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
+                  Text(context.loc.filterArticlesTitle,
+                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                 ],
               ),
@@ -82,7 +83,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       MultiSelectChipGroup(
-                        title: 'Category',
+                        title: context.loc.filterLabelCategory,
                         options: _categories,
                         loading: _loading,
                         selected: _filter.categoryIds.map((e) => '$e').toSet(),
@@ -91,7 +92,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Tag',
+                        title: context.loc.filterLabelTag,
                         options: _tags,
                         loading: _loading,
                         selected: _filter.tagIds.map((e) => '$e').toSet(),
@@ -100,8 +101,8 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       SearchableMultiSelect(
-                        title: 'Publisher',
-                        hint: 'Search authors…',
+                        title: context.loc.filterLabelPublisher,
+                        hint: context.loc.filterSearchAuthorsHint,
                         onSearch: _searchAuthors,
                         selectedLabels: _selectedPublisher,
                         onChanged: (m) => setState(() {
@@ -115,7 +116,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                       const SizedBox(height: 8),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: const Text('Liked by me', style: TextStyle(fontFamily: 'Cairo', fontSize: 13)),
+                        title: Text(context.loc.filterLikedByMe, style: const TextStyle(fontFamily: 'Cairo', fontSize: 13)),
                         value: _filter.likedByMe,
                         activeThumbColor: JadalColors.primaryOrange,
                         onChanged: (v) => setState(() => _filter = _filter.copyWith(likedByMe: v)),
@@ -133,7 +134,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                         _filter = const BlogSearchFilter();
                         _selectedPublisher = {};
                       }),
-                      child: const Text('Clear', style: TextStyle(fontFamily: 'Cairo')),
+                      child: Text(context.loc.filterClearButton, style: const TextStyle(fontFamily: 'Cairo')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -141,7 +142,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: JadalColors.primaryOrange),
                       onPressed: () => Navigator.pop(context, _filter),
-                      child: const Text('Apply', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+                      child: Text(context.loc.filterApplyButton, style: const TextStyle(fontFamily: 'Cairo', color: Colors.white)),
                     ),
                   ),
                 ],

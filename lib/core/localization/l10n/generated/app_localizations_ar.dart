@@ -150,6 +150,12 @@ class AppLocalizationsAr extends AppLocalizations {
   String get ok => 'حسناً';
 
   @override
+  String get logout => 'تسجيل الخروج';
+
+  @override
+  String get logoutConfirmMessage => 'هل أنت متأكد أنك تريد تسجيل الخروج؟';
+
+  @override
   String get permissionsRequiredTitle => 'الأذونات مطلوبة';
 
   @override
@@ -495,6 +501,846 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get searchTitle => 'البحث';
+
+  @override
+  String get drawerAnalysis => 'تحليلك';
+
+  @override
+  String get drawerFrameworks => 'الأطر الموجودة في النظام';
+
+  @override
+  String get drawerSurveys => 'الاستطلاعات';
+
+  @override
+  String get drawerMyComplaints => 'شكاواي';
+
+  @override
+  String get drawerTrainerSurveys => 'استطلاعات المدرب';
+
+  @override
+  String get drawerMyTeams => 'فرقي';
+
+  @override
+  String get drawerJoinTeam => 'انضم إلى فريق';
+
+  @override
+  String get drawerContactUs => 'تواصل معنا';
+
+  @override
+  String get profileStatistics => 'الإحصائيات';
+
+  @override
+  String get profileTeamAnalysis => 'تحليل الفريق';
+
+  @override
+  String get profilePrepAttendance => 'حضور التحضير';
+
+  @override
+  String get profileAttendance => 'الحضور';
+
+  @override
+  String get editProfileChooseSource => 'اختر المصدر';
+
+  @override
+  String get editProfileCamera => 'الكاميرا';
+
+  @override
+  String get editProfileGallery => 'معرض الصور';
+
+  @override
+  String get cameraPermissionRequired => 'إذن الكاميرا مطلوب';
+
+  @override
+  String get profileUpdatedSuccess => 'تم تحديث الملف الشخصي بنجاح';
+
+  @override
+  String get avatarUpdated => 'تم تحديث الصورة الشخصية';
+
+  @override
+  String get fieldName => 'الاسم';
+
+  @override
+  String get fieldPhone => 'الهاتف';
+
+  @override
+  String get fieldLocation => 'الموقع';
+
+  @override
+  String get fieldBirthDate => 'تاريخ الميلاد';
+
+  @override
+  String get notSet => 'غير محدد';
+
+  @override
+  String get saveChanges => 'حفظ التغييرات';
+
+  @override
+  String userAchievementsTitle(String name) {
+    return 'إنجازات $name';
+  }
+
+  @override
+  String get noAchievementsYet => 'لا توجد إنجازات بعد';
+
+  @override
+  String userDebatesTitle(String name) {
+    return 'مناظرات $name';
+  }
+
+  @override
+  String get latestDebates => 'أحدث المناظرات';
+
+  @override
+  String get showAll => 'عرض الكل';
+
+  @override
+  String get noDebatesYet => 'لا توجد مناظرات بعد';
+
+  @override
+  String get achievements => 'الإنجازات';
+
+  @override
+  String get surveyDetailsTitle => 'الاستطلاع';
+
+  @override
+  String get surveyNoneAvailable => 'لا توجد استطلاعات حالياً';
+
+  @override
+  String get surveyAnswerAllQuestions =>
+      'يرجى الإجابة على جميع الأسئلة قبل الإرسال';
+
+  @override
+  String get surveySubmittedSuccess => 'تم تقديم إجاباتك بنجاح';
+
+  @override
+  String get surveySubmitAnswers => 'إرسال الإجابات';
+
+  @override
+  String get surveyAlreadyAnsweredMessage =>
+      'لقد قمت بالإجابة على هذا الاستطلاع من قبل';
+
+  @override
+  String get surveyClosedMessage => 'هذا الاستطلاع مغلق ولا يقبل إجابات جديدة';
+
+  @override
+  String get trainerSurveysTitle => 'استطلاعات فريقي';
+
+  @override
+  String get surveyNewSurvey => 'استطلاع جديد';
+
+  @override
+  String get trainerSurveyNoneYet => 'لم تنشئ أي استطلاعات لفريقك بعد';
+
+  @override
+  String get surveyDeleteTitle => 'حذف الاستطلاع';
+
+  @override
+  String get surveyDeleteConfirmBody =>
+      'هل أنت متأكد من حذف هذا الاستطلاع؟ لا يمكن التراجع عن هذا الإجراء، وستفقد جميع الردود المرتبطة به.';
+
+  @override
+  String get surveyDeletedMsg => 'تم حذف الاستطلاع';
+
+  @override
+  String get surveyDetailsHeaderTitle => 'تفاصيل الاستطلاع';
+
+  @override
+  String get surveyStatusOpen => 'مفتوح';
+
+  @override
+  String get surveyStatusClosed => 'مغلق';
+
+  @override
+  String surveyClosesOnDate(String date) {
+    return 'ينتهي في $date';
+  }
+
+  @override
+  String get surveyQuestionsHeader => 'الأسئلة';
+
+  @override
+  String get surveyNoQuestionsYet => 'لا توجد أسئلة لهذا الاستطلاع بعد';
+
+  @override
+  String get surveyTypeRating => 'تقييم رقمي';
+
+  @override
+  String get surveyTypeMcq => 'اختيار من متعدد';
+
+  @override
+  String get surveyTypeOpenText => 'إجابة مفتوحة';
+
+  @override
+  String get surveyResultsTitle => 'نتائج الاستطلاع';
+
+  @override
+  String get surveyNoResponsesYet => 'لا توجد ردود على هذا الاستطلاع بعد';
+
+  @override
+  String surveyTotalResponsesLabel(int count) {
+    return 'إجمالي الردود: $count';
+  }
+
+  @override
+  String get surveyAnswersSummary => 'ملخص الإجابات';
+
+  @override
+  String surveyResponsesCountLabel(int count) {
+    return 'الردود ($count)';
+  }
+
+  @override
+  String get surveyNoAnswersYet => 'لا توجد إجابات على هذا السؤال بعد';
+
+  @override
+  String surveyAverageLabel(String avg, String max, String count) {
+    return 'المتوسط: $avg / $max ($count رداً)';
+  }
+
+  @override
+  String surveyTextAnswersCount(int count) {
+    return '$count إجابة نصية (انظر أدناه)';
+  }
+
+  @override
+  String get surveyTargetTeams => 'الفرق المستهدفة';
+
+  @override
+  String get surveyChooseAtLeastOneTeam => 'اختر فريقاً واحداً على الأقل';
+
+  @override
+  String get surveyCloseDateOptional => 'موعد الإغلاق (اختياري)';
+
+  @override
+  String get surveyNoCloseDate => 'بدون موعد إغلاق';
+
+  @override
+  String get surveyQuestionsRequiredLabel => 'الأسئلة *';
+
+  @override
+  String get surveyQuestionsHint =>
+      'مطلوب سؤال واحد على الأقل. لا يمكن تعديل الاستطلاع بعد إنشائه، فتأكد من مراجعة الأسئلة قبل الإرسال';
+
+  @override
+  String get surveyCreateButton => 'إنشاء الاستطلاع';
+
+  @override
+  String get surveyTitleField => 'عنوان الاستطلاع';
+
+  @override
+  String get surveyTitleRequired => 'العنوان مطلوب';
+
+  @override
+  String get surveyDescriptionOptional => 'الوصف (اختياري)';
+
+  @override
+  String get surveyAddAtLeastOneTeam => 'أضف فريقاً واحداً على الأقل';
+
+  @override
+  String get surveyAddAtLeastOneQuestion =>
+      'أضف سؤالاً واحداً على الأقل — لا يمكن للمشاركين الإجابة على استطلاع بلا أسئلة';
+
+  @override
+  String get surveyCompleteAllQuestionText => 'أكمل نص كل الأسئلة قبل الحفظ';
+
+  @override
+  String get surveyMcqNeedsTwoOptions =>
+      'أسئلة الاختيار من متعدد تحتاج خيارين على الأقل';
+
+  @override
+  String get surveyCreatedSuccess => 'تم إنشاء الاستطلاع بنجاح';
+
+  @override
+  String surveyPartialSuccess(String message) {
+    return 'تم إنشاء الاستطلاع لكن تعذر حفظ الأسئلة: $message. لا يمكن تعديل الاستطلاعات بعد إنشائها، لذا سيبقى بلا أسئلة. يُفضّل إنشاء استطلاع جديد بدلاً منه.';
+  }
+
+  @override
+  String surveyClosesInDays(int days) {
+    return 'يغلق خلال $days يوم';
+  }
+
+  @override
+  String surveyClosesInHours(int hours) {
+    return 'يغلق خلال $hours ساعة';
+  }
+
+  @override
+  String get surveyClosesSoon => 'يغلق قريباً';
+
+  @override
+  String get surveyAnsweredChip => 'تمت الإجابة';
+
+  @override
+  String get surveyWriteAnswerHint => 'اكتب إجابتك هنا...';
+
+  @override
+  String get surveyAddQuestion => 'إضافة سؤال';
+
+  @override
+  String surveyQuestionNumber(int number) {
+    return 'سؤال $number';
+  }
+
+  @override
+  String get surveyQuestionTextHint => 'نص السؤال';
+
+  @override
+  String get surveyQuestionTypeLabel => 'نوع السؤال';
+
+  @override
+  String get surveyMinValue => 'الحد الأدنى';
+
+  @override
+  String get surveyMaxValue => 'الحد الأقصى';
+
+  @override
+  String get surveyStepValue => 'الخطوة';
+
+  @override
+  String get surveyOptionsMinTwo => 'الخيارات (حد أدنى خياران)';
+
+  @override
+  String surveyOptionHint(int number) {
+    return 'خيار $number';
+  }
+
+  @override
+  String get surveyAddOption => 'إضافة خيار';
+
+  @override
+  String get complaintNewComplaint => 'شكوى جديدة';
+
+  @override
+  String get complaintNoneYet => 'لم تقدم أي شكاوى بعد';
+
+  @override
+  String get complaintStatusOpen => 'قيد المراجعة';
+
+  @override
+  String get complaintStatusResolved => 'تم الحل';
+
+  @override
+  String get complaintStatusRejected => 'مرفوضة';
+
+  @override
+  String get complaintStatusClosed => 'مغلقة';
+
+  @override
+  String complaintDebateFallback(int id) {
+    return 'مناظرة #$id';
+  }
+
+  @override
+  String get complaintAdminResponseLabel => 'رد الإدارة';
+
+  @override
+  String get complaintChooseDebate => 'اختر المناظرة المتعلقة بالشكوى';
+
+  @override
+  String get complaintDescriptionLabel => 'وصف الشكوى';
+
+  @override
+  String get complaintDescriptionRequired => 'وصف الشكوى مطلوب';
+
+  @override
+  String get complaintDescriptionHint => 'اشرح المشكلة بالتفصيل...';
+
+  @override
+  String get complaintSubmitButton => 'تقديم الشكوى';
+
+  @override
+  String get complaintSubmittedSuccess => 'تم تقديم الشكوى بنجاح';
+
+  @override
+  String get complaintDebateFieldLabel => 'المناظرة';
+
+  @override
+  String get debateSearchHint => 'ابحث عن المناظرة بعنوانها...';
+
+  @override
+  String debateSearchFailed(String error) {
+    return 'تعذر البحث: $error';
+  }
+
+  @override
+  String get teamSearchHint => 'ابحث عن فريق بالاسم...';
+
+  @override
+  String get teamNoneAvailableToJoin => 'لا توجد فرق متاحة للانضمام حالياً';
+
+  @override
+  String get teamLeaveDialogTitle => 'مغادرة الفريق';
+
+  @override
+  String get teamLeaveDialogBody =>
+      'سيُرسل طلب مغادرة إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟';
+
+  @override
+  String get teamReasonOptionalHint => 'السبب (اختياري)';
+
+  @override
+  String get teamSendRequestButton => 'إرسال الطلب';
+
+  @override
+  String get teamJoinDialogTitle => 'الانضمام إلى الفريق';
+
+  @override
+  String get teamJoinDialogBody =>
+      'سيُرسل طلب انضمام إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟';
+
+  @override
+  String get teamRoleLeader => 'قائد الفريق';
+
+  @override
+  String get teamRoleTrainer => 'مدرب';
+
+  @override
+  String get teamRoleMember => 'عضو';
+
+  @override
+  String get teamJoinedDateLabel => 'تاريخ الانضمام';
+
+  @override
+  String get teamLeftDateLabel => 'تاريخ المغادرة';
+
+  @override
+  String get teamTrainerLabel => 'المدرب';
+
+  @override
+  String get teamMembersCountLabel => 'عدد الأعضاء';
+
+  @override
+  String get teamInfoTitle => 'معلومات الفريق';
+
+  @override
+  String get teamLeaveRequestPendingMsg =>
+      'تم إرسال طلب المغادرة. في انتظار موافقة المدرب';
+
+  @override
+  String get teamLeaveRequestSentMsg => 'تم إرسال طلب المغادرة';
+
+  @override
+  String get teamJoinRequestPendingMsg =>
+      'تم إرسال طلب الانضمام. في انتظار موافقة المدرب';
+
+  @override
+  String get teamJoinRequestSentMsg => 'تم إرسال طلب الانضمام';
+
+  @override
+  String get teamMembersHeader => 'الأعضاء';
+
+  @override
+  String get teamNoMembersYet => 'لا يوجد أعضاء في هذا الفريق';
+
+  @override
+  String get teamLeaveTeamAction => 'مغادرة الفريق';
+
+  @override
+  String get teamJoinTeamAction => 'الانضمام إلى الفريق';
+
+  @override
+  String get teamChipLeft => 'غادرت الفريق';
+
+  @override
+  String get teamChipCurrentMember => 'عضو حالي';
+
+  @override
+  String get teamChipActive => 'الفريق نشط';
+
+  @override
+  String get teamChipInactive => 'الفريق غير نشط';
+
+  @override
+  String get teamForbiddenMsg => 'ليست لديك صلاحية لعرض تفاصيل هذا الفريق';
+
+  @override
+  String get teamNotFoundMsg => 'هذا الفريق غير موجود';
+
+  @override
+  String get teamAuthRequiredMsg => 'يرجى تسجيل الدخول لعرض تفاصيل الفريق';
+
+  @override
+  String get teamLoadFailedMsg => 'تعذر تحميل تفاصيل هذا الفريق حالياً';
+
+  @override
+  String get teamDeactivateTitle => 'إلغاء تفعيل الفريق';
+
+  @override
+  String get teamDeactivateConfirmBody =>
+      'هل أنت متأكد من إلغاء تفعيل هذا الفريق؟';
+
+  @override
+  String get teamCancelButton => 'إلغاء';
+
+  @override
+  String get teamDeactivateConfirmButton => 'إلغاء التفعيل';
+
+  @override
+  String get teamRemoveMemberTitle => 'إزالة عضو';
+
+  @override
+  String teamRemoveMemberBody(String name) {
+    return 'هل تريد إزالة $name من الفريق؟';
+  }
+
+  @override
+  String get teamRemoveButton => 'إزالة';
+
+  @override
+  String get teamAcceptLeaveRequestTitle => 'قبول طلب المغادرة';
+
+  @override
+  String get teamRejectLeaveRequestTitle => 'رفض طلب المغادرة';
+
+  @override
+  String teamLeaveRequestAcceptBody(String name) {
+    return 'سيغادر $name الفريق فوراً. هل تريد المتابعة؟';
+  }
+
+  @override
+  String teamLeaveRequestRejectBody(String name) {
+    return 'سيبقى $name عضواً في الفريق. هل تريد رفض الطلب؟';
+  }
+
+  @override
+  String get teamAcceptJoinRequestTitle => 'قبول طلب الانضمام';
+
+  @override
+  String get teamRejectJoinRequestTitle => 'رفض طلب الانضمام';
+
+  @override
+  String teamJoinRequestAcceptBody(String name) {
+    return 'سينضم $name إلى الفريق فوراً. هل تريد المتابعة؟';
+  }
+
+  @override
+  String teamJoinRequestRejectBody(String name) {
+    return 'لن ينضم $name إلى الفريق. هل تريد رفض الطلب؟';
+  }
+
+  @override
+  String get teamAcceptButton => 'قبول';
+
+  @override
+  String get teamRejectButton => 'رفض';
+
+  @override
+  String get teamAddMembers => 'إضافة أعضاء';
+
+  @override
+  String teamAddCount(int count) {
+    return 'إضافة ($count)';
+  }
+
+  @override
+  String get teamDeactivatedMsg => 'تم إلغاء تفعيل الفريق';
+
+  @override
+  String get teamStatusActive => 'نشط';
+
+  @override
+  String get teamStatusInactive => 'غير نشط';
+
+  @override
+  String teamLeaderLabel(String name) {
+    return 'القائد: $name';
+  }
+
+  @override
+  String teamJoinRequestsHeader(int count) {
+    return 'طلبات الانضمام ($count)';
+  }
+
+  @override
+  String teamLeaveRequestsHeader(int count) {
+    return 'طلبات المغادرة ($count)';
+  }
+
+  @override
+  String teamMembersHeaderCount(int count) {
+    return 'الأعضاء ($count)';
+  }
+
+  @override
+  String get teamDragToReorderHint => 'اسحب مقبض الترتيب لتغيير الأولوية';
+
+  @override
+  String teamRequestedOnDate(String date) {
+    return 'طلب في $date';
+  }
+
+  @override
+  String get teamNewTeamTitle => 'فريق جديد';
+
+  @override
+  String get teamAddAtLeastTwoMembers => 'أضف عضوين على الأقل';
+
+  @override
+  String get teamChooseLeader => 'اختر قائداً للفريق';
+
+  @override
+  String get teamCreatedSuccess => 'تم إنشاء الفريق بنجاح';
+
+  @override
+  String get teamNameField => 'اسم الفريق';
+
+  @override
+  String get teamNameRequired => 'اسم الفريق مطلوب';
+
+  @override
+  String get teamAddMembersHint =>
+      'أضف عضوين على الأقل، ثم اختر قائد الفريق من بينهم';
+
+  @override
+  String teamLeaderSuffix(String name) {
+    return '$name (قائد)';
+  }
+
+  @override
+  String get teamCreateButton => 'إنشاء الفريق';
+
+  @override
+  String get teamNoneYet => 'لا توجد فرق بعد';
+
+  @override
+  String teamMembersCountShort(int count) {
+    return '$count أعضاء';
+  }
+
+  @override
+  String get userSearchHint => 'ابحث بالاسم...';
+
+  @override
+  String teamLoadListFailed(String message) {
+    return 'تعذر تحميل الفرق: $message';
+  }
+
+  @override
+  String get teamNoneAvailableForYou => 'لا توجد فرق متاحة لك بعد';
+
+  @override
+  String get statsTitle => 'الإحصائيات';
+
+  @override
+  String statsTitleWithName(String name) {
+    return '$name · الإحصائيات';
+  }
+
+  @override
+  String get statsNothingToExport => 'لا يوجد شيء لتصديره بعد';
+
+  @override
+  String get statsShareText => 'ملف تحليل مناظرات جدل';
+
+  @override
+  String get statsShareSubject => 'تحليل مناظرات جدل';
+
+  @override
+  String statsExportFailed(String error) {
+    return 'فشل التصدير: $error';
+  }
+
+  @override
+  String get statsExportTooltip => 'تصدير الملف';
+
+  @override
+  String get statsKindWinRate => 'نسبة الفوز';
+
+  @override
+  String get statsKindAvgScore => 'متوسط النتيجة';
+
+  @override
+  String get statsKindBestSpeaker => 'أفضل متحدث';
+
+  @override
+  String get statsKindRanking => 'الترتيب';
+
+  @override
+  String get statsKindImprovement => 'التحسن';
+
+  @override
+  String get statsKindActivity => 'النشاط';
+
+  @override
+  String get statsSomethingWrong => 'حدث خطأ ما';
+
+  @override
+  String get statsWinRateTitle => 'نسبة الفوز';
+
+  @override
+  String get statsAvgScoreTitle => 'متوسط النتيجة';
+
+  @override
+  String get statsBestSpeakerTitle => 'نسبة أفضل متحدث';
+
+  @override
+  String statsDebatesCount(int count) {
+    return '$count مناظرة';
+  }
+
+  @override
+  String get statsCouldNotUpdateFilters => 'تعذر التحديث بهذه الفلاتر';
+
+  @override
+  String get statsTopOfJadal => 'الأوائل في جدل';
+
+  @override
+  String get statsScopeDebaters => 'المناظرون';
+
+  @override
+  String get statsScopeTeams => 'الفرق';
+
+  @override
+  String get statsMetricPoints => 'النقاط';
+
+  @override
+  String get statsNoEntriesYet => 'لا توجد نتائج بعد';
+
+  @override
+  String get statsTeamAnalysisTitle => 'تحليل الفريق';
+
+  @override
+  String statsTeamAnalysisTitleWithName(String name) {
+    return '$name · تحليل الفريق';
+  }
+
+  @override
+  String get statsAveragedAcrossTeams => 'المتوسط عبر فرقك';
+
+  @override
+  String statsTeamsCount(int count) {
+    return '$count فرق';
+  }
+
+  @override
+  String get statsAvgImprovement => 'متوسط التحسن';
+
+  @override
+  String get statsAvgWinRate => 'متوسط نسبة الفوز';
+
+  @override
+  String get statsAvgMemberActivity => 'متوسط نشاط الأعضاء';
+
+  @override
+  String get statsAttendanceSubtitleDebater =>
+      'عدد مرات حضورك الفعلي لغرفة التحضير';
+
+  @override
+  String get statsAttendanceSubtitleTrainer => 'عدد مرات حضورك لمناظرات فريقك';
+
+  @override
+  String get statsAttendanceSubtitleJudge =>
+      'عدد مرات حضورك للمناظرات المكلف بها';
+
+  @override
+  String statsAttendanceTitle(String name) {
+    return '$name · الحضور';
+  }
+
+  @override
+  String statsOverallPercent(int percent) {
+    return '$percent% إجمالاً';
+  }
+
+  @override
+  String statsAttendedCount(int attended, int selected) {
+    return '$attended/$selected حضور';
+  }
+
+  @override
+  String statsRegisteredNotHeldAgainst(int count) {
+    return 'تم تسجيلك $count مرة — الاختيار قرار الإدارة، ولا يُحسب عليك.';
+  }
+
+  @override
+  String get statsFrameworksTitle => 'الأطر';
+
+  @override
+  String get filterStatusScheduled => 'مجدولة';
+
+  @override
+  String get filterStatusAnnounced => 'معلنة';
+
+  @override
+  String get filterStatusSidesSelected => 'تم اختيار الفرق';
+
+  @override
+  String get filterStatusLive => 'مباشرة';
+
+  @override
+  String get filterStatusCompleted => 'منتهية';
+
+  @override
+  String get filterStatusCancelled => 'ملغاة';
+
+  @override
+  String filterFormatFallback(String id) {
+    return 'صيغة $id';
+  }
+
+  @override
+  String get filterDebatesTitle => 'تصفية المناظرات';
+
+  @override
+  String get filterLabelStatus => 'الحالة';
+
+  @override
+  String get filterLabelFormat => 'الصيغة';
+
+  @override
+  String get filterLabelMotionFramework => 'إطار القرار';
+
+  @override
+  String get filterLabelDebateTag => 'وسم المناظرة';
+
+  @override
+  String get filterLabelJudge => 'الحكم';
+
+  @override
+  String get filterLabelTeam => 'الفريق';
+
+  @override
+  String get filterLabelUser => 'المستخدم';
+
+  @override
+  String get filterSearchUsersHint => 'ابحث عن مستخدمين…';
+
+  @override
+  String get filterClearButton => 'مسح';
+
+  @override
+  String get filterApplyButton => 'تطبيق';
+
+  @override
+  String get filterArticlesTitle => 'تصفية المقالات';
+
+  @override
+  String get filterLabelCategory => 'التصنيف';
+
+  @override
+  String get filterLabelTag => 'الوسم';
+
+  @override
+  String get filterLabelPublisher => 'الناشر';
+
+  @override
+  String get filterSearchAuthorsHint => 'ابحث عن كتّاب…';
+
+  @override
+  String get filterLikedByMe => 'أعجبتني';
+
+  @override
+  String get filterNoneAvailable => 'لا يوجد شيء متاح';
+
+  @override
+  String get filterDateRangeLabel => 'النطاق الزمني';
+
+  @override
+  String get filterFromLabel => 'من';
+
+  @override
+  String get filterToLabel => 'إلى';
 
   @override
   String get mutedSpeakingTitle => 'الميكروفون مغلق';

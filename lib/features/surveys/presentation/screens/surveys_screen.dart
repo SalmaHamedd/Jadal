@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/survey_repository_impl.dart';
@@ -18,9 +19,9 @@ class SurveysScreen extends StatelessWidget {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text(
-            'الاستطلاعات',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+          title: Text(
+            context.loc.drawerSurveys,
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -39,7 +40,7 @@ class SurveysScreen extends StatelessWidget {
                 final surveys = state.surveys;
                 if (surveys.isEmpty) {
                   return SurveyEmptyState(
-                    message: 'لا توجد استطلاعات حالياً',
+                    message: context.loc.surveyNoneAvailable,
                     onRefresh: () => context.read<SurveyCubit>().loadSurveys(),
                   );
                 }

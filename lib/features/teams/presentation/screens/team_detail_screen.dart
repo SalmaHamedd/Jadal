@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -28,24 +29,24 @@ class TeamDetailScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'إلغاء تفعيل الفريق',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        title: Text(
+          context.loc.teamDeactivateTitle,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
-        content: const Text(
-          'هل أنت متأكد من إلغاء تفعيل هذا الفريق؟',
-          style: TextStyle(fontFamily: 'Cairo'),
+        content: Text(
+          context.loc.teamDeactivateConfirmBody,
+          style: const TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'إلغاء التفعيل',
-              style: TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
+            child: Text(
+              context.loc.teamDeactivateConfirmButton,
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -58,24 +59,24 @@ class TeamDetailScreen extends StatelessWidget {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
-        title: const Text(
-          'إزالة عضو',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        title: Text(
+          context.loc.teamRemoveMemberTitle,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
         content: Text(
-          'هل تريد إزالة $name من الفريق؟',
+          context.loc.teamRemoveMemberBody(name),
           style: const TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'إزالة',
-              style: TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
+            child: Text(
+              context.loc.teamRemoveButton,
+              style: const TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
             ),
           ),
         ],
@@ -90,24 +91,24 @@ class TeamDetailScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          accept ? 'قبول طلب المغادرة' : 'رفض طلب المغادرة',
+          accept ? context.loc.teamAcceptLeaveRequestTitle : context.loc.teamRejectLeaveRequestTitle,
           style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
         content: Text(
           accept
-              ? 'سيغادر $name الفريق فوراً. هل تريد المتابعة؟'
-              : 'سيبقى $name عضواً في الفريق. هل تريد رفض الطلب؟',
+              ? context.loc.teamLeaveRequestAcceptBody(name)
+              : context.loc.teamLeaveRequestRejectBody(name),
           style: const TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
-              accept ? 'قبول' : 'رفض',
+              accept ? context.loc.teamAcceptButton : context.loc.teamRejectButton,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 color: accept ? JadalColors.positiveGreen : Colors.red,
@@ -131,24 +132,24 @@ class TeamDetailScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          accept ? 'قبول طلب الانضمام' : 'رفض طلب الانضمام',
+          accept ? context.loc.teamAcceptJoinRequestTitle : context.loc.teamRejectJoinRequestTitle,
           style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
         content: Text(
           accept
-              ? 'سينضم $name إلى الفريق فوراً. هل تريد المتابعة؟'
-              : 'لن ينضم $name إلى الفريق. هل تريد رفض الطلب؟',
+              ? context.loc.teamJoinRequestAcceptBody(name)
+              : context.loc.teamJoinRequestRejectBody(name),
           style: const TextStyle(fontFamily: 'Cairo'),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
-              accept ? 'قبول' : 'رفض',
+              accept ? context.loc.teamAcceptButton : context.loc.teamRejectButton,
               style: TextStyle(
                 fontFamily: 'Cairo',
                 color: accept ? JadalColors.positiveGreen : Colors.red,
@@ -190,7 +191,7 @@ class TeamDetailScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'إضافة أعضاء',
+                      sheetContext.loc.teamAddMembers,
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w800,
@@ -223,7 +224,7 @@ class TeamDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text('إضافة (${picked.length})',
+                        child: Text(sheetContext.loc.teamAddCount(picked.length),
                             style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700)),
                       ),
                     ),
@@ -250,7 +251,7 @@ class TeamDetailScreen extends StatelessWidget {
             JadalSnackBar.show(context, state.error!, type: SnackBarType.error);
           }
           if (state.deactivated) {
-            JadalSnackBar.show(context, 'تم إلغاء تفعيل الفريق', type: SnackBarType.success);
+            JadalSnackBar.show(context, context.loc.teamDeactivatedMsg, type: SnackBarType.success);
             Navigator.pop(context, true);
           }
         },
@@ -272,7 +273,7 @@ class TeamDetailScreen extends StatelessWidget {
                 actions: [
                   if (team.isActive)
                     IconButton(
-                      tooltip: 'إلغاء تفعيل الفريق',
+                      tooltip: context.loc.teamDeactivateTitle,
                       icon: state.busy
                           ? const SizedBox(
                               height: 18,
@@ -295,9 +296,9 @@ class TeamDetailScreen extends StatelessWidget {
                 backgroundColor: JadalColors.primaryOrange,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.person_add_alt_1_rounded),
-                label: const Text(
-                  'إضافة أعضاء',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                label: Text(
+                  context.loc.teamAddMembers,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
                 ),
                 onPressed: () => _openAddMembersSheet(context),
               ),
@@ -316,12 +317,12 @@ class TeamDetailScreen extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _StatusChip(
-                          label: team.isActive ? 'نشط' : 'غير نشط',
+                          label: team.isActive ? context.loc.teamStatusActive : context.loc.teamStatusInactive,
                           color: team.isActive ? JadalColors.positiveGreen : JadalColors.judgesGrey,
                         ),
                         if (team.leader != null)
                           _StatusChip(
-                            label: 'القائد: ${team.leader!.name}',
+                            label: context.loc.teamLeaderLabel(team.leader!.name),
                             color: JadalColors.primaryBlue,
                           ),
                       ],
@@ -329,7 +330,7 @@ class TeamDetailScreen extends StatelessWidget {
                     if (state.joinRequests.isNotEmpty) ...[
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'طلبات الانضمام (${state.joinRequests.length})',
+                        context.loc.teamJoinRequestsHeader(state.joinRequests.length),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -364,7 +365,7 @@ class TeamDetailScreen extends StatelessWidget {
                     if (state.leaveRequests.isNotEmpty) ...[
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        'طلبات المغادرة (${state.leaveRequests.length})',
+                        context.loc.teamLeaveRequestsHeader(state.leaveRequests.length),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontWeight: FontWeight.w700,
@@ -398,7 +399,7 @@ class TeamDetailScreen extends StatelessWidget {
                     ],
                     SizedBox(height: context.hp(2.5)),
                     Text(
-                      'الأعضاء (${team.members.length})',
+                      context.loc.teamMembersHeaderCount(team.members.length),
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontWeight: FontWeight.w700,
@@ -408,7 +409,7 @@ class TeamDetailScreen extends StatelessWidget {
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      'اسحب مقبض الترتيب لتغيير الأولوية',
+                      context.loc.teamDragToReorderHint,
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 12,
@@ -421,7 +422,7 @@ class TeamDetailScreen extends StatelessWidget {
                         padding: const EdgeInsets.symmetric(vertical: 24),
                         child: Center(
                           child: Text(
-                            'لا يوجد أعضاء في هذا الفريق',
+                            context.loc.teamNoMembersYet,
                             style: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
                           ),
                         ),
@@ -557,7 +558,7 @@ class _JoinRequestTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.name ?? 'عضو',
+                      user?.name ?? context.loc.teamRoleMember,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -570,7 +571,7 @@ class _JoinRequestTile extends StatelessWidget {
                     ),
                     if (request.requestedAt != null)
                       Text(
-                        'طلب في ${_formatDate(request.requestedAt!)}',
+                        context.loc.teamRequestedOnDate(_formatDate(request.requestedAt!)),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 11,
@@ -601,9 +602,9 @@ class _JoinRequestTile extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onReject,
                   icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
-                  label: const Text(
-                    'رفض',
-                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
+                  label: Text(
+                    context.loc.teamRejectButton,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
@@ -617,9 +618,9 @@ class _JoinRequestTile extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: busy ? null : onAccept,
                   icon: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
-                  label: const Text(
-                    'قبول',
-                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
+                  label: Text(
+                    context.loc.teamAcceptButton,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: JadalColors.positiveGreen,
@@ -693,7 +694,7 @@ class _LeaveRequestTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      user?.name ?? 'عضو',
+                      user?.name ?? context.loc.teamRoleMember,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
@@ -706,7 +707,7 @@ class _LeaveRequestTile extends StatelessWidget {
                     ),
                     if (request.requestedAt != null)
                       Text(
-                        'طلب في ${_formatDate(request.requestedAt!)}',
+                        context.loc.teamRequestedOnDate(_formatDate(request.requestedAt!)),
                         style: TextStyle(
                           fontFamily: 'Cairo',
                           fontSize: 11,
@@ -737,9 +738,9 @@ class _LeaveRequestTile extends StatelessWidget {
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onReject,
                   icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
-                  label: const Text(
-                    'رفض',
-                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
+                  label: Text(
+                    context.loc.teamRejectButton,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
@@ -753,9 +754,9 @@ class _LeaveRequestTile extends StatelessWidget {
                 child: ElevatedButton.icon(
                   onPressed: busy ? null : onAccept,
                   icon: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
-                  label: const Text(
-                    'قبول',
-                    style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
+                  label: Text(
+                    context.loc.teamAcceptButton,
+                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: JadalColors.positiveGreen,
@@ -858,7 +859,7 @@ class _MemberTile extends StatelessWidget {
           ),
           if (!isLeader && onRemove != null)
             IconButton(
-              tooltip: 'إزالة',
+              tooltip: context.loc.teamRemoveButton,
               icon: const Icon(Icons.person_remove_outlined, color: Colors.red, size: 20),
               onPressed: onRemove,
             ),

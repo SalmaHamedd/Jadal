@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
@@ -160,7 +161,7 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
         color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
       ),
       decoration: InputDecoration(
-        hintText: 'اكتب إجابتك هنا...',
+        hintText: context.loc.surveyWriteAnswerHint,
         hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
         filled: true,
         fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,

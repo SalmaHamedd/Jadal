@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../data/models/attendance_stat_model.dart';
@@ -57,10 +58,10 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
     );
   }
 
-  String get _subtitle => switch (widget.role) {
-        AttendanceRole.debater => 'How often you actually join your prep room',
-        AttendanceRole.trainer => 'How often you attend your team\'s debates',
-        AttendanceRole.judge => 'How often you attend debates you\'re assigned to',
+  String _subtitle(BuildContext context) => switch (widget.role) {
+        AttendanceRole.debater => context.loc.statsAttendanceSubtitleDebater,
+        AttendanceRole.trainer => context.loc.statsAttendanceSubtitleTrainer,
+        AttendanceRole.judge => context.loc.statsAttendanceSubtitleJudge,
       };
 
   @override
@@ -70,7 +71,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
           StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text('${widget.userName} · Attendance',
+        title: Text(context.loc.statsAttendanceTitle(widget.userName),
             style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
       ),
       body: JadalGradientBackground(
@@ -87,7 +88,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                               textAlign: TextAlign.center,
                               style: const TextStyle(fontFamily: 'Cairo')),
                           const SizedBox(height: 12),
-                          OutlinedButton(onPressed: _load, child: const Text('Retry')),
+                          OutlinedButton(onPressed: _load, child: Text(context.loc.retry)),
                         ],
                       ),
                     ),
@@ -95,7 +96,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                 : ListView(
                     padding: const EdgeInsets.all(16),
                     children: [
-                      Text(_subtitle,
+                      Text(_subtitle(context),
                           style: TextStyle(
                               fontFamily: 'Cairo', color: StatsTheme.textSecondary(context))),
                       const SizedBox(height: 16),
@@ -114,7 +115,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
-                                  '${((_stat?.rate ?? 0) * 100).round()}% overall',
+                                  context.loc.statsOverallPercent(((_stat?.rate ?? 0) * 100).round()),
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontWeight: FontWeight.w800,
@@ -129,7 +130,8 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                                     borderRadius: BorderRadius.circular(20),
                                   ),
                                   child: Text(
-                                    '${_stat?.attendedTotal ?? 0}/${_stat?.selectedTotal ?? 0} attended',
+                                    context.loc.statsAttendedCount(
+                                        _stat?.attendedTotal ?? 0, _stat?.selectedTotal ?? 0),
                                     style: const TextStyle(
                                       fontFamily: 'Cairo',
                                       fontWeight: FontWeight.w800,
@@ -144,8 +146,7 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
                               Padding(
                                 padding: const EdgeInsets.only(top: 4),
                                 child: Text(
-                                  'Registered ${_stat!.registered} times — selection is the '
-                                  "admin's call, not held against you.",
+                                  context.loc.statsRegisteredNotHeldAgainst(_stat!.registered),
                                   style: TextStyle(
                                     fontFamily: 'Cairo',
                                     fontSize: 11,

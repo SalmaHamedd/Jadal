@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
@@ -78,15 +79,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     final source = await showDialog<ImageSource>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Choose source'),
+        title: Text(context.loc.editProfileChooseSource),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, ImageSource.camera),
-            child: const Text('Camera'),
+            child: Text(context.loc.editProfileCamera),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, ImageSource.gallery),
-            child: const Text('Gallery'),
+            child: Text(context.loc.editProfileGallery),
           ),
         ],
       ),
@@ -99,7 +100,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final requested = await Permission.camera.request();
         if (!requested.isGranted) {
           if (!mounted) return;
-          JadalSnackBar.show(context, 'Camera permission required', type: SnackBarType.error);
+          JadalSnackBar.show(context, context.loc.cameraPermissionRequired, type: SnackBarType.error);
           return;
         }
       }
@@ -123,7 +124,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           bloc: _cubit,
           listener: (context, state) {
             if (state is EditProfileSuccess) {
-              JadalSnackBar.show(context, 'Profile updated successfully', type: SnackBarType.success);
+              JadalSnackBar.show(context, context.loc.profileUpdatedSuccess, type: SnackBarType.success);
               Navigator.pop(context, state.updatedProfile);
             } else if (state is EditProfileError) {
               JadalSnackBar.show(context, state.message, type: SnackBarType.error);
@@ -131,7 +132,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               setState(() {
                 _avatarUrl = state.newAvatarUrl;
               });
-              JadalSnackBar.show(context, 'Avatar updated', type: SnackBarType.success);
+              JadalSnackBar.show(context, context.loc.avatarUpdated, type: SnackBarType.success);
             }
           },
           builder: (context, state) {
@@ -176,19 +177,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         ),
                         SizedBox(height: context.hp(4)),
                         AuthTextField(
-                          label: 'Name',
+                          label: context.loc.fieldName,
                           icon: Icons.person,
                           controller: _nameController,
                         ),
                         SizedBox(height: context.hp(2)),
                         AuthTextField(
-                          label: 'Phone',
+                          label: context.loc.fieldPhone,
                           icon: Icons.phone,
                           controller: _phoneController,
                         ),
                         SizedBox(height: context.hp(2)),
                         AuthTextField(
-                          label: 'Location',
+                          label: context.loc.fieldLocation,
                           icon: Icons.location_on_outlined,
                           controller: _locationController,
                         ),
@@ -196,17 +197,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                         InkWell(
                           onTap: _pickBirthDate,
                           child: InputDecorator(
-                            decoration: const InputDecoration(
-                              labelText: 'Birth date',
-                              prefixIcon: Icon(Icons.cake_outlined),
-                              border: OutlineInputBorder(),
+                            decoration: InputDecoration(
+                              labelText: context.loc.fieldBirthDate,
+                              prefixIcon: const Icon(Icons.cake_outlined),
+                              border: const OutlineInputBorder(),
                             ),
-                            child: Text(_birthDate != null ? _formatDate(_birthDate!) : 'Not set'),
+                            child: Text(
+                              _birthDate != null ? _formatDate(_birthDate!) : context.loc.notSet,
+                            ),
                           ),
                         ),
                         SizedBox(height: context.hp(3)),
                         AuthButton(
-                          text: 'Save Changes',
+                          text: context.loc.saveChanges,
                           onPressed: () {
                             _cubit.updateProfile(
                               name: _nameController.text.trim(),

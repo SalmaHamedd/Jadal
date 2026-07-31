@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 
 /// The loading / error / empty placeholders shared by every survey list and
@@ -26,7 +27,7 @@ class SurveyErrorView extends StatelessWidget {
           const Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
           const SizedBox(height: 16),
           Text(
-            'حدث خطأ: $message',
+            context.loc.errorWithMessage(message),
             style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
             textAlign: TextAlign.center,
           ),
@@ -39,7 +40,7 @@ class SurveyErrorView extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
-            child: const Text('إعادة المحاولة'),
+            child: Text(context.loc.retry),
           ),
         ],
       ),

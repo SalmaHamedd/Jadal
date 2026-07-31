@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/trainer_survey_repository_impl.dart';
@@ -25,9 +26,9 @@ class TrainerSurveysScreen extends StatelessWidget {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: AppBar(
-                title: const Text(
-                  'استطلاعات فريقي',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                title: Text(
+                  context.loc.trainerSurveysTitle,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -37,9 +38,9 @@ class TrainerSurveysScreen extends StatelessWidget {
                 backgroundColor: JadalColors.primaryOrange,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.add),
-                label: const Text(
-                  'استطلاع جديد',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                label: Text(
+                  context.loc.surveyNewSurvey,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
                 ),
                 onPressed: () async {
                   final created = await Navigator.push(
@@ -61,7 +62,7 @@ class TrainerSurveysScreen extends StatelessWidget {
                     final surveys = state.surveys;
                     if (surveys.isEmpty) {
                       return SurveyEmptyState(
-                        message: 'لم تنشئ أي استطلاعات لفريقك بعد',
+                        message: context.loc.trainerSurveyNoneYet,
                         onRefresh: () => context.read<TrainerSurveyCubit>().loadSurveys(),
                       );
                     }

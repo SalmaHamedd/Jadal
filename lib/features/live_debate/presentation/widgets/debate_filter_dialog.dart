@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/filter_dialog_pieces.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -30,13 +31,13 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
   List<FilterOption> _teams = const [];
   Map<String, String> _selectedUsers = {};
 
-  static const _statusOptions = [
-    FilterOption(id: 'scheduled', label: 'Scheduled'),
-    FilterOption(id: 'announced', label: 'Announced'),
-    FilterOption(id: 'teams-selected', label: 'Sides selected'),
-    FilterOption(id: 'live', label: 'Live'),
-    FilterOption(id: 'completed', label: 'Completed'),
-    FilterOption(id: 'cancelled', label: 'Cancelled'),
+  List<FilterOption> _statusOptions(BuildContext context) => [
+    FilterOption(id: 'scheduled', label: context.loc.filterStatusScheduled),
+    FilterOption(id: 'announced', label: context.loc.filterStatusAnnounced),
+    FilterOption(id: 'teams-selected', label: context.loc.filterStatusSidesSelected),
+    FilterOption(id: 'live', label: context.loc.filterStatusLive),
+    FilterOption(id: 'completed', label: context.loc.filterStatusCompleted),
+    FilterOption(id: 'cancelled', label: context.loc.filterStatusCancelled),
   ];
 
   @override
@@ -56,7 +57,10 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
     if (!mounted) return;
     setState(() {
       formatsRes.fold((_) {}, (list) {
-        _formats = [for (final f in list) FilterOption(id: '${f.id}', label: f.name ?? 'Format ${f.id}')];
+        _formats = [
+          for (final f in list)
+            FilterOption(id: '${f.id}', label: f.name ?? context.loc.filterFormatFallback('${f.id}')),
+        ];
       });
       frameworksRes.fold((_) {}, (list) {
         _frameworks = [for (final f in list) FilterOption(id: '${f.id}', label: f.name)];
@@ -97,8 +101,8 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  const Text('Filter debates',
-                      style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
+                  Text(context.loc.filterDebatesTitle,
+                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                 ],
               ),
@@ -108,14 +112,14 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       MultiSelectChipGroup(
-                        title: 'Status',
-                        options: _statusOptions,
+                        title: context.loc.filterLabelStatus,
+                        options: _statusOptions(context),
                         selected: _filter.status.toSet(),
                         onChanged: (s) => setState(() => _filter = _filter.copyWith(status: s.toList())),
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Format',
+                        title: context.loc.filterLabelFormat,
                         options: _formats,
                         loading: _loadingOptions,
                         selected: _filter.formatIds.map((e) => '$e').toSet(),
@@ -124,7 +128,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Motion framework',
+                        title: context.loc.filterLabelMotionFramework,
                         options: _frameworks,
                         loading: _loadingOptions,
                         selected: _filter.frameworkIds.map((e) => '$e').toSet(),
@@ -133,7 +137,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Debate tag',
+                        title: context.loc.filterLabelDebateTag,
                         options: _debateTags,
                         loading: _loadingOptions,
                         selected: _filter.debateTags.toSet(),
@@ -141,7 +145,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Judge',
+                        title: context.loc.filterLabelJudge,
                         options: _judges,
                         loading: _loadingOptions,
                         selected: _filter.judgeIds.map((e) => '$e').toSet(),
@@ -150,7 +154,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       MultiSelectChipGroup(
-                        title: 'Team',
+                        title: context.loc.filterLabelTeam,
                         options: _teams,
                         loading: _loadingOptions,
                         selected: _filter.teamIds.map((e) => '$e').toSet(),
@@ -159,8 +163,8 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                       ),
                       const SizedBox(height: 14),
                       SearchableMultiSelect(
-                        title: 'User',
-                        hint: 'Search users…',
+                        title: context.loc.filterLabelUser,
+                        hint: context.loc.filterSearchUsersHint,
                         onSearch: _searchUsers,
                         selectedLabels: _selectedUsers,
                         onChanged: (m) => setState(() {
@@ -188,7 +192,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                         _filter = const DebateSearchFilter();
                         _selectedUsers = {};
                       }),
-                      child: const Text('Clear', style: TextStyle(fontFamily: 'Cairo')),
+                      child: Text(context.loc.filterClearButton, style: const TextStyle(fontFamily: 'Cairo')),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -196,7 +200,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: JadalColors.primaryOrange),
                       onPressed: () => Navigator.pop(context, _filter),
-                      child: const Text('Apply', style: TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+                      child: Text(context.loc.filterApplyButton, style: const TextStyle(fontFamily: 'Cairo', color: Colors.white)),
                     ),
                   ),
                 ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../data/models/team_summary_model.dart';
@@ -50,7 +51,9 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
-          widget.trainerName == null ? 'Team analysis' : '${widget.trainerName} · Team analysis',
+          widget.trainerName == null
+              ? context.loc.statsTeamAnalysisTitle
+              : context.loc.statsTeamAnalysisTitleWithName(widget.trainerName!),
           style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
         ),
       ),
@@ -77,7 +80,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
               OutlinedButton.icon(
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded),
-                label: const Text('Retry', style: TextStyle(fontFamily: 'Cairo')),
+                label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
               ),
             ],
           ),
@@ -97,7 +100,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Averaged across your teams',
+                context.loc.statsAveragedAcrossTeams,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w700,
@@ -112,7 +115,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  '${stat.teamsCounted} teams',
+                  context.loc.statsTeamsCount(stat.teamsCounted),
                   style: const TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w800,
@@ -129,7 +132,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
               Expanded(
                 child: _MetricTile(
                   icon: Icons.trending_up_rounded,
-                  label: 'Avg improvement',
+                  label: context.loc.statsAvgImprovement,
                   value: '${stat.teamAvgImprovement >= 0 ? '+' : ''}'
                       '${stat.teamAvgImprovement.toStringAsFixed(1)}',
                   color: stat.teamAvgImprovement >= 0
@@ -141,7 +144,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
               Expanded(
                 child: _MetricTile(
                   icon: Icons.percent_rounded,
-                  label: 'Avg win rate',
+                  label: context.loc.statsAvgWinRate,
                   value: '${(stat.teamAvgWinRate * 100).toStringAsFixed(0)}%',
                   color: JadalColors.primaryBlue,
                 ),
@@ -154,7 +157,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
               Expanded(
                 child: _MetricTile(
                   icon: Icons.speed_rounded,
-                  label: 'Avg score',
+                  label: context.loc.statsKindAvgScore,
                   value: stat.teamAvgScore.toStringAsFixed(1),
                   color: JadalColors.primaryOrange,
                 ),
@@ -163,7 +166,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
               Expanded(
                 child: _MetricTile(
                   icon: Icons.local_fire_department_rounded,
-                  label: 'Avg member activity',
+                  label: context.loc.statsAvgMemberActivity,
                   value: '${stat.teamAvgActive >= 0 ? '+' : ''}'
                       '${stat.teamAvgActive.toStringAsFixed(1)}',
                   color: stat.teamAvgActive >= 0

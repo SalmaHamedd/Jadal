@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -87,7 +88,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(widget.userName ?? _profile?.name ?? 'Profile',
+          title: Text(widget.userName ?? _profile?.name ?? context.loc.navProfile,
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -103,7 +104,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
                         children: [
                           Text(_error!, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Cairo')),
                           const SizedBox(height: 12),
-                          OutlinedButton(onPressed: _load, child: const Text('Retry')),
+                          OutlinedButton(onPressed: _load, child: Text(context.loc.retry)),
                         ],
                       ),
                     ),
@@ -124,7 +125,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           ProfileHeaderSection(
             name: p.name,
             avatarUrl: p.avatarUrl,
-            roleLabel: _roleLabel(p.role),
+            roleLabel: _roleLabel(context, p.role),
             location: p.location,
             tenure: p.tenure,
           ),
@@ -132,7 +133,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
           AchievementsStrip(userId: p.id, userName: p.name, topAchievements: p.topAchievements),
           if (p.topAchievements.isNotEmpty) const SizedBox(height: 20),
           if (p.role == 'debater' || p.role == 'trainer') ...[
-            Text('Teams',
+            Text(context.loc.teamsSection,
                 style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w800,
@@ -153,11 +154,12 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     );
   }
 
-  String _roleLabel(String role) => switch (role) {
-        'debater' => 'Debater',
-        'judge' => 'Judge',
-        'trainer' => 'Coach', // display-only rename (§6.6) — wire value stays "trainer"
-        'admin' => 'Admin',
+  String _roleLabel(BuildContext context, String role) => switch (role) {
+        'debater' => context.loc.roleDebater,
+        'judge' => context.loc.judgeRole,
+        // Display-only rename (§6.6) — wire value stays "trainer".
+        'trainer' => context.loc.roleTrainer,
+        'admin' => context.loc.roleAdmin,
         _ => role,
       };
 }

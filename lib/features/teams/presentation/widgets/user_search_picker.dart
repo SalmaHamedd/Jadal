@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
@@ -13,13 +14,13 @@ import 'package:jadal_app/features/search/domain/repositories/search_repository.
 class UserSearchPicker extends StatefulWidget {
   final Set<int> excludeIds;
   final ValueChanged<SearchUser> onSelected;
-  final String hintText;
+  final String? hintText;
 
   const UserSearchPicker({
     super.key,
     this.excludeIds = const {},
     required this.onSelected,
-    this.hintText = 'ابحث بالاسم...',
+    this.hintText,
   });
 
   @override
@@ -90,7 +91,7 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
             color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
           ),
           decoration: InputDecoration(
-            hintText: widget.hintText,
+            hintText: widget.hintText ?? context.loc.userSearchHint,
             hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
             prefixIcon: const Icon(Icons.search),
             filled: true,
@@ -117,7 +118,7 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'تعذر البحث: $_error',
+              context.loc.debateSearchFailed(_error ?? ''),
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.negativeRed),
             ),
           )
@@ -125,7 +126,7 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
-              'لا توجد نتائج',
+              context.loc.noResults,
               style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
             ),
           )

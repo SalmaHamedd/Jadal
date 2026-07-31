@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
@@ -72,9 +73,9 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: const Text(
-            'انضم إلى فريق',
-            style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+          title: Text(
+            context.loc.drawerJoinTeam,
+            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -89,7 +90,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
                 onChanged: _onQueryChanged,
                 style: const TextStyle(fontFamily: 'Cairo'),
                 decoration: InputDecoration(
-                  hintText: 'ابحث عن فريق بالاسم...',
+                  hintText: context.loc.teamSearchHint,
                   hintStyle: const TextStyle(fontFamily: 'Cairo'),
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
@@ -123,7 +124,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
             Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
             const SizedBox(height: 16),
             Text(
-              'حدث خطأ: $_error',
+              context.loc.errorWithMessage(_error!),
               style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
               textAlign: TextAlign.center,
             ),
@@ -136,7 +137,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               ),
-              child: const Text('إعادة المحاولة'),
+              child: Text(context.loc.retry),
             ),
           ],
         ),
@@ -148,12 +149,12 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
         onRefresh: _load,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(),
-          children: const [
-            SizedBox(height: 120),
+          children: [
+            const SizedBox(height: 120),
             Center(
               child: Text(
-                'لا توجد فرق متاحة للانضمام حالياً',
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                context.loc.teamNoneAvailableToJoin,
+                style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
               ),
             ),
           ],

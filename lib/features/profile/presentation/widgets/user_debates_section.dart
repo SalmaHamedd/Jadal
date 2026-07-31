@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -34,7 +35,7 @@ class UserDebatesSection extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Latest debates',
+            Text(context.loc.latestDebates,
                 style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15, color: textColor)),
             TextButton(
               onPressed: () => Navigator.push(
@@ -43,7 +44,7 @@ class UserDebatesSection extends StatelessWidget {
                   builder: (_) => UserDebatesListScreen(userId: userId, userName: userName),
                 ),
               ),
-              child: const Text('Show all', style: TextStyle(fontFamily: 'Cairo')),
+              child: Text(context.loc.showAll, style: const TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),
@@ -76,8 +77,10 @@ class _DebateTile extends StatelessWidget {
           color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
         ),
       ),
-      subtitle: Text(item.status.wire,
-          style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey)),
+      subtitle: Text(
+        item.status.wire == 'cancelled' ? context.loc.tabCancelled : context.loc.tabDone,
+        style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
+      ),
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
@@ -136,7 +139,7 @@ class _UserDebatesListScreenState extends State<UserDebatesListScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text('${widget.userName} — Debates',
+          title: Text(context.loc.userDebatesTitle(widget.userName),
               style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -144,7 +147,7 @@ class _UserDebatesListScreenState extends State<UserDebatesListScreen> {
         body: _items.isEmpty && _loading
             ? const Center(child: CircularProgressIndicator())
             : _items.isEmpty
-                ? const Center(child: Text('No debates yet', style: TextStyle(fontFamily: 'Cairo')))
+                ? Center(child: Text(context.loc.noDebatesYet, style: const TextStyle(fontFamily: 'Cairo')))
                 : NotificationListener<ScrollNotification>(
                     onNotification: (n) {
                       if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) _loadMore();

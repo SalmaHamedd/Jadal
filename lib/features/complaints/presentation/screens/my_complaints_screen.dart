@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
@@ -60,9 +61,9 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: AppBar(
-                title: const Text(
-                  'شكاواي',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                title: Text(
+                  context.loc.drawerMyComplaints,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -72,9 +73,9 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                 backgroundColor: JadalColors.primaryOrange,
                 foregroundColor: Colors.white,
                 icon: const Icon(Icons.add),
-                label: const Text(
-                  'شكوى جديدة',
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                label: Text(
+                  context.loc.complaintNewComplaint,
+                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
                 ),
                 onPressed: () async {
                   final created = await Navigator.push(
@@ -100,12 +101,12 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                         onRefresh: () => context.read<ComplaintCubit>().loadMyComplaints(),
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
-                          children: const [
-                            SizedBox(height: 120),
+                          children: [
+                            const SizedBox(height: 120),
                             Center(
                               child: Text(
-                                'لم تقدم أي شكاوى بعد',
-                                style: TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                                context.loc.complaintNoneYet,
+                                style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
                               ),
                             ),
                           ],
@@ -132,7 +133,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                           Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
                           const SizedBox(height: 16),
                           Text(
-                            'حدث خطأ: ${state.message}',
+                            context.loc.errorWithMessage(state.message),
                             style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
                             textAlign: TextAlign.center,
                           ),
@@ -147,7 +148,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                               ),
                               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                             ),
-                            child: const Text('إعادة المحاولة'),
+                            child: Text(context.loc.retry),
                           ),
                         ],
                       ),
@@ -169,11 +170,11 @@ class _ComplaintCard extends StatelessWidget {
   final String? debateTitle;
   const _ComplaintCard({required this.complaint, this.debateTitle});
 
-  String _statusLabel() => switch (complaint.status) {
-        'open' => 'قيد المراجعة',
-        'resolved' => 'تم الحل',
-        'rejected' => 'مرفوضة',
-        'closed' => 'مغلقة',
+  String _statusLabel(BuildContext context) => switch (complaint.status) {
+        'open' => context.loc.complaintStatusOpen,
+        'resolved' => context.loc.complaintStatusResolved,
+        'rejected' => context.loc.complaintStatusRejected,
+        'closed' => context.loc.complaintStatusClosed,
         _ => complaint.status,
       };
 
@@ -221,7 +222,7 @@ class _ComplaintCard extends StatelessWidget {
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    debateTitle ?? 'مناظرة #${complaint.debateId}',
+                    debateTitle ?? context.loc.complaintDebateFallback(complaint.debateId),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: TextStyle(
@@ -239,7 +240,7 @@ class _ComplaintCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
-                    _statusLabel(),
+                    _statusLabel(context),
                     style: TextStyle(
                       fontFamily: 'Cairo',
                       fontSize: 11,
@@ -272,7 +273,7 @@ class _ComplaintCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'رد الإدارة',
+                      context.loc.complaintAdminResponseLabel,
                       style: TextStyle(
                         fontFamily: 'Cairo',
                         fontSize: 11,

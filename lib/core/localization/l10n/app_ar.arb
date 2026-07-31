@@ -46,6 +46,8 @@
   "emailEmpty": "يرجى إدخال البريد الإلكتروني",
   "checkYourEmail": "تحقق من بريدك الإلكتروني",
   "ok": "حسناً",
+  "logout": "تسجيل الخروج",
+  "logoutConfirmMessage": "هل أنت متأكد أنك تريد تسجيل الخروج؟",
   "permissionsRequiredTitle": "الأذونات مطلوبة",
   "permissionsRequiredBody": "يحتاج تطبيق جدل إلى الكاميرا والميكروفون والبلوتوث ليعمل بشكل صحيح خلال المناظرات المباشرة.",
   "openSettings": "فتح الإعدادات",
@@ -169,6 +171,381 @@
   "navSearch": "بحث",
   "navProfile": "حسابي",
   "searchTitle": "البحث",
+
+  "drawerAnalysis": "تحليلك",
+  "drawerFrameworks": "الأطر الموجودة في النظام",
+  "drawerSurveys": "الاستطلاعات",
+  "drawerMyComplaints": "شكاواي",
+  "drawerTrainerSurveys": "استطلاعات المدرب",
+  "drawerMyTeams": "فرقي",
+  "drawerJoinTeam": "انضم إلى فريق",
+  "drawerContactUs": "تواصل معنا",
+
+  "profileStatistics": "الإحصائيات",
+  "profileTeamAnalysis": "تحليل الفريق",
+  "profilePrepAttendance": "حضور التحضير",
+  "profileAttendance": "الحضور",
+
+  "editProfileChooseSource": "اختر المصدر",
+  "editProfileCamera": "الكاميرا",
+  "editProfileGallery": "معرض الصور",
+  "cameraPermissionRequired": "إذن الكاميرا مطلوب",
+  "profileUpdatedSuccess": "تم تحديث الملف الشخصي بنجاح",
+  "avatarUpdated": "تم تحديث الصورة الشخصية",
+  "fieldName": "الاسم",
+  "fieldPhone": "الهاتف",
+  "fieldLocation": "الموقع",
+  "fieldBirthDate": "تاريخ الميلاد",
+  "notSet": "غير محدد",
+  "saveChanges": "حفظ التغييرات",
+  "userAchievementsTitle": "إنجازات {name}",
+  "@userAchievementsTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "noAchievementsYet": "لا توجد إنجازات بعد",
+  "userDebatesTitle": "مناظرات {name}",
+  "@userDebatesTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "latestDebates": "أحدث المناظرات",
+  "showAll": "عرض الكل",
+  "noDebatesYet": "لا توجد مناظرات بعد",
+  "achievements": "الإنجازات",
+
+  "surveyDetailsTitle": "الاستطلاع",
+  "surveyNoneAvailable": "لا توجد استطلاعات حالياً",
+  "surveyAnswerAllQuestions": "يرجى الإجابة على جميع الأسئلة قبل الإرسال",
+  "surveySubmittedSuccess": "تم تقديم إجاباتك بنجاح",
+  "surveySubmitAnswers": "إرسال الإجابات",
+  "surveyAlreadyAnsweredMessage": "لقد قمت بالإجابة على هذا الاستطلاع من قبل",
+  "surveyClosedMessage": "هذا الاستطلاع مغلق ولا يقبل إجابات جديدة",
+  "trainerSurveysTitle": "استطلاعات فريقي",
+  "surveyNewSurvey": "استطلاع جديد",
+  "trainerSurveyNoneYet": "لم تنشئ أي استطلاعات لفريقك بعد",
+  "surveyDeleteTitle": "حذف الاستطلاع",
+  "surveyDeleteConfirmBody": "هل أنت متأكد من حذف هذا الاستطلاع؟ لا يمكن التراجع عن هذا الإجراء، وستفقد جميع الردود المرتبطة به.",
+  "surveyDeletedMsg": "تم حذف الاستطلاع",
+  "surveyDetailsHeaderTitle": "تفاصيل الاستطلاع",
+  "surveyStatusOpen": "مفتوح",
+  "surveyStatusClosed": "مغلق",
+  "surveyClosesOnDate": "ينتهي في {date}",
+  "@surveyClosesOnDate": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "surveyQuestionsHeader": "الأسئلة",
+  "surveyNoQuestionsYet": "لا توجد أسئلة لهذا الاستطلاع بعد",
+  "surveyTypeRating": "تقييم رقمي",
+  "surveyTypeMcq": "اختيار من متعدد",
+  "surveyTypeOpenText": "إجابة مفتوحة",
+  "surveyResultsTitle": "نتائج الاستطلاع",
+  "surveyNoResponsesYet": "لا توجد ردود على هذا الاستطلاع بعد",
+  "surveyTotalResponsesLabel": "إجمالي الردود: {count}",
+  "@surveyTotalResponsesLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyAnswersSummary": "ملخص الإجابات",
+  "surveyResponsesCountLabel": "الردود ({count})",
+  "@surveyResponsesCountLabel": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyNoAnswersYet": "لا توجد إجابات على هذا السؤال بعد",
+  "surveyAverageLabel": "المتوسط: {avg} / {max} ({count} رداً)",
+  "@surveyAverageLabel": {
+    "placeholders": {
+      "avg": { "type": "String" },
+      "max": { "type": "String" },
+      "count": { "type": "String" }
+    }
+  },
+  "surveyTextAnswersCount": "{count} إجابة نصية (انظر أدناه)",
+  "@surveyTextAnswersCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "surveyTargetTeams": "الفرق المستهدفة",
+  "surveyChooseAtLeastOneTeam": "اختر فريقاً واحداً على الأقل",
+  "surveyCloseDateOptional": "موعد الإغلاق (اختياري)",
+  "surveyNoCloseDate": "بدون موعد إغلاق",
+  "surveyQuestionsRequiredLabel": "الأسئلة *",
+  "surveyQuestionsHint": "مطلوب سؤال واحد على الأقل. لا يمكن تعديل الاستطلاع بعد إنشائه، فتأكد من مراجعة الأسئلة قبل الإرسال",
+  "surveyCreateButton": "إنشاء الاستطلاع",
+  "surveyTitleField": "عنوان الاستطلاع",
+  "surveyTitleRequired": "العنوان مطلوب",
+  "surveyDescriptionOptional": "الوصف (اختياري)",
+  "surveyAddAtLeastOneTeam": "أضف فريقاً واحداً على الأقل",
+  "surveyAddAtLeastOneQuestion": "أضف سؤالاً واحداً على الأقل — لا يمكن للمشاركين الإجابة على استطلاع بلا أسئلة",
+  "surveyCompleteAllQuestionText": "أكمل نص كل الأسئلة قبل الحفظ",
+  "surveyMcqNeedsTwoOptions": "أسئلة الاختيار من متعدد تحتاج خيارين على الأقل",
+  "surveyCreatedSuccess": "تم إنشاء الاستطلاع بنجاح",
+  "surveyPartialSuccess": "تم إنشاء الاستطلاع لكن تعذر حفظ الأسئلة: {message}. لا يمكن تعديل الاستطلاعات بعد إنشائها، لذا سيبقى بلا أسئلة. يُفضّل إنشاء استطلاع جديد بدلاً منه.",
+  "@surveyPartialSuccess": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "surveyClosesInDays": "يغلق خلال {days} يوم",
+  "@surveyClosesInDays": {
+    "placeholders": { "days": { "type": "int" } }
+  },
+  "surveyClosesInHours": "يغلق خلال {hours} ساعة",
+  "@surveyClosesInHours": {
+    "placeholders": { "hours": { "type": "int" } }
+  },
+  "surveyClosesSoon": "يغلق قريباً",
+  "surveyAnsweredChip": "تمت الإجابة",
+  "surveyWriteAnswerHint": "اكتب إجابتك هنا...",
+  "surveyAddQuestion": "إضافة سؤال",
+  "surveyQuestionNumber": "سؤال {number}",
+  "@surveyQuestionNumber": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "surveyQuestionTextHint": "نص السؤال",
+  "surveyQuestionTypeLabel": "نوع السؤال",
+  "surveyMinValue": "الحد الأدنى",
+  "surveyMaxValue": "الحد الأقصى",
+  "surveyStepValue": "الخطوة",
+  "surveyOptionsMinTwo": "الخيارات (حد أدنى خياران)",
+  "surveyOptionHint": "خيار {number}",
+  "@surveyOptionHint": {
+    "placeholders": { "number": { "type": "int" } }
+  },
+  "surveyAddOption": "إضافة خيار",
+
+  "complaintNewComplaint": "شكوى جديدة",
+  "complaintNoneYet": "لم تقدم أي شكاوى بعد",
+  "complaintStatusOpen": "قيد المراجعة",
+  "complaintStatusResolved": "تم الحل",
+  "complaintStatusRejected": "مرفوضة",
+  "complaintStatusClosed": "مغلقة",
+  "complaintDebateFallback": "مناظرة #{id}",
+  "@complaintDebateFallback": {
+    "placeholders": { "id": { "type": "int" } }
+  },
+  "complaintAdminResponseLabel": "رد الإدارة",
+  "complaintChooseDebate": "اختر المناظرة المتعلقة بالشكوى",
+  "complaintDescriptionLabel": "وصف الشكوى",
+  "complaintDescriptionRequired": "وصف الشكوى مطلوب",
+  "complaintDescriptionHint": "اشرح المشكلة بالتفصيل...",
+  "complaintSubmitButton": "تقديم الشكوى",
+  "complaintSubmittedSuccess": "تم تقديم الشكوى بنجاح",
+  "complaintDebateFieldLabel": "المناظرة",
+  "debateSearchHint": "ابحث عن المناظرة بعنوانها...",
+  "debateSearchFailed": "تعذر البحث: {error}",
+  "@debateSearchFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+
+  "teamSearchHint": "ابحث عن فريق بالاسم...",
+  "teamNoneAvailableToJoin": "لا توجد فرق متاحة للانضمام حالياً",
+  "teamLeaveDialogTitle": "مغادرة الفريق",
+  "teamLeaveDialogBody": "سيُرسل طلب مغادرة إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟",
+  "teamReasonOptionalHint": "السبب (اختياري)",
+  "teamSendRequestButton": "إرسال الطلب",
+  "teamJoinDialogTitle": "الانضمام إلى الفريق",
+  "teamJoinDialogBody": "سيُرسل طلب انضمام إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟",
+  "teamRoleLeader": "قائد الفريق",
+  "teamRoleTrainer": "مدرب",
+  "teamRoleMember": "عضو",
+  "teamJoinedDateLabel": "تاريخ الانضمام",
+  "teamLeftDateLabel": "تاريخ المغادرة",
+  "teamTrainerLabel": "المدرب",
+  "teamMembersCountLabel": "عدد الأعضاء",
+  "teamInfoTitle": "معلومات الفريق",
+  "teamLeaveRequestPendingMsg": "تم إرسال طلب المغادرة. في انتظار موافقة المدرب",
+  "teamLeaveRequestSentMsg": "تم إرسال طلب المغادرة",
+  "teamJoinRequestPendingMsg": "تم إرسال طلب الانضمام. في انتظار موافقة المدرب",
+  "teamJoinRequestSentMsg": "تم إرسال طلب الانضمام",
+  "teamMembersHeader": "الأعضاء",
+  "teamNoMembersYet": "لا يوجد أعضاء في هذا الفريق",
+  "teamLeaveTeamAction": "مغادرة الفريق",
+  "teamJoinTeamAction": "الانضمام إلى الفريق",
+  "teamChipLeft": "غادرت الفريق",
+  "teamChipCurrentMember": "عضو حالي",
+  "teamChipActive": "الفريق نشط",
+  "teamChipInactive": "الفريق غير نشط",
+  "teamForbiddenMsg": "ليست لديك صلاحية لعرض تفاصيل هذا الفريق",
+  "teamNotFoundMsg": "هذا الفريق غير موجود",
+  "teamAuthRequiredMsg": "يرجى تسجيل الدخول لعرض تفاصيل الفريق",
+  "teamLoadFailedMsg": "تعذر تحميل تفاصيل هذا الفريق حالياً",
+  "teamDeactivateTitle": "إلغاء تفعيل الفريق",
+  "teamDeactivateConfirmBody": "هل أنت متأكد من إلغاء تفعيل هذا الفريق؟",
+  "teamCancelButton": "إلغاء",
+  "teamDeactivateConfirmButton": "إلغاء التفعيل",
+  "teamRemoveMemberTitle": "إزالة عضو",
+  "teamRemoveMemberBody": "هل تريد إزالة {name} من الفريق؟",
+  "@teamRemoveMemberBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamRemoveButton": "إزالة",
+  "teamAcceptLeaveRequestTitle": "قبول طلب المغادرة",
+  "teamRejectLeaveRequestTitle": "رفض طلب المغادرة",
+  "teamLeaveRequestAcceptBody": "سيغادر {name} الفريق فوراً. هل تريد المتابعة؟",
+  "@teamLeaveRequestAcceptBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamLeaveRequestRejectBody": "سيبقى {name} عضواً في الفريق. هل تريد رفض الطلب؟",
+  "@teamLeaveRequestRejectBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamAcceptJoinRequestTitle": "قبول طلب الانضمام",
+  "teamRejectJoinRequestTitle": "رفض طلب الانضمام",
+  "teamJoinRequestAcceptBody": "سينضم {name} إلى الفريق فوراً. هل تريد المتابعة؟",
+  "@teamJoinRequestAcceptBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamJoinRequestRejectBody": "لن ينضم {name} إلى الفريق. هل تريد رفض الطلب؟",
+  "@teamJoinRequestRejectBody": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamAcceptButton": "قبول",
+  "teamRejectButton": "رفض",
+  "teamAddMembers": "إضافة أعضاء",
+  "teamAddCount": "إضافة ({count})",
+  "@teamAddCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamDeactivatedMsg": "تم إلغاء تفعيل الفريق",
+  "teamStatusActive": "نشط",
+  "teamStatusInactive": "غير نشط",
+  "teamLeaderLabel": "القائد: {name}",
+  "@teamLeaderLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamJoinRequestsHeader": "طلبات الانضمام ({count})",
+  "@teamJoinRequestsHeader": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamLeaveRequestsHeader": "طلبات المغادرة ({count})",
+  "@teamLeaveRequestsHeader": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamMembersHeaderCount": "الأعضاء ({count})",
+  "@teamMembersHeaderCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "teamDragToReorderHint": "اسحب مقبض الترتيب لتغيير الأولوية",
+  "teamRequestedOnDate": "طلب في {date}",
+  "@teamRequestedOnDate": {
+    "placeholders": { "date": { "type": "String" } }
+  },
+  "teamNewTeamTitle": "فريق جديد",
+  "teamAddAtLeastTwoMembers": "أضف عضوين على الأقل",
+  "teamChooseLeader": "اختر قائداً للفريق",
+  "teamCreatedSuccess": "تم إنشاء الفريق بنجاح",
+  "teamNameField": "اسم الفريق",
+  "teamNameRequired": "اسم الفريق مطلوب",
+  "teamAddMembersHint": "أضف عضوين على الأقل، ثم اختر قائد الفريق من بينهم",
+  "teamLeaderSuffix": "{name} (قائد)",
+  "@teamLeaderSuffix": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "teamCreateButton": "إنشاء الفريق",
+  "teamNoneYet": "لا توجد فرق بعد",
+  "teamMembersCountShort": "{count} أعضاء",
+  "@teamMembersCountShort": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "userSearchHint": "ابحث بالاسم...",
+  "teamLoadListFailed": "تعذر تحميل الفرق: {message}",
+  "@teamLoadListFailed": {
+    "placeholders": { "message": { "type": "String" } }
+  },
+  "teamNoneAvailableForYou": "لا توجد فرق متاحة لك بعد",
+
+  "statsTitle": "الإحصائيات",
+  "statsTitleWithName": "{name} · الإحصائيات",
+  "@statsTitleWithName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsNothingToExport": "لا يوجد شيء لتصديره بعد",
+  "statsShareText": "ملف تحليل مناظرات جدل",
+  "statsShareSubject": "تحليل مناظرات جدل",
+  "statsExportFailed": "فشل التصدير: {error}",
+  "@statsExportFailed": {
+    "placeholders": { "error": { "type": "String" } }
+  },
+  "statsExportTooltip": "تصدير الملف",
+  "statsKindWinRate": "نسبة الفوز",
+  "statsKindAvgScore": "متوسط النتيجة",
+  "statsKindBestSpeaker": "أفضل متحدث",
+  "statsKindRanking": "الترتيب",
+  "statsKindImprovement": "التحسن",
+  "statsKindActivity": "النشاط",
+  "statsSomethingWrong": "حدث خطأ ما",
+  "statsWinRateTitle": "نسبة الفوز",
+  "statsAvgScoreTitle": "متوسط النتيجة",
+  "statsBestSpeakerTitle": "نسبة أفضل متحدث",
+  "statsDebatesCount": "{count} مناظرة",
+  "@statsDebatesCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsCouldNotUpdateFilters": "تعذر التحديث بهذه الفلاتر",
+  "statsTopOfJadal": "الأوائل في جدل",
+  "statsScopeDebaters": "المناظرون",
+  "statsScopeTeams": "الفرق",
+  "statsMetricPoints": "النقاط",
+  "statsNoEntriesYet": "لا توجد نتائج بعد",
+  "statsTeamAnalysisTitle": "تحليل الفريق",
+  "statsTeamAnalysisTitleWithName": "{name} · تحليل الفريق",
+  "@statsTeamAnalysisTitleWithName": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsAveragedAcrossTeams": "المتوسط عبر فرقك",
+  "statsTeamsCount": "{count} فرق",
+  "@statsTeamsCount": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsAvgImprovement": "متوسط التحسن",
+  "statsAvgWinRate": "متوسط نسبة الفوز",
+  "statsAvgMemberActivity": "متوسط نشاط الأعضاء",
+  "statsAttendanceSubtitleDebater": "عدد مرات حضورك الفعلي لغرفة التحضير",
+  "statsAttendanceSubtitleTrainer": "عدد مرات حضورك لمناظرات فريقك",
+  "statsAttendanceSubtitleJudge": "عدد مرات حضورك للمناظرات المكلف بها",
+  "statsAttendanceTitle": "{name} · الحضور",
+  "@statsAttendanceTitle": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+  "statsOverallPercent": "{percent}% إجمالاً",
+  "@statsOverallPercent": {
+    "placeholders": { "percent": { "type": "int" } }
+  },
+  "statsAttendedCount": "{attended}/{selected} حضور",
+  "@statsAttendedCount": {
+    "placeholders": { "attended": { "type": "int" }, "selected": { "type": "int" } }
+  },
+  "statsRegisteredNotHeldAgainst": "تم تسجيلك {count} مرة — الاختيار قرار الإدارة، ولا يُحسب عليك.",
+  "@statsRegisteredNotHeldAgainst": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "statsFrameworksTitle": "الأطر",
+  "filterStatusScheduled": "مجدولة",
+  "filterStatusAnnounced": "معلنة",
+  "filterStatusSidesSelected": "تم اختيار الفرق",
+  "filterStatusLive": "مباشرة",
+  "filterStatusCompleted": "منتهية",
+  "filterStatusCancelled": "ملغاة",
+  "filterFormatFallback": "صيغة {id}",
+  "@filterFormatFallback": {
+    "placeholders": { "id": { "type": "String" } }
+  },
+  "filterDebatesTitle": "تصفية المناظرات",
+  "filterLabelStatus": "الحالة",
+  "filterLabelFormat": "الصيغة",
+  "filterLabelMotionFramework": "إطار القرار",
+  "filterLabelDebateTag": "وسم المناظرة",
+  "filterLabelJudge": "الحكم",
+  "filterLabelTeam": "الفريق",
+  "filterLabelUser": "المستخدم",
+  "filterSearchUsersHint": "ابحث عن مستخدمين…",
+  "filterClearButton": "مسح",
+  "filterApplyButton": "تطبيق",
+  "filterArticlesTitle": "تصفية المقالات",
+  "filterLabelCategory": "التصنيف",
+  "filterLabelTag": "الوسم",
+  "filterLabelPublisher": "الناشر",
+  "filterSearchAuthorsHint": "ابحث عن كتّاب…",
+  "filterLikedByMe": "أعجبتني",
+  "filterNoneAvailable": "لا يوجد شيء متاح",
+  "filterDateRangeLabel": "النطاق الزمني",
+  "filterFromLabel": "من",
+  "filterToLabel": "إلى",
 
   "mutedSpeakingTitle": "الميكروفون مغلق",
   "mutedSpeakingBody": "يبدو أنك تتحدث، لكن لا أحد يسمعك.",

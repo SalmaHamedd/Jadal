@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
@@ -88,17 +89,17 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'مغادرة الفريق',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        title: Text(
+          context.loc.teamLeaveDialogTitle,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'سيُرسل طلب مغادرة إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟',
-              style: TextStyle(fontFamily: 'Cairo'),
+            Text(
+              context.loc.teamLeaveDialogBody,
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -106,7 +107,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
               maxLines: 3,
               style: const TextStyle(fontFamily: 'Cairo'),
               decoration: InputDecoration(
-                hintText: 'السبب (اختياري)',
+                hintText: context.loc.teamReasonOptionalHint,
                 hintStyle: const TextStyle(fontFamily: 'Cairo'),
                 filled: true,
                 fillColor: Colors.grey.withValues(alpha: 0.1),
@@ -122,13 +123,13 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.cancel, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'إرسال الطلب',
-              style: TextStyle(
+            child: Text(
+              context.loc.teamSendRequestButton,
+              style: const TextStyle(
                 fontFamily: 'Cairo',
                 color: Colors.red,
                 fontWeight: FontWeight.w700,
@@ -154,17 +155,17 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
       context: context,
       builder: (dialogContext) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: const Text(
-          'الانضمام إلى الفريق',
-          style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+        title: Text(
+          context.loc.teamJoinDialogTitle,
+          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              'سيُرسل طلب انضمام إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟',
-              style: TextStyle(fontFamily: 'Cairo'),
+            Text(
+              context.loc.teamJoinDialogBody,
+              style: const TextStyle(fontFamily: 'Cairo'),
             ),
             const SizedBox(height: 12),
             TextField(
@@ -172,7 +173,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
               maxLines: 3,
               style: const TextStyle(fontFamily: 'Cairo'),
               decoration: InputDecoration(
-                hintText: 'السبب (اختياري)',
+                hintText: context.loc.teamReasonOptionalHint,
                 hintStyle: const TextStyle(fontFamily: 'Cairo'),
                 filled: true,
                 fillColor: Colors.grey.withValues(alpha: 0.1),
@@ -188,13 +189,13 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: const Text('إلغاء', style: TextStyle(fontFamily: 'Cairo')),
+            child: Text(context.loc.cancel, style: const TextStyle(fontFamily: 'Cairo')),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
-            child: const Text(
-              'إرسال الطلب',
-              style: TextStyle(
+            child: Text(
+              context.loc.teamSendRequestButton,
+              style: const TextStyle(
                 fontFamily: 'Cairo',
                 color: JadalColors.positiveGreen,
                 fontWeight: FontWeight.w700,
@@ -214,45 +215,45 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
     }
   }
 
-  String _roleLabel(String role) => switch (role) {
-    'leader' => 'قائد الفريق',
-    'trainer' => 'مدرب',
-    _ => 'عضو',
+  String _roleLabel(BuildContext context, String role) => switch (role) {
+    'leader' => context.loc.teamRoleLeader,
+    'trainer' => context.loc.teamRoleTrainer,
+    _ => context.loc.teamRoleMember,
   };
 
   String _formatDate(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-  List<Widget> _buildInfoRows(TeamMembership? membership) {
+  List<Widget> _buildInfoRows(BuildContext context, TeamMembership? membership) {
     final rows = <Widget>[
       if (membership?.joinedAt != null)
         _InfoRow(
           icon: Icons.login_rounded,
-          label: 'تاريخ الانضمام',
+          label: context.loc.teamJoinedDateLabel,
           value: _formatDate(membership!.joinedAt!),
         ),
       if (membership?.leftAt != null)
         _InfoRow(
           icon: Icons.logout_rounded,
-          label: 'تاريخ المغادرة',
+          label: context.loc.teamLeftDateLabel,
           value: _formatDate(membership!.leftAt!),
         ),
          if (_team?.createdBy != null)
         _InfoRow(
           icon: Icons.school_rounded,
-          label: 'المدرب',
+          label: context.loc.teamTrainerLabel,
           value: _team!.createdBy!.name,
         ),
       if (_team?.leader != null)
         _InfoRow(
           icon: Icons.star_rounded,
-          label: 'قائد الفريق',
+          label: context.loc.teamRoleLeader,
           value: _team!.leader!.name,
         ),
       if (_team != null)
         _InfoRow(
           icon: Icons.groups_rounded,
-          label: 'عدد الأعضاء',
+          label: context.loc.teamMembersCountLabel,
           value: '${_team!.membersCount}',
         ),
     ];
@@ -289,8 +290,8 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                 JadalSnackBar.show(
                   context,
                   state.request.isPending
-                      ? 'تم إرسال طلب المغادرة. في انتظار موافقة المدرب'
-                      : 'تم إرسال طلب المغادرة',
+                      ? context.loc.teamLeaveRequestPendingMsg
+                      : context.loc.teamLeaveRequestSentMsg,
                   type: SnackBarType.success,
                 );
                 Navigator.pop(context, true);
@@ -309,8 +310,8 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                 JadalSnackBar.show(
                   context,
                   state.request.isPending
-                      ? 'تم إرسال طلب الانضمام. في انتظار موافقة المدرب'
-                      : 'تم إرسال طلب الانضمام',
+                      ? context.loc.teamJoinRequestPendingMsg
+                      : context.loc.teamJoinRequestSentMsg,
                   type: SnackBarType.success,
                 );
                 Navigator.pop(context, true);
@@ -329,9 +330,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
               child: Scaffold(
                 backgroundColor: Colors.transparent,
                 appBar: AppBar(
-                  title: const Text(
-                    'معلومات الفريق',
-                    style: TextStyle(
+                  title: Text(
+                    context.loc.teamInfoTitle,
+                    style: const TextStyle(
                       fontFamily: 'Cairo',
                       fontWeight: FontWeight.w800,
                     ),
@@ -355,12 +356,12 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                         membership: membership,
                         team: _team,
                         roleLabel: membership != null
-                            ? _roleLabel(membership.role)
+                            ? _roleLabel(context, membership.role)
                             : null,
                       ),
-                      if (_buildInfoRows(membership).isNotEmpty) ...[
+                      if (_buildInfoRows(context, membership).isNotEmpty) ...[
                         SizedBox(height: context.hp(2.5)),
-                        _SectionCard(children: _buildInfoRows(membership)),
+                        _SectionCard(children: _buildInfoRows(context, membership)),
                       ],
                       SizedBox(height: context.hp(2.5)),
                       if (_loadingTeam)
@@ -371,7 +372,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                       else if (_team != null) ...[
                         if (_team!.members.isNotEmpty) ...[
                           _SectionHeader(
-                            title: 'الأعضاء',
+                            title: context.loc.teamMembersHeader,
                             count: _team!.members.length,
                           ),
                           const SizedBox(height: 10),
@@ -390,7 +391,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                           ),
                         ] else
                           Text(
-                            'لا يوجد أعضاء في هذا الفريق',
+                            context.loc.teamNoMembersYet,
                             style: TextStyle(
                               fontFamily: 'Cairo',
                               color: JadalColors.judgesGrey,
@@ -418,9 +419,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                                     Icons.logout_rounded,
                                     color: Colors.red,
                                   ),
-                            label: const Text(
-                              'مغادرة الفريق',
-                              style: TextStyle(
+                            label: Text(
+                              context.loc.teamLeaveTeamAction,
+                              style: const TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w700,
                                 color: Colors.red,
@@ -457,9 +458,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                                     Icons.person_add_alt_1_rounded,
                                     color: Colors.white,
                                   ),
-                            label: const Text(
-                              'الانضمام إلى الفريق',
-                              style: TextStyle(
+                            label: Text(
+                              context.loc.teamJoinTeamAction,
+                              style: const TextStyle(
                                 fontFamily: 'Cairo',
                                 fontWeight: FontWeight.w700,
                                 color: Colors.white,
@@ -575,14 +576,14 @@ class _TeamHero extends StatelessWidget {
                 _Chip(label: roleLabel!, color: JadalColors.primaryBlue),
               if (membership != null)
                 _Chip(
-                  label: left ? 'غادرت الفريق' : 'عضو حالي',
+                  label: left ? context.loc.teamChipLeft : context.loc.teamChipCurrentMember,
                   color: left
                       ? JadalColors.judgesGrey
                       : JadalColors.positiveGreen,
                 ),
               if (team != null)
                 _Chip(
-                  label: team!.isActive ? 'الفريق نشط' : 'الفريق غير نشط',
+                  label: team!.isActive ? context.loc.teamChipActive : context.loc.teamChipInactive,
                   color: team!.isActive
                       ? JadalColors.positiveGreen
                       : JadalColors.judgesGrey,
@@ -856,12 +857,12 @@ class _UnavailableNotice extends StatelessWidget {
   final Failure? error;
   const _UnavailableNotice({this.error});
 
-  String get _message {
+  String _message(BuildContext context) {
     final err = error;
-    if (err is ForbiddenFailure) return 'ليست لديك صلاحية لعرض تفاصيل هذا الفريق';
-    if (err is NotFoundFailure) return 'هذا الفريق غير موجود';
-    if (err is AuthFailure) return 'يرجى تسجيل الدخول لعرض تفاصيل الفريق';
-    return 'تعذر تحميل تفاصيل هذا الفريق حالياً';
+    if (err is ForbiddenFailure) return context.loc.teamForbiddenMsg;
+    if (err is NotFoundFailure) return context.loc.teamNotFoundMsg;
+    if (err is AuthFailure) return context.loc.teamAuthRequiredMsg;
+    return context.loc.teamLoadFailedMsg;
   }
 
   @override
@@ -888,7 +889,7 @@ class _UnavailableNotice extends StatelessWidget {
           const SizedBox(width: 10),
           Expanded(
             child: Text(
-              _message,
+              _message(context),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontSize: 12.5,

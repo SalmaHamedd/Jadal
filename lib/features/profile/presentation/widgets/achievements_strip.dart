@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/screens/achievements_screen.dart';
@@ -28,7 +29,7 @@ class AchievementsStrip extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('Achievements',
+            Text(context.loc.achievements,
                 style: TextStyle(
                   fontFamily: 'Cairo',
                   fontWeight: FontWeight.w800,
@@ -42,7 +43,7 @@ class AchievementsStrip extends StatelessWidget {
                   builder: (_) => AchievementsScreen(userId: userId, userName: userName),
                 ),
               ),
-              child: const Text('Show all', style: TextStyle(fontFamily: 'Cairo')),
+              child: Text(context.loc.showAll, style: const TextStyle(fontFamily: 'Cairo')),
             ),
           ],
         ),

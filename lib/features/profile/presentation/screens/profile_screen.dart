@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -62,16 +63,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
     if (mounted) setState(() {});
   }
 
+  String _roleLabel(BuildContext context, String role) => switch (role) {
+        'debater' => context.loc.roleDebater,
+        'judge' => context.loc.judgeRole,
+        // Display-only rename — wire value stays 'trainer'.
+        'trainer' => context.loc.roleTrainer,
+        'admin' => context.loc.roleAdmin,
+        _ => role,
+      };
+
   void _showLogoutConfirmation() {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to log out?'),
+        title: Text(context.loc.logout),
+        content: Text(context.loc.logoutConfirmMessage),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
+            child: Text(context.loc.cancel),
           ),
           TextButton(
             onPressed: () {
@@ -79,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               _cubit.logout();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Logout'),
+            child: Text(context.loc.logout),
           ),
         ],
       ),
@@ -171,8 +181,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               children: [
                                 _HeaderChip(
                                   icon: Icons.badge_outlined,
-                                  // Display-only rename — wire value stays 'trainer'.
-                                  label: profile.role == 'trainer' ? 'Coach' : profile.role,
+                                  label: _roleLabel(context, profile.role),
                                   color: JadalColors.primaryBlue,
                                 ),
                                 const SizedBox(width: 8),
@@ -277,7 +286,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (profile.role == 'debater')
                             Expanded(
                               child: ProfileActionButton(
-                                text: 'Statistics',
+                                text: context.loc.profileStatistics,
                                 icon: Icons.insights_rounded,
                                 onPressed: () {
                                   Navigator.push(
@@ -294,7 +303,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (profile.role == 'trainer')
                             Expanded(
                               child: ProfileActionButton(
-                                text: 'Team analysis',
+                                text: context.loc.profileTeamAnalysis,
                                 icon: Icons.groups_rounded,
                                 onPressed: () {
                                   Navigator.push(
@@ -312,7 +321,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           if (profile.role == 'trainer') const SizedBox(width: 12),
                           Expanded(
                             child: ProfileActionButton(
-                              text: profile.role == 'debater' ? 'Prep attendance' : 'Attendance',
+                              text: profile.role == 'debater'
+                                  ? context.loc.profilePrepAttendance
+                                  : context.loc.profileAttendance,
                               icon: Icons.event_available_rounded,
                               onPressed: () {
                                 Navigator.push(
@@ -344,7 +355,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       if (profile.role == 'debater' || profile.role == 'trainer') ...[
                         Align(
                           alignment: AlignmentDirectional.centerStart,
-                          child: Text('Teams',
+                          child: Text(context.loc.teamsSection,
                               style: TextStyle(
                                   fontFamily: 'Cairo', fontSize: context.fontSize(15), fontWeight: FontWeight.w800)),
                         ),
@@ -417,11 +428,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Error: ${state.message}'),
+                  Text(context.loc.errorWithMessage(state.message)),
                   const SizedBox(height: 16),
                   ElevatedButton(
                     onPressed: () => _cubit.loadProfile(),
-                    child: const Text('Retry'),
+                    child: Text(context.loc.retry),
                   ),
                 ],
               ),
