@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
@@ -28,23 +29,33 @@ class UserDebatesSection extends StatelessWidget {
   Widget build(BuildContext context) {
     if (latest.isEmpty) return const SizedBox.shrink();
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
+    final textColor = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.lightTextPrimary;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(context.loc.latestDebates,
-                style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 15, color: textColor)),
+            Text(
+              context.loc.latestDebates,
+              style: AppTextStyles.subtitle(
+                context,
+              ).copyWith(fontWeight: FontWeight.w800, color: textColor),
+            ),
             TextButton(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => UserDebatesListScreen(userId: userId, userName: userName),
+                  builder: (_) =>
+                      UserDebatesListScreen(userId: userId, userName: userName),
                 ),
               ),
-              child: Text(context.loc.showAll, style: const TextStyle(fontFamily: 'Cairo')),
+              child: Text(
+                context.loc.showAll,
+                style: AppTextStyles.button(context),
+              ),
             ),
           ],
         ),
@@ -64,27 +75,36 @@ class _DebateTile extends StatelessWidget {
     return ListTile(
       contentPadding: EdgeInsets.zero,
       leading: Icon(
-        item.status.wire == 'cancelled' ? Icons.cancel_outlined : Icons.emoji_events_outlined,
-        color: item.status.wire == 'cancelled' ? JadalColors.negativeRed : JadalColors.primaryOrange,
+        item.status.wire == 'cancelled'
+            ? Icons.cancel_outlined
+            : Icons.emoji_events_outlined,
+        color: item.status.wire == 'cancelled'
+            ? JadalColors.negativeRed
+            : JadalColors.primaryOrange,
       ),
       title: Text(
         item.title,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 14,
-          color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+        style: AppTextStyles.body(context).copyWith(
+          color: isDark
+              ? JadalColors.darkTextPrimary
+              : JadalColors.lightTextPrimary,
         ),
       ),
       subtitle: Text(
-        item.status.wire == 'cancelled' ? context.loc.tabCancelled : context.loc.tabDone,
-        style: const TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
+        item.status.wire == 'cancelled'
+            ? context.loc.tabCancelled
+            : context.loc.tabDone,
+        style: AppTextStyles.small(
+          context,
+        ).copyWith(color: JadalColors.judgesGrey),
       ),
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => BackendDebateDetailScreen(debateId: item.id, title: item.title),
+          builder: (_) =>
+              BackendDebateDetailScreen(debateId: item.id, title: item.title),
         ),
       ),
     );
@@ -96,7 +116,11 @@ class _DebateTile extends StatelessWidget {
 class UserDebatesListScreen extends StatefulWidget {
   final int userId;
   final String userName;
-  const UserDebatesListScreen({super.key, required this.userId, required this.userName});
+  const UserDebatesListScreen({
+    super.key,
+    required this.userId,
+    required this.userName,
+  });
 
   @override
   State<UserDebatesListScreen> createState() => _UserDebatesListScreenState();
@@ -119,7 +143,10 @@ class _UserDebatesListScreenState extends State<UserDebatesListScreen> {
     setState(() => _loading = true);
     final repo = di.sl<LiveDebateRepository>();
     final res = await repo.searchDebates(
-      DebateSearchFilter(userIds: [widget.userId], status: const ['completed', 'cancelled']),
+      DebateSearchFilter(
+        userIds: [widget.userId],
+        status: const ['completed', 'cancelled'],
+      ),
       page: _page,
     );
     res.fold(
@@ -139,27 +166,35 @@ class _UserDebatesListScreenState extends State<UserDebatesListScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.loc.userDebatesTitle(widget.userName),
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(
+            context.loc.userDebatesTitle(widget.userName),
+            style: AppTextStyles.title(context),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: _items.isEmpty && _loading
             ? const Center(child: CircularProgressIndicator())
             : _items.isEmpty
-                ? Center(child: Text(context.loc.noDebatesYet, style: const TextStyle(fontFamily: 'Cairo')))
-                : NotificationListener<ScrollNotification>(
-                    onNotification: (n) {
-                      if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) _loadMore();
-                      return false;
-                    },
-                    child: ListView.separated(
-                      padding: const EdgeInsets.all(16),
-                      itemCount: _items.length,
-                      separatorBuilder: (_, _) => const Divider(height: 1),
-                      itemBuilder: (context, i) => _DebateTile(item: _items[i]),
-                    ),
-                  ),
+            ? Center(
+                child: Text(
+                  context.loc.noDebatesYet,
+                  style: AppTextStyles.body(context),
+                ),
+              )
+            : NotificationListener<ScrollNotification>(
+                onNotification: (n) {
+                  if (n.metrics.pixels > n.metrics.maxScrollExtent - 200)
+                    _loadMore();
+                  return false;
+                },
+                child: ListView.separated(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: _items.length,
+                  separatorBuilder: (_, _) => const Divider(height: 1),
+                  itemBuilder: (context, i) => _DebateTile(item: _items[i]),
+                ),
+              ),
       ),
     );
   }

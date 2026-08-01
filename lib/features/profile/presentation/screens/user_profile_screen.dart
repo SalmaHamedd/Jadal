@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
@@ -62,19 +63,27 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         setState(() => _profile = p);
         final futures = <Future>[];
         if (p.role == 'debater' || p.role == 'trainer') {
-          futures.add(_repo.getUserTeams(widget.userId).then((r) {
-            r.fold((_) {}, (t) => _teams = t);
-          }));
+          futures.add(
+            _repo.getUserTeams(widget.userId).then((r) {
+              r.fold((_) {}, (t) => _teams = t);
+            }),
+          );
         }
         if (p.role == 'debater' || p.role == 'judge') {
-          futures.add(di.sl<LiveDebateRepository>()
-              .searchDebates(
-                DebateSearchFilter(userIds: [widget.userId], status: const ['completed', 'cancelled']),
-                perPage: kLatestDebatesPreviewCount,
-              )
-              .then((r) {
-            r.fold((_) {}, (page) => _debates = page.items);
-          }));
+          futures.add(
+            di
+                .sl<LiveDebateRepository>()
+                .searchDebates(
+                  DebateSearchFilter(
+                    userIds: [widget.userId],
+                    status: const ['completed', 'cancelled'],
+                  ),
+                  perPage: kLatestDebatesPreviewCount,
+                )
+                .then((r) {
+                  r.fold((_) {}, (page) => _debates = page.items);
+                }),
+          );
         }
         await Future.wait(futures);
         if (mounted) setState(() => _loading = false);
@@ -88,28 +97,37 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(widget.userName ?? _profile?.name ?? context.loc.navProfile,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(
+            widget.userName ?? _profile?.name ?? context.loc.navProfile,
+            style: AppTextStyles.title(context),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_error!, textAlign: TextAlign.center, style: const TextStyle(fontFamily: 'Cairo')),
-                          const SizedBox(height: 12),
-                          OutlinedButton(onPressed: _load, child: Text(context.loc.retry)),
-                        ],
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _error!,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.body(context),
                       ),
-                    ),
-                  )
-                : _buildBody(context, _profile!),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: _load,
+                        child: Text(context.loc.retry),
+                      ),
+                    ],
+                  ),
+                ),
+              )
+            : _buildBody(context, _profile!),
       ),
     );
   }
@@ -130,22 +148,35 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             tenure: p.tenure,
           ),
           const SizedBox(height: 20),
-          AchievementsStrip(userId: p.id, userName: p.name, topAchievements: p.topAchievements),
+          AchievementsStrip(
+            userId: p.id,
+            userName: p.name,
+            topAchievements: p.topAchievements,
+          ),
           if (p.topAchievements.isNotEmpty) const SizedBox(height: 20),
           if (p.role == 'debater' || p.role == 'trainer') ...[
-            Text(context.loc.teamsSection,
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? JadalColors.darkTextPrimary
-                        : JadalColors.lightTextPrimary)),
-            TeamMembershipSection(userId: p.id, current: _teams, isOwnProfile: false),
+            Text(
+              context.loc.teamsSection,
+              style: AppTextStyles.subtitle(context).copyWith(
+                fontWeight: FontWeight.w800,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? JadalColors.darkTextPrimary
+                    : JadalColors.lightTextPrimary,
+              ),
+            ),
+            TeamMembershipSection(
+              userId: p.id,
+              current: _teams,
+              isOwnProfile: false,
+            ),
             const SizedBox(height: 20),
           ],
           if (p.role == 'debater' || p.role == 'judge') ...[
-            UserDebatesSection(userId: p.id, userName: p.name, latest: _debates),
+            UserDebatesSection(
+              userId: p.id,
+              userName: p.name,
+              latest: _debates,
+            ),
             const SizedBox(height: 20),
           ],
           _StatsButtons(profile: p),
@@ -155,13 +186,13 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   }
 
   String _roleLabel(BuildContext context, String role) => switch (role) {
-        'debater' => context.loc.roleDebater,
-        'judge' => context.loc.judgeRole,
-        // Display-only rename (§6.6) — wire value stays "trainer".
-        'trainer' => context.loc.roleTrainer,
-        'admin' => context.loc.roleAdmin,
-        _ => role,
-      };
+    'debater' => context.loc.roleDebater,
+    'judge' => context.loc.judgeRole,
+    // Display-only rename (§6.6) — wire value stays "trainer".
+    'trainer' => context.loc.roleTrainer,
+    'admin' => context.loc.roleAdmin,
+    _ => role,
+  };
 }
 
 class _StatsButtons extends StatelessWidget {
@@ -180,7 +211,10 @@ class _StatsButtons extends StatelessWidget {
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => DebaterStatsScreen(debaterId: profile.id, debaterName: profile.name),
+                  builder: (_) => DebaterStatsScreen(
+                    debaterId: profile.id,
+                    debaterName: profile.name,
+                  ),
                 ),
               ),
             ),

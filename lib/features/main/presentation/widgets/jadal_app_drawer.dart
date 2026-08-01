@@ -1,10 +1,11 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/localization/widgets/locale_toggle_button.dart';
 import 'package:jadal_app/core/services/contact_info.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/theme/widgets/theme_toggle_button.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/complaints/presentation/screens/my_complaints_screen.dart';
@@ -27,7 +28,9 @@ class JadalAppDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final textColor = isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
+    final textColor = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.lightTextPrimary;
     return Drawer(
       child: SafeArea(
         child: Column(
@@ -35,9 +38,12 @@ class JadalAppDrawer extends StatelessWidget {
           children: [
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
-              child: Text(context.loc.appName,
-                  style: TextStyle(
-                      fontFamily: 'Cairo', fontSize: 22, fontWeight: FontWeight.w800, color: textColor)),
+              child: Text(
+                context.loc.appName,
+                style: AppTextStyles.headline(
+                  context,
+                ).copyWith(color: textColor),
+              ),
             ),
             // V2 §3 — the signed-in user + their points, right at the top of
             // the drawer. Same lazy FutureBuilder pattern as the contact
@@ -54,18 +60,21 @@ class JadalAppDrawer extends StatelessWidget {
                       CircleAvatar(
                         radius: 18,
                         backgroundColor: JadalColors.primaryBlue,
-                        backgroundImage: (profile.avatarUrl != null && profile.avatarUrl!.isNotEmpty)
+                        backgroundImage:
+                            (profile.avatarUrl != null &&
+                                profile.avatarUrl!.isNotEmpty)
                             ? NetworkImage(profile.avatarUrl!)
                             : null,
-                        child: (profile.avatarUrl == null || profile.avatarUrl!.isEmpty)
+                        child:
+                            (profile.avatarUrl == null ||
+                                profile.avatarUrl!.isEmpty)
                             ? Text(
                                 profile.name.isEmpty
                                     ? '?'
-                                    : profile.name.characters.first.toUpperCase(),
-                                style: const TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w800,
-                                    color: Colors.white),
+                                    : profile.name.characters.first
+                                          .toUpperCase(),
+                                style: AppTextStyles.subtitle(context)
+                                    .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
                               )
                             : null,
                       ),
@@ -75,30 +84,34 @@ class JadalAppDrawer extends StatelessWidget {
                           profile.name,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 14,
-                              color: textColor),
+                          style: AppTextStyles.bodyEmphasis(
+                            context,
+                          ).copyWith(color: textColor),
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 10,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
-                          color: JadalColors.primaryOrange.withValues(alpha: 0.12),
+                          color: JadalColors.primaryOrange.withValues(
+                            alpha: 0.12,
+                          ),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            const Icon(Icons.star_rounded,
-                                size: 14, color: JadalColors.primaryOrange),
+                            const Icon(
+                              Icons.star_rounded,
+                              size: 14,
+                              color: JadalColors.primaryOrange,
+                            ),
                             const SizedBox(width: 4),
                             Text(
                               '${profile.points}',
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 12.5,
+                              style: AppTextStyles.caption(context).copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: JadalColors.primaryOrange,
                               ),
@@ -124,7 +137,10 @@ class JadalAppDrawer extends StatelessWidget {
             const Divider(height: 24),
             ListTile(
               leading: const Icon(Icons.insights_rounded),
-              title: Text(context.loc.drawerAnalysis, style: const TextStyle(fontFamily: 'Cairo')),
+              title: Text(
+                context.loc.drawerAnalysis,
+                style: AppTextStyles.body(context),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -135,18 +151,26 @@ class JadalAppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.category_rounded),
-              title: Text(context.loc.drawerFrameworks, style: const TextStyle(fontFamily: 'Cairo')),
+              title: Text(
+                context.loc.drawerFrameworks,
+                style: AppTextStyles.body(context),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (_) => const FrameworksListScreen()),
+                  MaterialPageRoute(
+                    builder: (_) => const FrameworksListScreen(),
+                  ),
                 );
               },
             ),
-              ListTile(
+            ListTile(
               leading: const Icon(Icons.assignment_rounded),
-              title: Text(context.loc.drawerSurveys, style: const TextStyle(fontFamily: 'Cairo')),
+              title: Text(
+                context.loc.drawerSurveys,
+                style: AppTextStyles.body(context),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -157,7 +181,10 @@ class JadalAppDrawer extends StatelessWidget {
             ),
             ListTile(
               leading: const Icon(Icons.report_gmailerrorred_rounded),
-              title: Text(context.loc.drawerMyComplaints, style: const TextStyle(fontFamily: 'Cairo')),
+              title: Text(
+                context.loc.drawerMyComplaints,
+                style: AppTextStyles.body(context),
+              ),
               onTap: () {
                 Navigator.pop(context);
                 Navigator.push(
@@ -176,25 +203,33 @@ class JadalAppDrawer extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: const Icon(Icons.assignment_rounded),
-                        title: Text(context.loc.drawerTrainerSurveys,
-                            style: const TextStyle(fontFamily: 'Cairo')),
+                        title: Text(
+                          context.loc.drawerTrainerSurveys,
+                          style: AppTextStyles.body(context),
+                        ),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const TrainerSurveysScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const TrainerSurveysScreen(),
+                            ),
                           );
                         },
                       ),
                       ListTile(
                         leading: const Icon(Icons.groups_rounded),
-                        title: Text(context.loc.drawerMyTeams,
-                            style: const TextStyle(fontFamily: 'Cairo')),
+                        title: Text(
+                          context.loc.drawerMyTeams,
+                          style: AppTextStyles.body(context),
+                        ),
                         onTap: () {
                           Navigator.pop(context);
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (_) => const TeamsScreen()),
+                            MaterialPageRoute(
+                              builder: (_) => const TeamsScreen(),
+                            ),
                           );
                         },
                       ),
@@ -204,12 +239,17 @@ class JadalAppDrawer extends StatelessWidget {
                 if (profile.role == 'debater') {
                   return ListTile(
                     leading: const Icon(Icons.group_add_rounded),
-                    title: Text(context.loc.drawerJoinTeam, style: const TextStyle(fontFamily: 'Cairo')),
+                    title: Text(
+                      context.loc.drawerJoinTeam,
+                      style: AppTextStyles.body(context),
+                    ),
                     onTap: () {
                       Navigator.pop(context);
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (_) => const JoinableTeamsScreen()),
+                        MaterialPageRoute(
+                          builder: (_) => const JoinableTeamsScreen(),
+                        ),
                       );
                     },
                   );
@@ -225,18 +265,34 @@ class JadalAppDrawer extends StatelessWidget {
                 future: ContactInfo.load(),
                 builder: (context, snapshot) {
                   final contact = snapshot.data;
-                  if (contact == null || contact.isEmpty) return const SizedBox.shrink();
+                  if (contact == null || contact.isEmpty)
+                    return const SizedBox.shrink();
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(context.loc.drawerContactUs,
-                          style: TextStyle(
-                              fontFamily: 'Cairo', fontWeight: FontWeight.w700, fontSize: 12, color: textColor)),
+                      Text(
+                        context.loc.drawerContactUs,
+                        style: AppTextStyles.caption(context).copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: textColor,
+                        ),
+                      ),
                       const SizedBox(height: 6),
-                      if (contact.email != null) _ContactRow(icon: Icons.email_outlined, text: contact.email!),
-                      if (contact.phone != null) _ContactRow(icon: Icons.phone_outlined, text: contact.phone!),
+                      if (contact.email != null)
+                        _ContactRow(
+                          icon: Icons.email_outlined,
+                          text: contact.email!,
+                        ),
+                      if (contact.phone != null)
+                        _ContactRow(
+                          icon: Icons.phone_outlined,
+                          text: contact.phone!,
+                        ),
                       if (contact.instagram != null)
-                        _ContactRow(icon: Icons.camera_alt_outlined, text: contact.instagram!),
+                        _ContactRow(
+                          icon: Icons.camera_alt_outlined,
+                          text: contact.instagram!,
+                        ),
                     ],
                   );
                 },
@@ -263,10 +319,14 @@ class _ContactRow extends StatelessWidget {
           Icon(icon, size: 14, color: JadalColors.judgesGrey),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(text,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey)),
+            child: Text(
+              text,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
+            ),
           ),
         ],
       ),

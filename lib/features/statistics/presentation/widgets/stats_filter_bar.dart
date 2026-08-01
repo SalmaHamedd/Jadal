@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debater_stats_models.dart';
 import '../cubits/debater_stats_cubit.dart';
 import 'stats_theme.dart';
@@ -146,7 +147,10 @@ class StatsFilterBar extends StatelessWidget {
     if (current != null) {
       final parts = current.split('-');
       if (parts.length == 2) {
-        initial = DateTime(int.tryParse(parts[0]) ?? now.year, int.tryParse(parts[1]) ?? 1);
+        initial = DateTime(
+          int.tryParse(parts[0]) ?? now.year,
+          int.tryParse(parts[1]) ?? 1,
+        );
       }
     }
     final picked = await showDatePicker(
@@ -178,10 +182,8 @@ class _ChipRow extends StatelessWidget {
             children: [
               Text(
                 label,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
+                style: AppTextStyles.small(context).copyWith(
                   fontWeight: FontWeight.w800,
-                  fontSize: 11.5,
                   letterSpacing: 0.4,
                   color: StatsTheme.textSecondary(context),
                 ),
@@ -193,9 +195,7 @@ class _ChipRow extends StatelessWidget {
                     hint!,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 10.5,
+                    style: AppTextStyles.small(context).copyWith(
                       fontStyle: FontStyle.italic,
                       color: JadalColors.primaryOrange,
                     ),
@@ -242,15 +242,16 @@ class _MonthButton extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.calendar_month_rounded,
-                  size: 15, color: StatsTheme.textSecondary(context)),
+              Icon(
+                Icons.calendar_month_rounded,
+                size: 15,
+                color: StatsTheme.textSecondary(context),
+              ),
               const SizedBox(width: 6),
               Text(
                 text,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
+                style: AppTextStyles.body(context).copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
                   color: StatsTheme.textSecondary(context),
                 ),
               ),

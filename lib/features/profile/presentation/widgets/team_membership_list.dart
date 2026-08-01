@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/team_membership.dart';
 import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.dart';
@@ -84,12 +86,10 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
-                'لا توجد فرق سابقة',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 12.5,
-                  color: JadalColors.judgesGrey,
-                ),
+                context.loc.noPastTeams,
+                style: AppTextStyles.caption(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
               ),
             )
           else
@@ -137,12 +137,8 @@ class _HistoryToggle extends StatelessWidget {
                 size: 17,
               ),
         label: Text(
-          expanded ? 'إخفاء الفرق السابقة' : 'عرض الفرق السابقة',
-          style: const TextStyle(
-            fontFamily: 'Cairo',
-            fontSize: 12.5,
-            fontWeight: FontWeight.w600,
-          ),
+          expanded ? context.loc.hidePastTeams : context.loc.showPastTeams,
+          style: AppTextStyles.caption(context),
         ),
       ),
     );
@@ -161,20 +157,21 @@ class _TeamMembershipCard extends StatelessWidget {
     required this.isOwnProfile,
   });
 
-  String _elapsed() {
+  String _elapsed(BuildContext context) {
     final start = membership.joinedAt;
     if (start == null) return '';
     final end = membership.leftAt ?? DateTime.now();
     final days = end.difference(start).inDays;
-    if (days < 30) return '$daysد';
-    if (days < 365) return '${(days / 30).round()}ش';
-    return '${(days / 365).round()}س';
+    final loc = context.loc;
+    if (days < 30) return loc.elapsedDaysShort(days);
+    if (days < 365) return loc.elapsedMonthsShort((days / 30).round());
+    return loc.elapsedYearsShort((days / 365).round());
   }
 
-  String _roleLabel() => switch (membership.role) {
-    'leader' => 'قائد',
-    'trainer' => 'مدرب',
-    _ => 'عضو',
+  String _roleLabel(BuildContext context) => switch (membership.role) {
+    'leader' => context.loc.teamRoleLeader,
+    'trainer' => context.loc.teamRoleTrainer,
+    _ => context.loc.teamRoleMember,
   };
 
   @override
@@ -228,10 +225,7 @@ class _TeamMembershipCard extends StatelessWidget {
                       membership.teamName,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
+                      style: AppTextStyles.bodyEmphasis(context).copyWith(
                         color: past ? JadalColors.judgesGrey : textColor,
                       ),
                     ),
@@ -239,7 +233,7 @@ class _TeamMembershipCard extends StatelessWidget {
                     Row(
                       children: [
                         _Pill(
-                          label: _roleLabel(),
+                          label: _roleLabel(context),
                           color: past
                               ? JadalColors.judgesGrey
                               : JadalColors.primaryBlue,
@@ -247,7 +241,7 @@ class _TeamMembershipCard extends StatelessWidget {
                         if (!past) ...[
                           const SizedBox(width: 6),
                           _Pill(
-                            label: 'حالي',
+                            label: context.loc.currentPill,
                             color: JadalColors.positiveGreen,
                           ),
                         ],
@@ -258,12 +252,10 @@ class _TeamMembershipCard extends StatelessWidget {
               ),
               const SizedBox(width: 6),
               Text(
-                _elapsed(),
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 11,
-                  color: JadalColors.judgesGrey,
-                ),
+                _elapsed(context),
+                style: AppTextStyles.small(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
               ),
               const SizedBox(width: 2),
               Icon(
@@ -294,12 +286,9 @@ class _Pill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 10.5,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
+        style: AppTextStyles.small(
+          context,
+        ).copyWith(fontWeight: FontWeight.w700, color: color),
       ),
     );
   }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../data/models/debate_models.dart';
 import '../../domain/debate_result_view.dart';
@@ -115,12 +116,8 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
               const SizedBox(height: 12),
               Text(
                 loc.submitResultTitle,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w900,
-                  fontSize: 18,
-                  color: DebateTheme.textPrimary(context),
-                ),
+                style: AppTextStyles.headline(context)
+                    .copyWith(fontWeight: FontWeight.w900, color: DebateTheme.textPrimary(context)),
               ),
               const SizedBox(height: 2),
               Padding(
@@ -128,11 +125,8 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
                 child: Text(
                   loc.submitResultPrompt,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 12,
-                    color: DebateTheme.textSecondary(context),
-                  ),
+                  style: AppTextStyles.caption(context)
+                      .copyWith(color: DebateTheme.textSecondary(context)),
                 ),
               ),
               const SizedBox(height: 14),
@@ -177,10 +171,12 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
                     TextField(
                       controller: _notes,
                       maxLines: 3,
-                      style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context)),
+                      style: AppTextStyles.body(context)
+                          .copyWith(color: DebateTheme.textPrimary(context)),
                       decoration: InputDecoration(
                         hintText: loc.summaryNotesHint,
-                        hintStyle: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context)),
+                        hintStyle: AppTextStyles.body(context)
+                            .copyWith(color: DebateTheme.textSecondary(context)),
                         filled: true,
                         fillColor: DebateTheme.surfaceElevated(context),
                         border: OutlineInputBorder(
@@ -206,7 +202,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
                         : const Icon(Icons.check_rounded),
                     label: Text(
                       loc.submitResult,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                      style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800),
                     ),
                   ),
                 ),
@@ -223,12 +219,8 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
         alignment: AlignmentDirectional.centerStart,
         child: Text(
           text,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w800,
-            fontSize: 14,
-            color: DebateTheme.textPrimary(context),
-          ),
+          style: AppTextStyles.subtitle(context)
+              .copyWith(fontWeight: FontWeight.w800, color: DebateTheme.textPrimary(context)),
         ),
       );
 }
@@ -272,8 +264,7 @@ class _SideButton extends StatelessWidget {
             const SizedBox(width: 8),
             Text(
               label,
-              style: TextStyle(
-                fontFamily: 'Cairo',
+              style: AppTextStyles.button(context).copyWith(
                 fontWeight: FontWeight.w800,
                 color: selected ? color : DebateTheme.textPrimary(context),
               ),
@@ -314,18 +305,16 @@ class _StageSlider extends StatelessWidget {
                   stage.roleLabel,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 12, color: color),
+                  style: AppTextStyles.caption(context)
+                      .copyWith(fontWeight: FontWeight.w800, color: color),
                 ),
                 if (stage.speakerName.isNotEmpty)
                   Text(
                     stage.speakerName,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 10,
-                      color: DebateTheme.textSecondary(context),
-                    ),
+                    style: AppTextStyles.small(context)
+                        .copyWith(color: DebateTheme.textSecondary(context)),
                   ),
               ],
             ),
@@ -338,8 +327,8 @@ class _StageSlider extends StatelessWidget {
                 overlayColor: color.withValues(alpha: 0.16),
                 // The value bubble (pointer) follows the side colour, not blue (§U5).
                 valueIndicatorColor: color,
-                valueIndicatorTextStyle: const TextStyle(
-                    fontFamily: 'Cairo', color: Colors.white, fontWeight: FontWeight.w800),
+                valueIndicatorTextStyle: AppTextStyles.button(context)
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.w800),
                 showValueIndicator: ShowValueIndicator.onDrag,
               ),
               child: Slider(
@@ -357,11 +346,8 @@ class _StageSlider extends StatelessWidget {
             child: Text(
               display,
               textAlign: TextAlign.end,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w900,
-                color: DebateTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.bodyEmphasis(context)
+                  .copyWith(fontWeight: FontWeight.w900, color: DebateTheme.textPrimary(context)),
             ),
           ),
         ],

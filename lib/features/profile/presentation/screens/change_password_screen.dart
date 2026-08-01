@@ -1,6 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
@@ -47,10 +49,18 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
           bloc: _cubit,
           listener: (context, state) {
             if (state is ChangePasswordSuccess) {
-              JadalSnackBar.show(context, state.message, type: SnackBarType.success);
+              JadalSnackBar.show(
+                context,
+                state.message,
+                type: SnackBarType.success,
+              );
               Navigator.pop(context);
             } else if (state is ChangePasswordError) {
-              JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+              JadalSnackBar.show(
+                context,
+                state.message,
+                type: SnackBarType.error,
+              );
             }
           },
           builder: (context, state) {
@@ -75,42 +85,41 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
                         ),
                         SizedBox(height: context.hp(2)),
                         Text(
-                          'Change Password',
-                          style: TextStyle(
-                            fontSize: context.fontSize(22),
-                            fontWeight: FontWeight.bold,
-                          ),
+                          context.loc.changePasswordTitle,
+                          style: AppTextStyles.headline(context),
                         ),
                         SizedBox(height: context.hp(2)),
                         AuthTextField(
-                          label: 'Current Password',
+                          label: context.loc.currentPassword,
                           icon: Icons.lock,
                           obscureText: true,
                           controller: _currentPasswordController,
                         ),
                         SizedBox(height: context.hp(2)),
                         AuthTextField(
-                          label: 'New Password',
+                          label: context.loc.newPassword,
                           icon: Icons.lock_outline,
                           obscureText: true,
                           controller: _newPasswordController,
                         ),
                         SizedBox(height: context.hp(2)),
                         AuthTextField(
-                          label: 'Confirm Password',
+                          label: context.loc.confirmPassword,
                           icon: Icons.lock_outline,
                           obscureText: true,
                           controller: _confirmPasswordController,
                         ),
                         SizedBox(height: context.hp(3)),
                         AuthButton(
-                          text: 'Update Password',
+                          text: context.loc.updatePasswordButton,
                           isLoading: state is ChangePasswordLoading,
                           onPressed: () {
                             _cubit.changePassword(
-                              currentPassword: _currentPasswordController.text.trim(),
+                              currentPassword: _currentPasswordController.text
+                                  .trim(),
                               newPassword: _newPasswordController.text.trim(),
-                              confirmPassword: _confirmPasswordController.text.trim(),
+                              confirmPassword: _confirmPasswordController.text
+                                  .trim(),
                             );
                           },
                         ),

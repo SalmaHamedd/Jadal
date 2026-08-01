@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 
 /// The small rounded status pill used on survey cards and detail screens
 /// (closing countdown, open/closed, already-responded, etc.).
@@ -7,7 +8,12 @@ class SurveyStatusChip extends StatelessWidget {
   final Color color;
   final IconData? icon;
 
-  const SurveyStatusChip({super.key, required this.label, required this.color, this.icon});
+  const SurveyStatusChip({
+    super.key,
+    required this.label,
+    required this.color,
+    this.icon,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -26,12 +32,7 @@ class SurveyStatusChip extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
+            style: AppTextStyles.small(context).copyWith(color: color),
           ),
         ],
       ),

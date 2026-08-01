@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/screens/achievements_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
@@ -29,21 +30,27 @@ class AchievementsStrip extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(context.loc.achievements,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 15,
-                  color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
-                )),
+            Text(
+              context.loc.achievements,
+              style: AppTextStyles.subtitle(context).copyWith(
+                fontWeight: FontWeight.w800,
+                color: isDark
+                    ? JadalColors.darkTextPrimary
+                    : JadalColors.lightTextPrimary,
+              ),
+            ),
             TextButton(
               onPressed: () => Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => AchievementsScreen(userId: userId, userName: userName),
+                  builder: (_) =>
+                      AchievementsScreen(userId: userId, userName: userName),
                 ),
               ),
-              child: Text(context.loc.showAll, style: const TextStyle(fontFamily: 'Cairo')),
+              child: Text(
+                context.loc.showAll,
+                style: AppTextStyles.button(context),
+              ),
             ),
           ],
         ),

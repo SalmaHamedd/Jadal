@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/survey_repository_impl.dart';
 import 'package:jadal_app/features/surveys/domain/repositories/survey_repository.dart';
@@ -21,7 +22,7 @@ class SurveysScreen extends StatelessWidget {
         appBar: AppBar(
           title: Text(
             context.loc.drawerSurveys,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            style: AppTextStyles.title(context),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -58,7 +59,8 @@ class SurveysScreen extends StatelessWidget {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (_) => SurveyDetailsScreen(surveyId: survey.id),
+                              builder: (_) =>
+                                  SurveyDetailsScreen(surveyId: survey.id),
                             ),
                           );
                           if (context.mounted) {

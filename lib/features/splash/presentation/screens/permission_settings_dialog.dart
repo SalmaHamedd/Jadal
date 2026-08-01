@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/extensions/responsive_extension.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/permissions_service.dart';
 
 /// Shows a frosted-glass dialog telling the user which permissions
@@ -96,13 +96,8 @@ class PermissionSettingsDialog extends StatelessWidget {
                 Text(
                   loc.permissionsRequiredTitle, // "Permissions Required"
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: context.fontSize(19, min: 16, max: 22),
-                    fontWeight: FontWeight.w800,
-                    color: textPrimary,
-                    letterSpacing: 0.3,
-                  ),
+                  style: AppTextStyles.headline(context)
+                      .copyWith(color: textPrimary, letterSpacing: 0.3),
                 ),
                 const SizedBox(height: 8),
 
@@ -112,12 +107,8 @@ class PermissionSettingsDialog extends StatelessWidget {
                   // "Some permissions were denied. Enable them in Settings
                   //  to use all features of Jadal."
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: context.fontSize(13, min: 11, max: 14),
-                    color: textSecondary,
-                    height: 1.5,
-                  ),
+                  style: AppTextStyles.body(context)
+                      .copyWith(color: textSecondary, height: 1.5),
                 ),
                 const SizedBox(height: 22),
 
@@ -176,12 +167,7 @@ class PermissionSettingsDialog extends StatelessWidget {
                         const SizedBox(width: 8),
                         Text(
                           loc.openSettings, // "Open Settings"
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 15,
-                            fontWeight: FontWeight.w700,
-                            letterSpacing: 0.2,
-                          ),
+                          style: AppTextStyles.button(context).copyWith(letterSpacing: 0.2),
                         ),
                       ],
                     ),
@@ -203,12 +189,8 @@ class PermissionSettingsDialog extends StatelessWidget {
                     ),
                     child: Text(
                       loc.skipForNow, // "Skip for now"
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: context.fontSize(13, min: 11, max: 14),
-                        fontWeight: FontWeight.w600,
-                        color: textSecondary,
-                      ),
+                      style: AppTextStyles.caption(context)
+                          .copyWith(fontWeight: FontWeight.w600, color: textSecondary),
                     ),
                   ),
                 ),
@@ -270,12 +252,8 @@ class _PermissionRow extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: textPrimary,
-                  ),
+                  style: AppTextStyles.body(context)
+                      .copyWith(fontWeight: FontWeight.w600, color: textPrimary),
                 ),
               ),
               Icon(

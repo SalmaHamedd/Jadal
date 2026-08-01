@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/services/token_storage.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/registration_models.dart';
@@ -105,12 +106,8 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
             ),
             Text(
               loc.registerTitle,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w800,
-                fontSize: 16,
-                color: DebateTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.title(context)
+                  .copyWith(color: DebateTheme.textPrimary(context)),
             ),
             const SizedBox(height: 16),
             if (_resolving)
@@ -196,7 +193,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
               : Icon(icon),
           label: Text(
             label,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800),
           ),
         ),
       ),
@@ -289,12 +286,8 @@ class _TeamPickerDialog extends StatelessWidget {
                   Expanded(
                     child: Text(
                       loc.registerAsTeam,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 16,
-                        color: DebateTheme.textPrimary(context),
-                      ),
+                      style: AppTextStyles.title(context)
+                          .copyWith(color: DebateTheme.textPrimary(context)),
                     ),
                   ),
                   IconButton(
@@ -368,17 +361,13 @@ class _TeamTile extends StatelessWidget {
                       team.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 14,
-                        color: eligible ? primary : muted,
-                      ),
+                      style: AppTextStyles.subtitle(context)
+                          .copyWith(color: eligible ? primary : muted),
                     ),
                     const SizedBox(height: 2),
                     Text(
                       '${team.membersCount} members',
-                      style: TextStyle(fontFamily: 'Cairo', fontSize: 11.5, color: muted),
+                      style: AppTextStyles.caption(context).copyWith(color: muted),
                     ),
                   ],
                 ),
@@ -395,12 +384,8 @@ class _TeamTile extends StatelessWidget {
                   ),
                   child: Text(
                     _TeamPickerDialog._reasonLabel(team.ineligibleReason),
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 10.5,
-                      fontWeight: FontWeight.w700,
-                      color: muted,
-                    ),
+                    style: AppTextStyles.small(context)
+                        .copyWith(fontWeight: FontWeight.w700, color: muted),
                   ),
                 ),
             ],

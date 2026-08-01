@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import 'debate_settings_sheet.dart';
@@ -194,13 +195,8 @@ class _ChatButton extends StatelessWidget {
               ),
               child: Text(
                 unread > 9 ? '9+' : '$unread',
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  color: Colors.white,
-                  fontSize: 9,
-                  fontWeight: FontWeight.w800,
-                  height: 1,
-                ),
+                style: AppTextStyles.small(context)
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
               ),
             ),
           ),

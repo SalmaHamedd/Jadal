@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../app_models/framework.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 import '../theme/hex_color.dart';
 
 class FrameworkChips extends StatelessWidget {
@@ -52,12 +53,7 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
+        style: AppTextStyles.small(context).copyWith(fontWeight: FontWeight.w700, color: color),
       ),
     );
   }

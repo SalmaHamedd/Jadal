@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/trainer_survey_repository_impl.dart';
 import 'package:jadal_app/features/surveys/domain/repositories/trainer_survey_repository.dart';
@@ -28,7 +29,7 @@ class TrainerSurveysScreen extends StatelessWidget {
               appBar: AppBar(
                 title: Text(
                   context.loc.trainerSurveysTitle,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                  style: AppTextStyles.title(context),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -40,13 +41,16 @@ class TrainerSurveysScreen extends StatelessWidget {
                 icon: const Icon(Icons.add),
                 label: Text(
                   context.loc.surveyNewSurvey,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                  style: AppTextStyles.button(
+                    context,
+                  ).copyWith(color: Colors.white),
                 ),
                 onPressed: () async {
                   final created = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CreateTrainerSurveyScreen(repository: repository),
+                      builder: (_) =>
+                          CreateTrainerSurveyScreen(repository: repository),
                     ),
                   );
                   if (created == true && context.mounted) {
@@ -63,12 +67,14 @@ class TrainerSurveysScreen extends StatelessWidget {
                     if (surveys.isEmpty) {
                       return SurveyEmptyState(
                         message: context.loc.trainerSurveyNoneYet,
-                        onRefresh: () => context.read<TrainerSurveyCubit>().loadSurveys(),
+                        onRefresh: () =>
+                            context.read<TrainerSurveyCubit>().loadSurveys(),
                       );
                     }
                     return RefreshIndicator(
                       color: JadalColors.primaryOrange,
-                      onRefresh: () => context.read<TrainerSurveyCubit>().loadSurveys(),
+                      onRefresh: () =>
+                          context.read<TrainerSurveyCubit>().loadSurveys(),
                       child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 90),
                         itemCount: surveys.length,
@@ -87,7 +93,9 @@ class TrainerSurveysScreen extends StatelessWidget {
                                 ),
                               );
                               if (context.mounted) {
-                                context.read<TrainerSurveyCubit>().loadSurveys();
+                                context
+                                    .read<TrainerSurveyCubit>()
+                                    .loadSurveys();
                               }
                             },
                           );
@@ -97,7 +105,8 @@ class TrainerSurveysScreen extends StatelessWidget {
                   } else if (state is TrainerSurveyError) {
                     return SurveyErrorView(
                       message: state.message,
-                      onRetry: () => context.read<TrainerSurveyCubit>().loadSurveys(),
+                      onRetry: () =>
+                          context.read<TrainerSurveyCubit>().loadSurveys(),
                     );
                   }
                   return const SizedBox();

@@ -7,6 +7,7 @@ import 'package:share_plus/share_plus.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../../profile/data/repositories/profile_repository.dart';
@@ -68,12 +69,15 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
     // the cubit's current state + filters.
     if (_id == null) {
       return Scaffold(
-        backgroundColor:
-            StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+        backgroundColor: StatsTheme.isDark(context)
+            ? JadalColors.darkBackground
+            : JadalColors.lightBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.loc.statsTitle,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(
+            context.loc.statsTitle,
+            style: AppTextStyles.title(context),
+          ),
         ),
         body: JadalGradientBackground(child: _resolving(context)),
       );
@@ -95,12 +99,18 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 52, color: JadalColors.judgesGrey),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 52,
+                color: JadalColors.judgesGrey,
+              ),
               const SizedBox(height: 12),
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
+                style: AppTextStyles.body(
+                  context,
+                ).copyWith(color: StatsTheme.textPrimary(context)),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
@@ -109,7 +119,10 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
                   _resolveSelf();
                 }),
                 icon: const Icon(Icons.refresh_rounded),
-                label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+                label: Text(
+                  context.loc.retry,
+                  style: AppTextStyles.button(context),
+                ),
               ),
             ],
           ),
@@ -118,7 +131,6 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
     }
     return const Center(child: CircularProgressIndicator());
   }
-
 }
 
 /// The ready-state scaffold (inside the BlocProvider). Holds the app bar with
@@ -128,11 +140,11 @@ class _StatsScaffold extends StatelessWidget {
   const _StatsScaffold({required this.debaterName});
 
   bool _hasData(DebaterStatsState s) => switch (s.kind) {
-        StatKind.ranking => s.ranking != null,
-        StatKind.improvement => s.improvement != null,
-        StatKind.activity => s.activity != null,
-        _ => s.bucketed != null,
-      };
+    StatKind.ranking => s.ranking != null,
+    StatKind.improvement => s.improvement != null,
+    StatKind.activity => s.activity != null,
+    _ => s.bucketed != null,
+  };
 
   Future<void> _export(BuildContext context, DebaterStatsState state) async {
     final messenger = ScaffoldMessenger.of(context);
@@ -156,7 +168,9 @@ class _StatsScaffold extends StatelessWidget {
         return;
       }
       final dir = await getTemporaryDirectory();
-      final file = File('${dir.path}/${StatsExcelExporter.fileName(state.kind)}');
+      final file = File(
+        '${dir.path}/${StatsExcelExporter.fileName(state.kind)}',
+      );
       await file.writeAsBytes(bytes, flush: true);
       await Share.shareXFiles(
         [XFile(file.path)],
@@ -171,13 +185,16 @@ class _StatsScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+      backgroundColor: StatsTheme.isDark(context)
+          ? JadalColors.darkBackground
+          : JadalColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
-          debaterName == null ? context.loc.statsTitle : context.loc.statsTitleWithName(debaterName!),
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+          debaterName == null
+              ? context.loc.statsTitle
+              : context.loc.statsTitleWithName(debaterName!),
+          style: AppTextStyles.title(context),
         ),
         actions: [
           BlocBuilder<DebaterStatsCubit, DebaterStatsState>(
@@ -224,13 +241,39 @@ class _KindSelector extends StatelessWidget {
   final StatKind active;
   const _KindSelector({required this.active});
 
-  List<({StatKind kind, String label, IconData icon})> _items(BuildContext context) => [
-    (kind: StatKind.winRate, label: context.loc.statsKindWinRate, icon: Icons.percent_rounded),
-    (kind: StatKind.avgScore, label: context.loc.statsKindAvgScore, icon: Icons.speed_rounded),
-    (kind: StatKind.bestSpeaker, label: context.loc.statsKindBestSpeaker, icon: Icons.workspace_premium_rounded),
-    (kind: StatKind.ranking, label: context.loc.statsKindRanking, icon: Icons.format_list_numbered_rounded),
-    (kind: StatKind.improvement, label: context.loc.statsKindImprovement, icon: Icons.trending_up_rounded),
-    (kind: StatKind.activity, label: context.loc.statsKindActivity, icon: Icons.local_fire_department_rounded),
+  List<({StatKind kind, String label, IconData icon})> _items(
+    BuildContext context,
+  ) => [
+    (
+      kind: StatKind.winRate,
+      label: context.loc.statsKindWinRate,
+      icon: Icons.percent_rounded,
+    ),
+    (
+      kind: StatKind.avgScore,
+      label: context.loc.statsKindAvgScore,
+      icon: Icons.speed_rounded,
+    ),
+    (
+      kind: StatKind.bestSpeaker,
+      label: context.loc.statsKindBestSpeaker,
+      icon: Icons.workspace_premium_rounded,
+    ),
+    (
+      kind: StatKind.ranking,
+      label: context.loc.statsKindRanking,
+      icon: Icons.format_list_numbered_rounded,
+    ),
+    (
+      kind: StatKind.improvement,
+      label: context.loc.statsKindImprovement,
+      icon: Icons.trending_up_rounded,
+    ),
+    (
+      kind: StatKind.activity,
+      label: context.loc.statsKindActivity,
+      icon: Icons.local_fire_department_rounded,
+    ),
   ];
 
   @override
@@ -252,15 +295,18 @@ class _KindSelector extends StatelessWidget {
               color: selected
                   ? null
                   : (StatsTheme.isDark(context)
-                      ? Colors.white.withValues(alpha: 0.06)
-                      : Colors.white.withValues(alpha: 0.7)),
+                        ? Colors.white.withValues(alpha: 0.06)
+                        : Colors.white.withValues(alpha: 0.7)),
               borderRadius: BorderRadius.circular(30),
               child: Ink(
                 decoration: selected
                     ? BoxDecoration(
                         borderRadius: BorderRadius.circular(30),
                         gradient: const LinearGradient(
-                          colors: [JadalColors.primaryBlue, JadalColors.primaryOrange],
+                          colors: [
+                            JadalColors.primaryBlue,
+                            JadalColors.primaryOrange,
+                          ],
                         ),
                       )
                     : null,
@@ -274,16 +320,20 @@ class _KindSelector extends StatelessWidget {
                         Icon(
                           item.icon,
                           size: 17,
-                          color: selected ? Colors.white : StatsTheme.textSecondary(context),
+                          color: selected
+                              ? Colors.white
+                              : StatsTheme.textSecondary(context),
                         ),
                         const SizedBox(width: 7),
                         Text(
                           item.label,
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                            fontSize: 13,
-                            color: selected ? Colors.white : StatsTheme.textSecondary(context),
+                          style: AppTextStyles.body(context).copyWith(
+                            fontWeight: selected
+                                ? FontWeight.w800
+                                : FontWeight.w600,
+                            color: selected
+                                ? Colors.white
+                                : StatsTheme.textSecondary(context),
                           ),
                         ),
                       ],
@@ -304,18 +354,21 @@ class _Content extends StatelessWidget {
   const _Content({required this.state});
 
   bool get _hasData => switch (state.kind) {
-        StatKind.ranking => state.ranking != null,
-        StatKind.improvement => state.improvement != null,
-        StatKind.activity => state.activity != null,
-        _ => state.bucketed != null,
-      };
+    StatKind.ranking => state.ranking != null,
+    StatKind.improvement => state.improvement != null,
+    StatKind.activity => state.activity != null,
+    _ => state.bucketed != null,
+  };
 
   @override
   Widget build(BuildContext context) {
     // Nothing for this stat yet → full loader / first-load error.
     if (!_hasData) {
       if (state.status == StatsStatus.error) {
-        return _ErrorCard(message: state.error ?? context.loc.statsSomethingWrong, state: state);
+        return _ErrorCard(
+          message: state.error ?? context.loc.statsSomethingWrong,
+          state: state,
+        );
       }
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 60),
@@ -334,7 +387,9 @@ class _Content extends StatelessWidget {
         ),
         // A non-blocking error banner over stale data (e.g. an invalid filter).
         if (state.status == StatsStatus.error)
-          _ErrorBanner(message: state.error ?? context.loc.statsCouldNotUpdateFilters),
+          _ErrorBanner(
+            message: state.error ?? context.loc.statsCouldNotUpdateFilters,
+          ),
         // View-family switch: bucketed charts share one key so they MORPH between
         // win-rate/avg-score/best-speaker; ranking & improvement cross-fade.
         AnimatedSwitcher(
@@ -357,7 +412,9 @@ class _Content extends StatelessWidget {
       case StatKind.improvement:
         return KeyedSubtree(
           key: const ValueKey('improvement'),
-          child: StatsCard(child: StatsImprovementView(data: state.improvement!)),
+          child: StatsCard(
+            child: StatsImprovementView(data: state.improvement!),
+          ),
         );
       case StatKind.activity:
         return KeyedSubtree(
@@ -399,10 +456,8 @@ class _BucketedHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontFamily: 'Cairo',
+          style: AppTextStyles.subtitle(context).copyWith(
             fontWeight: FontWeight.w800,
-            fontSize: 15,
             color: StatsTheme.textPrimary(context),
           ),
         ),
@@ -414,10 +469,8 @@ class _BucketedHeader extends StatelessWidget {
           ),
           child: Text(
             context.loc.statsDebatesCount(state.bucketed!.totalNDebates),
-            style: const TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.small(context).copyWith(
               fontWeight: FontWeight.w800,
-              fontSize: 11.5,
               color: JadalColors.primaryOrange,
             ),
           ),
@@ -457,16 +510,24 @@ class _ErrorBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: const Color(0xFFE53935).withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFE53935).withValues(alpha: 0.4)),
+        border: Border.all(
+          color: const Color(0xFFE53935).withValues(alpha: 0.4),
+        ),
       ),
       child: Row(
         children: [
-          const Icon(Icons.info_outline_rounded, color: Color(0xFFE53935), size: 18),
+          const Icon(
+            Icons.info_outline_rounded,
+            color: Color(0xFFE53935),
+            size: 18,
+          ),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
-              style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: StatsTheme.textPrimary(context)),
             ),
           ),
         ],
@@ -486,18 +547,27 @@ class _ErrorCard extends StatelessWidget {
     return StatsCard(
       child: Column(
         children: [
-          const Icon(Icons.error_outline_rounded, size: 44, color: JadalColors.judgesGrey),
+          const Icon(
+            Icons.error_outline_rounded,
+            size: 44,
+            color: JadalColors.judgesGrey,
+          ),
           const SizedBox(height: 10),
           Text(
             message,
             textAlign: TextAlign.center,
-            style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
+            style: AppTextStyles.body(
+              context,
+            ).copyWith(color: StatsTheme.textPrimary(context)),
           ),
           const SizedBox(height: 14),
           OutlinedButton.icon(
             onPressed: cubit.load,
             icon: const Icon(Icons.refresh_rounded),
-            label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+            label: Text(
+              context.loc.retry,
+              style: AppTextStyles.button(context),
+            ),
           ),
         ],
       ),

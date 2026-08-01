@@ -5,6 +5,7 @@ import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/avatar_palette.dart';
@@ -162,7 +163,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
           children: [
             TextField(
               onChanged: (v) => setState(() => _query = v),
-              style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context)),
+              style: AppTextStyles.body(context).copyWith(color: DebateTheme.textPrimary(context)),
               decoration: InputDecoration(
                 hintText: loc.searchHint,
                 prefixIcon: const Icon(Icons.search_rounded),
@@ -177,8 +178,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
               child: filtered.isEmpty
                   ? Center(
                       child: Text(loc.noMatches,
-                          style: TextStyle(
-                              fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+                          style: AppTextStyles.body(context).copyWith(color: DebateTheme.textSecondary(context))),
                     )
                   : ListView.separated(
                       itemCount: filtered.length,
@@ -213,9 +213,8 @@ class _AudienceDialogState extends State<AudienceDialog> {
                                 ),
                                 child: Text(
                                   avatarInitial(m.name),
-                                  style: const TextStyle(
+                                  style: AppTextStyles.body(context).copyWith(
                                     color: JadalColors.primaryBlue,
-                                    fontFamily: 'Cairo',
                                     fontWeight: FontWeight.w800,
                                   ),
                                 ),
@@ -226,8 +225,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
                                   m.isMe ? '${m.name} • ${loc.youTag}' : m.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
+                                  style: AppTextStyles.body(context).copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: DebateTheme.textPrimary(context),
                                   ),
@@ -242,9 +240,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
                                 ),
                                 child: Text(
                                   m.role,
-                                  style: const TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 11,
+                                  style: AppTextStyles.small(context).copyWith(
                                     fontWeight: FontWeight.w700,
                                     color: JadalColors.primaryBlue,
                                   ),
@@ -303,10 +299,7 @@ class MotionDialog extends StatelessWidget {
                       Text(
                         motion.text,
                         textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w800,
-                          fontSize: 19,
+                        style: AppTextStyles.headline(context).copyWith(
                           height: 1.5,
                           color: DebateTheme.textPrimary(context),
                         ),
@@ -357,12 +350,7 @@ class _MetaPill extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 11.5,
-          fontWeight: FontWeight.w700,
-          color: muted,
-        ),
+        style: AppTextStyles.small(context).copyWith(fontWeight: FontWeight.w700, color: muted),
       ),
     );
   }

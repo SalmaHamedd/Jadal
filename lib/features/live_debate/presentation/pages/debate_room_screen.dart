@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../../data/models/debate_models.dart';
@@ -513,23 +514,16 @@ class _MutedSpeakingBanner extends StatelessWidget {
                           children: [
                             Text(
                               loc.mutedSpeakingTitle,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w800,
-                                fontSize: 13.5,
-                                color: DebateTheme.textPrimary(context),
-                              ),
+                              style: AppTextStyles.bodyEmphasis(context).copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: DebateTheme.textPrimary(context)),
                             ),
                             Text(
                               loc.mutedSpeakingBody,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 11.5,
-                                height: 1.25,
-                                color: DebateTheme.textSecondary(context),
-                              ),
+                              style: AppTextStyles.caption(context).copyWith(
+                                  height: 1.25, color: DebateTheme.textSecondary(context)),
                             ),
                           ],
                         ),
@@ -544,11 +538,8 @@ class _MutedSpeakingBanner extends StatelessWidget {
                           ),
                           child: Text(
                             loc.unmuteAction,
-                            style: const TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w700,
-                              fontSize: 12,
-                            ),
+                            style: AppTextStyles.caption(context)
+                                .copyWith(fontWeight: FontWeight.w700),
                           ),
                         ),
                       ],
@@ -600,12 +591,8 @@ class _ConnectingView extends StatelessWidget {
             child: Text(
               loc.connectingToRoom,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                fontSize: 15,
-                color: DebateTheme.textSecondary(context),
-              ),
+              style: AppTextStyles.subtitle(context)
+                  .copyWith(fontWeight: FontWeight.w600, color: DebateTheme.textSecondary(context)),
             ),
           ),
         ],
@@ -635,12 +622,8 @@ class _ConnectionFailedView extends StatelessWidget {
             Text(
               loc.connectionFailed,
               textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w800,
-                fontSize: 17,
-                color: DebateTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.title(context)
+                  .copyWith(color: DebateTheme.textPrimary(context)),
             ),
             if (message.isNotEmpty) ...[
               const SizedBox(height: 8),
@@ -649,11 +632,8 @@ class _ConnectionFailedView extends StatelessWidget {
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 12,
-                  color: DebateTheme.textSecondary(context),
-                ),
+                style: AppTextStyles.caption(context)
+                    .copyWith(color: DebateTheme.textSecondary(context)),
               ),
             ],
             const SizedBox(height: 22),

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
@@ -125,8 +126,8 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                     ? Center(
                         child: Text(
                           loc.noMessages,
-                          style: TextStyle(
-                              fontFamily: 'Cairo', color: DebateTheme.textSecondary(context)),
+                          style: AppTextStyles.body(context)
+                              .copyWith(color: DebateTheme.textSecondary(context)),
                         ),
                       )
                     : Stack(
@@ -166,17 +167,14 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                                     children: [
                                       Text(
                                         m.senderName,
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
-                                          fontSize: 10,
+                                        style: AppTextStyles.small(context).copyWith(
                                           fontWeight: FontWeight.w700,
                                           color: mine ? Colors.white70 : primary,
                                         ),
                                       ),
                                       Text(
                                         m.message,
-                                        style: TextStyle(
-                                          fontFamily: 'Cairo',
+                                        style: AppTextStyles.body(context).copyWith(
                                           color: mine
                                               ? Colors.white
                                               : DebateTheme.textPrimary(context),
@@ -211,11 +209,9 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                                         children: [
                                           Text(
                                             loc.newMessages,
-                                            style: const TextStyle(
-                                              fontFamily: 'Cairo',
+                                            style: AppTextStyles.caption(context).copyWith(
                                               color: Colors.white,
                                               fontWeight: FontWeight.w800,
-                                              fontSize: 12,
                                             ),
                                           ),
                                           const SizedBox(width: 6),
@@ -240,8 +236,8 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                         controller: _controller,
                         textInputAction: TextInputAction.send,
                         onSubmitted: (_) => _send(cubit),
-                        style: TextStyle(
-                            fontFamily: 'Cairo', color: DebateTheme.textPrimary(context)),
+                        style: AppTextStyles.body(context)
+                            .copyWith(color: DebateTheme.textPrimary(context)),
                         decoration: InputDecoration(
                           hintText: loc.messageHint,
                           isDense: true,

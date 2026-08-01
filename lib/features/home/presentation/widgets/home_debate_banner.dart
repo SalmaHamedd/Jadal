@@ -1,7 +1,8 @@
-import 'dart:async';
+﻿import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
@@ -48,13 +49,16 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
     if (!mounted) return;
     final entries = <_BannerEntry>[];
     liveRes.fold((_) {}, (p) {
-      if (p.items.isNotEmpty) entries.add(_BannerEntry(_BannerKind.live, p.items.first));
+      if (p.items.isNotEmpty)
+        entries.add(_BannerEntry(_BannerKind.live, p.items.first));
     });
     regRes.fold((_) {}, (p) {
-      if (p.items.isNotEmpty) entries.add(_BannerEntry(_BannerKind.registration, p.items.first));
+      if (p.items.isNotEmpty)
+        entries.add(_BannerEntry(_BannerKind.registration, p.items.first));
     });
     doneRes.fold((_) {}, (p) {
-      if (p.items.isNotEmpty) entries.add(_BannerEntry(_BannerKind.done, p.items.first));
+      if (p.items.isNotEmpty)
+        entries.add(_BannerEntry(_BannerKind.done, p.items.first));
     });
     setState(() {
       _entries = entries;
@@ -69,8 +73,11 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
     _timer = Timer.periodic(const Duration(seconds: 6), (_) {
       if (!mounted || !_pageController.hasClients) return;
       final next = (_page + 1) % _entries.length;
-      _pageController.animateToPage(next,
-          duration: const Duration(milliseconds: 500), curve: Curves.easeOutCubic);
+      _pageController.animateToPage(
+        next,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.easeOutCubic,
+      );
     });
   }
 
@@ -84,7 +91,10 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
   @override
   Widget build(BuildContext context) {
     if (_loading) {
-      return const SizedBox(height: 140, child: Center(child: CircularProgressIndicator()));
+      return const SizedBox(
+        height: 140,
+        child: Center(child: CircularProgressIndicator()),
+      );
     }
     if (_entries.isEmpty) {
       return _BannerCard(
@@ -142,11 +152,14 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
 
   Widget _cardFor(_BannerEntry entry) {
     void onTap() => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => BackendDebateDetailScreen(debateId: entry.debate.id, title: entry.debate.title),
-          ),
-        );
+      context,
+      MaterialPageRoute(
+        builder: (_) => BackendDebateDetailScreen(
+          debateId: entry.debate.id,
+          title: entry.debate.title,
+        ),
+      ),
+    );
     // Surface the debate's motion (the actual topic) when one is out — it's
     // far more informative than a generic call-to-action line.
     final motionText = entry.debate.motion?.text.trim();
@@ -171,7 +184,9 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
           icon: Icons.how_to_reg_rounded,
           badge: 'OPEN',
           title: entry.debate.title,
-          subtitle: hasMotion ? motionText : 'Registration is open — tap to join in',
+          subtitle: hasMotion
+              ? motionText
+              : 'Registration is open — tap to join in',
           onTap: onTap,
         );
       case _BannerKind.done:
@@ -180,7 +195,9 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
           icon: Icons.emoji_events_rounded,
           badge: 'RESULT',
           title: entry.debate.title,
-          subtitle: hasMotion ? motionText : 'The result is out — tap to see it',
+          subtitle: hasMotion
+              ? motionText
+              : 'The result is out — tap to see it',
           onTap: onTap,
         );
     }
@@ -252,27 +269,28 @@ class _BannerCard extends StatelessWidget {
                         if (badge != null)
                           Container(
                             margin: const EdgeInsets.only(bottom: 4),
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 2,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white.withValues(alpha: 0.25),
                               borderRadius: BorderRadius.circular(8),
                             ),
-                            child: Text(badge!,
-                                style: const TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: 10,
-                                  fontWeight: FontWeight.w800,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
-                                )),
+                            child: Text(
+                              badge!,
+                              style: AppTextStyles.small(context).copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: Colors.white,
+                                letterSpacing: 0.5,
+                              ),
+                            ),
                           ),
                         Text(
                           title,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: const TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 15,
+                          style: AppTextStyles.subtitle(context).copyWith(
                             fontWeight: FontWeight.w800,
                             color: Colors.white,
                           ),
@@ -285,9 +303,8 @@ class _BannerCard extends StatelessWidget {
                           subtitle,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontSize: 11,
+                          style: AppTextStyles.small(context).copyWith(
+                            fontWeight: FontWeight.w500,
                             height: 1.35,
                             color: Colors.white.withValues(alpha: 0.9),
                           ),
@@ -296,7 +313,11 @@ class _BannerCard extends StatelessWidget {
                     ),
                   ),
                   if (onTap != null)
-                    const Icon(Icons.arrow_forward_ios_rounded, color: Colors.white, size: 16),
+                    const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      color: Colors.white,
+                      size: 16,
+                    ),
                 ],
               ),
             ),

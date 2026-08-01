@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debater_stats_models.dart';
 import 'stats_theme.dart';
 
@@ -19,7 +20,9 @@ class StatsRankingList extends StatelessWidget {
         child: Center(
           child: Text(
             'No qualifying debates yet.',
-            style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textSecondary(context)),
+            style: AppTextStyles.body(
+              context,
+            ).copyWith(color: StatsTheme.textSecondary(context)),
           ),
         ),
       );
@@ -31,10 +34,8 @@ class StatsRankingList extends StatelessWidget {
           padding: const EdgeInsets.only(left: 4, bottom: 10),
           child: Text(
             '${data.totalQualifyingDebates} qualifying debates',
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.caption(context).copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 12.5,
               color: StatsTheme.textSecondary(context),
             ),
           ),
@@ -60,7 +61,8 @@ class _RankRow extends StatefulWidget {
   State<_RankRow> createState() => _RankRowState();
 }
 
-class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin {
+class _RankRowState extends State<_RankRow>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _c = AnimationController(
     vsync: this,
     duration: const Duration(milliseconds: 420),
@@ -85,13 +87,17 @@ class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     final e = widget.entry;
     final won = e.debateWon;
-    final accent = e.side == 'proposition' ? JadalColors.primaryBlue : JadalColors.primaryOrange;
+    final accent = e.side == 'proposition'
+        ? JadalColors.primaryBlue
+        : JadalColors.primaryOrange;
 
     return FadeTransition(
       opacity: _c,
       child: SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, 0.12), end: Offset.zero)
-            .animate(CurvedAnimation(parent: _c, curve: Curves.easeOut)),
+        position: Tween<Offset>(
+          begin: const Offset(0, 0.12),
+          end: Offset.zero,
+        ).animate(CurvedAnimation(parent: _c, curve: Curves.easeOut)),
         child: Container(
           margin: const EdgeInsets.only(bottom: 10),
           padding: const EdgeInsets.all(12),
@@ -107,12 +113,8 @@ class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin 
                 width: 26,
                 child: Text(
                   '${widget.index + 1}',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: StatsTheme.textSecondary(context),
-                  ),
+                  style: AppTextStyles.subtitle(context)
+                      .copyWith(fontWeight: FontWeight.w800, color: StatsTheme.textSecondary(context)),
                 ),
               ),
               // Score dial.
@@ -130,12 +132,8 @@ class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin 
                 ),
                 child: Text(
                   e.normalizedScore.toStringAsFixed(0),
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w900,
-                    fontSize: 17,
-                  ),
+                  style: AppTextStyles.title(context)
+                      .copyWith(color: Colors.white, fontWeight: FontWeight.w900),
                 ),
               ),
               const SizedBox(width: 12),
@@ -144,13 +142,12 @@ class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin 
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      e.motionText.isNotEmpty ? e.motionText : 'Debate #${e.debateId}',
+                      e.motionText.isNotEmpty
+                          ? e.motionText
+                          : 'Debate #${e.debateId}',
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        fontSize: 13.5,
+                      style: AppTextStyles.bodyEmphasis(context).copyWith(
                         height: 1.3,
                         color: StatsTheme.textPrimary(context),
                       ),
@@ -162,8 +159,10 @@ class _RankRowState extends State<_RankRow> with SingleTickerProviderStateMixin 
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         _MiniTag(text: e.debateDate),
-                        if (e.frameworkLabel != null) _MiniTag(text: e.frameworkLabel!),
-                        for (final p in e.positionsHeld) _MiniTag(text: p, accent: accent),
+                        if (e.frameworkLabel != null)
+                          _MiniTag(text: e.frameworkLabel!),
+                        for (final p in e.positionsHeld)
+                          _MiniTag(text: p, accent: accent),
                         if (e.rawReplyScore != null)
                           _MiniTag(text: 'reply ${e.rawReplyScore}'),
                       ],
@@ -197,9 +196,7 @@ class _MiniTag extends StatelessWidget {
       ),
       child: Text(
         text,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 10.5,
+        style: AppTextStyles.small(context).copyWith(
           fontWeight: FontWeight.w700,
           color: accent ?? StatsTheme.textSecondary(context),
         ),
@@ -224,16 +221,17 @@ class _WinBadge extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(won ? Icons.emoji_events_rounded : Icons.close_rounded, size: 14, color: color),
+          Icon(
+            won ? Icons.emoji_events_rounded : Icons.close_rounded,
+            size: 14,
+            color: color,
+          ),
           const SizedBox(width: 4),
           Text(
             won ? 'Won' : 'Lost',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 11,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            style: AppTextStyles.small(
+              context,
+            ).copyWith(fontWeight: FontWeight.w800, color: color),
           ),
         ],
       ),

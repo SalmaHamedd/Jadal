@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../theme/app_text_styles.dart';
+
 enum SnackBarType { error, warning, success }
 
 class JadalSnackBar {
@@ -75,7 +77,8 @@ class JadalSnackBar {
                 Expanded(
                   child: Text(
                     message,
-                    style: TextStyle(fontFamily: 'Cairo', fontSize: 14, fontWeight: FontWeight.w500, color: textColor, height: 1.4),
+                    style: AppTextStyles.body(context)
+                        .copyWith(fontWeight: FontWeight.w500, color: textColor, height: 1.4),
                   ),
                 ),
               ],

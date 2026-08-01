@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/search/domain/entities/search_team.dart';
 import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.dart';
 
@@ -64,12 +65,8 @@ class SearchTeamCard extends StatelessWidget {
                           team.name.isEmpty
                               ? '?'
                               : team.name.characters.first.toUpperCase(),
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontWeight: FontWeight.w800,
-                            fontSize: context.fontSize(16),
-                            color: Colors.white,
-                          ),
+                          style: AppTextStyles.subtitle(context)
+                              .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
                         )
                       : null,
                 ),
@@ -83,9 +80,7 @@ class SearchTeamCard extends StatelessWidget {
                       team.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: context.fontSize(15),
+                      style: AppTextStyles.subtitle(context).copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark
                             ? JadalColors.darkTextPrimary
@@ -119,9 +114,7 @@ class SearchTeamCard extends StatelessWidget {
                                 context.loc.membersCountLabel(
                                   team.membersCount,
                                 ),
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontSize: context.fontSize(11),
+                                style: AppTextStyles.small(context).copyWith(
                                   fontWeight: FontWeight.w800,
                                   color: JadalColors.primaryBlue,
                                 ),
@@ -135,9 +128,7 @@ class SearchTeamCard extends StatelessWidget {
                             context.loc.coachNameLabel(team.trainer.name),
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: context.fontSize(12),
+                            style: AppTextStyles.caption(context).copyWith(
                               color: isDark
                                   ? JadalColors.darkTextSecondary
                                   : JadalColors.lightTextSecondary,

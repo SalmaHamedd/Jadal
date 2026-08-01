@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../../profile/presentation/screens/user_profile_screen.dart';
@@ -21,14 +22,18 @@ class PublicStatsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => LeaderboardCubit(repo: di.sl<LeaderboardRepository>())..load(),
+      create: (_) =>
+          LeaderboardCubit(repo: di.sl<LeaderboardRepository>())..load(),
       child: Scaffold(
-        backgroundColor:
-            StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+        backgroundColor: StatsTheme.isDark(context)
+            ? JadalColors.darkBackground
+            : JadalColors.lightBackground,
         appBar: AppBar(
           backgroundColor: Colors.transparent,
-          title: Text(context.loc.statsTopOfJadal,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(
+            context.loc.statsTopOfJadal,
+            style: AppTextStyles.title(context),
+          ),
         ),
         body: const JadalGradientBackground(child: _Body()),
       ),
@@ -74,7 +79,9 @@ class _ScopeSwitch extends StatelessWidget {
       height: 44,
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: dark ? Colors.white.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.7),
+        color: dark
+            ? Colors.white.withValues(alpha: 0.06)
+            : Colors.white.withValues(alpha: 0.7),
         borderRadius: BorderRadius.circular(16),
       ),
       child: Row(
@@ -129,16 +136,21 @@ class _ScopeButton extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon,
-                  size: 17, color: selected ? Colors.white : StatsTheme.textSecondary(context)),
+              Icon(
+                icon,
+                size: 17,
+                color: selected
+                    ? Colors.white
+                    : StatsTheme.textSecondary(context),
+              ),
               const SizedBox(width: 7),
               Text(
                 label,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13.5,
+                style: AppTextStyles.body(context).copyWith(
                   fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                  color: selected ? Colors.white : StatsTheme.textSecondary(context),
+                  color: selected
+                      ? Colors.white
+                      : StatsTheme.textSecondary(context),
                 ),
               ),
             ],
@@ -154,7 +166,8 @@ class _MetricChips extends StatelessWidget {
   final ValueChanged<LeaderboardMetric> onChanged;
   const _MetricChips({required this.state, required this.onChanged});
 
-  static String _label(BuildContext context, LeaderboardMetric m) => switch (m) {
+  static String _label(BuildContext context, LeaderboardMetric m) =>
+      switch (m) {
         LeaderboardMetric.points => context.loc.statsMetricPoints,
         LeaderboardMetric.winRate => context.loc.statsKindWinRate,
         LeaderboardMetric.avgScore => context.loc.statsKindAvgScore,
@@ -195,18 +208,27 @@ class _Board extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 44, color: JadalColors.judgesGrey),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 44,
+              color: JadalColors.judgesGrey,
+            ),
             const SizedBox(height: 10),
             Text(
               state.error ?? context.loc.statsSomethingWrong,
               textAlign: TextAlign.center,
-              style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: StatsTheme.textPrimary(context)),
             ),
             const SizedBox(height: 14),
             OutlinedButton.icon(
               onPressed: context.read<LeaderboardCubit>().load,
               icon: const Icon(Icons.refresh_rounded),
-              label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+              label: Text(
+                context.loc.retry,
+                style: AppTextStyles.button(context),
+              ),
             ),
           ],
         ),
@@ -221,7 +243,9 @@ class _Board extends StatelessWidget {
         child: Center(
           child: Text(
             context.loc.statsNoEntriesYet,
-            style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textSecondary(context)),
+            style: AppTextStyles.body(
+              context,
+            ).copyWith(color: StatsTheme.textSecondary(context)),
           ),
         ),
       );
@@ -235,10 +259,8 @@ class _Board extends StatelessWidget {
           key: ValueKey('${board.scope}-${board.metric}'),
           padding: EdgeInsets.zero,
           itemCount: board.entries.length,
-          separatorBuilder: (_, _) => Divider(
-            height: 1,
-            color: StatsTheme.border(context),
-          ),
+          separatorBuilder: (_, _) =>
+              Divider(height: 1, color: StatsTheme.border(context)),
           itemBuilder: (context, i) {
             final entry = board.entries[i];
             return LeaderboardRow(
@@ -248,14 +270,14 @@ class _Board extends StatelessWidget {
               // screen in the app yet, so team rows stay non-tappable.
               onTap: board.scope == LeaderboardScope.debaters
                   ? () => Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (_) => UserProfileScreen(
-                            userId: entry.subjectId,
-                            userName: entry.name,
-                          ),
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => UserProfileScreen(
+                          userId: entry.subjectId,
+                          userName: entry.name,
                         ),
-                      )
+                      ),
+                    )
                   : null,
             );
           },
@@ -271,20 +293,26 @@ class LeaderboardRow extends StatelessWidget {
   final LeaderboardEntry entry;
   final LeaderboardMetric metric;
   final VoidCallback? onTap;
-  const LeaderboardRow({super.key, required this.entry, required this.metric, this.onTap});
+  const LeaderboardRow({
+    super.key,
+    required this.entry,
+    required this.metric,
+    this.onTap,
+  });
 
   static const _gold = Color(0xFFD4A017);
   static const _silver = Color(0xFF9AA0A6);
   static const _bronze = Color(0xFFCD7F32);
 
   static Color? medalColor(int rank) => switch (rank) {
-        1 => _gold,
-        2 => _silver,
-        3 => _bronze,
-        _ => null,
-      };
+    1 => _gold,
+    2 => _silver,
+    3 => _bronze,
+    _ => null,
+  };
 
-  static String formatValue(LeaderboardMetric metric, num value) => switch (metric) {
+  static String formatValue(LeaderboardMetric metric, num value) =>
+      switch (metric) {
         LeaderboardMetric.points => '${value.round()}',
         LeaderboardMetric.winRate => '${(value * 100).toStringAsFixed(0)}%',
         LeaderboardMetric.avgScore => value.toStringAsFixed(1),
@@ -310,10 +338,8 @@ class LeaderboardRow extends StatelessWidget {
                   : Text(
                       '${entry.rank}',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
+                      style: AppTextStyles.body(context).copyWith(
                         fontWeight: FontWeight.w800,
-                        fontSize: 13,
                         color: StatsTheme.textSecondary(context),
                       ),
                     ),
@@ -322,16 +348,17 @@ class LeaderboardRow extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: JadalColors.primaryBlue.withValues(alpha: 0.85),
-              backgroundImage: (entry.imageUrl != null && entry.imageUrl!.isNotEmpty)
+              backgroundImage:
+                  (entry.imageUrl != null && entry.imageUrl!.isNotEmpty)
                   ? NetworkImage(entry.imageUrl!)
                   : null,
               child: (entry.imageUrl == null || entry.imageUrl!.isEmpty)
                   ? Text(
-                      entry.name.isEmpty ? '?' : entry.name.characters.first.toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
+                      entry.name.isEmpty
+                          ? '?'
+                          : entry.name.characters.first.toUpperCase(),
+                      style: AppTextStyles.body(context).copyWith(
                         fontWeight: FontWeight.w800,
-                        fontSize: 13,
                         color: Colors.white,
                       ),
                     )
@@ -343,27 +370,24 @@ class LeaderboardRow extends StatelessWidget {
                 entry.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 13.5,
-                  color: StatsTheme.textPrimary(context),
-                ),
+                style: AppTextStyles.bodyEmphasis(
+                  context,
+                ).copyWith(color: StatsTheme.textPrimary(context)),
               ),
             ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
-                color: (medal ?? JadalColors.primaryOrange).withValues(alpha: 0.12),
+                color: (medal ?? JadalColors.primaryOrange).withValues(
+                  alpha: 0.12,
+                ),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 formatValue(metric, entry.value),
-                style: TextStyle(
-                  fontFamily: 'Cairo',
+                style: AppTextStyles.caption(context).copyWith(
                   fontWeight: FontWeight.w800,
-                  fontSize: 12.5,
                   color: medal ?? JadalColors.primaryOrange,
                 ),
               ),

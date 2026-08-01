@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 
 class ProfileActionButton extends StatelessWidget {
   final String text;
@@ -28,7 +29,9 @@ class ProfileActionButton extends StatelessWidget {
           : const SizedBox.shrink(),
       label: Text(
         text,
-        style: TextStyle(color: textColor ?? JadalColors.primaryBlue),
+        style: AppTextStyles.button(
+          context,
+        ).copyWith(color: textColor ?? JadalColors.primaryBlue),
       ),
       style: OutlinedButton.styleFrom(
         foregroundColor: borderColor ?? JadalColors.primaryBlue,

@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debate_models.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_access.dart';
@@ -114,7 +115,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                       icon: const Icon(Icons.reorder_rounded),
                       label: Text(
                         order.isSet ? loc.updateSpeakerOrder : loc.selectSpeakerOrder,
-                        style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                        style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800),
                       ),
                       onPressed: () => showDialog(
                         context: context,
@@ -180,10 +181,8 @@ class _PrepBanner extends StatelessWidget {
               Icon(Icons.timer_outlined, size: 18, color: accent),
               const SizedBox(width: 8),
               Text('${loc.prepEndsIn}: $remainingLabel',
-                  style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      color: DebateTheme.textPrimary(context))),
+                  style: AppTextStyles.bodyEmphasis(context)
+                      .copyWith(color: DebateTheme.textPrimary(context))),
             ],
           ),
           const SizedBox(height: 6),
@@ -196,8 +195,8 @@ class _PrepBanner extends StatelessWidget {
               Expanded(
                 child: Text(
                   orderSet ? loc.orderSet : loc.orderNotSet,
-                  style: TextStyle(
-                      fontFamily: 'Cairo', color: DebateTheme.textSecondary(context), fontSize: 12),
+                  style: AppTextStyles.caption(context)
+                      .copyWith(color: DebateTheme.textSecondary(context)),
                 ),
               ),
             ],
@@ -205,8 +204,8 @@ class _PrepBanner extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             isLeader ? loc.leaderHint : '${loc.notLeaderHint} ${leaderName ?? '—'}',
-            style: TextStyle(
-                fontFamily: 'Cairo', color: DebateTheme.textSecondary(context), fontSize: 11),
+            style: AppTextStyles.small(context)
+                .copyWith(color: DebateTheme.textSecondary(context)),
           ),
         ],
       ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/domain/entities/category.dart';
 import 'package:jadal_app/features/blog/domain/entities/tag.dart';
 
@@ -42,12 +43,7 @@ class _BlogChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: color,
-        ),
+        style: AppTextStyles.small(context).copyWith(fontWeight: FontWeight.w700, color: color),
       ),
     );
   }

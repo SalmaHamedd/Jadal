@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_list_model.dart';
@@ -54,6 +55,10 @@ class _DebateListScreenState extends State<DebateListScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final titleColor = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.deepBlue;
     final tabs = <({String label, String status})>[
       (label: loc.tabRegistration, status: DebateStatus.scheduled.wire),
       (label: loc.tabAnnounced, status: DebateStatus.announced.wire),
@@ -64,8 +69,9 @@ class _DebateListScreenState extends State<DebateListScreen> {
     ];
 
     // Light mode is blue-led (orange barely shows otherwise); dark keeps orange.
-    final tabColor =
-        DebateTheme.isDark(context) ? JadalColors.primaryOrange : JadalColors.primaryBlue;
+    final tabColor = DebateTheme.isDark(context)
+        ? JadalColors.primaryOrange
+        : JadalColors.primaryBlue;
 
     return DefaultTabController(
       length: tabs.length,
@@ -76,6 +82,7 @@ class _DebateListScreenState extends State<DebateListScreen> {
             backgroundColor: Colors.transparent,
             elevation: 0,
             scrolledUnderElevation: 0,
+            titleSpacing: 0,
             leading: _searching
                 ? null
                 : IconButton(
@@ -86,15 +93,19 @@ class _DebateListScreenState extends State<DebateListScreen> {
                 ? TextField(
                     controller: _searchController,
                     autofocus: true,
-                    style: const TextStyle(fontFamily: 'Cairo'),
+                    style: AppTextStyles.body(context),
                     decoration: InputDecoration(
                       hintText: loc.debatesTitle,
                       border: InputBorder.none,
                     ),
                     onChanged: (v) => setState(() => _query = v),
                   )
-                : Text(loc.debatesTitle,
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+                : Text(
+                    loc.debatesTitle,
+                    style: AppTextStyles.displayTitle(
+                      context,
+                    ).copyWith(color: titleColor),
+                  ),
             actions: [
               IconButton(
                 icon: Icon(_searching ? Icons.close : Icons.search),
@@ -126,14 +137,16 @@ class _DebateListScreenState extends State<DebateListScreen> {
                     indicatorWeight: 3,
                     labelColor: tabColor,
                     unselectedLabelColor: JadalColors.judgesGrey,
-                    labelStyle: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                    labelStyle: AppTextStyles.button(context),
                     tabs: [for (final t in tabs) Tab(text: t.label)],
                   ),
           ),
           body: _isFiltering
               ? _SearchResultsView(query: _query, filter: _filter)
               : TabBarView(
-                  children: [for (final t in tabs) _StatusTab(status: t.status)],
+                  children: [
+                    for (final t in tabs) _StatusTab(status: t.status),
+                  ],
                 ),
         ),
       ),
@@ -179,7 +192,8 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
   }
 
   void _onScroll() {
-    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 300) _load();
+    if (_scroll.position.pixels >= _scroll.position.maxScrollExtent - 300)
+      _load();
   }
 
   Future<void> _load() async {
@@ -189,9 +203,9 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       _error = null;
     });
     final res = await di.sl<LiveDebateRepository>().searchDebates(
-          widget.filter.copyWith(q: widget.query.isEmpty ? null : widget.query),
-          page: _page,
-        );
+      widget.filter.copyWith(q: widget.query.isEmpty ? null : widget.query),
+      page: _page,
+    );
     if (!mounted) return;
     res.fold(
       (f) => setState(() {
@@ -231,7 +245,9 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
             child: Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: DebateTheme.textSecondary(context).withValues(alpha: 0.06),
+                color: DebateTheme.textSecondary(
+                  context,
+                ).withValues(alpha: 0.06),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Image.asset(
@@ -243,8 +259,12 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
           ),
           const SizedBox(height: 16),
           Center(
-            child: Text(loc.noDebatesHere,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+            child: Text(
+              loc.noDebatesHere,
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: DebateTheme.textSecondary(context)),
+            ),
           ),
         ],
       );
@@ -266,9 +286,14 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
         final item = _items[i];
         return _DebateListCard(
           item: item,
-          onTap: () => Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => BackendDebateDetailScreen(debateId: item.id, title: item.title),
-          )),
+          onTap: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => BackendDebateDetailScreen(
+                debateId: item.id,
+                title: item.title,
+              ),
+            ),
+          ),
         );
       },
     );
@@ -282,8 +307,10 @@ class _StatusTab extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) =>
-          DebateListCubit(repo: di.sl<LiveDebateRepository>(), statusFilter: status)..load(),
+      create: (_) => DebateListCubit(
+        repo: di.sl<LiveDebateRepository>(),
+        statusFilter: status,
+      )..load(),
       child: const _StatusList(),
     );
   }
@@ -329,7 +356,8 @@ class _StatusListState extends State<_StatusList> {
         if (state.status == DebateListStatus.error && state.items.isEmpty) {
           return _ErrorRetry(message: state.error ?? '', onRetry: cubit.load);
         }
-        final showFooter = state.hasMore || state.status == DebateListStatus.loadingMore;
+        final showFooter =
+            state.hasMore || state.status == DebateListStatus.loadingMore;
         return RefreshIndicator(
           color: JadalColors.primaryOrange,
           onRefresh: cubit.refresh,
@@ -342,21 +370,27 @@ class _StatusListState extends State<_StatusList> {
                       child: Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: DebateTheme.textSecondary(context).withValues(alpha: 0.06),
+                          color: DebateTheme.textSecondary(
+                            context,
+                          ).withValues(alpha: 0.06),
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Image.asset(
                           AppImageAsset.emptyDebatesIllustration,
                           height: 160,
-                          errorBuilder: (_, _, _) => const SizedBox(height: 160),
+                          errorBuilder: (_, _, _) =>
+                              const SizedBox(height: 160),
                         ),
                       ),
                     ),
                     const SizedBox(height: 16),
                     Center(
-                      child: Text(loc.noDebatesHere,
-                          style: TextStyle(
-                              fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+                      child: Text(
+                        loc.noDebatesHere,
+                        style: AppTextStyles.body(
+                          context,
+                        ).copyWith(color: DebateTheme.textSecondary(context)),
+                      ),
                     ),
                   ],
                 )
@@ -376,10 +410,14 @@ class _StatusListState extends State<_StatusList> {
                     final item = state.items[i];
                     return _DebateListCard(
                       item: item,
-                      onTap: () => Navigator.of(context).push(MaterialPageRoute(
-                        builder: (_) =>
-                            BackendDebateDetailScreen(debateId: item.id, title: item.title),
-                      )),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => BackendDebateDetailScreen(
+                            debateId: item.id,
+                            title: item.title,
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ),
@@ -440,7 +478,10 @@ class _DebateListCard extends StatelessWidget {
                       gradient: LinearGradient(
                         begin: Alignment.topCenter,
                         end: Alignment.bottomCenter,
-                        colors: [JadalColors.primaryBlue, JadalColors.primaryOrange],
+                        colors: [
+                          JadalColors.primaryBlue,
+                          JadalColors.primaryOrange,
+                        ],
                       ),
                     ),
                   ),
@@ -454,10 +495,7 @@ class _DebateListCard extends StatelessWidget {
                             item.title,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.w800,
-                              fontSize: 17,
+                            style: AppTextStyles.title(context).copyWith(
                               height: 1.3,
                               color: DebateTheme.textPrimary(context),
                             ),
@@ -470,9 +508,7 @@ class _DebateListCard extends StatelessWidget {
                               item.motion!.text,
                               maxLines: 2,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: 14,
+                              style: AppTextStyles.body(context).copyWith(
                                 height: 1.4,
                                 color: DebateTheme.textSecondary(context),
                               ),
@@ -484,47 +520,62 @@ class _DebateListCard extends StatelessWidget {
                               if (item.tag != null && item.tag!.isNotEmpty) ...[
                                 Container(
                                   padding: const EdgeInsets.symmetric(
-                                      horizontal: 9, vertical: 3),
+                                    horizontal: 9,
+                                    vertical: 3,
+                                  ),
                                   decoration: BoxDecoration(
-                                    color: JadalColors.primaryOrange
-                                        .withValues(alpha: 0.12),
+                                    color: JadalColors.primaryOrange.withValues(
+                                      alpha: 0.12,
+                                    ),
                                     borderRadius: BorderRadius.circular(10),
                                   ),
-                                  child: Text(item.tag!,
-                                      style: const TextStyle(
-                                          fontFamily: 'Cairo',
-                                          fontSize: 11.5,
+                                  child: Text(
+                                    item.tag!,
+                                    style: AppTextStyles.small(context)
+                                        .copyWith(
                                           fontWeight: FontWeight.w700,
-                                          color: JadalColors.primaryOrange)),
+                                          color: JadalColors.primaryOrange,
+                                        ),
+                                  ),
                                 ),
                                 const SizedBox(width: 12),
                               ],
                               if (item.format.name != null) ...[
-                                Icon(Icons.tune_rounded,
-                                    size: 15,
-                                    color: DebateTheme.textSecondary(context)),
+                                Icon(
+                                  Icons.tune_rounded,
+                                  size: 15,
+                                  color: DebateTheme.textSecondary(context),
+                                ),
                                 const SizedBox(width: 5),
-                                Text(item.format.name!,
-                                    style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 12.5,
-                                        color: DebateTheme.textSecondary(context))),
+                                Text(
+                                  item.format.name!,
+                                  style: AppTextStyles.caption(context)
+                                      .copyWith(
+                                        color: DebateTheme.textSecondary(
+                                          context,
+                                        ),
+                                      ),
+                                ),
                                 const SizedBox(width: 14),
                               ],
                               if (item.scheduledAt != null) ...[
-                                Icon(Icons.event_rounded,
-                                    size: 15,
-                                    color: DebateTheme.textSecondary(context)),
+                                Icon(
+                                  Icons.event_rounded,
+                                  size: 15,
+                                  color: DebateTheme.textSecondary(context),
+                                ),
                                 const SizedBox(width: 5),
                                 Flexible(
                                   child: Text(
                                     formatDebateDate(item.scheduledAt),
                                     maxLines: 1,
                                     overflow: TextOverflow.ellipsis,
-                                    style: TextStyle(
-                                        fontFamily: 'Cairo',
-                                        fontSize: 12.5,
-                                        color: DebateTheme.textSecondary(context)),
+                                    style: AppTextStyles.caption(context)
+                                        .copyWith(
+                                          color: DebateTheme.textSecondary(
+                                            context,
+                                          ),
+                                        ),
                                   ),
                                 ),
                               ],
@@ -558,16 +609,24 @@ class _ErrorRetry extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.cloud_off_rounded, size: 56, color: JadalColors.judgesGrey),
+            const Icon(
+              Icons.cloud_off_rounded,
+              size: 56,
+              color: JadalColors.judgesGrey,
+            ),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: DebateTheme.textPrimary(context)),
+            ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: Text(loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+              label: Text(loc.retry, style: AppTextStyles.button(context)),
             ),
           ],
         ),
@@ -575,4 +634,3 @@ class _ErrorRetry extends StatelessWidget {
     );
   }
 }
-

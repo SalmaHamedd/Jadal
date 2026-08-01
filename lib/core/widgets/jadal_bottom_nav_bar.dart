@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 /// One tab for [JadalBottomNavBar].
 class JadalNavItem {
@@ -152,9 +153,7 @@ class _NavTapTarget extends StatelessWidget {
                     const SizedBox(height: 2),
                     AnimatedDefaultTextStyle(
                       duration: const Duration(milliseconds: 200),
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 11,
+                      style: AppTextStyles.small(context).copyWith(
                         fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
                         color: color,
                       ),

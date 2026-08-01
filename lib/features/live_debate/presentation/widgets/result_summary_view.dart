@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/debate_result_view.dart';
 import '../utils/debate_theme.dart';
 
@@ -39,12 +40,8 @@ class ResultSummaryView extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             loc.perSpeechScores,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w800,
-              fontSize: 15,
-              color: DebateTheme.textPrimary(context),
-            ),
+            style: AppTextStyles.subtitle(context)
+                .copyWith(color: DebateTheme.textPrimary(context)),
           ),
           const SizedBox(height: 8),
           for (final s in result.speeches)
@@ -96,29 +93,20 @@ class _WinnerHero extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             loc.winnerLabel.toUpperCase(),
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: 12,
-              letterSpacing: 1.5,
-              color: Colors.white70,
-            ),
+            style: AppTextStyles.caption(context)
+                .copyWith(fontWeight: FontWeight.w700, letterSpacing: 1.5, color: Colors.white70),
           ),
           const SizedBox(height: 2),
           Text(
             team,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w900,
-              fontSize: 22,
-              color: Colors.white,
-            ),
+            style: AppTextStyles.displayTitle(context)
+                .copyWith(fontWeight: FontWeight.w900, color: Colors.white),
           ),
           const SizedBox(height: 6),
           Text(
             loc.congratulations,
-            style: const TextStyle(fontFamily: 'Cairo', color: Colors.white70),
+            style: AppTextStyles.body(context).copyWith(color: Colors.white70),
           ),
         ],
       ),
@@ -146,11 +134,8 @@ class _AwaitingReveal extends StatelessWidget {
           Expanded(
             child: Text(
               loc.awaitingReveal,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                color: DebateTheme.textSecondary(context),
-                fontWeight: FontWeight.w600,
-              ),
+              style: AppTextStyles.body(context)
+                  .copyWith(color: DebateTheme.textSecondary(context)),
             ),
           ),
         ],
@@ -195,22 +180,13 @@ class _BestSpeakerCard extends StatelessWidget {
               children: [
                 Text(
                   loc.bestSpeakerLabel,
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w700,
-                    fontSize: 11,
-                    letterSpacing: 0.5,
-                    color: _gold,
-                  ),
+                  style: AppTextStyles.small(context)
+                      .copyWith(fontWeight: FontWeight.w700, letterSpacing: 0.5, color: _gold),
                 ),
                 Text(
                   speaker.speakerName,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 16,
-                    color: DebateTheme.textPrimary(context),
-                  ),
+                  style: AppTextStyles.title(context)
+                      .copyWith(color: DebateTheme.textPrimary(context)),
                 ),
               ],
             ),
@@ -249,11 +225,8 @@ class _SpeechScoreRow extends StatelessWidget {
               speech.speakerName.isNotEmpty ? speech.speakerName : '—',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                color: DebateTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.body(context)
+                  .copyWith(color: DebateTheme.textPrimary(context)),
             ),
           ),
           if (isBest) const Padding(
@@ -286,12 +259,7 @@ class _RolePill extends StatelessWidget {
         label,
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontWeight: FontWeight.w800,
-          fontSize: 11,
-          color: color,
-        ),
+        style: AppTextStyles.small(context).copyWith(fontWeight: FontWeight.w800, color: color),
       ),
     );
   }
@@ -308,12 +276,8 @@ class _ScoreText extends StatelessWidget {
         : (score! % 1 == 0 ? score!.toInt().toString() : score!.toStringAsFixed(1));
     return Text(
       value,
-      style: TextStyle(
-        fontFamily: 'Cairo',
-        fontWeight: FontWeight.w900,
-        fontSize: 16,
-        color: DebateTheme.textPrimary(context),
-      ),
+      style: AppTextStyles.title(context)
+          .copyWith(fontWeight: FontWeight.w900, color: DebateTheme.textPrimary(context)),
     );
   }
 }
@@ -339,11 +303,8 @@ class _NotesBlock extends StatelessWidget {
           const SizedBox(height: 6),
           Text(
             notes,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              height: 1.4,
-              color: DebateTheme.textPrimary(context),
-            ),
+            style: AppTextStyles.body(context)
+                .copyWith(height: 1.4, color: DebateTheme.textPrimary(context)),
           ),
         ],
       ),

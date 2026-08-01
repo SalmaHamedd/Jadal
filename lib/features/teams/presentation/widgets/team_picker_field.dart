@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/team_cubit.dart';
 
@@ -12,7 +13,11 @@ class TeamPickerField extends StatelessWidget {
   final Set<int> selectedIds;
   final ValueChanged<Set<int>> onChanged;
 
-  const TeamPickerField({super.key, required this.selectedIds, required this.onChanged});
+  const TeamPickerField({
+    super.key,
+    required this.selectedIds,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -44,17 +49,24 @@ class TeamPickerField extends StatelessWidget {
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.error_outline, color: Colors.red, size: 20),
+                      const Icon(
+                        Icons.error_outline,
+                        color: Colors.red,
+                        size: 20,
+                      ),
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           context.loc.teamLoadListFailed(state.message),
-                          style: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
+                          style: AppTextStyles.caption(context),
                         ),
                       ),
                       TextButton(
                         onPressed: () => context.read<TeamCubit>().loadTeams(),
-                        child: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+                        child: Text(
+                          context.loc.retry,
+                          style: AppTextStyles.button(context),
+                        ),
                       ),
                     ],
                   ),
@@ -64,18 +76,22 @@ class TeamPickerField extends StatelessWidget {
                   return Container(
                     padding: const EdgeInsets.all(14),
                     decoration: BoxDecoration(
-                      color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+                      color: isDark
+                          ? JadalColors.darkSurfaceElevated
+                          : Colors.grey.shade100,
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
                       context.loc.teamNoneAvailableForYou,
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 13),
+                      style: AppTextStyles.body(context),
                     ),
                   );
                 }
                 return Container(
                   decoration: BoxDecoration(
-                    color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+                    color: isDark
+                        ? JadalColors.darkSurfaceElevated
+                        : Colors.grey.shade100,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Column(
@@ -88,9 +104,7 @@ class TeamPickerField extends StatelessWidget {
                         dense: true,
                         title: Text(
                           team.name,
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontWeight: FontWeight.w600,
+                          style: AppTextStyles.body(context).copyWith(
                             color: isDark
                                 ? JadalColors.darkTextPrimary
                                 : JadalColors.lightTextPrimary,
@@ -98,10 +112,13 @@ class TeamPickerField extends StatelessWidget {
                         ),
                         subtitle: Text(
                           [
-                            context.loc.teamMembersCountShort(team.membersCount),
-                            if (team.leaderName != null) context.loc.teamLeaderLabel(team.leaderName!),
+                            context.loc.teamMembersCountShort(
+                              team.membersCount,
+                            ),
+                            if (team.leaderName != null)
+                              context.loc.teamLeaderLabel(team.leaderName!),
                           ].join(' • '),
-                          style: const TextStyle(fontFamily: 'Cairo', fontSize: 11.5),
+                          style: AppTextStyles.small(context),
                         ),
                         onChanged: (v) {
                           final next = {...selectedIds};

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
@@ -52,7 +53,10 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
       });
       return;
     }
-    _debounce = Timer(const Duration(milliseconds: 400), () => _search(query.trim()));
+    _debounce = Timer(
+      const Duration(milliseconds: 400),
+      () => _search(query.trim()),
+    );
   }
 
   Future<void> _search(String query) async {
@@ -77,8 +81,9 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final visibleResults =
-        _results.where((u) => !widget.excludeIds.contains(u.id)).toList();
+    final visibleResults = _results
+        .where((u) => !widget.excludeIds.contains(u.id))
+        .toList();
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -86,21 +91,29 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
         TextField(
           controller: _controller,
           onChanged: _onQueryChanged,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+          style: AppTextStyles.body(context).copyWith(
+            color: isDark
+                ? JadalColors.darkTextPrimary
+                : JadalColors.lightTextPrimary,
           ),
           decoration: InputDecoration(
             hintText: widget.hintText ?? context.loc.userSearchHint,
-            hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
+            hintStyle: AppTextStyles.body(
+              context,
+            ).copyWith(color: JadalColors.judgesGrey),
             prefixIcon: const Icon(Icons.search),
             filled: true,
-            fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+            fillColor: isDark
+                ? JadalColors.darkSurfaceElevated
+                : Colors.grey.shade100,
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(10),
               borderSide: BorderSide.none,
             ),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 12,
+            ),
           ),
         ),
         if (_loading)
@@ -119,7 +132,9 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
               context.loc.debateSearchFailed(_error ?? ''),
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.negativeRed),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.negativeRed),
             ),
           )
         else if (_controller.text.trim().isNotEmpty && visibleResults.isEmpty)
@@ -127,7 +142,9 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
             padding: const EdgeInsets.symmetric(vertical: 10),
             child: Text(
               context.loc.noResults,
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
             ),
           )
         else if (visibleResults.isNotEmpty)
@@ -144,7 +161,9 @@ class _UserSearchPickerState extends State<UserSearchPicker> {
                   onTap: () {
                     widget.onSelected(user);
                     setState(() {
-                      _results = _results.where((u) => u.id != user.id).toList();
+                      _results = _results
+                          .where((u) => u.id != user.id)
+                          .toList();
                     });
                   },
                 );
@@ -175,15 +194,17 @@ class _UserResultTile extends StatelessWidget {
             CircleAvatar(
               radius: 16,
               backgroundColor: JadalColors.primaryBlue,
-              backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+              backgroundImage: user.avatarUrl != null
+                  ? NetworkImage(user.avatarUrl!)
+                  : null,
               child: user.avatarUrl == null
                   ? Text(
-                      user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
+                      user.name.isEmpty
+                          ? '?'
+                          : user.name.characters.first.toUpperCase(),
+                      style: AppTextStyles.small(context).copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
-                        fontSize: 12,
                       ),
                     )
                   : null,
@@ -194,14 +215,18 @@ class _UserResultTile extends StatelessWidget {
                 user.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w600,
-                  color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                style: AppTextStyles.body(context).copyWith(
+                  color: isDark
+                      ? JadalColors.darkTextPrimary
+                      : JadalColors.lightTextPrimary,
                 ),
               ),
             ),
-            Icon(Icons.add_circle_outline, color: JadalColors.primaryOrange, size: 20),
+            Icon(
+              Icons.add_circle_outline,
+              color: JadalColors.primaryOrange,
+              size: 20,
+            ),
           ],
         ),
       ),

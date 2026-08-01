@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
@@ -29,7 +30,7 @@ class TeamsScreen extends StatelessWidget {
               appBar: AppBar(
                 title: Text(
                   context.loc.drawerMyTeams,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                  style: AppTextStyles.title(context),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -41,7 +42,9 @@ class TeamsScreen extends StatelessWidget {
                 icon: const Icon(Icons.add),
                 label: Text(
                   context.loc.teamNewTeamTitle,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                  style: AppTextStyles.button(
+                    context,
+                  ).copyWith(color: Colors.white),
                 ),
                 onPressed: () async {
                   final created = await Navigator.push(
@@ -72,7 +75,7 @@ class TeamsScreen extends StatelessWidget {
                             Center(
                               child: Text(
                                 context.loc.teamNoneYet,
-                                style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                                style: AppTextStyles.subtitle(context),
                               ),
                             ),
                           ],
@@ -112,23 +115,31 @@ class TeamsScreen extends StatelessWidget {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
+                          Icon(
+                            Icons.error_outline,
+                            size: 60,
+                            color: JadalColors.judgesGrey,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             context.loc.errorWithMessage(state.message),
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                            style: AppTextStyles.subtitle(context),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
-                            onPressed: () => context.read<TeamCubit>().loadTeams(),
+                            onPressed: () =>
+                                context.read<TeamCubit>().loadTeams(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: JadalColors.primaryOrange,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
                             ),
                             child: Text(context.loc.retry),
                           ),

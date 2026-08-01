@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../constants/constants.dart';
+import '../theme/app_text_styles.dart';
 
 /// Styled dialog shell used across the live-debate feature (§3.4).
 ///
@@ -75,13 +76,8 @@ class JadalDialog extends StatelessWidget {
                         title,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color: titleColor,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 16,
-                          letterSpacing: 0.2,
-                        ),
+                        style: AppTextStyles.title(context)
+                            .copyWith(color: titleColor, letterSpacing: 0.2),
                       ),
                     ),
                     if (showClose)

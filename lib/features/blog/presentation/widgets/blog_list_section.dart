@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
@@ -31,11 +32,7 @@ class BlogListSection extends StatelessWidget {
                 ),
                 child: Text(
                   context.loc.allArticles,
-                  style: TextStyle(
-                    fontSize: context.fontSize(18),
-                    fontWeight: FontWeight.bold,
-                    color: JadalColors.primaryBlue,
-                  ),
+                  style: AppTextStyles.headline(context).copyWith(color: JadalColors.primaryBlue),
                 ),
               ),
               Expanded(

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debate_models.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
@@ -161,15 +162,16 @@ void showPoiAcceptRefuse(BuildContext context, DebateController cubit,
     builder: (_) => AlertDialog(
       backgroundColor: DebateTheme.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-      title: Text(loc.poiTitle, style: const TextStyle(fontFamily: 'Cairo')),
-      content: Text(loc.poiPrompt, style: const TextStyle(fontFamily: 'Cairo')),
+      title: Text(loc.poiTitle, style: AppTextStyles.title(context)),
+      content: Text(loc.poiPrompt, style: AppTextStyles.body(context)),
       actions: [
         TextButton(
           onPressed: () {
             cubit.refusePOI(asker);
             Navigator.of(context).maybePop();
           },
-          child: Text(loc.refuse, style: const TextStyle(color: JadalColors.judgesGrey)),
+          child: Text(loc.refuse,
+              style: AppTextStyles.button(context).copyWith(color: JadalColors.judgesGrey)),
         ),
         TextButton(
           onPressed: () {
@@ -177,7 +179,8 @@ void showPoiAcceptRefuse(BuildContext context, DebateController cubit,
             Navigator.of(context).maybePop();
           },
           child: Text(loc.accept,
-              style: const TextStyle(color: JadalColors.primaryBlue, fontWeight: FontWeight.w700)),
+              style: AppTextStyles.button(context)
+                  .copyWith(color: JadalColors.primaryBlue, fontWeight: FontWeight.w700)),
         ),
       ],
     ),

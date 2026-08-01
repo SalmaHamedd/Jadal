@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/surveys/data/repositories/survey_repository_impl.dart';
@@ -50,11 +51,13 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
       );
       return;
     }
-    final answers = _answers.map((key, value) => MapEntry(key.toString(), value));
+    final answers = _answers.map(
+      (key, value) => MapEntry(key.toString(), value),
+    );
     context.read<SurveyResponseCubit>().submitResponse(
-          surveyId: details.id,
-          answers: answers,
-        );
+      surveyId: details.id,
+      answers: answers,
+    );
   }
 
   @override
@@ -65,7 +68,8 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
       providers: [
         BlocProvider<SurveyDetailsCubit>(
           create: (_) =>
-              SurveyDetailsCubit(_repository)..loadSurveyDetails(widget.surveyId),
+              SurveyDetailsCubit(_repository)
+                ..loadSurveyDetails(widget.surveyId),
         ),
         BlocProvider<SurveyResponseCubit>(
           create: (_) => SurveyResponseCubit(_repository),
@@ -77,7 +81,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
           appBar: AppBar(
             title: Text(
               context.loc.surveyDetailsTitle,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+              style: AppTextStyles.title(context),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -93,7 +97,11 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                   type: SnackBarType.success,
                 );
               } else if (state is SurveyResponseError) {
-                JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+                JadalSnackBar.show(
+                  context,
+                  state.message,
+                  type: SnackBarType.error,
+                );
               }
             },
             builder: (context, responseState) {
@@ -103,20 +111,23 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                     return const SurveyLoadingView();
                   } else if (detailsState is SurveyDetailsLoaded) {
                     final details = detailsState.details;
-                    final locked = details.isClosed || details.alreadyResponded || _submitted;
-                    final submitting = responseState is SurveyResponseSubmitting;
+                    final locked =
+                        details.isClosed ||
+                        details.alreadyResponded ||
+                        _submitted;
+                    final submitting =
+                        responseState is SurveyResponseSubmitting;
 
                     return SingleChildScrollView(
-                      padding: EdgeInsets.all(context.wp(5)).copyWith(bottom: 32),
+                      padding: EdgeInsets.all(
+                        context.wp(5),
+                      ).copyWith(bottom: 32),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
                             details.title,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontWeight: FontWeight.bold,
-                              fontSize: context.fontSize(22, min: 18, max: 26),
+                            style: AppTextStyles.displayTitle(context).copyWith(
                               color: isDark
                                   ? JadalColors.darkTextPrimary
                                   : JadalColors.lightTextPrimary,
@@ -125,9 +136,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                           const SizedBox(height: 8),
                           Text(
                             details.description,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: context.fontSize(14),
+                            style: AppTextStyles.body(context).copyWith(
                               height: 1.6,
                               color: isDark
                                   ? JadalColors.darkTextSecondary
@@ -135,7 +144,8 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                             ),
                           ),
                           const SizedBox(height: 20),
-                          if (locked) _buildLockedBanner(context, details, isDark),
+                          if (locked)
+                            _buildLockedBanner(context, details, isDark),
                           if (locked) const SizedBox(height: 20),
                           ...details.questions.asMap().entries.map((entry) {
                             final index = entry.key + 1;
@@ -147,7 +157,8 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                                 child: SurveyQuestionField(
                                   index: index,
                                   question: question,
-                                  onChanged: (value) => _answers[question.id] = value,
+                                  onChanged: (value) =>
+                                      _answers[question.id] = value,
                                 ),
                               ),
                             );
@@ -163,7 +174,9 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: JadalColors.primaryOrange,
                                   foregroundColor: Colors.white,
-                                  padding: const EdgeInsets.symmetric(vertical: 14),
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 14,
+                                  ),
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(12),
                                   ),
@@ -179,10 +192,9 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                                       )
                                     : Text(
                                         context.loc.surveySubmitAnswers,
-                                        style: const TextStyle(
-                                          fontFamily: 'Cairo',
-                                          fontWeight: FontWeight.w700,
-                                        ),
+                                        style: AppTextStyles.button(
+                                          context,
+                                        ).copyWith(color: Colors.white),
                                       ),
                               ),
                             ),
@@ -207,7 +219,11 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
     );
   }
 
-  Widget _buildLockedBanner(BuildContext context, SurveyDetails details, bool isDark) {
+  Widget _buildLockedBanner(
+    BuildContext context,
+    SurveyDetails details,
+    bool isDark,
+  ) {
     final String message;
     final IconData icon;
     final Color color;
@@ -237,11 +253,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
           Expanded(
             child: Text(
               message,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w600,
-                color: color,
-              ),
+              style: AppTextStyles.body(context).copyWith(color: color),
             ),
           ),
         ],

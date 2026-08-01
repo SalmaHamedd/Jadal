@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_text_styles.dart';
 import '../utils/debate_theme.dart';
 
 /// A lightweight in-body header used instead of an AppBar so the page's gradient
@@ -36,12 +37,7 @@ class DebateScreenHeader extends StatelessWidget {
               title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w800,
-                fontSize: 20,
-                color: c,
-              ),
+              style: AppTextStyles.headline(context).copyWith(color: c),
             ),
           ),
           ...actions,

@@ -1,7 +1,8 @@
-import 'package:cached_network_image/cached_network_image.dart';
+﻿import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/constants/appImgaeAsset.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 
 /// Rank → color, presentational only (backend just sends the enum string).
@@ -26,7 +27,11 @@ Color achievementRankColor(AchievementRank rank) {
 class AchievementBadge extends StatelessWidget {
   final Achievement achievement;
   final double size;
-  const AchievementBadge({super.key, required this.achievement, this.size = 64});
+  const AchievementBadge({
+    super.key,
+    required this.achievement,
+    this.size = 64,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -45,14 +50,21 @@ class AchievementBadge extends StatelessWidget {
               border: Border.all(color: color, width: 2.5),
             ),
             child: ClipOval(
-              child: (achievement.imageUrl != null && achievement.imageUrl!.isNotEmpty)
+              child:
+                  (achievement.imageUrl != null &&
+                      achievement.imageUrl!.isNotEmpty)
                   ? CachedNetworkImage(
                       imageUrl: achievement.imageUrl!,
                       fit: BoxFit.cover,
-                      errorWidget: (_, _, _) =>
-                          Image.asset(AppImageAsset.achievementPlaceholder, fit: BoxFit.cover),
+                      errorWidget: (_, _, _) => Image.asset(
+                        AppImageAsset.achievementPlaceholder,
+                        fit: BoxFit.cover,
+                      ),
                     )
-                  : Image.asset(AppImageAsset.achievementPlaceholder, fit: BoxFit.cover),
+                  : Image.asset(
+                      AppImageAsset.achievementPlaceholder,
+                      fit: BoxFit.cover,
+                    ),
             ),
           ),
           const SizedBox(height: 4),
@@ -61,11 +73,10 @@ class AchievementBadge extends StatelessWidget {
             textAlign: TextAlign.center,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 10,
-              fontWeight: FontWeight.w600,
-              color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+            style: AppTextStyles.small(context).copyWith(
+              color: isDark
+                  ? JadalColors.darkTextSecondary
+                  : JadalColors.lightTextSecondary,
             ),
           ),
         ],

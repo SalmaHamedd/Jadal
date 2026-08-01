@@ -897,10 +897,10 @@ class AppLocalizationsEn extends AppLocalizations {
       'A join request will be sent to the team\'s trainer for approval. Continue?';
 
   @override
-  String get teamRoleLeader => 'Team leader';
+  String get teamRoleLeader => 'Leader';
 
   @override
-  String get teamRoleTrainer => 'Trainer';
+  String get teamRoleTrainer => 'Coach';
 
   @override
   String get teamRoleMember => 'Member';
@@ -1662,5 +1662,74 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String optionsLoadError(String error) {
     return 'Failed to load options: $error';
+  }
+
+  @override
+  String get submitComplaintTooltip => 'Submit a complaint';
+
+  @override
+  String get registrantsTitle => 'Registrants';
+
+  @override
+  String get registrantsTeamsLabel => 'Teams';
+
+  @override
+  String get registrantsJudgesLabel => 'Judges';
+
+  @override
+  String get registrantsSoloLabel => 'Solo';
+
+  @override
+  String get registeredTeamsTitle => 'Registered teams';
+
+  @override
+  String get registeredJudgesTitle => 'Registered judges';
+
+  @override
+  String get soloApplicantsTitle => 'Solo applicants';
+
+  @override
+  String get noneYetLabel => 'None yet.';
+
+  @override
+  String get editProfileButton => 'Edit Profile';
+
+  @override
+  String get changePasswordButton => 'Change Password';
+
+  @override
+  String get changePasswordTitle => 'Change Password';
+
+  @override
+  String get currentPassword => 'Current Password';
+
+  @override
+  String get updatePasswordButton => 'Update Password';
+
+  @override
+  String get currentPill => 'Current';
+
+  @override
+  String get noPastTeams => 'No past teams';
+
+  @override
+  String get showPastTeams => 'Show past teams';
+
+  @override
+  String get hidePastTeams => 'Hide past teams';
+
+  @override
+  String elapsedDaysShort(int count) {
+    return '$count days';
+  }
+
+  @override
+  String elapsedMonthsShort(int count) {
+    return '${count}mo';
+  }
+
+  @override
+  String elapsedYearsShort(int count) {
+    return '${count}y';
   }
 }

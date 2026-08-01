@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 
 /// Small shared theming helpers for the statistics screens so every card, chip
 /// and chart pulls from the same on-brand palette and adapts to light/dark.
 class StatsTheme {
   StatsTheme._();
 
-  static bool isDark(BuildContext c) => Theme.of(c).brightness == Brightness.dark;
+  static bool isDark(BuildContext c) =>
+      Theme.of(c).brightness == Brightness.dark;
 
   static Color surface(BuildContext c) =>
       isDark(c) ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface;
@@ -15,8 +17,9 @@ class StatsTheme {
   static Color textPrimary(BuildContext c) =>
       isDark(c) ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
 
-  static Color textSecondary(BuildContext c) =>
-      isDark(c) ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
+  static Color textSecondary(BuildContext c) => isDark(c)
+      ? JadalColors.darkTextSecondary
+      : JadalColors.lightTextSecondary;
 
   static Color border(BuildContext c) => isDark(c)
       ? Colors.white.withValues(alpha: 0.07)
@@ -34,7 +37,8 @@ class StatsTheme {
     Color(0xFFB8860B), // gold
   ];
 
-  static Color seriesColor(int index) => seriesColors[index % seriesColors.length];
+  static Color seriesColor(int index) =>
+      seriesColors[index % seriesColors.length];
 }
 
 /// A rounded elevated card used to frame chart / list sections, matching the
@@ -42,7 +46,11 @@ class StatsTheme {
 class StatsCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
-  const StatsCard({super.key, required this.child, this.padding = const EdgeInsets.all(16)});
+  const StatsCard({
+    super.key,
+    required this.child,
+    this.padding = const EdgeInsets.all(16),
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +58,9 @@ class StatsCard extends StatelessWidget {
     return Container(
       padding: padding,
       decoration: BoxDecoration(
-        color: StatsTheme.surface(context).withValues(alpha: dark ? 0.85 : 0.92),
+        color: StatsTheme.surface(
+          context,
+        ).withValues(alpha: dark ? 0.85 : 0.92),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: StatsTheme.border(context)),
         boxShadow: [
@@ -93,22 +103,22 @@ class StatsChip extends StatelessWidget {
       child: Material(
         color: selected
             ? color
-            : (dark ? Colors.white.withValues(alpha: 0.06) : Colors.white.withValues(alpha: 0.7)),
+            : (dark
+                  ? Colors.white.withValues(alpha: 0.06)
+                  : Colors.white.withValues(alpha: 0.7)),
         borderRadius: BorderRadius.circular(30),
         child: InkWell(
           borderRadius: BorderRadius.circular(30),
           onTap: enabled ? onTap : null,
           child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 220),
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.body(context).copyWith(
               fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-              fontSize: 13,
               color: selected
                   ? Colors.white
                   : enabled
-                      ? StatsTheme.textSecondary(context)
-                      : StatsTheme.textSecondary(context).withValues(alpha: 0.4),
+                  ? StatsTheme.textSecondary(context)
+                  : StatsTheme.textSecondary(context).withValues(alpha: 0.4),
             ),
             child: Padding(
               padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),

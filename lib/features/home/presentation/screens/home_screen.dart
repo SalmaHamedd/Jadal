@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
@@ -41,53 +42,54 @@ class _HomeScreenState extends State<HomeScreen> {
       // draws content only, never its own backdrop.
       child: Scaffold(
         backgroundColor: Colors.transparent,
+        appBar: AppBar(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          titleSpacing: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.menu_rounded),
+            onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+          ),
+          title: Builder(
+            builder: (context) {
+              final isDark = Theme.of(context).brightness == Brightness.dark;
+              final titleColor = isDark
+                  ? JadalColors.darkTextPrimary
+                  : JadalColors.deepBlue;
+              return Text(
+                context.loc.navHome,
+                style: AppTextStyles.displayTitle(
+                  context,
+                ).copyWith(color: titleColor),
+              );
+            },
+          ),
+        ),
         body: Builder(
           builder: (context) {
             final isDark = Theme.of(context).brightness == Brightness.dark;
-            final titleColor =
-                isDark ? JadalColors.darkTextPrimary : JadalColors.deepBlue;
             final subtitleColor = isDark
                 ? JadalColors.darkTextSecondary
                 : JadalColors.lightTextSecondary;
-            final titleStyle = TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 24,
-              fontWeight: FontWeight.w800,
-              color: titleColor,
-            );
             return SafeArea(
               child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(8, 4, 16, 12),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 12),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Row(
-                      children: [
-                        IconButton(
-                          icon: const Icon(Icons.menu_rounded),
-                          onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
-                        ),
-                        Text(context.loc.navHome, style: titleStyle),
-                      ],
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.only(left: 12),
-                      child: BlocBuilder<ProfileCubit, ProfileState>(
-                        builder: (context, state) {
-                          final greeting = state is ProfileLoaded
-                              ? context.loc.greetingWithName(state.profile.name)
-                              : context.loc.greeting;
-                          return Text(
-                            greeting,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              fontSize: 17,
-                              fontWeight: FontWeight.w600,
-                              color: subtitleColor,
-                            ),
-                          );
-                        },
-                      ),
+                    BlocBuilder<ProfileCubit, ProfileState>(
+                      builder: (context, state) {
+                        final greeting = state is ProfileLoaded
+                            ? context.loc.greetingWithName(state.profile.name)
+                            : context.loc.greeting;
+                        return Text(
+                          greeting,
+                          style: AppTextStyles.subtitle(
+                            context,
+                          ).copyWith(color: subtitleColor),
+                        );
+                      },
                     ),
                     const SizedBox(height: 14),
                     const Padding(

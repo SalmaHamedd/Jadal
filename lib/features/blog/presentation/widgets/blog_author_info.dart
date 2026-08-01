@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/domain/entities/author.dart';
 
 class BlogAuthorInfo extends StatelessWidget {
@@ -36,10 +37,7 @@ class BlogAuthorInfo extends StatelessWidget {
             children: [
               Text(
                 author.name,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: context.fontSize(14),
-                  fontWeight: FontWeight.w600,
+                style: AppTextStyles.body(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextPrimary
                       : JadalColors.lightTextPrimary,
@@ -47,11 +45,9 @@ class BlogAuthorInfo extends StatelessWidget {
               ),
               Text(
                 _formatDate(publishedAt!),
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: context.fontSize(12),
-                  color: JadalColors.judgesGrey,
-                ),
+                style: AppTextStyles.caption(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
               ),
             ],
           ),

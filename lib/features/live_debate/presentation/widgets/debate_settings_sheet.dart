@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/app_cubit/app_cubit.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
@@ -133,8 +134,8 @@ class DebateSettingsSheet {
       context: sheetCtx,
       builder: (_) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
-        title: Text(loc.areYouSure, style: const TextStyle(fontFamily: 'Cairo')),
-        content: Text(loc.leaveDebateBody, style: const TextStyle(fontFamily: 'Cairo')),
+        title: Text(loc.areYouSure, style: AppTextStyles.title(context)),
+        content: Text(loc.leaveDebateBody, style: AppTextStyles.body(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(sheetCtx).pop(false),
@@ -142,7 +143,8 @@ class DebateSettingsSheet {
           ),
           TextButton(
             onPressed: () => Navigator.of(sheetCtx).pop(true),
-            child: Text(loc.confirm, style: const TextStyle(color: Color(0xFFE53935))),
+            child: Text(loc.confirm,
+                style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
           ),
         ],
       ),
@@ -168,8 +170,8 @@ class DebateSettingsSheet {
       context: sheetCtx,
       builder: (_) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
-        title: Text(loc.areYouSure, style: const TextStyle(fontFamily: 'Cairo')),
-        content: Text(loc.closeRoomBody, style: const TextStyle(fontFamily: 'Cairo')),
+        title: Text(loc.areYouSure, style: AppTextStyles.title(context)),
+        content: Text(loc.closeRoomBody, style: AppTextStyles.body(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(sheetCtx).pop(false),
@@ -177,7 +179,8 @@ class DebateSettingsSheet {
           ),
           TextButton(
             onPressed: () => Navigator.of(sheetCtx).pop(true),
-            child: Text(loc.confirm, style: const TextStyle(color: Color(0xFFE53935))),
+            child: Text(loc.confirm,
+                style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
           ),
         ],
       ),
@@ -211,7 +214,7 @@ class _Item extends StatelessWidget {
       leading: Icon(icon, color: danger ? color : JadalColors.primaryBlue),
       title: Text(
         label,
-        style: TextStyle(fontFamily: 'Cairo', color: color, fontWeight: FontWeight.w600),
+        style: AppTextStyles.body(context).copyWith(color: color, fontWeight: FontWeight.w600),
       ),
       trailing: trailing,
       onTap: onTap,

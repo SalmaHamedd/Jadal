@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 
 /// A tappable like/dislike pill. No loading spinner — the underlying cubit
 /// already applies the count/color change optimistically before the network
@@ -43,8 +44,9 @@ class _ReactionButtonState extends State<ReactionButton> {
 
   @override
   Widget build(BuildContext context) {
-    final color =
-        widget.isActive ? (widget.activeColor ?? JadalColors.primaryOrange) : JadalColors.judgesGrey;
+    final color = widget.isActive
+        ? (widget.activeColor ?? JadalColors.primaryOrange)
+        : JadalColors.judgesGrey;
 
     return Material(
       color: Colors.transparent,
@@ -68,18 +70,20 @@ class _ReactionButtonState extends State<ReactionButton> {
                 curve: Curves.easeOut,
                 child: AnimatedSwitcher(
                   duration: const Duration(milliseconds: 150),
-                  child: Icon(widget.icon, key: ValueKey(widget.isActive), size: 16, color: color),
+                  child: Icon(
+                    widget.icon,
+                    key: ValueKey(widget.isActive),
+                    size: 16,
+                    color: color,
+                  ),
                 ),
               ),
               const SizedBox(width: 6),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 13,
-                  fontWeight: FontWeight.w700,
-                  color: color,
-                ),
+                style: AppTextStyles.body(
+                  context,
+                ).copyWith(fontWeight: FontWeight.w700, color: color),
                 child: Text('${widget.count}'),
               ),
             ],

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_status_chip.dart';
 
@@ -34,7 +34,9 @@ class SurveyCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : Colors.grey.shade200,
         ),
       ),
       child: InkWell(
@@ -63,10 +65,7 @@ class SurveyCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       survey.title,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        fontSize: context.fontSize(15, min: 13, max: 17),
+                      style: AppTextStyles.subtitle(context).copyWith(
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
@@ -80,9 +79,7 @@ class SurveyCard extends StatelessWidget {
               const SizedBox(height: 8),
               Text(
                 survey.description,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: context.fontSize(13),
+                style: AppTextStyles.body(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextSecondary
                       : JadalColors.lightTextSecondary,
@@ -96,8 +93,12 @@ class SurveyCard extends StatelessWidget {
                 runSpacing: 8,
                 children: [
                   SurveyStatusChip(
-                    label: closed ? context.loc.surveyStatusClosed : _formatCloses(context, survey.closesAt),
-                    color: closed ? JadalColors.judgesGrey : JadalColors.primaryBlue,
+                    label: closed
+                        ? context.loc.surveyStatusClosed
+                        : _formatCloses(context, survey.closesAt),
+                    color: closed
+                        ? JadalColors.judgesGrey
+                        : JadalColors.primaryBlue,
                     icon: closed ? Icons.lock_clock_outlined : Icons.schedule,
                   ),
                   if (responded)

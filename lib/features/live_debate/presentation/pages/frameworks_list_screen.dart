@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/theme/hex_color.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -52,14 +53,15 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.loc.statsFrameworksTitle, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(context.loc.statsFrameworksTitle,
+              style: AppTextStyles.title(context).copyWith(fontWeight: FontWeight.w800)),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? Center(child: Text(_error!, style: const TextStyle(fontFamily: 'Cairo')))
+                ? Center(child: Text(_error!, style: AppTextStyles.body(context)))
                 : ListView.separated(
                     padding: const EdgeInsets.all(16),
                     itemCount: _frameworks.length,
@@ -69,7 +71,7 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
                       final color = colorFromHex(f.colorHex) ?? JadalColors.primaryBlue;
                       return ListTile(
                         leading: CircleAvatar(backgroundColor: color, radius: 8),
-                        title: Text(f.name, style: const TextStyle(fontFamily: 'Cairo')),
+                        title: Text(f.name, style: AppTextStyles.body(context)),
                       );
                     },
                   ),

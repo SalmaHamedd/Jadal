@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../extensions/responsive_extension.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 /// Primary gradient CTA, ported from the auth `AuthButton` design so the
 /// gorgeous blue→orange gradient can be reused across the app (§3.3).
@@ -109,13 +110,8 @@ class _JadalGradientButtonState extends State<JadalGradientButton> {
                         widget.text,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontFamily: 'Cairo',
-                          fontSize: fontSize,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 0.3,
-                        ),
+                        style: AppTextStyles.button(context)
+                            .copyWith(color: Colors.white, letterSpacing: 0.3),
                       ),
                     ),
                   ],

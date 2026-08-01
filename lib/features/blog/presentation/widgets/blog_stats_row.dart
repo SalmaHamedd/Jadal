@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/reaction_button.dart';
 
 class BlogStatsRow extends StatelessWidget {
@@ -26,7 +27,10 @@ class BlogStatsRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(vertical: context.hp(1), horizontal: context.wp(3)),
+      padding: EdgeInsets.symmetric(
+        vertical: context.hp(1),
+        horizontal: context.wp(3),
+      ),
       decoration: BoxDecoration(
         color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey[100],
         borderRadius: BorderRadius.circular(12),
@@ -43,13 +47,15 @@ class BlogStatsRow extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.visibility_outlined, size: 16, color: JadalColors.primaryBlue),
+                Icon(
+                  Icons.visibility_outlined,
+                  size: 16,
+                  color: JadalColors.primaryBlue,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   '$views',
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13,
+                  style: AppTextStyles.body(context).copyWith(
                     fontWeight: FontWeight.w700,
                     color: JadalColors.primaryBlue,
                   ),

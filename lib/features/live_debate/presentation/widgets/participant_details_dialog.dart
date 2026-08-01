@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debate_models.dart';
 import '../cubits/connection_cubit.dart';
 import '../cubits/debate_controller.dart';
@@ -154,24 +155,15 @@ class ParticipantDetailsDialog extends StatelessWidget {
                   backgroundColor: avatarColorFor(participantId),
                   child: Text(
                     avatarInitial(name),
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w800,
-                      fontSize: 26,
-                    ),
+                    style: AppTextStyles.displayTitle(context).copyWith(color: Colors.white),
                   ),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   name,
                   textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 17,
-                    color: DebateTheme.textPrimary(context),
-                  ),
+                  style: AppTextStyles.title(context)
+                      .copyWith(color: DebateTheme.textPrimary(context)),
                 ),
                 if (subtitle.isNotEmpty) ...[
                   const SizedBox(height: 4),
@@ -183,12 +175,8 @@ class ParticipantDetailsDialog extends StatelessWidget {
                     ),
                     child: Text(
                       subtitle,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        color: accent,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 12.5,
-                      ),
+                      style: AppTextStyles.caption(context)
+                          .copyWith(color: accent, fontWeight: FontWeight.w700),
                     ),
                   ),
                 ],
@@ -255,8 +243,8 @@ class ParticipantDetailsDialog extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
-        title: Text(loc.areYouSure, style: const TextStyle(fontFamily: 'Cairo')),
-        content: Text(loc.leaveToProfileWarning, style: const TextStyle(fontFamily: 'Cairo')),
+        title: Text(loc.areYouSure, style: AppTextStyles.title(context)),
+        content: Text(loc.leaveToProfileWarning, style: AppTextStyles.body(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -293,7 +281,7 @@ class _ActionTile extends StatelessWidget {
       leading: Icon(icon, color: DebateTheme.textPrimary(context)),
       title: Text(
         label,
-        style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context)),
+        style: AppTextStyles.body(context).copyWith(color: DebateTheme.textPrimary(context)),
       ),
       onTap: onTap,
     );

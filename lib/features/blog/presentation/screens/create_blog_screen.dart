@@ -6,6 +6,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
@@ -166,8 +167,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
       child: Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
-        title: Text(context.loc.createNewArticle,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        title: Text(context.loc.createNewArticle, style: AppTextStyles.title(context)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -232,15 +232,12 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                   children: [
                     Text(
                       context.loc.addYourNewArticle,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      style: AppTextStyles.headline(context),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       context.loc.articleReviewNote,
-                      style: const TextStyle(color: Colors.grey, fontSize: 14),
+                      style: AppTextStyles.body(context).copyWith(color: Colors.grey),
                     ),
                     const SizedBox(height: 24),
 
@@ -269,24 +266,16 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                             vertical: isMobile ? 14 : 16,
                           ),
                           hintText: context.loc.contentRequiredLabel,
-                          hintStyle: TextStyle(
-                            fontFamily: 'Cairo',
+                          hintStyle: AppTextStyles.caption(context).copyWith(
                             color: isDark
                                 ? JadalColors.darkTextSecondary
                                 : Colors.grey[500],
-                            fontSize: context.fontSize(
-                              12.5,
-                              min: 11.5,
-                              max: 15,
-                            ),
                           ),
                         ),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
+                        style: AppTextStyles.caption(context).copyWith(
                           color: isDark
                               ? JadalColors.darkTextPrimary
                               : JadalColors.lightTextPrimary,
-                          fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                         ),
                       ),
                     ),
@@ -434,11 +423,10 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             Expanded(
               child: Text(
                 'اختر صورة الغلاف (اختياري)',
-                style: TextStyle(
+                style: AppTextStyles.caption(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextSecondary
                       : Colors.grey[600],
-                  fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                 ),
               ),
             ),
@@ -479,7 +467,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             Expanded(
               child: Text(
                 selectedNames.isEmpty ? label : selectedNames.join('، '),
-                style: TextStyle(
+                style: AppTextStyles.caption(context).copyWith(
                   color: selectedNames.isEmpty
                       ? (isDark
                             ? JadalColors.darkTextSecondary
@@ -487,7 +475,6 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                       : (isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary),
-                  fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                 ),
               ),
             ),

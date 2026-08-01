@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
@@ -177,12 +178,8 @@ class _RoomCard extends StatelessWidget {
                   _title(loc),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                    color: DebateTheme.textPrimary(context),
-                  ),
+                  style: AppTextStyles.subtitle(context)
+                      .copyWith(color: DebateTheme.textPrimary(context)),
                 ),
                 const SizedBox(height: 2),
                 Row(
@@ -195,11 +192,8 @@ class _RoomCard extends StatelessWidget {
                         access.status,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11,
-                          color: DebateTheme.textSecondary(context),
-                        ),
+                        style: AppTextStyles.small(context)
+                            .copyWith(color: DebateTheme.textSecondary(context)),
                       ),
                     ),
                   ],
@@ -378,8 +372,8 @@ class _RoomCard extends StatelessWidget {
       context: context,
       builder: (_) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
-        title: Text(loc.needOrderTitle, style: const TextStyle(fontFamily: 'Cairo')),
-        content: Text(loc.needOrderBody, style: const TextStyle(fontFamily: 'Cairo')),
+        title: Text(loc.needOrderTitle, style: AppTextStyles.title(context)),
+        content: Text(loc.needOrderBody, style: AppTextStyles.body(context)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).maybePop(),
@@ -458,10 +452,8 @@ class _ShareResultBanner extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(loc.shareResultPrompt,
-              style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  color: DebateTheme.textPrimary(context))),
+              style: AppTextStyles.bodyEmphasis(context)
+                  .copyWith(color: DebateTheme.textPrimary(context))),
           const SizedBox(height: 10),
           SizedBox(
             width: double.infinity,
@@ -579,12 +571,7 @@ class _RoomJoinButtonState extends State<_RoomJoinButton> {
         ),
         child: Text(
           loc.join,
-          style: const TextStyle(
-            color: Colors.white,
-            fontFamily: 'Cairo',
-            fontSize: 13,
-            fontWeight: FontWeight.w700,
-          ),
+          style: AppTextStyles.button(context).copyWith(color: Colors.white),
         ),
       ),
     );

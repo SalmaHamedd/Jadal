@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
 
@@ -36,7 +36,9 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
     _ratingValue = (widget.initialValue is int)
         ? widget.initialValue
         : widget.question.ratingMin;
-    _selectedOption = widget.initialValue is String ? widget.initialValue : null;
+    _selectedOption = widget.initialValue is String
+        ? widget.initialValue
+        : null;
     _textController = TextEditingController(
       text: widget.initialValue is String ? widget.initialValue : '',
     );
@@ -60,10 +62,7 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
         children: [
           Text(
             '${widget.index}. ${q.questionText}',
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: context.fontSize(15),
+            style: AppTextStyles.subtitle(context).copyWith(
               color: isDark
                   ? JadalColors.darkTextPrimary
                   : JadalColors.lightTextPrimary,
@@ -99,7 +98,12 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text('${q.ratingMin}', style: TextStyle(color: JadalColors.judgesGrey)),
+            Text(
+              '${q.ratingMin}',
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
+            ),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
               decoration: BoxDecoration(
@@ -108,14 +112,17 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
               ),
               child: Text(
                 '$_ratingValue',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  color: JadalColors.primaryOrange,
-                ),
+                style: AppTextStyles.bodyEmphasis(
+                  context,
+                ).copyWith(color: JadalColors.primaryOrange),
               ),
             ),
-            Text('${q.ratingMax}', style: TextStyle(color: JadalColors.judgesGrey)),
+            Text(
+              '${q.ratingMax}',
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
+            ),
           ],
         ),
       ],
@@ -134,8 +141,7 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
           activeColor: JadalColors.primaryOrange,
           title: Text(
             option,
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.body(context).copyWith(
               fontWeight: selected ? FontWeight.w700 : FontWeight.w400,
               color: isDark
                   ? JadalColors.darkTextPrimary
@@ -156,15 +162,20 @@ class _SurveyQuestionFieldState extends State<SurveyQuestionField> {
       controller: _textController,
       maxLines: 3,
       onChanged: widget.onChanged,
-      style: TextStyle(
-        fontFamily: 'Cairo',
-        color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+      style: AppTextStyles.body(context).copyWith(
+        color: isDark
+            ? JadalColors.darkTextPrimary
+            : JadalColors.lightTextPrimary,
       ),
       decoration: InputDecoration(
         hintText: context.loc.surveyWriteAnswerHint,
-        hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
+        hintStyle: AppTextStyles.body(
+          context,
+        ).copyWith(color: JadalColors.judgesGrey),
         filled: true,
-        fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+        fillColor: isDark
+            ? JadalColors.darkSurfaceElevated
+            : Colors.grey.shade100,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(10),
           borderSide: BorderSide.none,

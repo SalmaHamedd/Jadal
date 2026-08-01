@@ -1,6 +1,7 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/statistics/data/models/leaderboard_models.dart';
@@ -30,9 +31,10 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
   }
 
   Future<void> _load() async {
-    final res = await di
-        .sl<LeaderboardRepository>()
-        .getLeaderboard(LeaderboardScope.debaters, LeaderboardMetric.points);
+    final res = await di.sl<LeaderboardRepository>().getLeaderboard(
+      LeaderboardScope.debaters,
+      LeaderboardMetric.points,
+    );
     if (!mounted) return;
     setState(() {
       _loading = false;
@@ -54,12 +56,9 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
             children: [
               Text(
                 context.loc.topDebaters,
-                style: const TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: JadalColors.primaryBlue,
-                ),
+                style: AppTextStyles.headline(
+                  context,
+                ).copyWith(color: JadalColors.primaryBlue),
               ),
               TextButton(
                 onPressed: () => Navigator.push(
@@ -68,11 +67,9 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
                 ),
                 child: Text(
                   context.loc.showMore,
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    color: JadalColors.primaryOrange,
-                    fontWeight: FontWeight.w600,
-                  ),
+                  style: AppTextStyles.button(
+                    context,
+                  ).copyWith(color: JadalColors.primaryOrange),
                 ),
               ),
             ],
@@ -80,8 +77,9 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: (isDark ? JadalColors.darkSurface : JadalColors.lightSurface)
-                  .withValues(alpha: 0.72),
+              color:
+                  (isDark ? JadalColors.darkSurface : JadalColors.lightSurface)
+                      .withValues(alpha: 0.72),
               borderRadius: BorderRadius.circular(18),
               border: Border.all(color: StatsTheme.border(context)),
             ),

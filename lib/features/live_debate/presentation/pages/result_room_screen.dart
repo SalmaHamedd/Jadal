@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
@@ -133,11 +134,8 @@ class _ChairSubmitPrompt extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.all(12),
           child: Text(loc.noResultYet,
-              style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w800,
-                  fontSize: 16,
-                  color: DebateTheme.textPrimary(context))),
+              style: AppTextStyles.title(context)
+                  .copyWith(color: DebateTheme.textPrimary(context))),
         ),
         Expanded(child: GridLayout(participants: tiles)),
         Padding(
@@ -148,7 +146,7 @@ class _ChairSubmitPrompt extends StatelessWidget {
             child: FilledButton.icon(
               icon: const Icon(Icons.emoji_events_rounded),
               label: Text(loc.submitResult,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+                  style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800)),
               onPressed: () async {
                 final ok = await ResultSubmitSheet.show(context, cubit);
                 if (ok == true && context.mounted) {
@@ -163,7 +161,7 @@ class _ChairSubmitPrompt extends StatelessWidget {
           child: TextButton(
             onPressed: () => _confirmCloseNoResult(context, cubit),
             child: Text(loc.closeWithoutResult,
-                style: const TextStyle(fontFamily: 'Cairo', color: Color(0xFFE53935))),
+                style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
           ),
         ),
       ],
@@ -177,8 +175,8 @@ void _confirmCloseNoResult(BuildContext context, DebateController cubit) {
     context: context,
     builder: (_) => AlertDialog(
       backgroundColor: DebateTheme.surface(context),
-      title: Text(loc.debateCancelledTitle, style: const TextStyle(fontFamily: 'Cairo')),
-      content: Text(loc.debateCancelledBody, style: const TextStyle(fontFamily: 'Cairo')),
+      title: Text(loc.debateCancelledTitle, style: AppTextStyles.title(context)),
+      content: Text(loc.debateCancelledBody, style: AppTextStyles.body(context)),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).maybePop(),
@@ -259,11 +257,8 @@ class _RatingBarState extends State<_RatingBar> {
         children: [
           Text(
             _hasSent ? loc.ratingThanks : loc.rateDebate,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              color: DebateTheme.textPrimary(context),
-            ),
+            style: AppTextStyles.bodyEmphasis(context)
+                .copyWith(color: DebateTheme.textPrimary(context)),
           ),
           const SizedBox(height: 4),
           Row(
@@ -289,18 +284,12 @@ class _RatingBarState extends State<_RatingBar> {
             maxLines: 2,
             minLines: 1,
             onChanged: (_) => setState(() {}),
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 13,
-              color: DebateTheme.textPrimary(context),
-            ),
+            style: AppTextStyles.body(context)
+                .copyWith(color: DebateTheme.textPrimary(context)),
             decoration: InputDecoration(
               hintText: loc.ratingCommentHint,
-              hintStyle: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
-                color: DebateTheme.textSecondary(context),
-              ),
+              hintStyle: AppTextStyles.caption(context)
+                  .copyWith(color: DebateTheme.textSecondary(context)),
               isDense: true,
               contentPadding:
                   const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
@@ -334,8 +323,7 @@ class _RatingBarState extends State<_RatingBar> {
                   : const Icon(Icons.send_rounded, size: 18),
               label: Text(
                 _hasSent ? loc.updateRating : loc.submitRating,
-                style: const TextStyle(
-                    fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800),
               ),
             ),
           ),
@@ -412,15 +400,13 @@ class _CenteredMessage extends StatelessWidget {
             const SizedBox(height: 16),
             Text(title,
                 textAlign: TextAlign.center,
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 18,
-                    color: DebateTheme.textPrimary(context))),
+                style: AppTextStyles.headline(context)
+                    .copyWith(color: DebateTheme.textPrimary(context))),
             const SizedBox(height: 8),
             Text(body,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+                style: AppTextStyles.body(context)
+                    .copyWith(color: DebateTheme.textSecondary(context))),
           ],
         ),
       ),

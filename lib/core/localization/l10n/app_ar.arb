@@ -651,5 +651,32 @@
   "chooseTags": "اختر الوسوم",
   "publishArticle": "نشر المقال",
   "titleContentRequired": "العنوان والمحتوى مطلوبان",
-  "optionsLoadError": "خطأ في تحميل الخيارات: {error}"
+  "optionsLoadError": "خطأ في تحميل الخيارات: {error}",
+
+  "submitComplaintTooltip": "تقديم شكوى",
+  "registrantsTitle": "المسجلون",
+  "registrantsTeamsLabel": "الفرق",
+  "registrantsJudgesLabel": "الحكام",
+  "registrantsSoloLabel": "فردي",
+  "registeredTeamsTitle": "الفرق المسجلة",
+  "registeredJudgesTitle": "الحكام المسجلون",
+  "soloApplicantsTitle": "المتقدمون الأفراد",
+  "noneYetLabel": "لا يوجد بعد.",
+
+  "editProfileButton": "تعديل الملف الشخصي",
+  "changePasswordButton": "تغيير كلمة المرور",
+  "changePasswordTitle": "تغيير كلمة المرور",
+  "currentPassword": "كلمة المرور الحالية",
+  "updatePasswordButton": "تحديث كلمة المرور",
+
+  "teamRoleLeader": "قائد",
+  "teamRoleTrainer": "مدرب",
+  "teamRoleMember": "عضو",
+  "currentPill": "حالي",
+  "noPastTeams": "لا توجد فرق سابقة",
+  "showPastTeams": "عرض الفرق السابقة",
+  "hidePastTeams": "إخفاء الفرق السابقة",
+  "elapsedDaysShort": "{count} يوم",
+  "elapsedMonthsShort": "{count}ش",
+  "elapsedYearsShort": "{count}س"
 }

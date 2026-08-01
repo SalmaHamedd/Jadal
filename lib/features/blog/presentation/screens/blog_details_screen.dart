@@ -4,6 +4,7 @@ import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
@@ -107,8 +108,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
         child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.loc.articleDetails,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(context.loc.articleDetails, style: AppTextStyles.title(context)),
           backgroundColor: Colors.transparent,
           elevation: 0,
           scrolledUnderElevation: 0,
@@ -166,14 +166,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                           children: [
                             Text(
                               blog.title,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: context.fontSize(
-                                  24,
-                                  min: 20,
-                                  max: 28,
-                                ),
-                                fontWeight: FontWeight.bold,
+                              style: AppTextStyles.displayTitle(context).copyWith(
                                 color: isDark
                                     ? JadalColors.darkTextPrimary
                                     : JadalColors.lightTextPrimary,
@@ -198,9 +191,8 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                             const SizedBox(height: 16),
                             Text(
                               blog.content,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: context.fontSize(16),
+                              style: AppTextStyles.subtitle(context).copyWith(
+                                fontWeight: FontWeight.normal,
                                 height: 1.8,
                                 color: isDark
                                     ? JadalColors.darkTextSecondary
@@ -240,7 +232,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                     const SizedBox(height: 16),
                     Text(
                       context.loc.errorWithMessage(detailsState.message),
-                      style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                      style: AppTextStyles.subtitle(context),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 24),

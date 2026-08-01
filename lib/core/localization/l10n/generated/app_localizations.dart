@@ -1769,13 +1769,13 @@ abstract class AppLocalizations {
   /// No description provided for @teamRoleLeader.
   ///
   /// In en, this message translates to:
-  /// **'Team leader'**
+  /// **'Leader'**
   String get teamRoleLeader;
 
   /// No description provided for @teamRoleTrainer.
   ///
   /// In en, this message translates to:
-  /// **'Trainer'**
+  /// **'Coach'**
   String get teamRoleTrainer;
 
   /// No description provided for @teamRoleMember.
@@ -3145,6 +3145,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load options: {error}'**
   String optionsLoadError(String error);
+
+  /// No description provided for @submitComplaintTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Submit a complaint'**
+  String get submitComplaintTooltip;
+
+  /// No description provided for @registrantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrants'**
+  String get registrantsTitle;
+
+  /// No description provided for @registrantsTeamsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Teams'**
+  String get registrantsTeamsLabel;
+
+  /// No description provided for @registrantsJudgesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Judges'**
+  String get registrantsJudgesLabel;
+
+  /// No description provided for @registrantsSoloLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Solo'**
+  String get registrantsSoloLabel;
+
+  /// No description provided for @registeredTeamsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered teams'**
+  String get registeredTeamsTitle;
+
+  /// No description provided for @registeredJudgesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered judges'**
+  String get registeredJudgesTitle;
+
+  /// No description provided for @soloApplicantsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Solo applicants'**
+  String get soloApplicantsTitle;
+
+  /// No description provided for @noneYetLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'None yet.'**
+  String get noneYetLabel;
+
+  /// No description provided for @editProfileButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Profile'**
+  String get editProfileButton;
+
+  /// No description provided for @changePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordButton;
+
+  /// No description provided for @changePasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Change Password'**
+  String get changePasswordTitle;
+
+  /// No description provided for @currentPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Password'**
+  String get currentPassword;
+
+  /// No description provided for @updatePasswordButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Update Password'**
+  String get updatePasswordButton;
+
+  /// No description provided for @currentPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Current'**
+  String get currentPill;
+
+  /// No description provided for @noPastTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'No past teams'**
+  String get noPastTeams;
+
+  /// No description provided for @showPastTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Show past teams'**
+  String get showPastTeams;
+
+  /// No description provided for @hidePastTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Hide past teams'**
+  String get hidePastTeams;
+
+  /// No description provided for @elapsedDaysShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} days'**
+  String elapsedDaysShort(int count);
+
+  /// No description provided for @elapsedMonthsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}mo'**
+  String elapsedMonthsShort(int count);
+
+  /// No description provided for @elapsedYearsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'{count}y'**
+  String elapsedYearsShort(int count);
 }
 
 class _AppLocalizationsDelegate

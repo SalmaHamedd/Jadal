@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/teams/data/repositories/team_repository_impl.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
@@ -48,7 +49,9 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
       _error = null;
     });
     final query = _searchController.text.trim();
-    final result = await _repository.getTeams(search: query.isEmpty ? null : query);
+    final result = await _repository.getTeams(
+      search: query.isEmpty ? null : query,
+    );
     if (!mounted) return;
     result.fold(
       (failure) => setState(() {
@@ -75,7 +78,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
         appBar: AppBar(
           title: Text(
             context.loc.drawerJoinTeam,
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+            style: AppTextStyles.title(context),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -88,10 +91,12 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
               child: TextField(
                 controller: _searchController,
                 onChanged: _onQueryChanged,
-                style: const TextStyle(fontFamily: 'Cairo'),
+                style: AppTextStyles.body(context),
                 decoration: InputDecoration(
                   hintText: context.loc.teamSearchHint,
-                  hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                  hintStyle: AppTextStyles.body(
+                    context,
+                  ).copyWith(color: JadalColors.judgesGrey),
                   prefixIcon: const Icon(Icons.search),
                   filled: true,
                   fillColor: Theme.of(context).brightness == Brightness.dark
@@ -101,7 +106,10 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
                     borderRadius: BorderRadius.circular(12),
                     borderSide: BorderSide.none,
                   ),
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 14,
+                    vertical: 12,
+                  ),
                 ),
               ),
             ),
@@ -125,7 +133,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
             const SizedBox(height: 16),
             Text(
               context.loc.errorWithMessage(_error!),
-              style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+              style: AppTextStyles.subtitle(context),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 24),
@@ -134,8 +142,13 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
               style: ElevatedButton.styleFrom(
                 backgroundColor: JadalColors.primaryOrange,
                 foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24,
+                  vertical: 12,
+                ),
               ),
               child: Text(context.loc.retry),
             ),
@@ -154,7 +167,7 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
             Center(
               child: Text(
                 context.loc.teamNoneAvailableToJoin,
-                style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                style: AppTextStyles.subtitle(context),
               ),
             ),
           ],

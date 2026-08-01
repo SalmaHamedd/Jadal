@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/constants/appImgaeAsset.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/domain/entities/blog.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_chips.dart';
@@ -30,8 +31,10 @@ class BlogCard extends StatelessWidget {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) =>
-                    BlogDetailsScreen(slug: blog.slug, initialViews: blog.views),
+                builder: (context) => BlogDetailsScreen(
+                  slug: blog.slug,
+                  initialViews: blog.views,
+                ),
               ),
             );
           }
@@ -43,7 +46,9 @@ class BlogCard extends StatelessWidget {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(12),
-                child: (blog.coverImageUrl != null && blog.coverImageUrl!.isNotEmpty)
+                child:
+                    (blog.coverImageUrl != null &&
+                        blog.coverImageUrl!.isNotEmpty)
                     ? CachedNetworkImage(
                         imageUrl: blog.coverImageUrl!,
                         height: context.hp(18),
@@ -52,7 +57,9 @@ class BlogCard extends StatelessWidget {
                         placeholder: (_, __) => Container(
                           height: context.hp(18),
                           color: Colors.grey[300],
-                          child: const Center(child: CircularProgressIndicator()),
+                          child: const Center(
+                            child: CircularProgressIndicator(),
+                          ),
                         ),
                         errorWidget: (_, __, ___) => Image.asset(
                           AppImageAsset.blogArticlePlaceholder,
@@ -74,9 +81,7 @@ class BlogCard extends StatelessWidget {
               SizedBox(height: context.hp(1.5)),
               Text(
                 blog.title,
-                style: TextStyle(
-                  fontSize: context.fontSize(16),
-                  fontWeight: FontWeight.bold,
+                style: AppTextStyles.subtitle(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextPrimary
                       : JadalColors.lightTextPrimary,
@@ -91,8 +96,7 @@ class BlogCard extends StatelessWidget {
               SizedBox(height: context.hp(0.8)),
               Text(
                 blog.excerpt,
-                style: TextStyle(
-                  fontSize: context.fontSize(13),
+                style: AppTextStyles.body(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextSecondary
                       : JadalColors.lightTextSecondary,
@@ -111,10 +115,9 @@ class BlogCard extends StatelessWidget {
                   SizedBox(width: 4),
                   Text(
                     '${blog.publishedAt.year}-${blog.publishedAt.month}-${blog.publishedAt.day}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: JadalColors.judgesGrey,
-                    ),
+                    style: AppTextStyles.small(
+                      context,
+                    ).copyWith(color: JadalColors.judgesGrey),
                   ),
                   const Spacer(),
                   Icon(
@@ -125,10 +128,9 @@ class BlogCard extends StatelessWidget {
                   SizedBox(width: 4),
                   Text(
                     '${blog.views}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: JadalColors.judgesGrey,
-                    ),
+                    style: AppTextStyles.small(
+                      context,
+                    ).copyWith(color: JadalColors.judgesGrey),
                   ),
                   SizedBox(width: 12),
                   Icon(
@@ -139,10 +141,9 @@ class BlogCard extends StatelessWidget {
                   SizedBox(width: 4),
                   Text(
                     '${blog.likesCount}',
-                    style: TextStyle(
-                      fontSize: 11,
-                      color: JadalColors.judgesGrey,
-                    ),
+                    style: AppTextStyles.small(
+                      context,
+                    ).copyWith(color: JadalColors.judgesGrey),
                   ),
                 ],
               ),

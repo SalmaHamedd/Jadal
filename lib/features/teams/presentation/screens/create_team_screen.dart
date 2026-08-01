@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
@@ -63,18 +64,26 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_members.length < 2) {
-      JadalSnackBar.show(context, context.loc.teamAddAtLeastTwoMembers, type: SnackBarType.warning);
+      JadalSnackBar.show(
+        context,
+        context.loc.teamAddAtLeastTwoMembers,
+        type: SnackBarType.warning,
+      );
       return;
     }
     if (_leaderId == null) {
-      JadalSnackBar.show(context, context.loc.teamChooseLeader, type: SnackBarType.warning);
+      JadalSnackBar.show(
+        context,
+        context.loc.teamChooseLeader,
+        type: SnackBarType.warning,
+      );
       return;
     }
     context.read<CreateTeamCubit>().submit(
-          name: _nameController.text.trim(),
-          leaderId: _leaderId!,
-          memberIds: _members.map((m) => m.id).toList(),
-        );
+      name: _nameController.text.trim(),
+      leaderId: _leaderId!,
+      memberIds: _members.map((m) => m.id).toList(),
+    );
   }
 
   @override
@@ -87,7 +96,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
           appBar: AppBar(
             title: Text(
               context.loc.teamNewTeamTitle,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+              style: AppTextStyles.title(context),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -96,10 +105,18 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
           body: BlocConsumer<CreateTeamCubit, CreateTeamState>(
             listener: (context, state) {
               if (state is CreateTeamSuccess) {
-                JadalSnackBar.show(context, context.loc.teamCreatedSuccess, type: SnackBarType.success);
+                JadalSnackBar.show(
+                  context,
+                  context.loc.teamCreatedSuccess,
+                  type: SnackBarType.success,
+                );
                 Navigator.pop(context, true);
               } else if (state is CreateTeamError) {
-                JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+                JadalSnackBar.show(
+                  context,
+                  state.message,
+                  type: SnackBarType.error,
+                );
               }
             },
             builder: (context, state) {
@@ -117,27 +134,25 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                         label: context.loc.teamNameField,
                         icon: Icons.groups_rounded,
                         controller: _nameController,
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? context.loc.teamNameRequired : null,
+                        validator: (v) => (v == null || v.trim().isEmpty)
+                            ? context.loc.teamNameRequired
+                            : null,
                       ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
                         context.loc.teamMembersHeader,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        style: AppTextStyles.bodyEmphasis(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         context.loc.teamAddMembersHint,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 12,
-                          color: JadalColors.judgesGrey,
-                        ),
+                        style: AppTextStyles.caption(
+                          context,
+                        ).copyWith(color: JadalColors.judgesGrey),
                       ),
                       const SizedBox(height: 10),
                       UserSearchPicker(
@@ -153,20 +168,29 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                             final isLeader = m.id == _leaderId;
                             return InputChip(
                               label: Text(
-                                isLeader ? context.loc.teamLeaderSuffix(m.name) : m.name,
-                                style: TextStyle(
-                                  fontFamily: 'Cairo',
-                                  fontWeight: isLeader ? FontWeight.w700 : FontWeight.w500,
+                                isLeader
+                                    ? context.loc.teamLeaderSuffix(m.name)
+                                    : m.name,
+                                style: AppTextStyles.caption(context).copyWith(
+                                  fontWeight: isLeader
+                                      ? FontWeight.w700
+                                      : FontWeight.w500,
                                 ),
                               ),
                               avatar: Icon(
-                                isLeader ? Icons.star_rounded : Icons.person_outline,
+                                isLeader
+                                    ? Icons.star_rounded
+                                    : Icons.person_outline,
                                 size: 16,
-                                color: isLeader ? JadalColors.primaryOrange : null,
+                                color: isLeader
+                                    ? JadalColors.primaryOrange
+                                    : null,
                               ),
                               selected: isLeader,
-                              selectedColor: JadalColors.primaryOrange.withValues(alpha: 0.15),
-                              onSelected: (_) => setState(() => _leaderId = m.id),
+                              selectedColor: JadalColors.primaryOrange
+                                  .withValues(alpha: 0.15),
+                              onSelected: (_) =>
+                                  setState(() => _leaderId = m.id),
                               onDeleted: () => _removeMember(m),
                             );
                           }).toList(),

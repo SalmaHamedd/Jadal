@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question_input.dart';
 
 /// Editable list of [SurveyQuestionInput] drafts, used by both the admin and
@@ -24,14 +25,20 @@ class SurveyQuestionEditorList extends StatelessWidget {
 
   void _remove(int index) {
     final next = [...questions]..removeAt(index);
-    final reindexed = [for (var i = 0; i < next.length; i++) next[i].copyWith(orderIndex: i)];
+    final reindexed = [
+      for (var i = 0; i < next.length; i++) next[i].copyWith(orderIndex: i),
+    ];
     onChanged(reindexed);
   }
 
   void _add() {
     onChanged([
       ...questions,
-      SurveyQuestionInput(questionText: '', type: 'rating', orderIndex: questions.length),
+      SurveyQuestionInput(
+        questionText: '',
+        type: 'rating',
+        orderIndex: questions.length,
+      ),
     ]);
   }
 
@@ -42,19 +49,22 @@ class SurveyQuestionEditorList extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         ...questions.asMap().entries.map(
-              (entry) => _QuestionEditorCard(
-                key: ValueKey('survey_question_draft_${entry.key}'),
-                index: entry.key,
-                question: entry.value,
-                isDark: isDark,
-                onChanged: (q) => _update(entry.key, q),
-                onRemove: () => _remove(entry.key),
-              ),
-            ),
+          (entry) => _QuestionEditorCard(
+            key: ValueKey('survey_question_draft_${entry.key}'),
+            index: entry.key,
+            question: entry.value,
+            isDark: isDark,
+            onChanged: (q) => _update(entry.key, q),
+            onRemove: () => _remove(entry.key),
+          ),
+        ),
         OutlinedButton.icon(
           onPressed: _add,
           icon: const Icon(Icons.add),
-          label: Text(context.loc.surveyAddQuestion, style: const TextStyle(fontFamily: 'Cairo')),
+          label: Text(
+            context.loc.surveyAddQuestion,
+            style: AppTextStyles.button(context),
+          ),
           style: OutlinedButton.styleFrom(
             foregroundColor: JadalColors.primaryOrange,
             side: BorderSide(color: JadalColors.primaryOrange),
@@ -155,7 +165,9 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
         color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : Colors.grey.shade200,
         ),
       ),
       child: Column(
@@ -166,10 +178,10 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
               Expanded(
                 child: Text(
                   context.loc.surveyQuestionNumber(widget.index + 1),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w700,
-                    color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                  style: AppTextStyles.bodyEmphasis(context).copyWith(
+                    color: isDark
+                        ? JadalColors.darkTextPrimary
+                        : JadalColors.lightTextPrimary,
                   ),
                 ),
               ),
@@ -181,15 +193,20 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
           ),
           TextField(
             controller: _textController,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+            style: AppTextStyles.body(context).copyWith(
+              color: isDark
+                  ? JadalColors.darkTextPrimary
+                  : JadalColors.lightTextPrimary,
             ),
             decoration: InputDecoration(
               hintText: context.loc.surveyQuestionTextHint,
-              hintStyle: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
+              hintStyle: AppTextStyles.body(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
               filled: true,
-              fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+              fillColor: isDark
+                  ? JadalColors.darkSurfaceElevated
+                  : Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
@@ -203,19 +220,33 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
             initialValue: q.type,
             decoration: InputDecoration(
               labelText: context.loc.surveyQuestionTypeLabel,
-              labelStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 12),
+              labelStyle: AppTextStyles.caption(context),
               filled: true,
-              fillColor: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
+              fillColor: isDark
+                  ? JadalColors.darkSurfaceElevated
+                  : Colors.grey.shade100,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(10),
                 borderSide: BorderSide.none,
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+              contentPadding: const EdgeInsets.symmetric(
+                horizontal: 12,
+                vertical: 4,
+              ),
             ),
             items: [
-              DropdownMenuItem(value: 'rating', child: Text(context.loc.surveyTypeRating)),
-              DropdownMenuItem(value: 'mcq', child: Text(context.loc.surveyTypeMcq)),
-              DropdownMenuItem(value: 'open_text', child: Text(context.loc.surveyTypeOpenText)),
+              DropdownMenuItem(
+                value: 'rating',
+                child: Text(context.loc.surveyTypeRating),
+              ),
+              DropdownMenuItem(
+                value: 'mcq',
+                child: Text(context.loc.surveyTypeMcq),
+              ),
+              DropdownMenuItem(
+                value: 'open_text',
+                child: Text(context.loc.surveyTypeOpenText),
+              ),
             ],
             onChanged: _changeType,
           ),
@@ -227,7 +258,8 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                   child: _NumberField(
                     label: context.loc.surveyMinValue,
                     value: q.ratingMin,
-                    onChanged: (v) => widget.onChanged(q.copyWith(ratingMin: v)),
+                    onChanged: (v) =>
+                        widget.onChanged(q.copyWith(ratingMin: v)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -235,7 +267,8 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                   child: _NumberField(
                     label: context.loc.surveyMaxValue,
                     value: q.ratingMax,
-                    onChanged: (v) => widget.onChanged(q.copyWith(ratingMax: v)),
+                    onChanged: (v) =>
+                        widget.onChanged(q.copyWith(ratingMax: v)),
                   ),
                 ),
                 const SizedBox(width: 8),
@@ -243,7 +276,8 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
                   child: _NumberField(
                     label: context.loc.surveyStepValue,
                     value: q.ratingStep,
-                    onChanged: (v) => widget.onChanged(q.copyWith(ratingStep: v)),
+                    onChanged: (v) =>
+                        widget.onChanged(q.copyWith(ratingStep: v)),
                   ),
                 ),
               ],
@@ -253,50 +287,55 @@ class _QuestionEditorCardState extends State<_QuestionEditorCard> {
             const SizedBox(height: 10),
             Text(
               context.loc.surveyOptionsMinTwo,
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
             ),
             const SizedBox(height: 6),
             ..._optionControllers.asMap().entries.map(
-                  (e) => Padding(
-                    padding: const EdgeInsets.only(bottom: 6),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: TextField(
-                            controller: e.value,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              color: isDark
-                                  ? JadalColors.darkTextPrimary
-                                  : JadalColors.lightTextPrimary,
-                            ),
-                            decoration: InputDecoration(
-                              hintText: context.loc.surveyOptionHint(e.key + 1),
-                              filled: true,
-                              fillColor:
-                                  isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade100,
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(10),
-                                borderSide: BorderSide.none,
-                              ),
-                              contentPadding: const EdgeInsets.all(10),
-                            ),
-                            onChanged: (_) => _emit(),
-                          ),
+              (e) => Padding(
+                padding: const EdgeInsets.only(bottom: 6),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: e.value,
+                        style: AppTextStyles.body(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
-                        if (_optionControllers.length > 2)
-                          IconButton(
-                            icon: const Icon(Icons.close, size: 18),
-                            onPressed: () => _removeOption(e.key),
+                        decoration: InputDecoration(
+                          hintText: context.loc.surveyOptionHint(e.key + 1),
+                          filled: true,
+                          fillColor: isDark
+                              ? JadalColors.darkSurfaceElevated
+                              : Colors.grey.shade100,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(10),
+                            borderSide: BorderSide.none,
                           ),
-                      ],
+                          contentPadding: const EdgeInsets.all(10),
+                        ),
+                        onChanged: (_) => _emit(),
+                      ),
                     ),
-                  ),
+                    if (_optionControllers.length > 2)
+                      IconButton(
+                        icon: const Icon(Icons.close, size: 18),
+                        onPressed: () => _removeOption(e.key),
+                      ),
+                  ],
                 ),
+              ),
+            ),
             TextButton.icon(
               onPressed: _addOption,
               icon: const Icon(Icons.add, size: 18),
-              label: Text(context.loc.surveyAddOption, style: const TextStyle(fontFamily: 'Cairo')),
+              label: Text(
+                context.loc.surveyAddOption,
+                style: AppTextStyles.button(context),
+              ),
             ),
           ],
         ],
@@ -310,17 +349,21 @@ class _NumberField extends StatelessWidget {
   final int value;
   final ValueChanged<int> onChanged;
 
-  const _NumberField({required this.label, required this.value, required this.onChanged});
+  const _NumberField({
+    required this.label,
+    required this.value,
+    required this.onChanged,
+  });
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       initialValue: '$value',
       keyboardType: TextInputType.number,
-      style: const TextStyle(fontFamily: 'Cairo'),
+      style: AppTextStyles.body(context),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: const TextStyle(fontFamily: 'Cairo', fontSize: 11),
+        labelStyle: AppTextStyles.small(context),
         isDense: true,
         border: const OutlineInputBorder(),
       ),

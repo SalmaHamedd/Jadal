@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../app_cubit/app_cubit.dart';
 import '../../app_cubit/app_states.dart';
+import '../../theme/app_text_styles.dart';
 
 class LocaleToggleButton extends StatelessWidget {
   final Color? foregroundColor;
@@ -41,12 +42,7 @@ class LocaleToggleButton extends StatelessWidget {
                   const SizedBox(width: 6),
                   Text(
                     label,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      color: fg,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 13,
-                    ),
+                    style: AppTextStyles.bodyEmphasis(context).copyWith(color: fg),
                   ),
                 ],
               ),

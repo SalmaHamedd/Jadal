@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/extensions/responsive_extension.dart';
 
 /// Fully controlled auth input built on a standard [TextFormField].
@@ -48,20 +49,25 @@ class AuthTextField extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
     final isMobile = context.isMobile;
 
-    final accent =
-    isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
-    final borderColor =
-    isDark ? const Color(0xFF2A3A55) : const Color(0xFFD8DEE7);
-    final fill =
-    isDark ? JadalColors.darkSurfaceElevated : const Color(0xFFF1F4F9);
-    final textColor =
-    isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
-    final secondary =
-    isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary;
+    final accent = isDark ? const Color(0xFFF59A4A) : JadalColors.primaryOrange;
+    final borderColor = isDark
+        ? const Color(0xFF2A3A55)
+        : const Color(0xFFD8DEE7);
+    final fill = isDark
+        ? JadalColors.darkSurfaceElevated
+        : const Color(0xFFF1F4F9);
+    final textColor = isDark
+        ? JadalColors.darkTextPrimary
+        : JadalColors.lightTextPrimary;
+    final secondary = isDark
+        ? JadalColors.darkTextSecondary
+        : JadalColors.lightTextSecondary;
 
     final radius = BorderRadius.circular(isMobile ? 12 : 14);
-    final fieldFont = context.fontSize(12.5, min: 11.5, max: 15);
-    final labelFont = context.fontSize(12, min: 11, max: 14.5);
+    final fieldStyle = AppTextStyles.body(context).copyWith(color: textColor);
+    final labelStyle = AppTextStyles.caption(
+      context,
+    ).copyWith(color: secondary);
     final iconSize = isMobile ? 18.0 : 21.0;
     final vPad = isMobile ? 14.0 : 16.0;
 
@@ -79,11 +85,7 @@ class AuthTextField extends StatelessWidget {
       onFieldSubmitted: onSubmitted,
       validator: validator,
       cursorColor: accent,
-      style: TextStyle(
-        fontFamily: 'Cairo',
-        color: textColor,
-        fontSize: fieldFont,
-      ),
+      style: fieldStyle,
       decoration: InputDecoration(
         // Uniform fill — identical focused or not. No separate inner box.
         filled: true,
@@ -91,31 +93,23 @@ class AuthTextField extends StatelessWidget {
         labelText: label,
         isDense: true,
         contentPadding: EdgeInsets.symmetric(horizontal: 14, vertical: vPad),
-        labelStyle: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: labelFont,
-          color: secondary,
-        ),
-        floatingLabelStyle: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: labelFont,
-          color: accent,
-        ),
+        labelStyle: labelStyle,
+        floatingLabelStyle: labelStyle.copyWith(color: accent),
         prefixIcon: icon == null
             ? null
             : Icon(icon, size: iconSize, color: secondary),
         suffixIcon: isPassword
             ? IconButton(
-          splashRadius: 20,
-          icon: Icon(
-            obscureText
-                ? Icons.visibility_off_outlined
-                : Icons.visibility_outlined,
-            size: iconSize,
-            color: secondary,
-          ),
-          onPressed: onToggleVisibility,
-        )
+                splashRadius: 20,
+                icon: Icon(
+                  obscureText
+                      ? Icons.visibility_off_outlined
+                      : Icons.visibility_outlined,
+                  size: iconSize,
+                  color: secondary,
+                ),
+                onPressed: onToggleVisibility,
+              )
             : null,
         border: outline(borderColor, 1.0),
         enabledBorder: outline(borderColor, 1.0),

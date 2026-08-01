@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/filter_dialog_pieces.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
@@ -102,7 +103,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(context.loc.filterDebatesTitle,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
+                      style: AppTextStyles.title(context).copyWith(fontWeight: FontWeight.w800)),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                 ],
               ),
@@ -192,7 +193,7 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                         _filter = const DebateSearchFilter();
                         _selectedUsers = {};
                       }),
-                      child: Text(context.loc.filterClearButton, style: const TextStyle(fontFamily: 'Cairo')),
+                      child: Text(context.loc.filterClearButton, style: AppTextStyles.button(context)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -200,7 +201,8 @@ class _DebateFilterDialogState extends State<DebateFilterDialog> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: JadalColors.primaryOrange),
                       onPressed: () => Navigator.pop(context, _filter),
-                      child: Text(context.loc.filterApplyButton, style: const TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+                      child: Text(context.loc.filterApplyButton,
+                          style: AppTextStyles.button(context).copyWith(color: Colors.white)),
                     ),
                   ),
                 ],

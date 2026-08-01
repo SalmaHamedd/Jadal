@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart' show Either;
 import '../../../../core/error/failures.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_models.dart';
@@ -29,10 +30,15 @@ import '../../../complaints/presentation/screens/create_complaint_screen.dart';
 class BackendDebateDetailScreen extends StatefulWidget {
   final int debateId;
   final String? title;
-  const BackendDebateDetailScreen({super.key, required this.debateId, this.title});
+  const BackendDebateDetailScreen({
+    super.key,
+    required this.debateId,
+    this.title,
+  });
 
   @override
-  State<BackendDebateDetailScreen> createState() => _BackendDebateDetailScreenState();
+  State<BackendDebateDetailScreen> createState() =>
+      _BackendDebateDetailScreenState();
 }
 
 class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
@@ -44,8 +50,11 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
     // Open the on-device trace file (and print its path) the moment the user
     // lands on debate-details — this is the start of the flow we want captured.
     dlogInitFile();
-    dlog('details', '▶ OPEN debate-details (debateId=${widget.debateId}, '
-        'title="${widget.title ?? ''}")');
+    dlog(
+      'details',
+      '▶ OPEN debate-details (debateId=${widget.debateId}, '
+          'title="${widget.title ?? ''}")',
+    );
     _future = _loadLiveState('open details');
   }
 
@@ -57,16 +66,24 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
   /// repository (`http` tag); this adds a screen-level marker + a one-line digest
   /// so the trace clearly shows the user opened details and how it resolved.
   Future<Either<Failure, LiveStateModel>> _loadLiveState(String reason) {
-    dlog('details', 'GET live-state for details — reason="$reason" '
-        'debateId=${widget.debateId}');
+    dlog(
+      'details',
+      'GET live-state for details — reason="$reason" '
+          'debateId=${widget.debateId}',
+    );
     final future = di.sl<LiveDebateRepository>().getLiveState(widget.debateId);
-    future.then((res) => res.fold(
-          (f) => dlog('details', '✗ details live-state FAILED: ${f.message}'),
-          (s) => dlog('details', '✓ details live-state OK — status=${s.debate.statusRaw} '
+    future.then(
+      (res) => res.fold(
+        (f) => dlog('details', '✗ details live-state FAILED: ${f.message}'),
+        (s) => dlog(
+          'details',
+          '✓ details live-state OK — status=${s.debate.statusRaw} '
               'currentStage=${s.debate.currentStage} judges=${s.judges.length} '
               'prop.speakers=${s.proposition.speakers.length} '
-              'opp.speakers=${s.opposition.speakers.length} stages=${s.stages.length}'),
-        ));
+              'opp.speakers=${s.opposition.speakers.length} stages=${s.stages.length}',
+        ),
+      ),
+    );
     return future;
   }
 
@@ -85,7 +102,7 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
                 title: widget.title ?? loc.debatesTitle,
                 actions: [
                   IconButton(
-                    tooltip: 'تقديم شكوى',
+                    tooltip: loc.submitComplaintTooltip,
                     icon: const Icon(Icons.report_gmailerrorred_rounded),
                     onPressed: () => Navigator.push(
                       context,
@@ -133,11 +150,13 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
     //  • sides-selected/live/done/cancelled → sides fixed (prop/opp); motion shown.
     final isRegistration = status == DebateStatus.scheduled;
     final isAnnounced = status == DebateStatus.announced;
-    final sidesKnown = status == DebateStatus.teamsSelected ||
+    final sidesKnown =
+        status == DebateStatus.teamsSelected ||
         status == DebateStatus.live ||
         status == DebateStatus.completed ||
         status == DebateStatus.cancelled;
-    final motionRevealed = motion != null &&
+    final motionRevealed =
+        motion != null &&
         motion.text.isNotEmpty &&
         (sidesKnown ||
             (state.debate.motionRevealedAt != null &&
@@ -146,11 +165,13 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
-        if (state.debate.isCancelled && (state.debate.cancellationReason?.isNotEmpty ?? false))
+        if (state.debate.isCancelled &&
+            (state.debate.cancellationReason?.isNotEmpty ?? false))
           _Banner(
             icon: Icons.cancel_rounded,
             color: const Color(0xFFE53935),
-            text: '${loc.cancellationReasonLabel}: ${state.debate.cancellationReason}',
+            text:
+                '${loc.cancellationReasonLabel}: ${state.debate.cancellationReason}',
           ),
         // Vibrant gradient hero — status + title + (once revealed) the motion,
         // with its frameworks/tags as small chips inside the hero itself (the old
@@ -160,8 +181,9 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
           statusLabel: _statusLabel(loc, status),
           statusColor: _statusAccent(status),
           motionText: motionRevealed ? motion.text : null,
-          frameworkNames:
-              motionRevealed ? motion.frameworks.map((f) => f.name).toList() : const [],
+          frameworkNames: motionRevealed
+              ? motion.frameworks.map((f) => f.name).toList()
+              : const [],
           tags: motionRevealed ? motion.tags : const [],
         ),
         // Format — always available.
@@ -172,17 +194,22 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
             children: [
               Text(
                 state.format.name ?? '—',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w700,
-                  fontSize: 15,
-                  color: DebateTheme.textPrimary(context),
-                ),
+                style: AppTextStyles.subtitle(
+                  context,
+                ).copyWith(color: DebateTheme.textPrimary(context)),
               ),
               if (state.format.speakersPerSide != null)
-                _kv(context, loc.speakersPerSideLabel, '${state.format.speakersPerSide}'),
+                _kv(
+                  context,
+                  loc.speakersPerSideLabel,
+                  '${state.format.speakersPerSide}',
+                ),
               if (state.debate.scheduledAt != null)
-                _kv(context, loc.scheduledLabel, formatDebateDate(state.debate.scheduledAt)),
+                _kv(
+                  context,
+                  loc.scheduledLabel,
+                  formatDebateDate(state.debate.scheduledAt),
+                ),
             ],
           ),
         ),
@@ -193,7 +220,10 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
           // Judges sit in the same calm section card as Format (the user didn't
           // want the old busy strip), with the chair keeping its star/ring badge.
           if (state.judges.isNotEmpty)
-            _Section(title: loc.judgesLabel, child: _JudgesContent(judges: state.judges)),
+            _Section(
+              title: loc.judgesLabel,
+              child: _JudgesContent(judges: state.judges),
+            ),
           // Teams sit side-by-side as two filled, team-coloured panels (§design).
           _teamsRow(context, state, neutral: isAnnounced),
         ],
@@ -216,7 +246,11 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
 
   /// The two teams as side-by-side, filled team-coloured panels. During the
   /// announced stage sides aren't fixed yet → both render neutral (first/second).
-  Widget _teamsRow(BuildContext context, LiveStateModel state, {required bool neutral}) {
+  Widget _teamsRow(
+    BuildContext context,
+    LiveStateModel state, {
+    required bool neutral,
+  }) {
     final loc = context.loc;
     // Neutral (announced) cards use a muted slate instead of the old flat grey:
     // a deep blue-grey that reads as a calm, sides-not-set tint and blends into
@@ -265,7 +299,9 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
           label: loc.joinNow,
           icon: Icons.podcasts_rounded,
           onPressed: () => Navigator.of(context).push(
-            MaterialPageRoute(builder: (_) => DebateLobbyScreen(debateId: widget.debateId)),
+            MaterialPageRoute(
+              builder: (_) => DebateLobbyScreen(debateId: widget.debateId),
+            ),
           ),
         );
       case DebateStatus.scheduled:
@@ -288,33 +324,35 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
   }
 
   Widget _kv(BuildContext context, String k, String v) => Padding(
-        padding: const EdgeInsets.only(top: 4),
-        child: Text(
-          '$k: $v',
-          style: TextStyle(fontFamily: 'Cairo', fontSize: 13, color: DebateTheme.textSecondary(context)),
-        ),
-      );
+    padding: const EdgeInsets.only(top: 4),
+    child: Text(
+      '$k: $v',
+      style: AppTextStyles.body(
+        context,
+      ).copyWith(color: DebateTheme.textSecondary(context)),
+    ),
+  );
 }
 
 String _statusLabel(AppLocalizations loc, DebateStatus s) => switch (s) {
-      DebateStatus.scheduled => loc.tabRegistration,
-      DebateStatus.announced => loc.tabAnnounced,
-      DebateStatus.teamsSelected => loc.tabSidesSelected,
-      DebateStatus.live => loc.tabLive,
-      DebateStatus.completed => loc.tabDone,
-      DebateStatus.cancelled => loc.tabCancelled,
-      DebateStatus.unknown => '',
-    };
+  DebateStatus.scheduled => loc.tabRegistration,
+  DebateStatus.announced => loc.tabAnnounced,
+  DebateStatus.teamsSelected => loc.tabSidesSelected,
+  DebateStatus.live => loc.tabLive,
+  DebateStatus.completed => loc.tabDone,
+  DebateStatus.cancelled => loc.tabCancelled,
+  DebateStatus.unknown => '',
+};
 
 Color _statusAccent(DebateStatus s) => switch (s) {
-      DebateStatus.scheduled => JadalColors.judgesGrey,
-      DebateStatus.announced => JadalColors.primaryBlue,
-      DebateStatus.teamsSelected => JadalColors.deepBlue,
-      DebateStatus.live => const Color(0xFF2E9E5B),
-      DebateStatus.completed => JadalColors.primaryOrange,
-      DebateStatus.cancelled => const Color(0xFFE53935),
-      DebateStatus.unknown => JadalColors.judgesGrey,
-    };
+  DebateStatus.scheduled => JadalColors.judgesGrey,
+  DebateStatus.announced => JadalColors.primaryBlue,
+  DebateStatus.teamsSelected => JadalColors.deepBlue,
+  DebateStatus.live => const Color(0xFF2E9E5B),
+  DebateStatus.completed => JadalColors.primaryOrange,
+  DebateStatus.cancelled => const Color(0xFFE53935),
+  DebateStatus.unknown => JadalColors.judgesGrey,
+};
 
 /// Vibrant top hero: a blue→deepBlue gradient card with an orange radial glow in
 /// the top corner + faint decorative rings, carrying the status, the debate
@@ -339,7 +377,8 @@ class _HeroHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    final dot = (statusColor == JadalColors.primaryBlue ||
+    final dot =
+        (statusColor == JadalColors.primaryBlue ||
             statusColor == JadalColors.deepBlue)
         ? Colors.white
         : statusColor;
@@ -355,7 +394,11 @@ class _HeroHeader extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topRight,
           end: Alignment.bottomLeft,
-          colors: [JadalColors.deepBlue, JadalColors.primaryBlue, Color(0xFF124A8C)],
+          colors: [
+            JadalColors.deepBlue,
+            JadalColors.primaryBlue,
+            Color(0xFF124A8C),
+          ],
         ),
         boxShadow: [
           BoxShadow(
@@ -378,8 +421,16 @@ class _HeroHeader extends StatelessWidget {
           children: [
             // Two soft, well-blurred orange glows of different sizes — a gentle
             // wash across the top edge rather than one hard blob in the corner.
-            const Positioned(top: -90, right: -60, child: _Glow(size: 230, alpha: 0.30)),
-            const Positioned(top: -30, right: 90, child: _Glow(size: 120, alpha: 0.18)),
+            const Positioned(
+              top: -90,
+              right: -60,
+              child: _Glow(size: 230, alpha: 0.30),
+            ),
+            const Positioned(
+              top: -30,
+              right: 90,
+              child: _Glow(size: 120, alpha: 0.18),
+            ),
             // Faint decorative rings for depth.
             const Positioned(top: 30, right: 150, child: _Ring(size: 56)),
             const Positioned(bottom: -34, left: -12, child: _Ring(size: 130)),
@@ -390,13 +441,16 @@ class _HeroHeader extends StatelessWidget {
                 children: [
                   if (statusLabel.isNotEmpty)
                     Container(
-                      padding:
-                          const EdgeInsets.symmetric(horizontal: 11, vertical: 5),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 11,
+                        vertical: 5,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.16),
                         borderRadius: BorderRadius.circular(20),
-                        border:
-                            Border.all(color: Colors.white.withValues(alpha: 0.25)),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.25),
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
@@ -404,8 +458,10 @@ class _HeroHeader extends StatelessWidget {
                           Container(
                             width: 8,
                             height: 8,
-                            decoration:
-                                BoxDecoration(color: dot, shape: BoxShape.circle),
+                            decoration: BoxDecoration(
+                              color: dot,
+                              shape: BoxShape.circle,
+                            ),
                           ),
                           const SizedBox(width: 7),
                           Text(
@@ -435,12 +491,18 @@ class _HeroHeader extends StatelessWidget {
                   ),
                   if (hasMotion) ...[
                     const SizedBox(height: 14),
-                    Container(height: 1, color: Colors.white.withValues(alpha: 0.18)),
+                    Container(
+                      height: 1,
+                      color: Colors.white.withValues(alpha: 0.18),
+                    ),
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        Icon(Icons.format_quote_rounded,
-                            color: Colors.white.withValues(alpha: 0.75), size: 16),
+                        Icon(
+                          Icons.format_quote_rounded,
+                          color: Colors.white.withValues(alpha: 0.75),
+                          size: 16,
+                        ),
                         const SizedBox(width: 6),
                         Text(
                           loc.motion,
@@ -476,7 +538,8 @@ class _HeroHeader extends StatelessWidget {
                         children: [
                           for (final f in frameworkNames)
                             _HeroChip(label: f, filled: true),
-                          for (final t in tags) _HeroChip(label: t, filled: false),
+                          for (final t in tags)
+                            _HeroChip(label: t, filled: false),
                         ],
                       ),
                     ],
@@ -529,7 +592,9 @@ class _HeroChip extends StatelessWidget {
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: filled ? 0.16 : 0.0),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: filled ? 0.0 : 0.32)),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: filled ? 0.0 : 0.32),
+        ),
       ),
       child: Text(
         label,
@@ -555,7 +620,10 @@ class _Ring extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: Border.all(color: Colors.white.withValues(alpha: 0.12), width: 2),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.12),
+          width: 2,
+        ),
       ),
     );
   }
@@ -588,13 +656,13 @@ class _TeamColumn extends StatelessWidget {
     final teamName = info.team?.name ?? title;
     final people = showOrder
         ? info.orderedSpeakers
-            .map((s) => (name: s.user.name, reply: s.isReplySpeaker))
-            .toList()
+              .map((s) => (name: s.user.name, reply: s.isReplySpeaker))
+              .toList()
         : (info.members.isNotEmpty
-            ? info.members.map((m) => (name: m.name, reply: false)).toList()
-            : info.orderedSpeakers
-                .map((s) => (name: s.user.name, reply: false))
-                .toList());
+              ? info.members.map((m) => (name: m.name, reply: false)).toList()
+              : info.orderedSpeakers
+                    .map((s) => (name: s.user.name, reply: false))
+                    .toList());
 
     return Container(
       decoration: BoxDecoration(
@@ -602,9 +670,13 @@ class _TeamColumn extends StatelessWidget {
         // colour of its own — no bright coloured glow competing with it. The
         // neutral (announced) slate gets a hair more fill so it reads as a solid
         // calm panel rather than washed-out grey.
-        color: color.withValues(alpha: neutral ? (dark ? 0.18 : 0.10) : (dark ? 0.12 : 0.06)),
+        color: color.withValues(
+          alpha: neutral ? (dark ? 0.18 : 0.10) : (dark ? 0.12 : 0.06),
+        ),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(color: color.withValues(alpha: neutral ? 0.30 : 0.24)),
+        border: Border.all(
+          color: color.withValues(alpha: neutral ? 0.30 : 0.24),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: dark ? 0.22 : 0.05),
@@ -628,11 +700,9 @@ class _TeamColumn extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
+                  style: AppTextStyles.small(context).copyWith(
                     color: Colors.white.withValues(alpha: 0.92),
                     fontWeight: FontWeight.w700,
-                    fontSize: 11.5,
                     letterSpacing: 0.4,
                   ),
                 ),
@@ -641,12 +711,9 @@ class _TeamColumn extends StatelessWidget {
                   teamName,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
-                    color: Colors.white,
-                    fontWeight: FontWeight.w800,
-                    fontSize: 15,
-                  ),
+                  style: AppTextStyles.subtitle(
+                    context,
+                  ).copyWith(color: Colors.white, fontWeight: FontWeight.w800),
                 ),
               ],
             ),
@@ -659,10 +726,12 @@ class _TeamColumn extends StatelessWidget {
                 if (people.isEmpty)
                   Padding(
                     padding: const EdgeInsets.all(8),
-                    child: Text('—',
-                        style: TextStyle(
-                            fontFamily: 'Cairo',
-                            color: DebateTheme.textSecondary(context))),
+                    child: Text(
+                      '—',
+                      style: AppTextStyles.body(
+                        context,
+                      ).copyWith(color: DebateTheme.textSecondary(context)),
+                    ),
                   )
                 else
                   for (var i = 0; i < people.length; i++)
@@ -721,20 +790,19 @@ class _MemberLine extends StatelessWidget {
               name.isNotEmpty ? name : '—',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: DebateTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: DebateTheme.textPrimary(context)),
             ),
           ),
           if (replyTag != null) ...[
             const SizedBox(width: 4),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-              decoration:
-                  BoxDecoration(color: color, borderRadius: BorderRadius.circular(8)),
+              decoration: BoxDecoration(
+                color: color,
+                borderRadius: BorderRadius.circular(8),
+              ),
               child: Text(
                 replyTag!,
                 style: const TextStyle(
@@ -785,10 +853,8 @@ class _Section extends StatelessWidget {
         children: [
           Text(
             title,
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.subtitle(context).copyWith(
               fontWeight: FontWeight.w800,
-              fontSize: 15,
               letterSpacing: 0.3,
               color: DebateTheme.textSecondary(context),
             ),
@@ -811,7 +877,8 @@ class _JudgesContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Chair first, then the rest in judge order.
-    final ordered = [...judges]..sort((a, b) {
+    final ordered = [...judges]
+      ..sort((a, b) {
         if (a.isChair != b.isChair) return a.isChair ? -1 : 1;
         return (a.judgeOrder ?? 1 << 30).compareTo(b.judgeOrder ?? 1 << 30);
       });
@@ -843,8 +910,8 @@ class _JudgeRow extends StatelessWidget {
     final tileColor = chair
         ? JadalColors.primaryOrange.withValues(alpha: dark ? 0.16 : 0.10)
         : (dark
-            ? Colors.white.withValues(alpha: 0.04)
-            : JadalColors.primaryBlue.withValues(alpha: 0.04));
+              ? Colors.white.withValues(alpha: 0.04)
+              : JadalColors.primaryBlue.withValues(alpha: 0.04));
 
     return Container(
       margin: EdgeInsets.only(bottom: isLast ? 0 : 8),
@@ -863,7 +930,9 @@ class _JudgeRow extends StatelessWidget {
           Icon(
             chair ? Icons.star_rounded : Icons.gavel_rounded,
             size: 18,
-            color: chair ? JadalColors.primaryOrange : DebateTheme.textSecondary(context),
+            color: chair
+                ? JadalColors.primaryOrange
+                : DebateTheme.textSecondary(context),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -871,10 +940,8 @@ class _JudgeRow extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontFamily: 'Cairo',
+              style: AppTextStyles.body(context).copyWith(
                 fontWeight: chair ? FontWeight.w800 : FontWeight.w600,
-                fontSize: 14,
                 color: DebateTheme.textPrimary(context),
               ),
             ),
@@ -923,8 +990,12 @@ class _Banner extends StatelessWidget {
           Icon(icon, color: color, size: 20),
           const SizedBox(width: 10),
           Expanded(
-            child: Text(text,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context))),
+            child: Text(
+              text,
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: DebateTheme.textPrimary(context)),
+            ),
           ),
         ],
       ),
@@ -936,7 +1007,11 @@ class _PrimaryButton extends StatelessWidget {
   final String label;
   final IconData icon;
   final VoidCallback onPressed;
-  const _PrimaryButton({required this.label, required this.icon, required this.onPressed});
+  const _PrimaryButton({
+    required this.label,
+    required this.icon,
+    required this.onPressed,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -946,7 +1021,12 @@ class _PrimaryButton extends StatelessWidget {
       child: FilledButton.icon(
         onPressed: onPressed,
         icon: Icon(icon),
-        label: Text(label, style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        label: Text(
+          label,
+          style: AppTextStyles.button(
+            context,
+          ).copyWith(fontWeight: FontWeight.w800),
+        ),
       ),
     );
   }
@@ -966,16 +1046,24 @@ class _ErrorView extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline_rounded, size: 56, color: JadalColors.judgesGrey),
+            const Icon(
+              Icons.error_outline_rounded,
+              size: 56,
+              color: JadalColors.judgesGrey,
+            ),
             const SizedBox(height: 12),
-            Text(message,
-                textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textPrimary(context))),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: AppTextStyles.body(
+                context,
+              ).copyWith(color: DebateTheme.textPrimary(context)),
+            ),
             const SizedBox(height: 16),
             OutlinedButton.icon(
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
-              label: Text(loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+              label: Text(loc.retry, style: AppTextStyles.button(context)),
             ),
           ],
         ),
@@ -995,13 +1083,15 @@ class _RegistrantsBar extends StatefulWidget {
 }
 
 class _RegistrantsBarState extends State<_RegistrantsBar> {
-  late final Future<Either<Failure, DebateRegistrations>> _future =
-      di.sl<LiveDebateRepository>().getRegistrations(widget.debateId);
+  late final Future<Either<Failure, DebateRegistrations>> _future = di
+      .sl<LiveDebateRepository>()
+      .getRegistrations(widget.debateId);
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.loc;
     return _Section(
-      title: 'Registrants',
+      title: loc.registrantsTitle,
       child: FutureBuilder<Either<Failure, DebateRegistrations>>(
         future: _future,
         builder: (context, snap) {
@@ -1020,27 +1110,28 @@ class _RegistrantsBarState extends State<_RegistrantsBar> {
           return snap.data!.fold(
             (f) => Text(
               f.message,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
-                color: DebateTheme.textSecondary(context),
-              ),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: DebateTheme.textSecondary(context)),
             ),
             (reg) => Row(
               children: [
                 Expanded(
                   child: _CountButton(
                     icon: Icons.groups_rounded,
-                    label: 'Teams',
+                    label: loc.registrantsTeamsLabel,
                     count: reg.teams.length,
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => _RegistrantListDialog(
-                        title: 'Registered teams',
+                        title: loc.registeredTeamsTitle,
                         icon: Icons.groups_rounded,
                         rows: [
                           for (final t in reg.teams)
-                            (name: t.teamName, sub: '${t.membersCount} members'),
+                            (
+                              name: t.teamName,
+                              sub: '${t.membersCount} members',
+                            ),
                         ],
                       ),
                     ),
@@ -1050,14 +1141,16 @@ class _RegistrantsBarState extends State<_RegistrantsBar> {
                 Expanded(
                   child: _CountButton(
                     icon: Icons.gavel_rounded,
-                    label: 'Judges',
+                    label: loc.registrantsJudgesLabel,
                     count: reg.judges.length,
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => _RegistrantListDialog(
-                        title: 'Registered judges',
+                        title: loc.registeredJudgesTitle,
                         icon: Icons.gavel_rounded,
-                        rows: [for (final u in reg.judges) (name: u.name, sub: null)],
+                        rows: [
+                          for (final u in reg.judges) (name: u.name, sub: null),
+                        ],
                       ),
                     ),
                   ),
@@ -1066,14 +1159,16 @@ class _RegistrantsBarState extends State<_RegistrantsBar> {
                 Expanded(
                   child: _CountButton(
                     icon: Icons.person_rounded,
-                    label: 'Solo',
+                    label: loc.registrantsSoloLabel,
                     count: reg.solo.length,
                     onTap: () => showDialog(
                       context: context,
                       builder: (_) => _RegistrantListDialog(
-                        title: 'Solo applicants',
+                        title: loc.soloApplicantsTitle,
                         icon: Icons.person_rounded,
-                        rows: [for (final u in reg.solo) (name: u.name, sub: null)],
+                        rows: [
+                          for (final u in reg.solo) (name: u.name, sub: null),
+                        ],
                       ),
                     ),
                   ),
@@ -1118,20 +1213,16 @@ class _CountButton extends StatelessWidget {
               const SizedBox(height: 6),
               Text(
                 '$count',
-                style: TextStyle(
-                  fontFamily: 'Cairo',
+                style: AppTextStyles.subtitle(context).copyWith(
                   fontWeight: FontWeight.w800,
-                  fontSize: 18,
                   color: DebateTheme.textPrimary(context),
                 ),
               ),
               Text(
                 label,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontSize: 11.5,
-                  color: DebateTheme.textSecondary(context),
-                ),
+                style: AppTextStyles.small(
+                  context,
+                ).copyWith(color: DebateTheme.textSecondary(context)),
               ),
             ],
           ),
@@ -1158,7 +1249,9 @@ class _RegistrantListDialog extends StatelessWidget {
       backgroundColor: DebateTheme.surface(context),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
       child: ConstrainedBox(
-        constraints: BoxConstraints(maxHeight: MediaQuery.of(context).size.height * 0.6),
+        constraints: BoxConstraints(
+          maxHeight: MediaQuery.of(context).size.height * 0.6,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -1171,10 +1264,8 @@ class _RegistrantListDialog extends StatelessWidget {
                   Expanded(
                     child: Text(
                       title,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
+                      style: AppTextStyles.subtitle(context).copyWith(
                         fontWeight: FontWeight.w800,
-                        fontSize: 16,
                         color: DebateTheme.textPrimary(context),
                       ),
                     ),
@@ -1182,8 +1273,11 @@ class _RegistrantListDialog extends StatelessWidget {
                   IconButton(
                     visualDensity: VisualDensity.compact,
                     onPressed: () => Navigator.of(context).maybePop(),
-                    icon: Icon(Icons.close_rounded,
-                        color: DebateTheme.textSecondary(context), size: 20),
+                    icon: Icon(
+                      Icons.close_rounded,
+                      color: DebateTheme.textSecondary(context),
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -1191,8 +1285,12 @@ class _RegistrantListDialog extends StatelessWidget {
             if (rows.isEmpty)
               Padding(
                 padding: const EdgeInsets.fromLTRB(20, 8, 20, 26),
-                child: Text('None yet.',
-                    style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context))),
+                child: Text(
+                  context.loc.noneYetLabel,
+                  style: AppTextStyles.body(
+                    context,
+                  ).copyWith(color: DebateTheme.textSecondary(context)),
+                ),
               )
             else
               Flexible(
@@ -1203,10 +1301,14 @@ class _RegistrantListDialog extends StatelessWidget {
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, i) {
                     final r = rows[i];
-                    final initial =
-                        r.name.isNotEmpty ? r.name.substring(0, 1).toUpperCase() : '?';
+                    final initial = r.name.isNotEmpty
+                        ? r.name.substring(0, 1).toUpperCase()
+                        : '?';
                     return Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 11,
+                      ),
                       decoration: BoxDecoration(
                         color: DebateTheme.surfaceElevated(context),
                         borderRadius: BorderRadius.circular(12),
@@ -1219,7 +1321,9 @@ class _RegistrantListDialog extends StatelessWidget {
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: JadalColors.primaryBlue.withValues(alpha: 0.10),
+                              color: JadalColors.primaryBlue.withValues(
+                                alpha: 0.10,
+                              ),
                             ),
                             child: Text(
                               initial,
@@ -1239,21 +1343,20 @@ class _RegistrantListDialog extends StatelessWidget {
                                   r.name.isNotEmpty ? r.name : '—',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
+                                  style: AppTextStyles.body(context).copyWith(
                                     fontWeight: FontWeight.w700,
-                                    fontSize: 14,
                                     color: DebateTheme.textPrimary(context),
                                   ),
                                 ),
                                 if (r.sub != null)
                                   Text(
                                     r.sub!,
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: 11.5,
-                                      color: DebateTheme.textSecondary(context),
-                                    ),
+                                    style: AppTextStyles.small(context)
+                                        .copyWith(
+                                          color: DebateTheme.textSecondary(
+                                            context,
+                                          ),
+                                        ),
                                   ),
                               ],
                             ),

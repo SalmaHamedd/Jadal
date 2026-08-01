@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
@@ -106,12 +107,8 @@ class _NewsTickerState extends State<NewsTicker> {
                   textAlign: TextAlign.center,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: DebateTheme.textPrimary(context),
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
+                  style: AppTextStyles.body(context)
+                      .copyWith(color: DebateTheme.textPrimary(context), fontWeight: FontWeight.w600),
                 ),
               ),
             ),

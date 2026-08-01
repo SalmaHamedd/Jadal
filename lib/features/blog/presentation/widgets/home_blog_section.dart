@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/screens/all_blogs_screen.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
@@ -37,25 +38,22 @@ class HomeBlogSection extends StatelessWidget {
                   children: [
                     Text(
                       context.loc.latestArticles,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: context.fontSize(18),
-                        fontWeight: FontWeight.bold,
-                        color: JadalColors.primaryBlue,
-                      ),
+                      style: AppTextStyles.headline(
+                        context,
+                      ).copyWith(color: JadalColors.primaryBlue),
                     ),
                     TextButton(
                       onPressed: () => Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const AllBlogsScreen()),
+                        MaterialPageRoute(
+                          builder: (context) => const AllBlogsScreen(),
+                        ),
                       ),
                       child: Text(
                         context.loc.viewAll,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color: JadalColors.primaryOrange,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: AppTextStyles.button(
+                          context,
+                        ).copyWith(color: JadalColors.primaryOrange),
                       ),
                     ),
                   ],
@@ -63,10 +61,17 @@ class HomeBlogSection extends StatelessWidget {
               ),
               if (displayed.isEmpty)
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: context.wp(2), vertical: 24),
+                  padding: EdgeInsets.symmetric(
+                    horizontal: context.wp(2),
+                    vertical: 24,
+                  ),
                   child: Center(
-                    child: Text(context.loc.noArticles,
-                        style: TextStyle(color: JadalColors.judgesGrey, fontSize: context.fontSize(14))),
+                    child: Text(
+                      context.loc.noArticles,
+                      style: AppTextStyles.body(
+                        context,
+                      ).copyWith(color: JadalColors.judgesGrey),
+                    ),
                   ),
                 )
               else
@@ -80,11 +85,14 @@ class HomeBlogSection extends StatelessWidget {
                           await Navigator.push(
                             context,
                             MaterialPageRoute(
-                              builder: (context) =>
-                                  BlogDetailsScreen(slug: blog.slug, initialViews: blog.views),
+                              builder: (context) => BlogDetailsScreen(
+                                slug: blog.slug,
+                                initialViews: blog.views,
+                              ),
                             ),
                           );
-                          if (context.mounted) context.read<BlogCubit>().loadBlogs();
+                          if (context.mounted)
+                            context.read<BlogCubit>().loadBlogs();
                         },
                       );
                     }).toList(),
@@ -93,7 +101,9 @@ class HomeBlogSection extends StatelessWidget {
             ],
           );
         } else if (state is BlogError) {
-          return Center(child: Text(context.loc.errorWithMessage(state.message)));
+          return Center(
+            child: Text(context.loc.errorWithMessage(state.message)),
+          );
         }
         return const SizedBox();
       },

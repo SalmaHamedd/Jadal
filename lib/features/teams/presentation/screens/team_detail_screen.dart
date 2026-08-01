@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/teams/domain/entities/team.dart';
@@ -23,7 +24,11 @@ class TeamDetailScreen extends StatelessWidget {
   final Team team;
   final TeamRepository repository;
 
-  const TeamDetailScreen({super.key, required this.team, required this.repository});
+  const TeamDetailScreen({
+    super.key,
+    required this.team,
+    required this.repository,
+  });
 
   Future<bool> _confirmDeactivate(BuildContext context) async {
     final confirmed = await showDialog<bool>(
@@ -31,22 +36,25 @@ class TeamDetailScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(
           context.loc.teamDeactivateTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          style: AppTextStyles.subtitle(context),
         ),
         content: Text(
           context.loc.teamDeactivateConfirmBody,
-          style: const TextStyle(fontFamily: 'Cairo'),
+          style: AppTextStyles.body(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.teamCancelButton,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               context.loc.teamDeactivateConfirmButton,
-              style: const TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
+              style: AppTextStyles.button(context).copyWith(color: Colors.red),
             ),
           ),
         ],
@@ -61,22 +69,25 @@ class TeamDetailScreen extends StatelessWidget {
       builder: (dialogContext) => AlertDialog(
         title: Text(
           context.loc.teamRemoveMemberTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          style: AppTextStyles.subtitle(context),
         ),
         content: Text(
           context.loc.teamRemoveMemberBody(name),
-          style: const TextStyle(fontFamily: 'Cairo'),
+          style: AppTextStyles.body(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.teamCancelButton,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               context.loc.teamRemoveButton,
-              style: const TextStyle(fontFamily: 'Cairo', color: Colors.red, fontWeight: FontWeight.w700),
+              style: AppTextStyles.button(context).copyWith(color: Colors.red),
             ),
           ),
         ],
@@ -85,34 +96,43 @@ class TeamDetailScreen extends StatelessWidget {
     return confirmed ?? false;
   }
 
-  Future<bool> _confirmRespond(BuildContext context, TeamLeaveRequest request, bool accept) async {
+  Future<bool> _confirmRespond(
+    BuildContext context,
+    TeamLeaveRequest request,
+    bool accept,
+  ) async {
     final name = request.user?.name ?? '';
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          accept ? context.loc.teamAcceptLeaveRequestTitle : context.loc.teamRejectLeaveRequestTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          accept
+              ? context.loc.teamAcceptLeaveRequestTitle
+              : context.loc.teamRejectLeaveRequestTitle,
+          style: AppTextStyles.subtitle(context),
         ),
         content: Text(
           accept
               ? context.loc.teamLeaveRequestAcceptBody(name)
               : context.loc.teamLeaveRequestRejectBody(name),
-          style: const TextStyle(fontFamily: 'Cairo'),
+          style: AppTextStyles.body(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.teamCancelButton,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
-              accept ? context.loc.teamAcceptButton : context.loc.teamRejectButton,
-              style: TextStyle(
-                fontFamily: 'Cairo',
+              accept
+                  ? context.loc.teamAcceptButton
+                  : context.loc.teamRejectButton,
+              style: AppTextStyles.button(context).copyWith(
                 color: accept ? JadalColors.positiveGreen : Colors.red,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -132,28 +152,33 @@ class TeamDetailScreen extends StatelessWidget {
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: Text(
-          accept ? context.loc.teamAcceptJoinRequestTitle : context.loc.teamRejectJoinRequestTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          accept
+              ? context.loc.teamAcceptJoinRequestTitle
+              : context.loc.teamRejectJoinRequestTitle,
+          style: AppTextStyles.subtitle(context),
         ),
         content: Text(
           accept
               ? context.loc.teamJoinRequestAcceptBody(name)
               : context.loc.teamJoinRequestRejectBody(name),
-          style: const TextStyle(fontFamily: 'Cairo'),
+          style: AppTextStyles.body(context),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.teamCancelButton, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.teamCancelButton,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
-              accept ? context.loc.teamAcceptButton : context.loc.teamRejectButton,
-              style: TextStyle(
-                fontFamily: 'Cairo',
+              accept
+                  ? context.loc.teamAcceptButton
+                  : context.loc.teamRejectButton,
+              style: AppTextStyles.button(context).copyWith(
                 color: accept ? JadalColors.positiveGreen : Colors.red,
-                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -181,8 +206,12 @@ class TeamDetailScreen extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+              color: isDark
+                  ? JadalColors.darkSurface
+                  : JadalColors.lightSurface,
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(20),
+              ),
             ),
             child: StatefulBuilder(
               builder: (sheetContext, setSheetState) {
@@ -192,10 +221,7 @@ class TeamDetailScreen extends StatelessWidget {
                   children: [
                     Text(
                       sheetContext.loc.teamAddMembers,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17,
+                      style: AppTextStyles.title(sheetContext).copyWith(
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
@@ -204,7 +230,8 @@ class TeamDetailScreen extends StatelessWidget {
                     const SizedBox(height: 12),
                     UserSearchPicker(
                       excludeIds: {...excluded, ...picked},
-                      onSelected: (user) => setSheetState(() => picked.add(user.id)),
+                      onSelected: (user) =>
+                          setSheetState(() => picked.add(user.id)),
                     ),
                     const SizedBox(height: 16),
                     SizedBox(
@@ -224,8 +251,12 @@ class TeamDetailScreen extends StatelessWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                         ),
-                        child: Text(sheetContext.loc.teamAddCount(picked.length),
-                            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700)),
+                        child: Text(
+                          sheetContext.loc.teamAddCount(picked.length),
+                          style: AppTextStyles.button(
+                            sheetContext,
+                          ).copyWith(color: Colors.white),
+                        ),
                       ),
                     ),
                   ],
@@ -245,13 +276,18 @@ class TeamDetailScreen extends StatelessWidget {
         ..loadLeaveRequests()
         ..loadJoinRequests(),
       child: BlocConsumer<TeamDetailCubit, TeamDetailState>(
-        listenWhen: (prev, curr) => prev.error != curr.error || prev.deactivated != curr.deactivated,
+        listenWhen: (prev, curr) =>
+            prev.error != curr.error || prev.deactivated != curr.deactivated,
         listener: (context, state) {
           if (state.error != null) {
             JadalSnackBar.show(context, state.error!, type: SnackBarType.error);
           }
           if (state.deactivated) {
-            JadalSnackBar.show(context, context.loc.teamDeactivatedMsg, type: SnackBarType.success);
+            JadalSnackBar.show(
+              context,
+              context.loc.teamDeactivatedMsg,
+              type: SnackBarType.success,
+            );
             Navigator.pop(context, true);
           }
         },
@@ -263,10 +299,7 @@ class TeamDetailScreen extends StatelessWidget {
             child: Scaffold(
               backgroundColor: Colors.transparent,
               appBar: AppBar(
-                title: Text(
-                  team.name,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
-                ),
+                title: Text(team.name, style: AppTextStyles.title(context)),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
@@ -284,7 +317,9 @@ class TeamDetailScreen extends StatelessWidget {
                       onPressed: state.busy
                           ? null
                           : () async {
-                              final confirmed = await _confirmDeactivate(context);
+                              final confirmed = await _confirmDeactivate(
+                                context,
+                              );
                               if (confirmed && context.mounted) {
                                 context.read<TeamDetailCubit>().deactivate();
                               }
@@ -298,7 +333,9 @@ class TeamDetailScreen extends StatelessWidget {
                 icon: const Icon(Icons.person_add_alt_1_rounded),
                 label: Text(
                   context.loc.teamAddMembers,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                  style: AppTextStyles.button(
+                    context,
+                  ).copyWith(color: Colors.white),
                 ),
                 onPressed: () => _openAddMembersSheet(context),
               ),
@@ -317,12 +354,18 @@ class TeamDetailScreen extends StatelessWidget {
                       runSpacing: 8,
                       children: [
                         _StatusChip(
-                          label: team.isActive ? context.loc.teamStatusActive : context.loc.teamStatusInactive,
-                          color: team.isActive ? JadalColors.positiveGreen : JadalColors.judgesGrey,
+                          label: team.isActive
+                              ? context.loc.teamStatusActive
+                              : context.loc.teamStatusInactive,
+                          color: team.isActive
+                              ? JadalColors.positiveGreen
+                              : JadalColors.judgesGrey,
                         ),
                         if (team.leader != null)
                           _StatusChip(
-                            label: context.loc.teamLeaderLabel(team.leader!.name),
+                            label: context.loc.teamLeaderLabel(
+                              team.leader!.name,
+                            ),
                             color: JadalColors.primaryBlue,
                           ),
                       ],
@@ -330,13 +373,13 @@ class TeamDetailScreen extends StatelessWidget {
                     if (state.joinRequests.isNotEmpty) ...[
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        context.loc.teamJoinRequestsHeader(state.joinRequests.length),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          fontSize: context.fontSize(16),
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        context.loc.teamJoinRequestsHeader(
+                          state.joinRequests.length,
+                        ),
+                        style: AppTextStyles.subtitle(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -345,19 +388,33 @@ class TeamDetailScreen extends StatelessWidget {
                           request: request,
                           busy: state.busy,
                           onAccept: () async {
-                            final confirmed = await _confirmRespondJoin(context, request, true);
+                            final confirmed = await _confirmRespondJoin(
+                              context,
+                              request,
+                              true,
+                            );
                             if (confirmed && context.mounted) {
                               context
                                   .read<TeamDetailCubit>()
-                                  .respondToJoinRequest(request.id, accept: true);
+                                  .respondToJoinRequest(
+                                    request.id,
+                                    accept: true,
+                                  );
                             }
                           },
                           onReject: () async {
-                            final confirmed = await _confirmRespondJoin(context, request, false);
+                            final confirmed = await _confirmRespondJoin(
+                              context,
+                              request,
+                              false,
+                            );
                             if (confirmed && context.mounted) {
                               context
                                   .read<TeamDetailCubit>()
-                                  .respondToJoinRequest(request.id, accept: false);
+                                  .respondToJoinRequest(
+                                    request.id,
+                                    accept: false,
+                                  );
                             }
                           },
                         ),
@@ -365,13 +422,13 @@ class TeamDetailScreen extends StatelessWidget {
                     if (state.leaveRequests.isNotEmpty) ...[
                       SizedBox(height: context.hp(2.5)),
                       Text(
-                        context.loc.teamLeaveRequestsHeader(state.leaveRequests.length),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          fontSize: context.fontSize(16),
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        context.loc.teamLeaveRequestsHeader(
+                          state.leaveRequests.length,
+                        ),
+                        style: AppTextStyles.subtitle(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 10),
@@ -380,19 +437,33 @@ class TeamDetailScreen extends StatelessWidget {
                           request: request,
                           busy: state.busy,
                           onAccept: () async {
-                            final confirmed = await _confirmRespond(context, request, true);
+                            final confirmed = await _confirmRespond(
+                              context,
+                              request,
+                              true,
+                            );
                             if (confirmed && context.mounted) {
                               context
                                   .read<TeamDetailCubit>()
-                                  .respondToLeaveRequest(request.id, accept: true);
+                                  .respondToLeaveRequest(
+                                    request.id,
+                                    accept: true,
+                                  );
                             }
                           },
                           onReject: () async {
-                            final confirmed = await _confirmRespond(context, request, false);
+                            final confirmed = await _confirmRespond(
+                              context,
+                              request,
+                              false,
+                            );
                             if (confirmed && context.mounted) {
                               context
                                   .read<TeamDetailCubit>()
-                                  .respondToLeaveRequest(request.id, accept: false);
+                                  .respondToLeaveRequest(
+                                    request.id,
+                                    accept: false,
+                                  );
                             }
                           },
                         ),
@@ -400,21 +471,18 @@ class TeamDetailScreen extends StatelessWidget {
                     SizedBox(height: context.hp(2.5)),
                     Text(
                       context.loc.teamMembersHeaderCount(team.members.length),
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        fontSize: context.fontSize(16),
-                        color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                      style: AppTextStyles.subtitle(context).copyWith(
+                        color: isDark
+                            ? JadalColors.darkTextPrimary
+                            : JadalColors.lightTextPrimary,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       context.loc.teamDragToReorderHint,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 12,
-                        color: JadalColors.judgesGrey,
-                      ),
+                      style: AppTextStyles.caption(
+                        context,
+                      ).copyWith(color: JadalColors.judgesGrey),
                     ),
                     const SizedBox(height: 10),
                     if (team.members.isEmpty)
@@ -423,7 +491,9 @@ class TeamDetailScreen extends StatelessWidget {
                         child: Center(
                           child: Text(
                             context.loc.teamNoMembersYet,
-                            style: TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
+                            style: AppTextStyles.body(
+                              context,
+                            ).copyWith(color: JadalColors.judgesGrey),
                           ),
                         ),
                       )
@@ -441,9 +511,14 @@ class TeamDetailScreen extends StatelessWidget {
                                 members.insert(newIndex, moved);
                                 final priorities = [
                                   for (var i = 0; i < members.length; i++)
-                                    TeamMemberPriority(userId: members[i].userId, priority: i + 1),
+                                    TeamMemberPriority(
+                                      userId: members[i].userId,
+                                      priority: i + 1,
+                                    ),
                                 ];
-                                context.read<TeamDetailCubit>().updatePriorities(priorities);
+                                context
+                                    .read<TeamDetailCubit>()
+                                    .updatePriorities(priorities);
                               },
                         itemBuilder: (context, index) {
                           final member = team.members[index];
@@ -456,9 +531,14 @@ class TeamDetailScreen extends StatelessWidget {
                                 ? null
                                 : () async {
                                     final confirmed =
-                                        await _confirmRemoveMember(context, member.user.name);
+                                        await _confirmRemoveMember(
+                                          context,
+                                          member.user.name,
+                                        );
                                     if (confirmed && context.mounted) {
-                                      context.read<TeamDetailCubit>().removeMember(member.userId);
+                                      context
+                                          .read<TeamDetailCubit>()
+                                          .removeMember(member.userId);
                                     }
                                   },
                           );
@@ -490,12 +570,7 @@ class _StatusChip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: AppTextStyles.caption(context).copyWith(color: color),
       ),
     );
   }
@@ -528,7 +603,9 @@ class _JoinRequestTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: JadalColors.primaryBlue.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: JadalColors.primaryBlue.withValues(alpha: 0.25)),
+        border: Border.all(
+          color: JadalColors.primaryBlue.withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -538,16 +615,17 @@ class _JoinRequestTile extends StatelessWidget {
               CircleAvatar(
                 radius: 16,
                 backgroundColor: JadalColors.primaryBlue,
-                backgroundImage:
-                    user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
+                backgroundImage: user?.avatarUrl != null
+                    ? NetworkImage(user!.avatarUrl!)
+                    : null,
                 child: user?.avatarUrl == null
                     ? Text(
-                        (user?.name.isNotEmpty ?? false) ? user!.name[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          fontFamily: 'Cairo',
+                        (user?.name.isNotEmpty ?? false)
+                            ? user!.name[0].toUpperCase()
+                            : '?',
+                        style: AppTextStyles.small(context).copyWith(
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
-                          fontSize: 12,
                         ),
                       )
                     : null,
@@ -561,9 +639,7 @@ class _JoinRequestTile extends StatelessWidget {
                       user?.name ?? context.loc.teamRoleMember,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
+                      style: AppTextStyles.bodyEmphasis(context).copyWith(
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
@@ -571,12 +647,12 @@ class _JoinRequestTile extends StatelessWidget {
                     ),
                     if (request.requestedAt != null)
                       Text(
-                        context.loc.teamRequestedOnDate(_formatDate(request.requestedAt!)),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11,
-                          color: JadalColors.judgesGrey,
+                        context.loc.teamRequestedOnDate(
+                          _formatDate(request.requestedAt!),
                         ),
+                        style: AppTextStyles.small(
+                          context,
+                        ).copyWith(color: JadalColors.judgesGrey),
                       ),
                   ],
                 ),
@@ -587,11 +663,11 @@ class _JoinRequestTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               request.reason!,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
+              style: AppTextStyles.caption(context).copyWith(
                 fontStyle: FontStyle.italic,
-                color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+                color: isDark
+                    ? JadalColors.darkTextSecondary
+                    : JadalColors.lightTextSecondary,
               ),
             ),
           ],
@@ -601,15 +677,23 @@ class _JoinRequestTile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onReject,
-                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    size: 16,
+                    color: Colors.red,
+                  ),
                   label: Text(
                     context.loc.teamRejectButton,
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
+                    style: AppTextStyles.button(
+                      context,
+                    ).copyWith(color: Colors.red),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -617,15 +701,23 @@ class _JoinRequestTile extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: busy ? null : onAccept,
-                  icon: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
+                  icon: const Icon(
+                    Icons.check_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                   label: Text(
                     context.loc.teamAcceptButton,
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
+                    style: AppTextStyles.button(
+                      context,
+                    ).copyWith(color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: JadalColors.positiveGreen,
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -664,7 +756,9 @@ class _LeaveRequestTile extends StatelessWidget {
       decoration: BoxDecoration(
         color: JadalColors.primaryOrange.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: JadalColors.primaryOrange.withValues(alpha: 0.25)),
+        border: Border.all(
+          color: JadalColors.primaryOrange.withValues(alpha: 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -674,16 +768,17 @@ class _LeaveRequestTile extends StatelessWidget {
               CircleAvatar(
                 radius: 16,
                 backgroundColor: JadalColors.primaryOrange,
-                backgroundImage:
-                    user?.avatarUrl != null ? NetworkImage(user!.avatarUrl!) : null,
+                backgroundImage: user?.avatarUrl != null
+                    ? NetworkImage(user!.avatarUrl!)
+                    : null,
                 child: user?.avatarUrl == null
                     ? Text(
-                        (user?.name.isNotEmpty ?? false) ? user!.name[0].toUpperCase() : '?',
-                        style: const TextStyle(
-                          fontFamily: 'Cairo',
+                        (user?.name.isNotEmpty ?? false)
+                            ? user!.name[0].toUpperCase()
+                            : '?',
+                        style: AppTextStyles.small(context).copyWith(
                           fontWeight: FontWeight.w800,
                           color: Colors.white,
-                          fontSize: 12,
                         ),
                       )
                     : null,
@@ -697,9 +792,7 @@ class _LeaveRequestTile extends StatelessWidget {
                       user?.name ?? context.loc.teamRoleMember,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
+                      style: AppTextStyles.bodyEmphasis(context).copyWith(
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
@@ -707,12 +800,12 @@ class _LeaveRequestTile extends StatelessWidget {
                     ),
                     if (request.requestedAt != null)
                       Text(
-                        context.loc.teamRequestedOnDate(_formatDate(request.requestedAt!)),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11,
-                          color: JadalColors.judgesGrey,
+                        context.loc.teamRequestedOnDate(
+                          _formatDate(request.requestedAt!),
                         ),
+                        style: AppTextStyles.small(
+                          context,
+                        ).copyWith(color: JadalColors.judgesGrey),
                       ),
                   ],
                 ),
@@ -723,11 +816,11 @@ class _LeaveRequestTile extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               request.reason!,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
+              style: AppTextStyles.caption(context).copyWith(
                 fontStyle: FontStyle.italic,
-                color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+                color: isDark
+                    ? JadalColors.darkTextSecondary
+                    : JadalColors.lightTextSecondary,
               ),
             ),
           ],
@@ -737,15 +830,23 @@ class _LeaveRequestTile extends StatelessWidget {
               Expanded(
                 child: OutlinedButton.icon(
                   onPressed: busy ? null : onReject,
-                  icon: const Icon(Icons.close_rounded, size: 16, color: Colors.red),
+                  icon: const Icon(
+                    Icons.close_rounded,
+                    size: 16,
+                    color: Colors.red,
+                  ),
                   label: Text(
                     context.loc.teamRejectButton,
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.red),
+                    style: AppTextStyles.button(
+                      context,
+                    ).copyWith(color: Colors.red),
                   ),
                   style: OutlinedButton.styleFrom(
                     side: const BorderSide(color: Colors.red),
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -753,15 +854,23 @@ class _LeaveRequestTile extends StatelessWidget {
               Expanded(
                 child: ElevatedButton.icon(
                   onPressed: busy ? null : onAccept,
-                  icon: const Icon(Icons.check_rounded, size: 16, color: Colors.white),
+                  icon: const Icon(
+                    Icons.check_rounded,
+                    size: 16,
+                    color: Colors.white,
+                  ),
                   label: Text(
                     context.loc.teamAcceptButton,
-                    style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700, color: Colors.white),
+                    style: AppTextStyles.button(
+                      context,
+                    ).copyWith(color: Colors.white),
                   ),
                   style: ElevatedButton.styleFrom(
                     backgroundColor: JadalColors.positiveGreen,
                     padding: const EdgeInsets.symmetric(vertical: 8),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
                   ),
                 ),
               ),
@@ -799,7 +908,9 @@ class _MemberTile extends StatelessWidget {
         color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : Colors.grey.shade200,
         ),
       ),
       child: Row(
@@ -807,12 +918,13 @@ class _MemberTile extends StatelessWidget {
           CircleAvatar(
             radius: 18,
             backgroundColor: JadalColors.primaryBlue,
-            backgroundImage: user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
+            backgroundImage: user.avatarUrl != null
+                ? NetworkImage(user.avatarUrl!)
+                : null,
             child: user.avatarUrl == null
                 ? Text(
                     user.name.isEmpty ? '?' : user.name[0].toUpperCase(),
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
+                    style: AppTextStyles.body(context).copyWith(
                       fontWeight: FontWeight.w800,
                       color: Colors.white,
                     ),
@@ -831,9 +943,7 @@ class _MemberTile extends StatelessWidget {
                         user.name,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
+                        style: AppTextStyles.bodyEmphasis(context).copyWith(
                           color: isDark
                               ? JadalColors.darkTextPrimary
                               : JadalColors.lightTextPrimary,
@@ -842,17 +952,19 @@ class _MemberTile extends StatelessWidget {
                     ),
                     if (isLeader) ...[
                       const SizedBox(width: 6),
-                      Icon(Icons.star_rounded, size: 16, color: JadalColors.primaryOrange),
+                      Icon(
+                        Icons.star_rounded,
+                        size: 16,
+                        color: JadalColors.primaryOrange,
+                      ),
                     ],
                   ],
                 ),
                 Text(
                   '#${member.priority} • ${user.role}',
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 11,
-                    color: JadalColors.judgesGrey,
-                  ),
+                  style: AppTextStyles.small(
+                    context,
+                  ).copyWith(color: JadalColors.judgesGrey),
                 ),
               ],
             ),
@@ -860,14 +972,21 @@ class _MemberTile extends StatelessWidget {
           if (!isLeader && onRemove != null)
             IconButton(
               tooltip: context.loc.teamRemoveButton,
-              icon: const Icon(Icons.person_remove_outlined, color: Colors.red, size: 20),
+              icon: const Icon(
+                Icons.person_remove_outlined,
+                color: Colors.red,
+                size: 20,
+              ),
               onPressed: onRemove,
             ),
           ReorderableDragStartListener(
             index: index,
             child: const Padding(
               padding: EdgeInsets.only(left: 4),
-              child: Icon(Icons.drag_handle_rounded, color: JadalColors.judgesGrey),
+              child: Icon(
+                Icons.drag_handle_rounded,
+                color: JadalColors.judgesGrey,
+              ),
             ),
           ),
         ],

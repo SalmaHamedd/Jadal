@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/filter_dialog_pieces.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/blog_search_filter.dart';
@@ -73,7 +74,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(context.loc.filterArticlesTitle,
-                      style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800, fontSize: 17)),
+                      style: AppTextStyles.title(context).copyWith(fontWeight: FontWeight.w800)),
                   IconButton(icon: const Icon(Icons.close), onPressed: () => Navigator.pop(context)),
                 ],
               ),
@@ -116,7 +117,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                       const SizedBox(height: 8),
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(context.loc.filterLikedByMe, style: const TextStyle(fontFamily: 'Cairo', fontSize: 13)),
+                        title: Text(context.loc.filterLikedByMe, style: AppTextStyles.body(context)),
                         value: _filter.likedByMe,
                         activeThumbColor: JadalColors.primaryOrange,
                         onChanged: (v) => setState(() => _filter = _filter.copyWith(likedByMe: v)),
@@ -134,7 +135,7 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                         _filter = const BlogSearchFilter();
                         _selectedPublisher = {};
                       }),
-                      child: Text(context.loc.filterClearButton, style: const TextStyle(fontFamily: 'Cairo')),
+                      child: Text(context.loc.filterClearButton, style: AppTextStyles.button(context)),
                     ),
                   ),
                   const SizedBox(width: 12),
@@ -142,7 +143,8 @@ class _BlogFilterDialogState extends State<BlogFilterDialog> {
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(backgroundColor: JadalColors.primaryOrange),
                       onPressed: () => Navigator.pop(context, _filter),
-                      child: Text(context.loc.filterApplyButton, style: const TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+                      child: Text(context.loc.filterApplyButton,
+                          style: AppTextStyles.button(context).copyWith(color: Colors.white)),
                     ),
                   ),
                 ],

@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
@@ -9,7 +10,11 @@ import 'package:jadal_app/features/profile/presentation/widgets/achievement_badg
 class AchievementsScreen extends StatefulWidget {
   final int userId;
   final String userName;
-  const AchievementsScreen({super.key, required this.userId, required this.userName});
+  const AchievementsScreen({
+    super.key,
+    required this.userId,
+    required this.userName,
+  });
 
   @override
   State<AchievementsScreen> createState() => _AchievementsScreenState();
@@ -54,50 +59,55 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.loc.userAchievementsTitle(widget.userName),
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+          title: Text(
+            context.loc.userAchievementsTitle(widget.userName),
+            style: AppTextStyles.title(context),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: _items.isEmpty && _loading
             ? const Center(child: CircularProgressIndicator())
             : _items.isEmpty && _error != null
-                ? Center(child: Text(_error!, style: const TextStyle(fontFamily: 'Cairo')))
-                : _items.isEmpty
-                    ? Center(
-                        child: Text(context.loc.noAchievementsYet,
-                            style: const TextStyle(fontFamily: 'Cairo')),
-                      )
-                    : NotificationListener<ScrollNotification>(
-                        onNotification: (n) {
-                          if (n.metrics.pixels > n.metrics.maxScrollExtent - 200) _loadMore();
-                          return false;
-                        },
-                        child: GridView.builder(
-                          padding: const EdgeInsets.all(16),
-                          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 8,
-                            childAspectRatio: 0.8,
-                          ),
-                          itemCount: _items.length + (_hasMore ? 1 : 0),
-                          itemBuilder: (context, i) {
-                            if (i >= _items.length) {
-                              return const Center(
-                                child: SizedBox(
-                                  width: 24,
-                                  height: 24,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                ),
-                              );
-                            }
-                            return Center(
-                              child: AchievementBadge(achievement: _items[i], size: 72),
-                            );
-                          },
+            ? Center(child: Text(_error!, style: AppTextStyles.body(context)))
+            : _items.isEmpty
+            ? Center(
+                child: Text(
+                  context.loc.noAchievementsYet,
+                  style: AppTextStyles.body(context),
+                ),
+              )
+            : NotificationListener<ScrollNotification>(
+                onNotification: (n) {
+                  if (n.metrics.pixels > n.metrics.maxScrollExtent - 200)
+                    _loadMore();
+                  return false;
+                },
+                child: GridView.builder(
+                  padding: const EdgeInsets.all(16),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3,
+                    mainAxisSpacing: 16,
+                    crossAxisSpacing: 8,
+                    childAspectRatio: 0.8,
+                  ),
+                  itemCount: _items.length + (_hasMore ? 1 : 0),
+                  itemBuilder: (context, i) {
+                    if (i >= _items.length) {
+                      return const Center(
+                        child: SizedBox(
+                          width: 24,
+                          height: 24,
+                          child: CircularProgressIndicator(strokeWidth: 2),
                         ),
-                      ),
+                      );
+                    }
+                    return Center(
+                      child: AchievementBadge(achievement: _items[i], size: 72),
+                    );
+                  },
+                ),
+              ),
       ),
     );
   }

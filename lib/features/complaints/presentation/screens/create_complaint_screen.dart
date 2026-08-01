@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/complaints/domain/repositories/complaint_repository.dart';
@@ -57,13 +58,17 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
     FocusScope.of(context).unfocus();
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (_debateId == null) {
-      JadalSnackBar.show(context, context.loc.complaintChooseDebate, type: SnackBarType.warning);
+      JadalSnackBar.show(
+        context,
+        context.loc.complaintChooseDebate,
+        type: SnackBarType.warning,
+      );
       return;
     }
     context.read<CreateComplaintCubit>().submit(
-          description: _descriptionController.text.trim(),
-          debateId: _debateId!,
-        );
+      description: _descriptionController.text.trim(),
+      debateId: _debateId!,
+    );
   }
 
   @override
@@ -76,7 +81,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
           appBar: AppBar(
             title: Text(
               context.loc.complaintNewComplaint,
-              style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+              style: AppTextStyles.title(context),
             ),
             backgroundColor: Colors.transparent,
             elevation: 0,
@@ -85,10 +90,18 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
           body: BlocConsumer<CreateComplaintCubit, CreateComplaintState>(
             listener: (context, state) {
               if (state is CreateComplaintSuccess) {
-                JadalSnackBar.show(context, context.loc.complaintSubmittedSuccess, type: SnackBarType.success);
+                JadalSnackBar.show(
+                  context,
+                  context.loc.complaintSubmittedSuccess,
+                  type: SnackBarType.success,
+                );
                 Navigator.pop(context, true);
               } else if (state is CreateComplaintError) {
-                JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+                JadalSnackBar.show(
+                  context,
+                  state.message,
+                  type: SnackBarType.error,
+                );
               }
             },
             builder: (context, state) {
@@ -104,17 +117,19 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                     children: [
                       Text(
                         context.loc.complaintDebateFieldLabel,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        style: AppTextStyles.bodyEmphasis(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       if (_isDebateLocked)
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 12,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? JadalColors.darkSurfaceElevated
@@ -123,15 +138,18 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                           ),
                           child: Row(
                             children: [
-                              Icon(Icons.forum_outlined, size: 18, color: JadalColors.primaryBlue),
+                              Icon(
+                                Icons.forum_outlined,
+                                size: 18,
+                                color: JadalColors.primaryBlue,
+                              ),
                               const SizedBox(width: 10),
                               Expanded(
                                 child: Text(
                                   _debateTitle ?? '',
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
+                                  style: AppTextStyles.body(context).copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: isDark
                                         ? JadalColors.darkTextPrimary
@@ -145,37 +163,39 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                       else
                         DebatePickerField(
                           selected: _debate,
-                          onChanged: (debate) => setState(() => _debate = debate),
+                          onChanged: (debate) =>
+                              setState(() => _debate = debate),
                         ),
                       SizedBox(height: context.hp(2.5)),
                       Text(
                         context.loc.complaintDescriptionLabel,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        style: AppTextStyles.bodyEmphasis(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                       ),
                       const SizedBox(height: 8),
                       TextFormField(
                         controller: _descriptionController,
                         maxLines: 5,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          color:
-                              isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                        style: AppTextStyles.body(context).copyWith(
+                          color: isDark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
                         ),
                         validator: (v) => (v == null || v.trim().isEmpty)
                             ? context.loc.complaintDescriptionRequired
                             : null,
                         decoration: InputDecoration(
                           hintText: context.loc.complaintDescriptionHint,
-                          hintStyle:
-                              TextStyle(fontFamily: 'Cairo', color: JadalColors.judgesGrey),
+                          hintStyle: AppTextStyles.body(
+                            context,
+                          ).copyWith(color: JadalColors.judgesGrey),
                           filled: true,
-                          fillColor:
-                              isDark ? JadalColors.darkSurfaceElevated : const Color(0xFFF1F4F9),
+                          fillColor: isDark
+                              ? JadalColors.darkSurfaceElevated
+                              : const Color(0xFFF1F4F9),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -207,7 +227,9 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                                 )
                               : Text(
                                   context.loc.complaintSubmitButton,
-                                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                                  style: AppTextStyles.button(
+                                    context,
+                                  ).copyWith(color: Colors.white),
                                 ),
                         ),
                       ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 
@@ -51,12 +52,8 @@ class SearchUserCard extends StatelessWidget {
                   child: user.avatarUrl == null
                       ? Text(
                           user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
-                          style: TextStyle(
-                            fontFamily: 'Cairo',
-                            fontWeight: FontWeight.w800,
-                            fontSize: context.fontSize(16),
-                            color: Colors.white,
-                          ),
+                          style: AppTextStyles.subtitle(context)
+                              .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
                         )
                       : null,
                 ),
@@ -70,9 +67,7 @@ class SearchUserCard extends StatelessWidget {
                       user.name,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: context.fontSize(15),
+                      style: AppTextStyles.subtitle(context).copyWith(
                         fontWeight: FontWeight.bold,
                         color: isDark
                             ? JadalColors.darkTextPrimary
@@ -152,12 +147,7 @@ class _Chip extends StatelessWidget {
           ],
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: context.fontSize(11),
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            style: AppTextStyles.small(context).copyWith(fontWeight: FontWeight.w800, color: color),
           ),
         ],
       ),

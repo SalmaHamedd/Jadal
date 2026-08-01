@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../data/models/team_summary_model.dart';
 import '../../data/repositories/team_summary_repository.dart';
@@ -13,7 +14,11 @@ import '../widgets/stats_theme.dart';
 class CoachTeamSummaryScreen extends StatefulWidget {
   final int trainerId;
   final String? trainerName;
-  const CoachTeamSummaryScreen({super.key, required this.trainerId, this.trainerName});
+  const CoachTeamSummaryScreen({
+    super.key,
+    required this.trainerId,
+    this.trainerName,
+  });
 
   @override
   State<CoachTeamSummaryScreen> createState() => _CoachTeamSummaryScreenState();
@@ -46,15 +51,16 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+      backgroundColor: StatsTheme.isDark(context)
+          ? JadalColors.darkBackground
+          : JadalColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         title: Text(
           widget.trainerName == null
               ? context.loc.statsTeamAnalysisTitle
               : context.loc.statsTeamAnalysisTitleWithName(widget.trainerName!),
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+          style: AppTextStyles.title(context),
         ),
       ),
       body: JadalGradientBackground(child: _body(context)),
@@ -69,18 +75,27 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, size: 52, color: JadalColors.judgesGrey),
+              const Icon(
+                Icons.error_outline_rounded,
+                size: 52,
+                color: JadalColors.judgesGrey,
+              ),
               const SizedBox(height: 12),
               Text(
                 _error!,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textPrimary(context)),
+                style: AppTextStyles.body(
+                  context,
+                ).copyWith(color: StatsTheme.textPrimary(context)),
               ),
               const SizedBox(height: 16),
               OutlinedButton.icon(
                 onPressed: _load,
                 icon: const Icon(Icons.refresh_rounded),
-                label: Text(context.loc.retry, style: const TextStyle(fontFamily: 'Cairo')),
+                label: Text(
+                  context.loc.retry,
+                  style: AppTextStyles.button(context),
+                ),
               ),
             ],
           ),
@@ -101,25 +116,24 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
             children: [
               Text(
                 context.loc.statsAveragedAcrossTeams,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
+                style: AppTextStyles.body(context).copyWith(
                   fontWeight: FontWeight.w700,
-                  fontSize: 13,
                   color: StatsTheme.textSecondary(context),
                 ),
               ),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 5,
+                ),
                 decoration: BoxDecoration(
                   color: JadalColors.primaryOrange.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
                   context.loc.statsTeamsCount(stat.teamsCounted),
-                  style: const TextStyle(
-                    fontFamily: 'Cairo',
+                  style: AppTextStyles.small(context).copyWith(
                     fontWeight: FontWeight.w800,
-                    fontSize: 11.5,
                     color: JadalColors.primaryOrange,
                   ),
                 ),
@@ -133,7 +147,8 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
                 child: _MetricTile(
                   icon: Icons.trending_up_rounded,
                   label: context.loc.statsAvgImprovement,
-                  value: '${stat.teamAvgImprovement >= 0 ? '+' : ''}'
+                  value:
+                      '${stat.teamAvgImprovement >= 0 ? '+' : ''}'
                       '${stat.teamAvgImprovement.toStringAsFixed(1)}',
                   color: stat.teamAvgImprovement >= 0
                       ? JadalColors.positiveGreen
@@ -167,7 +182,8 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
                 child: _MetricTile(
                   icon: Icons.local_fire_department_rounded,
                   label: context.loc.statsAvgMemberActivity,
-                  value: '${stat.teamAvgActive >= 0 ? '+' : ''}'
+                  value:
+                      '${stat.teamAvgActive >= 0 ? '+' : ''}'
                       '${stat.teamAvgActive.toStringAsFixed(1)}',
                   color: stat.teamAvgActive >= 0
                       ? JadalColors.positiveGreen
@@ -209,22 +225,15 @@ class _MetricTile extends StatelessWidget {
             builder: (context, t, child) => Opacity(opacity: t, child: child),
             child: Text(
               value,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w900,
-                fontSize: 26,
-                color: color,
-              ),
+              style: AppTextStyles.displayTitle(context).copyWith(color: color),
             ),
           ),
           const SizedBox(height: 4),
           Text(
             label,
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.caption(context).copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 12,
               color: StatsTheme.textSecondary(context),
             ),
           ),

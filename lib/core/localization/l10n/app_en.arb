@@ -672,5 +672,41 @@
   "optionsLoadError": "Failed to load options: {error}",
   "@optionsLoadError": {
     "placeholders": { "error": { "type": "String" } }
+  },
+
+  "submitComplaintTooltip": "Submit a complaint",
+  "registrantsTitle": "Registrants",
+  "registrantsTeamsLabel": "Teams",
+  "registrantsJudgesLabel": "Judges",
+  "registrantsSoloLabel": "Solo",
+  "registeredTeamsTitle": "Registered teams",
+  "registeredJudgesTitle": "Registered judges",
+  "soloApplicantsTitle": "Solo applicants",
+  "noneYetLabel": "None yet.",
+
+  "editProfileButton": "Edit Profile",
+  "changePasswordButton": "Change Password",
+  "changePasswordTitle": "Change Password",
+  "currentPassword": "Current Password",
+  "updatePasswordButton": "Update Password",
+
+  "teamRoleLeader": "Leader",
+  "teamRoleTrainer": "Coach",
+  "teamRoleMember": "Member",
+  "currentPill": "Current",
+  "noPastTeams": "No past teams",
+  "showPastTeams": "Show past teams",
+  "hidePastTeams": "Hide past teams",
+  "elapsedDaysShort": "{count} days",
+  "@elapsedDaysShort": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "elapsedMonthsShort": "{count}mo",
+  "@elapsedMonthsShort": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "elapsedYearsShort": "{count}y",
+  "@elapsedYearsShort": {
+    "placeholders": { "count": { "type": "int" } }
   }
 }

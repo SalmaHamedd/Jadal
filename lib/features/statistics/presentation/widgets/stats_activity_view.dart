@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/activity_stat_model.dart';
 import 'stats_theme.dart';
 
@@ -41,10 +42,8 @@ class StatsActivityView extends StatelessWidget {
         Center(
           child: Text(
             'activity points',
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.caption(context).copyWith(
               fontWeight: FontWeight.w700,
-              fontSize: 12.5,
               color: StatsTheme.textSecondary(context),
             ),
           ),
@@ -53,10 +52,8 @@ class StatsActivityView extends StatelessWidget {
         if (data.buckets.length >= 2) ...[
           Text(
             'Activity trend',
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.body(context).copyWith(
               fontWeight: FontWeight.w800,
-              fontSize: 13,
               color: StatsTheme.textSecondary(context),
             ),
           ),
@@ -79,10 +76,8 @@ class StatsActivityView extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'By period',
-            style: TextStyle(
-              fontFamily: 'Cairo',
+            style: AppTextStyles.body(context).copyWith(
               fontWeight: FontWeight.w800,
-              fontSize: 13,
               color: StatsTheme.textSecondary(context),
             ),
           ),
@@ -102,9 +97,24 @@ class _BreakdownRows extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = <(IconData, String, String, ActivitySignal)>[
-      (Icons.how_to_reg_rounded, 'Registrations', 'registered', breakdown.registration),
-      (Icons.event_available_rounded, 'Attendance', 'attended', breakdown.attendance),
-      (Icons.visibility_rounded, 'Watched debates', 'watched', breakdown.viewing),
+      (
+        Icons.how_to_reg_rounded,
+        'Registrations',
+        'registered',
+        breakdown.registration,
+      ),
+      (
+        Icons.event_available_rounded,
+        'Attendance',
+        'attended',
+        breakdown.attendance,
+      ),
+      (
+        Icons.visibility_rounded,
+        'Watched debates',
+        'watched',
+        breakdown.viewing,
+      ),
       (Icons.event_busy_rounded, 'Missed debates', 'missed', breakdown.penalty),
     ];
     return Column(
@@ -119,9 +129,7 @@ class _BreakdownRows extends StatelessWidget {
                 Expanded(
                   child: Text(
                     r.$2,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 12.5,
+                    style: AppTextStyles.caption(context).copyWith(
                       fontWeight: FontWeight.w600,
                       color: StatsTheme.textPrimary(context),
                     ),
@@ -132,18 +140,14 @@ class _BreakdownRows extends StatelessWidget {
                     padding: const EdgeInsetsDirectional.only(end: 10),
                     child: Text(
                       '${r.$4.count} ${r.$3}',
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 11.5,
-                        color: StatsTheme.textSecondary(context),
-                      ),
+                      style: AppTextStyles.small(
+                        context,
+                      ).copyWith(color: StatsTheme.textSecondary(context)),
                     ),
                   ),
                 Text(
                   _signed(r.$4.points),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13,
+                  style: AppTextStyles.body(context).copyWith(
                     fontWeight: FontWeight.w800,
                     color: r.$4.points == 0
                         ? StatsTheme.textSecondary(context)
@@ -183,9 +187,7 @@ class _BucketRow extends StatelessWidget {
               children: [
                 Text(
                   bucket.label,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 12.5,
+                  style: AppTextStyles.caption(context).copyWith(
                     fontWeight: FontWeight.w700,
                     color: StatsTheme.textPrimary(context),
                   ),
@@ -193,11 +195,9 @@ class _BucketRow extends StatelessWidget {
                 if (parts.isNotEmpty)
                   Text(
                     parts.join(' · '),
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 11,
-                      color: StatsTheme.textSecondary(context),
-                    ),
+                    style: AppTextStyles.small(
+                      context,
+                    ).copyWith(color: StatsTheme.textSecondary(context)),
                   ),
               ],
             ),
@@ -205,14 +205,14 @@ class _BucketRow extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: StatsActivityView.signColor(bucket.value).withValues(alpha: 0.12),
+              color: StatsActivityView.signColor(
+                bucket.value,
+              ).withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
               _signed(bucket.value),
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
+              style: AppTextStyles.caption(context).copyWith(
                 fontWeight: FontWeight.w800,
                 color: StatsActivityView.signColor(bucket.value),
               ),
@@ -224,7 +224,8 @@ class _BucketRow extends StatelessWidget {
   }
 }
 
-String _signed(double v) => (v >= 0 ? '+' : '') + v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+String _signed(double v) =>
+    (v >= 0 ? '+' : '') + v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
 
 /// A line-with-area trend of the per-bucket totals. Unlike the improvement
 /// sparkline (fixed 0–100 score scale), activity points are unbounded and can

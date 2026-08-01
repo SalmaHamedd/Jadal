@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
@@ -23,11 +24,8 @@ class PoiAskerMicDialog extends StatelessWidget {
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: Text(
             loc.poiYourTurn,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w800,
-              color: DebateTheme.textPrimary(context),
-            ),
+            style: AppTextStyles.title(context)
+                .copyWith(color: DebateTheme.textPrimary(context)),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
@@ -35,7 +33,8 @@ class PoiAskerMicDialog extends StatelessWidget {
               Text(
                 loc.poiSpeakNow,
                 textAlign: TextAlign.center,
-                style: TextStyle(fontFamily: 'Cairo', color: DebateTheme.textSecondary(context)),
+                style: AppTextStyles.body(context)
+                    .copyWith(color: DebateTheme.textSecondary(context)),
               ),
               const SizedBox(height: 16),
               GestureDetector(

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../localization/l10n/context_localiztion.dart';
 import '../theme/app_colors.dart';
+import '../theme/app_text_styles.dart';
 
 /// A generic (id, label) option for the multi-select pieces below — shared by
 /// every filter dialog (debate search §8, blog search §10) so they don't each
@@ -38,10 +39,7 @@ class MultiSelectChipGroup extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(title,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+            style: AppTextStyles.bodyEmphasis(context).copyWith(
               color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
             )),
         const SizedBox(height: 6),
@@ -51,7 +49,8 @@ class MultiSelectChipGroup extends StatelessWidget {
             child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
           )
         else if (options.isEmpty)
-          Text(context.loc.filterNoneAvailable, style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey))
+          Text(context.loc.filterNoneAvailable,
+              style: AppTextStyles.caption(context).copyWith(color: JadalColors.judgesGrey))
         else
           Wrap(
             spacing: 8,
@@ -59,7 +58,7 @@ class MultiSelectChipGroup extends StatelessWidget {
             children: [
               for (final o in options)
                 FilterChip(
-                  label: Text(o.label, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                  label: Text(o.label, style: AppTextStyles.caption(context)),
                   selected: selected.contains(o.id),
                   selectedColor: JadalColors.primaryOrange.withValues(alpha: 0.2),
                   checkmarkColor: JadalColors.primaryOrange,
@@ -135,10 +134,7 @@ class _SearchableMultiSelectState extends State<SearchableMultiSelect> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(widget.title,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+            style: AppTextStyles.bodyEmphasis(context).copyWith(
               color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
             )),
         const SizedBox(height: 6),
@@ -151,7 +147,7 @@ class _SearchableMultiSelectState extends State<SearchableMultiSelect> {
               children: [
                 for (final e in widget.selectedLabels.entries)
                   Chip(
-                    label: Text(e.value, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                    label: Text(e.value, style: AppTextStyles.caption(context)),
                     onDeleted: () {
                       final next = Map<String, String>.from(widget.selectedLabels)..remove(e.key);
                       widget.onChanged(next);
@@ -188,7 +184,7 @@ class _SearchableMultiSelectState extends State<SearchableMultiSelect> {
                 final isSelected = widget.selectedLabels.containsKey(r.id);
                 return CheckboxListTile(
                   dense: true,
-                  title: Text(r.label, style: const TextStyle(fontFamily: 'Cairo', fontSize: 13)),
+                  title: Text(r.label, style: AppTextStyles.body(context)),
                   value: isSelected,
                   onChanged: (v) {
                     final next = Map<String, String>.from(widget.selectedLabels);
@@ -244,10 +240,7 @@ class DateRangeField extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(context.loc.filterDateRangeLabel,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: 13,
+            style: AppTextStyles.bodyEmphasis(context).copyWith(
               color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
             )),
         const SizedBox(height: 6),
@@ -256,14 +249,14 @@ class DateRangeField extends StatelessWidget {
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _pick(context, onFromChanged, from),
-                child: Text(from ?? context.loc.filterFromLabel, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                child: Text(from ?? context.loc.filterFromLabel, style: AppTextStyles.caption(context)),
               ),
             ),
             const SizedBox(width: 8),
             Expanded(
               child: OutlinedButton(
                 onPressed: () => _pick(context, onToChanged, to),
-                child: Text(to ?? context.loc.filterToLabel, style: const TextStyle(fontFamily: 'Cairo', fontSize: 12)),
+                child: Text(to ?? context.loc.filterToLabel, style: AppTextStyles.caption(context)),
               ),
             ),
           ],

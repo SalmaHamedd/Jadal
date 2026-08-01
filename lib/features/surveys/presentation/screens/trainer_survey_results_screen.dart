@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/surveys/data/repositories/trainer_survey_repository_impl.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_results.dart';
@@ -18,7 +19,11 @@ class TrainerSurveyResultsScreen extends StatelessWidget {
   final int surveyId;
   final TrainerSurveyRepository? repository;
 
-  const TrainerSurveyResultsScreen({super.key, required this.surveyId, this.repository});
+  const TrainerSurveyResultsScreen({
+    super.key,
+    required this.surveyId,
+    this.repository,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -34,28 +39,33 @@ class TrainerSurveyResultsScreen extends StatelessWidget {
               appBar: AppBar(
                 title: Text(
                   context.loc.surveyResultsTitle,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                  style: AppTextStyles.title(context),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
                 scrolledUnderElevation: 0,
               ),
-              body: BlocBuilder<TrainerSurveyResultsCubit, TrainerSurveyResultsState>(
-                builder: (context, state) {
-                  if (state is TrainerSurveyResultsLoading) {
-                    return const SurveyLoadingView();
-                  } else if (state is TrainerSurveyResultsLoaded) {
-                    return _ResultsBody(results: state.results);
-                  } else if (state is TrainerSurveyResultsError) {
-                    return SurveyErrorView(
-                      message: state.message,
-                      onRetry: () =>
-                          context.read<TrainerSurveyResultsCubit>().loadResults(surveyId),
-                    );
-                  }
-                  return const SizedBox();
-                },
-              ),
+              body:
+                  BlocBuilder<
+                    TrainerSurveyResultsCubit,
+                    TrainerSurveyResultsState
+                  >(
+                    builder: (context, state) {
+                      if (state is TrainerSurveyResultsLoading) {
+                        return const SurveyLoadingView();
+                      } else if (state is TrainerSurveyResultsLoaded) {
+                        return _ResultsBody(results: state.results);
+                      } else if (state is TrainerSurveyResultsError) {
+                        return SurveyErrorView(
+                          message: state.message,
+                          onRetry: () => context
+                              .read<TrainerSurveyResultsCubit>()
+                              .loadResults(surveyId),
+                        );
+                      }
+                      return const SizedBox();
+                    },
+                  ),
             ),
           );
         },
@@ -84,11 +94,10 @@ class _ResultsBody extends StatelessWidget {
           if (results.title != null) ...[
             Text(
               results.title!,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.bold,
-                fontSize: context.fontSize(20, min: 17, max: 24),
-                color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+              style: AppTextStyles.headline(context).copyWith(
+                color: isDark
+                    ? JadalColors.darkTextPrimary
+                    : JadalColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 12),
@@ -108,11 +117,9 @@ class _ResultsBody extends StatelessWidget {
                   context.loc.surveyTotalResponsesLabel(
                     results.totalResponses ?? results.responses.length,
                   ),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w700,
-                    color: JadalColors.primaryOrange,
-                  ),
+                  style: AppTextStyles.bodyEmphasis(
+                    context,
+                  ).copyWith(color: JadalColors.primaryOrange),
                 ),
               ],
             ),
@@ -120,29 +127,33 @@ class _ResultsBody extends StatelessWidget {
           const SizedBox(height: 20),
           Text(
             context.loc.surveyAnswersSummary,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: context.fontSize(16),
-              color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+            style: AppTextStyles.subtitle(context).copyWith(
+              color: isDark
+                  ? JadalColors.darkTextPrimary
+                  : JadalColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 10),
-          ...results.questions.map((q) => _QuestionSummaryCard(question: q, isDark: isDark)),
+          ...results.questions.map(
+            (q) => _QuestionSummaryCard(question: q, isDark: isDark),
+          ),
           if (results.responses.isNotEmpty) ...[
             const SizedBox(height: 20),
             Text(
               context.loc.surveyResponsesCountLabel(results.responses.length),
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w700,
-                fontSize: context.fontSize(16),
-                color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+              style: AppTextStyles.subtitle(context).copyWith(
+                color: isDark
+                    ? JadalColors.darkTextPrimary
+                    : JadalColors.lightTextPrimary,
               ),
             ),
             const SizedBox(height: 10),
             ...results.responses.map(
-              (r) => _RespondentCard(response: r, questions: results.questions, isDark: isDark),
+              (r) => _RespondentCard(
+                response: r,
+                questions: results.questions,
+                isDark: isDark,
+              ),
             ),
           ],
         ],
@@ -167,22 +178,28 @@ class _QuestionSummaryCard extends StatelessWidget {
         children: [
           Text(
             question.questionText,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+            style: AppTextStyles.bodyEmphasis(context).copyWith(
+              color: isDark
+                  ? JadalColors.darkTextPrimary
+                  : JadalColors.lightTextPrimary,
             ),
           ),
           const SizedBox(height: 10),
           if ((question.totalAnswered ?? 0) == 0)
             Text(
               context.loc.surveyNoAnswersYet,
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
             )
           else if (question.isRating && question.average != null)
             Row(
               children: [
-                Icon(Icons.star_rate_rounded, color: JadalColors.primaryOrange, size: 20),
+                Icon(
+                  Icons.star_rate_rounded,
+                  color: JadalColors.primaryOrange,
+                  size: 20,
+                ),
                 const SizedBox(width: 6),
                 Text(
                   context.loc.surveyAverageLabel(
@@ -190,20 +207,25 @@ class _QuestionSummaryCard extends StatelessWidget {
                     '${question.ratingMax}',
                     '${question.totalAnswered}',
                   ),
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w600,
-                    color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                  style: AppTextStyles.body(context).copyWith(
+                    color: isDark
+                        ? JadalColors.darkTextPrimary
+                        : JadalColors.lightTextPrimary,
                   ),
                 ),
               ],
             )
           else if (question.isMcq && question.distribution != null)
-            _DistributionBars(distribution: question.distribution!, isDark: isDark)
+            _DistributionBars(
+              distribution: question.distribution!,
+              isDark: isDark,
+            )
           else if (question.isOpenText && question.textAnswers != null)
             Text(
               context.loc.surveyTextAnswersCount(question.textAnswers!.length),
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
             ),
         ],
       ),
@@ -231,10 +253,10 @@ class _DistributionBars extends StatelessWidget {
                 width: 90,
                 child: Text(
                   entry.key,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 12,
-                    color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                  style: AppTextStyles.caption(context).copyWith(
+                    color: isDark
+                        ? JadalColors.darkTextPrimary
+                        : JadalColors.lightTextPrimary,
                   ),
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -245,16 +267,21 @@ class _DistributionBars extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: ratio,
                     minHeight: 10,
-                    backgroundColor:
-                        isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
-                    valueColor: AlwaysStoppedAnimation(JadalColors.primaryOrange),
+                    backgroundColor: isDark
+                        ? JadalColors.darkSurfaceElevated
+                        : Colors.grey.shade200,
+                    valueColor: AlwaysStoppedAnimation(
+                      JadalColors.primaryOrange,
+                    ),
                   ),
                 ),
               ),
               const SizedBox(width: 8),
               Text(
                 '${entry.value}',
-                style: TextStyle(fontFamily: 'Cairo', fontSize: 12, color: JadalColors.judgesGrey),
+                style: AppTextStyles.caption(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
               ),
             ],
           ),
@@ -304,17 +331,18 @@ class _RespondentCard extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: JadalColors.primaryOrange.withValues(alpha: 0.15),
-                backgroundImage:
-                    respondent.avatarUrl != null ? NetworkImage(respondent.avatarUrl!) : null,
+                backgroundColor: JadalColors.primaryOrange.withValues(
+                  alpha: 0.15,
+                ),
+                backgroundImage: respondent.avatarUrl != null
+                    ? NetworkImage(respondent.avatarUrl!)
+                    : null,
                 child: respondent.avatarUrl == null
                     ? Text(
                         initial,
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontWeight: FontWeight.w700,
-                          color: JadalColors.primaryOrange,
-                        ),
+                        style: AppTextStyles.bodyEmphasis(
+                          context,
+                        ).copyWith(color: JadalColors.primaryOrange),
                       )
                     : null,
               ),
@@ -325,24 +353,22 @@ class _RespondentCard extends StatelessWidget {
                   children: [
                     Text(
                       respondent.name,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontWeight: FontWeight.w700,
-                        color:
-                            isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                      style: AppTextStyles.bodyEmphasis(context).copyWith(
+                        color: isDark
+                            ? JadalColors.darkTextPrimary
+                            : JadalColors.lightTextPrimary,
                       ),
                     ),
                     if (respondent.role != null || response.submittedAt != null)
                       Text(
                         [
                           if (respondent.role != null) respondent.role!,
-                          if (response.submittedAt != null) _formatDate(response.submittedAt!),
+                          if (response.submittedAt != null)
+                            _formatDate(response.submittedAt!),
                         ].join(' • '),
-                        style: TextStyle(
-                          fontFamily: 'Cairo',
-                          fontSize: 11,
-                          color: JadalColors.judgesGrey,
-                        ),
+                        style: AppTextStyles.small(
+                          context,
+                        ).copyWith(color: JadalColors.judgesGrey),
                       ),
                   ],
                 ),
@@ -359,19 +385,17 @@ class _RespondentCard extends StatelessWidget {
                 children: [
                   Text(
                     q.questionText,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 12,
-                      color: JadalColors.judgesGrey,
-                    ),
+                    style: AppTextStyles.caption(
+                      context,
+                    ).copyWith(color: JadalColors.judgesGrey),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     _formatAnswer(q, value),
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w600,
-                      color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                    style: AppTextStyles.body(context).copyWith(
+                      color: isDark
+                          ? JadalColors.darkTextPrimary
+                          : JadalColors.lightTextPrimary,
                     ),
                   ),
                 ],

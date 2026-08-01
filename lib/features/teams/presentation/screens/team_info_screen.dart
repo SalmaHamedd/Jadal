@@ -4,6 +4,7 @@ import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/features/profile/domain/entities/team_membership.dart';
@@ -91,7 +92,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           context.loc.teamLeaveDialogTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          style: AppTextStyles.subtitle(context),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -99,16 +100,18 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
           children: [
             Text(
               context.loc.teamLeaveDialogBody,
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: AppTextStyles.body(context),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
               maxLines: 3,
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: AppTextStyles.body(context),
               decoration: InputDecoration(
                 hintText: context.loc.teamReasonOptionalHint,
-                hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                hintStyle: AppTextStyles.body(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
                 filled: true,
                 fillColor: Colors.grey.withValues(alpha: 0.1),
                 border: OutlineInputBorder(
@@ -123,17 +126,16 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.cancel, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.cancel,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               context.loc.teamSendRequestButton,
-              style: const TextStyle(
-                fontFamily: 'Cairo',
-                color: Colors.red,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.button(context).copyWith(color: Colors.red),
             ),
           ),
         ],
@@ -157,7 +159,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         title: Text(
           context.loc.teamJoinDialogTitle,
-          style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+          style: AppTextStyles.subtitle(context),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -165,16 +167,18 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
           children: [
             Text(
               context.loc.teamJoinDialogBody,
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: AppTextStyles.body(context),
             ),
             const SizedBox(height: 12),
             TextField(
               controller: reasonController,
               maxLines: 3,
-              style: const TextStyle(fontFamily: 'Cairo'),
+              style: AppTextStyles.body(context),
               decoration: InputDecoration(
                 hintText: context.loc.teamReasonOptionalHint,
-                hintStyle: const TextStyle(fontFamily: 'Cairo'),
+                hintStyle: AppTextStyles.body(
+                  context,
+                ).copyWith(color: JadalColors.judgesGrey),
                 filled: true,
                 fillColor: Colors.grey.withValues(alpha: 0.1),
                 border: OutlineInputBorder(
@@ -189,17 +193,18 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, false),
-            child: Text(context.loc.cancel, style: const TextStyle(fontFamily: 'Cairo')),
+            child: Text(
+              context.loc.cancel,
+              style: AppTextStyles.button(context),
+            ),
           ),
           TextButton(
             onPressed: () => Navigator.pop(dialogContext, true),
             child: Text(
               context.loc.teamSendRequestButton,
-              style: const TextStyle(
-                fontFamily: 'Cairo',
-                color: JadalColors.positiveGreen,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.button(
+                context,
+              ).copyWith(color: JadalColors.positiveGreen),
             ),
           ),
         ],
@@ -224,7 +229,10 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
   String _formatDate(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
 
-  List<Widget> _buildInfoRows(BuildContext context, TeamMembership? membership) {
+  List<Widget> _buildInfoRows(
+    BuildContext context,
+    TeamMembership? membership,
+  ) {
     final rows = <Widget>[
       if (membership?.joinedAt != null)
         _InfoRow(
@@ -238,7 +246,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
           label: context.loc.teamLeftDateLabel,
           value: _formatDate(membership!.leftAt!),
         ),
-         if (_team?.createdBy != null)
+      if (_team?.createdBy != null)
         _InfoRow(
           icon: Icons.school_rounded,
           label: context.loc.teamTrainerLabel,
@@ -266,7 +274,8 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
   @override
   Widget build(BuildContext context) {
     final membership = widget.membership;
-    final canLeave = widget.canLeave &&
+    final canLeave =
+        widget.canLeave &&
         membership != null &&
         membership.leftAt == null &&
         membership.role != 'trainer';
@@ -332,10 +341,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                 appBar: AppBar(
                   title: Text(
                     context.loc.teamInfoTitle,
-                    style: const TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: AppTextStyles.title(context),
                   ),
                   backgroundColor: Colors.transparent,
                   elevation: 0,
@@ -361,7 +367,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                       ),
                       if (_buildInfoRows(context, membership).isNotEmpty) ...[
                         SizedBox(height: context.hp(2.5)),
-                        _SectionCard(children: _buildInfoRows(context, membership)),
+                        _SectionCard(
+                          children: _buildInfoRows(context, membership),
+                        ),
                       ],
                       SizedBox(height: context.hp(2.5)),
                       if (_loadingTeam)
@@ -392,10 +400,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                         ] else
                           Text(
                             context.loc.teamNoMembersYet,
-                            style: TextStyle(
-                              fontFamily: 'Cairo',
-                              color: JadalColors.judgesGrey,
-                            ),
+                            style: AppTextStyles.body(
+                              context,
+                            ).copyWith(color: JadalColors.judgesGrey),
                           ),
                       ] else
                         _UnavailableNotice(error: _teamError),
@@ -421,11 +428,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                                   ),
                             label: Text(
                               context.loc.teamLeaveTeamAction,
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w700,
-                                color: Colors.red,
-                              ),
+                              style: AppTextStyles.button(
+                                context,
+                              ).copyWith(color: Colors.red),
                             ),
                             style: OutlinedButton.styleFrom(
                               side: const BorderSide(color: Colors.red),
@@ -460,11 +465,9 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
                                   ),
                             label: Text(
                               context.loc.teamJoinTeamAction,
-                              style: const TextStyle(
-                                fontFamily: 'Cairo',
-                                fontWeight: FontWeight.w700,
-                                color: Colors.white,
-                              ),
+                              style: AppTextStyles.button(
+                                context,
+                              ).copyWith(color: Colors.white),
                             ),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: JadalColors.positiveGreen,
@@ -557,12 +560,9 @@ class _TeamHero extends StatelessWidget {
                   teamName,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w800,
-                    fontSize: 19,
-                    color: textColor,
-                  ),
+                  style: AppTextStyles.headline(
+                    context,
+                  ).copyWith(color: textColor),
                 ),
               ),
             ],
@@ -576,14 +576,18 @@ class _TeamHero extends StatelessWidget {
                 _Chip(label: roleLabel!, color: JadalColors.primaryBlue),
               if (membership != null)
                 _Chip(
-                  label: left ? context.loc.teamChipLeft : context.loc.teamChipCurrentMember,
+                  label: left
+                      ? context.loc.teamChipLeft
+                      : context.loc.teamChipCurrentMember,
                   color: left
                       ? JadalColors.judgesGrey
                       : JadalColors.positiveGreen,
                 ),
               if (team != null)
                 _Chip(
-                  label: team!.isActive ? context.loc.teamChipActive : context.loc.teamChipInactive,
+                  label: team!.isActive
+                      ? context.loc.teamChipActive
+                      : context.loc.teamChipInactive,
                   color: team!.isActive
                       ? JadalColors.positiveGreen
                       : JadalColors.judgesGrey,
@@ -608,10 +612,7 @@ class _SectionHeader extends StatelessWidget {
       children: [
         Text(
           title,
-          style: TextStyle(
-            fontFamily: 'Cairo',
-            fontWeight: FontWeight.w700,
-            fontSize: 15.5,
+          style: AppTextStyles.subtitle(context).copyWith(
             color: isDark
                 ? JadalColors.darkTextPrimary
                 : JadalColors.lightTextPrimary,
@@ -626,9 +627,7 @@ class _SectionHeader extends StatelessWidget {
           ),
           child: Text(
             '$count',
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 11,
+            style: AppTextStyles.small(context).copyWith(
               fontWeight: FontWeight.w800,
               color: JadalColors.primaryOrange,
             ),
@@ -710,19 +709,14 @@ class _InfoRow extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 12.5,
-              color: JadalColors.judgesGrey,
-            ),
+            style: AppTextStyles.caption(
+              context,
+            ).copyWith(color: JadalColors.judgesGrey),
           ),
           const Spacer(),
           Text(
             value,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 12.5,
-              fontWeight: FontWeight.w700,
+            style: AppTextStyles.bodyEmphasis(context).copyWith(
               color: isDark
                   ? JadalColors.darkTextPrimary
                   : JadalColors.lightTextPrimary,
@@ -752,7 +746,8 @@ class _MemberRow extends StatelessWidget {
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(
-          builder: (_) => UserProfileScreen(userId: user.id, userName: user.name),
+          builder: (_) =>
+              UserProfileScreen(userId: user.id, userName: user.name),
         ),
       ),
       child: Container(
@@ -779,11 +774,9 @@ class _MemberRow extends StatelessWidget {
               child: user.avatarUrl == null
                   ? Text(
                       user.name.isEmpty ? '?' : user.name[0].toUpperCase(),
-                      style: const TextStyle(
-                        fontFamily: 'Cairo',
+                      style: AppTextStyles.small(context).copyWith(
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
-                        fontSize: 12,
                       ),
                     )
                   : null,
@@ -794,10 +787,7 @@ class _MemberRow extends StatelessWidget {
                 user.name,
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
-                style: TextStyle(
-                  fontFamily: 'Cairo',
-                  fontWeight: FontWeight.w600,
-                  fontSize: 13,
+                style: AppTextStyles.body(context).copyWith(
                   color: isDark
                       ? JadalColors.darkTextPrimary
                       : JadalColors.lightTextPrimary,
@@ -839,12 +829,7 @@ class _Chip extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
-          fontFamily: 'Cairo',
-          fontSize: 12,
-          fontWeight: FontWeight.w600,
-          color: color,
-        ),
+        style: AppTextStyles.caption(context).copyWith(color: color),
       ),
     );
   }
@@ -890,9 +875,7 @@ class _UnavailableNotice extends StatelessWidget {
           Expanded(
             child: Text(
               _message(context),
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
+              style: AppTextStyles.caption(context).copyWith(
                 color: isDark
                     ? JadalColors.darkTextSecondary
                     : JadalColors.lightTextSecondary,

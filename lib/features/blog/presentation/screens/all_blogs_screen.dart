@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/blog_search_filter.dart';
@@ -72,7 +73,7 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
             ? TextField(
                 controller: _searchController,
                 autofocus: true,
-                style: const TextStyle(fontFamily: 'Cairo'),
+                style: AppTextStyles.body(context),
                 decoration: InputDecoration(
                     hintText: context.loc.searchArticlesHint, border: InputBorder.none),
                 onChanged: (v) {
@@ -80,8 +81,7 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
                   _refresh();
                 },
               )
-            : Text(context.loc.allArticles,
-                style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+            : Text(context.loc.allArticles, style: AppTextStyles.title(context)),
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
@@ -114,7 +114,7 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
         backgroundColor: JadalColors.primaryOrange,
         icon: const Icon(Icons.edit, color: Colors.white),
         label: Text(context.loc.newArticle,
-            style: const TextStyle(fontFamily: 'Cairo', color: Colors.white)),
+            style: AppTextStyles.button(context).copyWith(color: Colors.white)),
       ),
       body: BlocProvider.value(
         value: _cubit,

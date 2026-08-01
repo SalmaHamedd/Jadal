@@ -1,8 +1,9 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
@@ -46,31 +47,43 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _extrasLoaded = true;
     final repo = ProfileRepository();
     final futures = <Future>[
-      repo.getUserAchievements(profile.id).then((r) => r.fold((_) {}, (a) => _achievements = a)),
+      repo
+          .getUserAchievements(profile.id)
+          .then((r) => r.fold((_) {}, (a) => _achievements = a)),
     ];
     if (profile.role == 'debater' || profile.role == 'trainer') {
-      futures.add(repo.getUserTeams(profile.id).then((r) => r.fold((_) {}, (t) => _teams = t)));
+      futures.add(
+        repo
+            .getUserTeams(profile.id)
+            .then((r) => r.fold((_) {}, (t) => _teams = t)),
+      );
     }
     if (profile.role == 'debater' || profile.role == 'judge') {
-      futures.add(di.sl<LiveDebateRepository>()
-          .searchDebates(
-            DebateSearchFilter(userIds: [profile.id], status: const ['completed', 'cancelled']),
-            perPage: kLatestDebatesPreviewCount,
-          )
-          .then((r) => r.fold((_) {}, (page) => _debates = page.items)));
+      futures.add(
+        di
+            .sl<LiveDebateRepository>()
+            .searchDebates(
+              DebateSearchFilter(
+                userIds: [profile.id],
+                status: const ['completed', 'cancelled'],
+              ),
+              perPage: kLatestDebatesPreviewCount,
+            )
+            .then((r) => r.fold((_) {}, (page) => _debates = page.items)),
+      );
     }
     await Future.wait(futures);
     if (mounted) setState(() {});
   }
 
   String _roleLabel(BuildContext context, String role) => switch (role) {
-        'debater' => context.loc.roleDebater,
-        'judge' => context.loc.judgeRole,
-        // Display-only rename — wire value stays 'trainer'.
-        'trainer' => context.loc.roleTrainer,
-        'admin' => context.loc.roleAdmin,
-        _ => role,
-      };
+    'debater' => context.loc.roleDebater,
+    'judge' => context.loc.judgeRole,
+    // Display-only rename — wire value stays 'trainer'.
+    'trainer' => context.loc.roleTrainer,
+    'admin' => context.loc.roleAdmin,
+    _ => role,
+  };
 
   void _showLogoutConfirmation() {
     showDialog(
@@ -122,16 +135,35 @@ class _ProfileScreenState extends State<ProfileScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
+        titleSpacing: 0,
         leading: IconButton(
           icon: const Icon(Icons.menu_rounded),
           onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+        ),
+        title: Builder(
+          builder: (context) {
+            final isDark = Theme.of(context).brightness == Brightness.dark;
+            final titleColor = isDark
+                ? JadalColors.darkTextPrimary
+                : JadalColors.deepBlue;
+            return Text(
+              context.loc.navProfile,
+              style: AppTextStyles.displayTitle(
+                context,
+              ).copyWith(color: titleColor),
+            );
+          },
         ),
       ),
       body: BlocConsumer<ProfileCubit, ProfileState>(
         bloc: _cubit,
         listener: (context, state) {
           if (state is ProfileLogoutSuccess) {
-            JadalSnackBar.show(context, state.message, type: SnackBarType.success);
+            JadalSnackBar.show(
+              context,
+              state.message,
+              type: SnackBarType.success,
+            );
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const LoginScreen()),
@@ -140,7 +172,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
           }
 
           if (state is ProfileError) {
-            JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+            JadalSnackBar.show(
+              context,
+              state.message,
+              type: SnackBarType.error,
+            );
           }
         },
         builder: (context, state) {
@@ -169,11 +205,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             SizedBox(height: context.hp(1)),
                             Text(
                               profile.name,
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: context.fontSize(22),
-                                fontWeight: FontWeight.bold,
-                              ),
+                              style: AppTextStyles.headline(context),
                             ),
                             SizedBox(height: context.hp(1)),
                             Row(
@@ -203,23 +235,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           children: [
                             Text(
                               'Private details',
-                              style: TextStyle(
-                                fontFamily: 'Cairo',
-                                fontSize: context.fontSize(15),
+                              style: AppTextStyles.subtitle(context).copyWith(
                                 fontWeight: FontWeight.w800,
                                 color: JadalColors.primaryBlue,
                               ),
                             ),
                             SizedBox(height: context.hp(1)),
-                            _DetailRow(icon: Icons.email_outlined, label: 'Email', value: profile.email),
+                            _DetailRow(
+                              icon: Icons.email_outlined,
+                              label: 'Email',
+                              value: profile.email,
+                            ),
                             _DetailRow(
                               icon: Icons.phone_outlined,
                               label: 'Phone',
                               value: profile.phone ?? 'Not provided',
                             ),
                             if (profile.age != null)
-                              _DetailRow(icon: Icons.cake_outlined, label: 'Age', value: '${profile.age}'),
-                            if (profile.location != null && profile.location!.isNotEmpty)
+                              _DetailRow(
+                                icon: Icons.cake_outlined,
+                                label: 'Age',
+                                value: '${profile.age}',
+                              ),
+                            if (profile.location != null &&
+                                profile.location!.isNotEmpty)
                               _DetailRow(
                                 icon: Icons.location_on_outlined,
                                 label: 'Location',
@@ -238,7 +277,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         children: [
                           Expanded(
                             child: ProfileActionButton(
-                              text: 'Edit Profile',
+                              text: context.loc.editProfileButton,
                               icon: Icons.edit,
                               onPressed: () async {
                                 await Navigator.push(
@@ -264,13 +303,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: ProfileActionButton(
-                              text: 'Change Password',
+                              text: context.loc.changePasswordButton,
                               icon: Icons.lock,
                               onPressed: () {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => const ChangePasswordScreen(),
+                                    builder: (context) =>
+                                        const ChangePasswordScreen(),
                                   ),
                                 );
                               },
@@ -292,13 +332,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => const DebaterStatsScreen(),
+                                      builder: (context) =>
+                                          const DebaterStatsScreen(),
                                     ),
                                   );
                                 },
                               ),
                             ),
-                          if (profile.role == 'debater') const SizedBox(width: 12),
+                          if (profile.role == 'debater')
+                            const SizedBox(width: 12),
                           // V2 §3 — the coach's cross-team averages.
                           if (profile.role == 'trainer')
                             Expanded(
@@ -309,16 +351,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
-                                      builder: (context) => CoachTeamSummaryScreen(
-                                        trainerId: profile.id,
-                                        trainerName: profile.name,
-                                      ),
+                                      builder: (context) =>
+                                          CoachTeamSummaryScreen(
+                                            trainerId: profile.id,
+                                            trainerName: profile.name,
+                                          ),
                                     ),
                                   );
                                 },
                               ),
                             ),
-                          if (profile.role == 'trainer') const SizedBox(width: 12),
+                          if (profile.role == 'trainer')
+                            const SizedBox(width: 12),
                           Expanded(
                             child: ProfileActionButton(
                               text: profile.role == 'debater'
@@ -351,26 +395,42 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         userName: profile.name,
                         topAchievements: _achievements,
                       ),
-                      if (_achievements.isNotEmpty) SizedBox(height: context.hp(2)),
-                      if (profile.role == 'debater' || profile.role == 'trainer') ...[
+                      if (_achievements.isNotEmpty)
+                        SizedBox(height: context.hp(2)),
+                      if (profile.role == 'debater' ||
+                          profile.role == 'trainer') ...[
                         Align(
                           alignment: AlignmentDirectional.centerStart,
-                          child: Text(context.loc.teamsSection,
-                              style: TextStyle(
-                                  fontFamily: 'Cairo', fontSize: context.fontSize(15), fontWeight: FontWeight.w800)),
+                          child: Text(
+                            context.loc.teamsSection,
+                            style: AppTextStyles.subtitle(
+                              context,
+                            ).copyWith(fontWeight: FontWeight.w800),
+                          ),
                         ),
-                        TeamMembershipSection(userId: profile.id, current: _teams),
+                        TeamMembershipSection(
+                          userId: profile.id,
+                          current: _teams,
+                        ),
                         SizedBox(height: context.hp(2)),
                       ],
-                      if (profile.role == 'debater' || profile.role == 'judge') ...[
-                        UserDebatesSection(userId: profile.id, userName: profile.name, latest: _debates),
+                      if (profile.role == 'debater' ||
+                          profile.role == 'judge') ...[
+                        UserDebatesSection(
+                          userId: profile.id,
+                          userName: profile.name,
+                          latest: _debates,
+                        ),
                         SizedBox(height: context.hp(2)),
                       ],
                       // ── V2 §9 — statistics visibility opt-out ─────────────
                       _FloatingCard(
                         child: Row(
                           children: [
-                            const Icon(Icons.visibility_outlined, color: JadalColors.primaryBlue),
+                            const Icon(
+                              Icons.visibility_outlined,
+                              color: JadalColors.primaryBlue,
+                            ),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -378,19 +438,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 children: [
                                   Text(
                                     'Share my statistics',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: context.fontSize(14),
-                                      fontWeight: FontWeight.w700,
-                                    ),
+                                    style: AppTextStyles.body(
+                                      context,
+                                    ).copyWith(fontWeight: FontWeight.w700),
                                   ),
                                   Text(
                                     'Others can view your analysis and see you on the leaderboards',
-                                    style: TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontSize: context.fontSize(11.5),
-                                      color: JadalColors.judgesGrey,
-                                    ),
+                                    style: AppTextStyles.small(
+                                      context,
+                                    ).copyWith(color: JadalColors.judgesGrey),
                                   ),
                                 ],
                               ),
@@ -459,8 +515,9 @@ class _FloatingCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
-            .withValues(alpha: dark ? 0.85 : 0.92),
+        color:
+            (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
+                .withValues(alpha: dark ? 0.85 : 0.92),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
           color: dark
@@ -486,7 +543,11 @@ class _HeaderChip extends StatelessWidget {
   final IconData icon;
   final String label;
   final Color color;
-  const _HeaderChip({required this.icon, required this.label, required this.color});
+  const _HeaderChip({
+    required this.icon,
+    required this.label,
+    required this.color,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -503,12 +564,9 @@ class _HeaderChip extends StatelessWidget {
           const SizedBox(width: 5),
           Text(
             label,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 12.5,
-              fontWeight: FontWeight.w800,
-              color: color,
-            ),
+            style: AppTextStyles.caption(
+              context,
+            ).copyWith(fontWeight: FontWeight.w800, color: color),
           ),
         ],
       ),
@@ -521,7 +579,11 @@ class _DetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
-  const _DetailRow({required this.icon, required this.label, required this.value});
+  const _DetailRow({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -533,12 +595,9 @@ class _DetailRow extends StatelessWidget {
           const SizedBox(width: 10),
           Text(
             label,
-            style: const TextStyle(
-              fontFamily: 'Cairo',
-              fontSize: 12.5,
-              fontWeight: FontWeight.w600,
-              color: JadalColors.judgesGrey,
-            ),
+            style: AppTextStyles.caption(
+              context,
+            ).copyWith(color: JadalColors.judgesGrey),
           ),
           const Spacer(),
           Flexible(
@@ -547,11 +606,7 @@ class _DetailRow extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.end,
-              style: const TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 13,
-                fontWeight: FontWeight.w700,
-              ),
+              style: AppTextStyles.bodyEmphasis(context),
             ),
           ),
         ],

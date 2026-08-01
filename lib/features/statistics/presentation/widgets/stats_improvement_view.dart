@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debater_stats_models.dart';
 import 'stats_theme.dart';
 
@@ -54,12 +55,9 @@ class StatsImprovementView extends StatelessWidget {
           Center(
             child: Text(
               _bandLabels[data.band] ?? (data.band ?? ''),
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontWeight: FontWeight.w800,
-                fontSize: 15,
-                color: color,
-              ),
+              style: AppTextStyles.subtitle(
+                context,
+              ).copyWith(fontWeight: FontWeight.w800, color: color),
             ),
           ),
         const SizedBox(height: 18),
@@ -71,10 +69,8 @@ class StatsImprovementView extends StatelessWidget {
         ],
         Text(
           'Average score trend',
-          style: TextStyle(
-            fontFamily: 'Cairo',
+          style: AppTextStyles.body(context).copyWith(
             fontWeight: FontWeight.w800,
-            fontSize: 13,
             color: StatsTheme.textSecondary(context),
           ),
         ),
@@ -149,7 +145,9 @@ class _Gauge extends StatelessWidget {
                               colors: [
                                 JadalColors.negativeRed.withValues(alpha: 0.30),
                                 muted.withValues(alpha: 0.22),
-                                JadalColors.positiveGreen.withValues(alpha: 0.30),
+                                JadalColors.positiveGreen.withValues(
+                                  alpha: 0.30,
+                                ),
                               ],
                               stops: const [0.0, 0.5, 1.0],
                             ),
@@ -217,8 +215,12 @@ class _Gauge extends StatelessWidget {
     );
   }
 
-  TextStyle _scaleStyle(Color c) =>
-      TextStyle(fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w700, color: c);
+  TextStyle _scaleStyle(Color c) => TextStyle(
+    fontFamily: 'Cairo',
+    fontSize: 10,
+    fontWeight: FontWeight.w700,
+    color: c,
+  );
 }
 
 class _CaretPainter extends CustomPainter {
@@ -249,7 +251,9 @@ class _Sparkline extends StatelessWidget {
       return Center(
         child: Text(
           'Not enough points to chart yet.',
-          style: TextStyle(fontFamily: 'Cairo', color: StatsTheme.textSecondary(context)),
+          style: AppTextStyles.body(
+            context,
+          ).copyWith(color: StatsTheme.textSecondary(context)),
         ),
       );
     }
@@ -363,17 +367,13 @@ class _Components extends StatelessWidget {
               children: [
                 Text(
                   r.$1,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 12.5,
-                    color: StatsTheme.textSecondary(context),
-                  ),
+                  style: AppTextStyles.caption(
+                    context,
+                  ).copyWith(color: StatsTheme.textSecondary(context)),
                 ),
                 Text(
                   r.$3,
-                  style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontSize: 13,
+                  style: AppTextStyles.body(context).copyWith(
                     fontWeight: FontWeight.w800,
                     color: StatsImprovementView.signColor(r.$2),
                   ),
@@ -397,7 +397,9 @@ class _InsufficientBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: JadalColors.primaryOrange.withValues(alpha: 0.10),
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: JadalColors.primaryOrange.withValues(alpha: 0.35)),
+        border: Border.all(
+          color: JadalColors.primaryOrange.withValues(alpha: 0.35),
+        ),
       ),
       child: Row(
         children: [
@@ -406,12 +408,9 @@ class _InsufficientBanner extends StatelessWidget {
           Expanded(
             child: Text(
               'Not enough history yet to score improvement — debate a few more rounds and this lights up.',
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: 12.5,
-                height: 1.4,
-                color: StatsTheme.textPrimary(context),
-              ),
+              style: AppTextStyles.caption(
+                context,
+              ).copyWith(height: 1.4, color: StatsTheme.textPrimary(context)),
             ),
           ),
         ],

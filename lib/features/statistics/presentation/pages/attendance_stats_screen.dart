@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../data/models/attendance_stat_model.dart';
 import '../../data/repositories/attendance_stats_repository.dart';
@@ -59,108 +60,125 @@ class _AttendanceStatsScreenState extends State<AttendanceStatsScreen> {
   }
 
   String _subtitle(BuildContext context) => switch (widget.role) {
-        AttendanceRole.debater => context.loc.statsAttendanceSubtitleDebater,
-        AttendanceRole.trainer => context.loc.statsAttendanceSubtitleTrainer,
-        AttendanceRole.judge => context.loc.statsAttendanceSubtitleJudge,
-      };
+    AttendanceRole.debater => context.loc.statsAttendanceSubtitleDebater,
+    AttendanceRole.trainer => context.loc.statsAttendanceSubtitleTrainer,
+    AttendanceRole.judge => context.loc.statsAttendanceSubtitleJudge,
+  };
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor:
-          StatsTheme.isDark(context) ? JadalColors.darkBackground : JadalColors.lightBackground,
+      backgroundColor: StatsTheme.isDark(context)
+          ? JadalColors.darkBackground
+          : JadalColors.lightBackground,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
-        title: Text(context.loc.statsAttendanceTitle(widget.userName),
-            style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800)),
+        title: Text(
+          context.loc.statsAttendanceTitle(widget.userName),
+          style: AppTextStyles.title(context),
+        ),
       ),
       body: JadalGradientBackground(
         child: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(_error!,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(fontFamily: 'Cairo')),
-                          const SizedBox(height: 12),
-                          OutlinedButton(onPressed: _load, child: Text(context.loc.retry)),
-                        ],
-                      ),
-                    ),
-                  )
-                : ListView(
-                    padding: const EdgeInsets.all(16),
+            ? Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(24),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
                     children: [
-                      Text(_subtitle(context),
-                          style: TextStyle(
-                              fontFamily: 'Cairo', color: StatsTheme.textSecondary(context))),
-                      const SizedBox(height: 16),
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: StatsTheme.isDark(context)
-                              ? JadalColors.darkSurface
-                              : JadalColors.lightSurface,
-                          borderRadius: BorderRadius.circular(18),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  context.loc.statsOverallPercent(((_stat?.rate ?? 0) * 100).round()),
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 16,
-                                    color: StatsTheme.textPrimary(context),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-                                  decoration: BoxDecoration(
-                                    color: JadalColors.primaryOrange.withValues(alpha: 0.12),
-                                    borderRadius: BorderRadius.circular(20),
-                                  ),
-                                  child: Text(
-                                    context.loc.statsAttendedCount(
-                                        _stat?.attendedTotal ?? 0, _stat?.selectedTotal ?? 0),
-                                    style: const TextStyle(
-                                      fontFamily: 'Cairo',
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: 11.5,
-                                      color: JadalColors.primaryOrange,
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if ((_stat?.registered ?? 0) > (_stat?.selectedTotal ?? 0))
-                              Padding(
-                                padding: const EdgeInsets.only(top: 4),
-                                child: Text(
-                                  context.loc.statsRegisteredNotHeldAgainst(_stat!.registered),
-                                  style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    fontSize: 11,
-                                    color: StatsTheme.textSecondary(context),
-                                  ),
-                                ),
-                              ),
-                            const SizedBox(height: 14),
-                            AttendanceBarChart(buckets: _stat?.buckets ?? const []),
-                          ],
-                        ),
+                      Text(
+                        _error!,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.body(context),
+                      ),
+                      const SizedBox(height: 12),
+                      OutlinedButton(
+                        onPressed: _load,
+                        child: Text(context.loc.retry),
                       ),
                     ],
                   ),
+                ),
+              )
+            : ListView(
+                padding: const EdgeInsets.all(16),
+                children: [
+                  Text(
+                    _subtitle(context),
+                    style: AppTextStyles.body(
+                      context,
+                    ).copyWith(color: StatsTheme.textSecondary(context)),
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: StatsTheme.isDark(context)
+                          ? JadalColors.darkSurface
+                          : JadalColors.lightSurface,
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              context.loc.statsOverallPercent(
+                                ((_stat?.rate ?? 0) * 100).round(),
+                              ),
+                              style: AppTextStyles.subtitle(context).copyWith(
+                                fontWeight: FontWeight.w800,
+                                color: StatsTheme.textPrimary(context),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 5,
+                              ),
+                              decoration: BoxDecoration(
+                                color: JadalColors.primaryOrange.withValues(
+                                  alpha: 0.12,
+                                ),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Text(
+                                context.loc.statsAttendedCount(
+                                  _stat?.attendedTotal ?? 0,
+                                  _stat?.selectedTotal ?? 0,
+                                ),
+                                style: AppTextStyles.small(context).copyWith(
+                                  fontWeight: FontWeight.w800,
+                                  color: JadalColors.primaryOrange,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        if ((_stat?.registered ?? 0) >
+                            (_stat?.selectedTotal ?? 0))
+                          Padding(
+                            padding: const EdgeInsets.only(top: 4),
+                            child: Text(
+                              context.loc.statsRegisteredNotHeldAgainst(
+                                _stat!.registered,
+                              ),
+                              style: AppTextStyles.small(context).copyWith(
+                                color: StatsTheme.textSecondary(context),
+                              ),
+                            ),
+                          ),
+                        const SizedBox(height: 14),
+                        AttendanceBarChart(buckets: _stat?.buckets ?? const []),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
       ),
     );
   }

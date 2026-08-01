@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/complaints/data/repositories/complaint_repository_impl.dart';
@@ -38,9 +38,9 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
     final userId = await PreferencesDatabase().getValue<int>('user_id');
     if (userId == null) return;
     final result = await di.sl<LiveDebateRepository>().searchDebates(
-          DebateSearchFilter(userIds: [userId]),
-          perPage: 100,
-        );
+      DebateSearchFilter(userIds: [userId]),
+      perPage: 100,
+    );
     if (!mounted) return;
     result.fold((_) {}, (page) {
       setState(() {
@@ -63,7 +63,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
               appBar: AppBar(
                 title: Text(
                   context.loc.drawerMyComplaints,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w800),
+                  style: AppTextStyles.title(context),
                 ),
                 backgroundColor: Colors.transparent,
                 elevation: 0,
@@ -75,13 +75,16 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                 icon: const Icon(Icons.add),
                 label: Text(
                   context.loc.complaintNewComplaint,
-                  style: const TextStyle(fontFamily: 'Cairo', fontWeight: FontWeight.w700),
+                  style: AppTextStyles.button(
+                    context,
+                  ).copyWith(color: Colors.white),
                 ),
                 onPressed: () async {
                   final created = await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (_) => CreateComplaintScreen(repository: repository),
+                      builder: (_) =>
+                          CreateComplaintScreen(repository: repository),
                     ),
                   );
                   if (created == true && context.mounted) {
@@ -98,7 +101,8 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                     if (complaints.isEmpty) {
                       return RefreshIndicator(
                         color: JadalColors.primaryOrange,
-                        onRefresh: () => context.read<ComplaintCubit>().loadMyComplaints(),
+                        onRefresh: () =>
+                            context.read<ComplaintCubit>().loadMyComplaints(),
                         child: ListView(
                           physics: const AlwaysScrollableScrollPhysics(),
                           children: [
@@ -106,7 +110,7 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                             Center(
                               child: Text(
                                 context.loc.complaintNoneYet,
-                                style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                                style: AppTextStyles.subtitle(context),
                               ),
                             ),
                           ],
@@ -115,13 +119,15 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                     }
                     return RefreshIndicator(
                       color: JadalColors.primaryOrange,
-                      onRefresh: () => context.read<ComplaintCubit>().loadMyComplaints(),
+                      onRefresh: () =>
+                          context.read<ComplaintCubit>().loadMyComplaints(),
                       child: ListView.builder(
                         padding: const EdgeInsets.fromLTRB(12, 12, 12, 90),
                         itemCount: complaints.length,
                         itemBuilder: (context, index) => _ComplaintCard(
                           complaint: complaints[index],
-                          debateTitle: _debateTitles[complaints[index].debateId],
+                          debateTitle:
+                              _debateTitles[complaints[index].debateId],
                         ),
                       ),
                     );
@@ -130,23 +136,32 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
+                          Icon(
+                            Icons.error_outline,
+                            size: 60,
+                            color: JadalColors.judgesGrey,
+                          ),
                           const SizedBox(height: 16),
                           Text(
                             context.loc.errorWithMessage(state.message),
-                            style: const TextStyle(fontFamily: 'Cairo', fontSize: 16),
+                            style: AppTextStyles.subtitle(context),
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
                           ElevatedButton(
-                            onPressed: () => context.read<ComplaintCubit>().loadMyComplaints(),
+                            onPressed: () => context
+                                .read<ComplaintCubit>()
+                                .loadMyComplaints(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: JadalColors.primaryOrange,
                               foregroundColor: Colors.white,
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 24,
+                                vertical: 12,
+                              ),
                             ),
                             child: Text(context.loc.retry),
                           ),
@@ -171,19 +186,19 @@ class _ComplaintCard extends StatelessWidget {
   const _ComplaintCard({required this.complaint, this.debateTitle});
 
   String _statusLabel(BuildContext context) => switch (complaint.status) {
-        'open' => context.loc.complaintStatusOpen,
-        'resolved' => context.loc.complaintStatusResolved,
-        'rejected' => context.loc.complaintStatusRejected,
-        'closed' => context.loc.complaintStatusClosed,
-        _ => complaint.status,
-      };
+    'open' => context.loc.complaintStatusOpen,
+    'resolved' => context.loc.complaintStatusResolved,
+    'rejected' => context.loc.complaintStatusRejected,
+    'closed' => context.loc.complaintStatusClosed,
+    _ => complaint.status,
+  };
 
   Color _statusColor() => switch (complaint.status) {
-        'open' => JadalColors.primaryBlue,
-        'resolved' => JadalColors.positiveGreen,
-        'rejected' => JadalColors.negativeRed,
-        _ => JadalColors.judgesGrey,
-      };
+    'open' => JadalColors.primaryBlue,
+    'resolved' => JadalColors.positiveGreen,
+    'rejected' => JadalColors.negativeRed,
+    _ => JadalColors.judgesGrey,
+  };
 
   String _formatDate(DateTime date) =>
       '${date.year}-${date.month.toString().padLeft(2, '0')}-${date.day.toString().padLeft(2, '0')}';
@@ -200,7 +215,9 @@ class _ComplaintCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(14),
         side: BorderSide(
-          color: isDark ? JadalColors.darkSurfaceElevated : Colors.grey.shade200,
+          color: isDark
+              ? JadalColors.darkSurfaceElevated
+              : Colors.grey.shade200,
         ),
       ),
       child: Padding(
@@ -216,37 +233,38 @@ class _ComplaintCard extends StatelessWidget {
                     color: JadalColors.negativeRed.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  child: Icon(Icons.report_gmailerrorred_rounded,
-                      color: JadalColors.negativeRed, size: 18),
+                  child: Icon(
+                    Icons.report_gmailerrorred_rounded,
+                    color: JadalColors.negativeRed,
+                    size: 18,
+                  ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
-                    debateTitle ?? context.loc.complaintDebateFallback(complaint.debateId),
+                    debateTitle ??
+                        context.loc.complaintDebateFallback(complaint.debateId),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w700,
-                      fontSize: context.fontSize(14),
-                      color: isDark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary,
+                    style: AppTextStyles.bodyEmphasis(context).copyWith(
+                      color: isDark
+                          ? JadalColors.darkTextPrimary
+                          : JadalColors.lightTextPrimary,
                     ),
                   ),
                 ),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 5,
+                  ),
                   decoration: BoxDecoration(
                     color: color.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
                     _statusLabel(context),
-                    style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontSize: 11,
-                      fontWeight: FontWeight.w600,
-                      color: color,
-                    ),
+                    style: AppTextStyles.small(context).copyWith(color: color),
                   ),
                 ),
               ],
@@ -254,13 +272,14 @@ class _ComplaintCard extends StatelessWidget {
             const SizedBox(height: 10),
             Text(
               complaint.description,
-              style: TextStyle(
-                fontFamily: 'Cairo',
-                fontSize: context.fontSize(13),
-                color: isDark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary,
+              style: AppTextStyles.body(context).copyWith(
+                color: isDark
+                    ? JadalColors.darkTextSecondary
+                    : JadalColors.lightTextSecondary,
               ),
             ),
-            if (complaint.adminResponse != null && complaint.adminResponse!.isNotEmpty) ...[
+            if (complaint.adminResponse != null &&
+                complaint.adminResponse!.isNotEmpty) ...[
               const SizedBox(height: 10),
               Container(
                 width: double.infinity,
@@ -274,9 +293,7 @@ class _ComplaintCard extends StatelessWidget {
                   children: [
                     Text(
                       context.loc.complaintAdminResponseLabel,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 11,
+                      style: AppTextStyles.small(context).copyWith(
                         fontWeight: FontWeight.w700,
                         color: JadalColors.primaryBlue,
                       ),
@@ -284,9 +301,7 @@ class _ComplaintCard extends StatelessWidget {
                     const SizedBox(height: 4),
                     Text(
                       complaint.adminResponse!,
-                      style: TextStyle(
-                        fontFamily: 'Cairo',
-                        fontSize: 12.5,
+                      style: AppTextStyles.caption(context).copyWith(
                         color: isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary,
@@ -299,7 +314,9 @@ class _ComplaintCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               _formatDate(complaint.createdAt),
-              style: TextStyle(fontFamily: 'Cairo', fontSize: 11, color: JadalColors.judgesGrey),
+              style: AppTextStyles.small(
+                context,
+              ).copyWith(color: JadalColors.judgesGrey),
             ),
           ],
         ),

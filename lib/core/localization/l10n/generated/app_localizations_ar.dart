@@ -890,7 +890,7 @@ class AppLocalizationsAr extends AppLocalizations {
       'سيُرسل طلب انضمام إلى مدرب الفريق للموافقة عليه. هل تريد المتابعة؟';
 
   @override
-  String get teamRoleLeader => 'قائد الفريق';
+  String get teamRoleLeader => 'قائد';
 
   @override
   String get teamRoleTrainer => 'مدرب';
@@ -1648,5 +1648,74 @@ class AppLocalizationsAr extends AppLocalizations {
   @override
   String optionsLoadError(String error) {
     return 'خطأ في تحميل الخيارات: $error';
+  }
+
+  @override
+  String get submitComplaintTooltip => 'تقديم شكوى';
+
+  @override
+  String get registrantsTitle => 'المسجلون';
+
+  @override
+  String get registrantsTeamsLabel => 'الفرق';
+
+  @override
+  String get registrantsJudgesLabel => 'الحكام';
+
+  @override
+  String get registrantsSoloLabel => 'فردي';
+
+  @override
+  String get registeredTeamsTitle => 'الفرق المسجلة';
+
+  @override
+  String get registeredJudgesTitle => 'الحكام المسجلون';
+
+  @override
+  String get soloApplicantsTitle => 'المتقدمون الأفراد';
+
+  @override
+  String get noneYetLabel => 'لا يوجد بعد.';
+
+  @override
+  String get editProfileButton => 'تعديل الملف الشخصي';
+
+  @override
+  String get changePasswordButton => 'تغيير كلمة المرور';
+
+  @override
+  String get changePasswordTitle => 'تغيير كلمة المرور';
+
+  @override
+  String get currentPassword => 'كلمة المرور الحالية';
+
+  @override
+  String get updatePasswordButton => 'تحديث كلمة المرور';
+
+  @override
+  String get currentPill => 'حالي';
+
+  @override
+  String get noPastTeams => 'لا توجد فرق سابقة';
+
+  @override
+  String get showPastTeams => 'عرض الفرق السابقة';
+
+  @override
+  String get hidePastTeams => 'إخفاء الفرق السابقة';
+
+  @override
+  String elapsedDaysShort(int count) {
+    return '$count يوم';
+  }
+
+  @override
+  String elapsedMonthsShort(int count) {
+    return '$countش';
+  }
+
+  @override
+  String elapsedYearsShort(int count) {
+    return '$countس';
   }
 }

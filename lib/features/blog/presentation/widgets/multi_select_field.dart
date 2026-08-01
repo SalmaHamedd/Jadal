@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 
 class MultiSelectField<T> extends StatelessWidget {
   final String label;
@@ -45,7 +46,7 @@ class MultiSelectField<T> extends StatelessWidget {
             Expanded(
               child: Text(
                 selectedNames.isEmpty ? label : selectedNames.join('، '),
-                style: TextStyle(
+                style: AppTextStyles.caption(context).copyWith(
                   color: selectedNames.isEmpty
                       ? (isDark
                             ? JadalColors.darkTextSecondary
@@ -53,7 +54,6 @@ class MultiSelectField<T> extends StatelessWidget {
                       : (isDark
                             ? JadalColors.darkTextPrimary
                             : JadalColors.lightTextPrimary),
-                  fontSize: context.fontSize(12.5, min: 11.5, max: 15),
                 ),
               ),
             ),

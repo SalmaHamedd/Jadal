@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_dialog.dart';
 import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../../data/models/debate_models.dart';
@@ -106,16 +107,15 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(loc.selectSpeakerOrder,
-                style: TextStyle(
-                    fontFamily: 'Cairo', color: DebateTheme.textSecondary(context), fontSize: 12)),
+                style: AppTextStyles.caption(context)
+                    .copyWith(color: DebateTheme.textSecondary(context))),
             const SizedBox(height: 8),
             Expanded(
               child: _roster.isEmpty
                   ? Center(
                       child: Text(loc.notJoinedYet,
-                          style: TextStyle(
-                              fontFamily: 'Cairo',
-                              color: DebateTheme.textSecondary(context))),
+                          style: AppTextStyles.body(context)
+                              .copyWith(color: DebateTheme.textSecondary(context))),
                     )
                   : ListView(
                       children: [
@@ -126,10 +126,8 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
             if (widget.replyEnabled) ...[
               const SizedBox(height: 8),
               Text(loc.replySpeaker,
-                  style: TextStyle(
-                      fontFamily: 'Cairo',
-                      fontWeight: FontWeight.w800,
-                      color: DebateTheme.textPrimary(context))),
+                  style: AppTextStyles.bodyEmphasis(context)
+                      .copyWith(fontWeight: FontWeight.w800, color: DebateTheme.textPrimary(context))),
               const SizedBox(height: 6),
               Wrap(
                 spacing: 8,
@@ -137,7 +135,7 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
                   for (final id in replyChoices)
                     ChoiceChip(
                       label: Text(widget.team.debaterById(id)?.name ?? '—',
-                          style: const TextStyle(fontFamily: 'Cairo')),
+                          style: AppTextStyles.body(context)),
                       selected: _replyId == id,
                       onSelected: (_) => setState(() => _replyId = id),
                     ),
@@ -179,8 +177,8 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
             radius: 14,
             backgroundColor: sideColor,
             child: Text('${side.rolePrefix}${index + 1}',
-                style: const TextStyle(
-                    color: Colors.white, fontFamily: 'Cairo', fontSize: 10, fontWeight: FontWeight.w800)),
+                style: AppTextStyles.small(context)
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.w800)),
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -190,10 +188,8 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
                 isExpanded: true,
                 borderRadius: BorderRadius.circular(12),
                 dropdownColor: DebateTheme.surfaceElevated(context),
-                style: TextStyle(
-                    fontFamily: 'Cairo',
-                    fontWeight: FontWeight.w600,
-                    color: DebateTheme.textPrimary(context)),
+                style: AppTextStyles.body(context)
+                    .copyWith(fontWeight: FontWeight.w600, color: DebateTheme.textPrimary(context)),
                 icon: Icon(Icons.keyboard_arrow_down_rounded,
                     color: DebateTheme.textSecondary(context)),
                 items: [
@@ -206,17 +202,15 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
                             radius: 12,
                             backgroundColor: avatarColorFor(d.id),
                             child: Text(avatarInitial(d.name),
-                                style: const TextStyle(
-                                    color: Colors.white, fontFamily: 'Cairo', fontSize: 11)),
+                                style: AppTextStyles.small(context).copyWith(color: Colors.white)),
                           ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(d.name,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: TextStyle(
-                                    fontFamily: 'Cairo',
-                                    color: DebateTheme.textPrimary(context))),
+                                style: AppTextStyles.body(context)
+                                    .copyWith(color: DebateTheme.textPrimary(context))),
                           ),
                         ],
                       ),
