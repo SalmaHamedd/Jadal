@@ -16,9 +16,6 @@ class Profile {
   final int? age;
   final String? location;
   final String? birthDate;
-  // V2 §9: opt-OUT model — statistics are public unless the user turns this
-  // off. Toggled via PUT /profile { stats_visible }.
-  final bool statsVisible;
 
   const Profile({
     required this.id,
@@ -36,6 +33,5 @@ class Profile {
     this.age,
     this.location,
     this.birthDate,
-    this.statsVisible = true,
   });
 }

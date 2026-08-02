@@ -83,37 +83,6 @@ class ProfileRepository {
     }
   }
 
-  /// V2 §9 — flip the statistics-visibility opt-out. Returns the updated
-  /// profile (same envelope as every other PUT /profile call).
-  Future<Either<Failure, Profile>> setStatsVisibility(bool visible) async {
-    try {
-      final token = await PreferencesDatabase().getToken();
-      if (token == null) {
-        return Left(AuthFailure('No authentication token found'));
-      }
-
-      final response = await http.put(
-        Uri.parse(ApiConstants.profileUrl),
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer $token',
-        },
-        body: jsonEncode({'stats_visible': visible}),
-      );
-
-      final Map<String, dynamic> responseBody = jsonDecode(response.body);
-      final String message = responseBody['message'] ?? 'Unknown error';
-
-      if (response.statusCode == 200 && responseBody['success'] == true) {
-        return Right(ProfileModel.fromJson(responseBody['data']));
-      }
-
-      return Left(ServerFailure(message));
-    } catch (e) {
-      return Left(NetworkFailure('Network error'));
-    }
-  }
-
   Future<Either<Failure, String>> changePassword({
     required String currentPassword,
     required String newPassword,
@@ -205,17 +174,21 @@ class ProfileRepository {
     }
   }
 
+  /// §6.8 — `sort` is `date` (assigned_at desc, backend default) or `rank`
+  /// (gold → … → participation, recency within a tier). Response is
+  /// `data: [...]` with a sibling `meta` pagination block (BACKEND_RESPONSE §0.2).
   Future<Either<Failure, List<Achievement>>> getUserAchievements(
     int userId, {
     int page = 1,
     int perPage = 15,
+    String sort = 'date',
   }) async {
     try {
       final token = await PreferencesDatabase().getToken();
       if (token == null) return Left(AuthFailure('No authentication token found'));
 
       final uri = Uri.parse(ApiConstants.userAchievementsUrl(userId))
-          .replace(queryParameters: {'page': '$page', 'per_page': '$perPage'});
+          .replace(queryParameters: {'page': '$page', 'per_page': '$perPage', 'sort': sort});
       final response = await http
           .get(uri, headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'});
       final Map<String, dynamic> responseBody = jsonDecode(response.body);

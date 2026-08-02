@@ -90,7 +90,12 @@ abstract class DebateController extends Cubit<DebateStates> {
   String firstName(String? full);
 
   Future<void> connectToRoom({required String url, required String token});
-  Future<void> disconnect();
+
+  /// [notify]=false is the intentional-leave path (§5.1): tears the
+  /// connection down WITHOUT emitting [DebateDisconnectedState], so the
+  /// room's pop-on-disconnect listener can't race the caller's own
+  /// navigation. Unexpected disconnects keep the default and still notify.
+  Future<void> disconnect({bool notify = true});
   void toggleMic();
   void toggleCamera();
 

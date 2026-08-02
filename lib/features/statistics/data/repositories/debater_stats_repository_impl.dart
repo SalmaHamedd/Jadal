@@ -111,7 +111,8 @@ class DebaterStatsRepositoryImpl implements DebaterStatsRepository {
 
   @override
   Future<Either<Failure, ActivityStat>> getActivity(
-      int debaterId, StatsFilter filter) async {
+      int debaterId, StatsFilter filter,
+      {String role = 'debater'}) async {
     // Activity takes only from/to/group_by — the framework/position/team
     // dimensions don't exist for it, so don't send them.
     final query = {
@@ -119,7 +120,11 @@ class DebaterStatsRepositoryImpl implements DebaterStatsRepository {
       if (filter.to != null) 'to': filter.to!,
       'group_by': filter.groupBy.wire,
     };
-    return (await _getData(ApiConstants.debaterActivityUrl(debaterId), query))
-        .map(ActivityStat.fromJson);
+    final url = switch (role) {
+      'trainer' => ApiConstants.trainerActivityUrl(debaterId),
+      'judge' => ApiConstants.judgeActivityUrl(debaterId),
+      _ => ApiConstants.debaterActivityUrl(debaterId),
+    };
+    return (await _getData(url, query)).map(ActivityStat.fromJson);
   }
 }

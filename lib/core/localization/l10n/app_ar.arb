@@ -169,6 +169,7 @@
   "navHome": "الرئيسية",
   "navDebates": "المناظرات",
   "navSearch": "بحث",
+  "navBlog": "المدونة",
   "navProfile": "حسابي",
   "searchTitle": "البحث",
 
@@ -183,8 +184,13 @@
 
   "profileStatistics": "الإحصائيات",
   "profileTeamAnalysis": "تحليل الفريق",
-  "profilePrepAttendance": "حضور التحضير",
-  "profileAttendance": "الحضور",
+  "achievementRankGold": "ذهبي",
+  "achievementRankSilver": "فضي",
+  "achievementRankBronze": "برونزي",
+  "achievementRankHonorable": "شرفي",
+  "achievementRankParticipation": "مشاركة",
+  "achievementsSortDate": "التاريخ",
+  "achievementsSortRank": "الفئة",
 
   "editProfileChooseSource": "اختر المصدر",
   "editProfileCamera": "الكاميرا",
@@ -478,6 +484,12 @@
   },
   "statsCouldNotUpdateFilters": "تعذر التحديث بهذه الفلاتر",
   "statsTopOfJadal": "الأوائل في جدل",
+  "statsFilterBy": "تصفية حسب",
+  "statsFilterDimPosition": "المركز",
+  "statsFilterDimFramework": "الإطار",
+  "statsFilterPeriod": "الفترة",
+  "statsFilterReset": "إعادة تعيين",
+  "statsPickMonthHelp": "اختر شهرًا (يتم تجاهل اليوم)",
   "statsScopeDebaters": "المناظرون",
   "statsScopeTeams": "الفرق",
   "statsMetricPoints": "النقاط",
@@ -495,13 +507,6 @@
   "statsAvgImprovement": "متوسط التحسن",
   "statsAvgWinRate": "متوسط نسبة الفوز",
   "statsAvgMemberActivity": "متوسط نشاط الأعضاء",
-  "statsAttendanceSubtitleDebater": "عدد مرات حضورك الفعلي لغرفة التحضير",
-  "statsAttendanceSubtitleTrainer": "عدد مرات حضورك لمناظرات فريقك",
-  "statsAttendanceSubtitleJudge": "عدد مرات حضورك للمناظرات المكلف بها",
-  "statsAttendanceTitle": "{name} · الحضور",
-  "@statsAttendanceTitle": {
-    "placeholders": { "name": { "type": "String" } }
-  },
   "statsOverallPercent": "{percent}% إجمالاً",
   "@statsOverallPercent": {
     "placeholders": { "percent": { "type": "int" } }
@@ -609,8 +614,8 @@
   "notJoinedYet": "لم ينضمّ بعد",
   "waitingToJoin": "بانتظار الانضمام",
 
-  "greetingWithName": "مرحباً بك، {name} 👋",
-  "greeting": "مرحباً بك 👋",
+  "greetingWithName": "مرحباً بك، {name}",
+  "greeting": "مرحباً بك",
   "topDebaters": "أفضل المناظرين",
   "showMore": "عرض المزيد",
 

@@ -1,6 +1,7 @@
 /// Rank ordering matches the backend's sort: gold → silver → bronze →
-/// honoring → participation (highest first).
-enum AchievementRank { gold, silver, bronze, honoring, participation }
+/// honorable → participation (highest first). Wire value is `honorable`
+/// (BACKEND_RESPONSE §0.1 — `honoring` no longer exists).
+enum AchievementRank { gold, silver, bronze, honorable, participation }
 
 AchievementRank achievementRankFromWire(String? wire) {
   switch (wire) {
@@ -10,8 +11,8 @@ AchievementRank achievementRankFromWire(String? wire) {
       return AchievementRank.silver;
     case 'bronze':
       return AchievementRank.bronze;
-    case 'honoring':
-      return AchievementRank.honoring;
+    case 'honorable':
+      return AchievementRank.honorable;
     default:
       return AchievementRank.participation;
   }
@@ -40,8 +41,8 @@ class Achievement {
         name: json['name'] as String? ?? '',
         rank: achievementRankFromWire(json['rank'] as String?),
         imageUrl: json['image_url'] as String?,
-        awardedAt: json['awarded_at'] != null
-            ? DateTime.tryParse(json['awarded_at'] as String)
+        awardedAt: (json['assigned_at'] ?? json['awarded_at']) != null
+            ? DateTime.tryParse((json['assigned_at'] ?? json['awarded_at']) as String)
             : null,
       );
 

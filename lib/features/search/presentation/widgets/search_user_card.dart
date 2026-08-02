@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
+import 'package:jadal_app/core/function/media_url.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/theme/avatar_palette.dart';
 import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 
@@ -44,19 +46,23 @@ class SearchUserCard extends StatelessWidget {
                     width: 2,
                   ),
                 ),
-                child: CircleAvatar(
-                  radius: context.wp(6.5),
-                  backgroundColor: JadalColors.primaryBlue,
-                  backgroundImage:
-                      user.avatarUrl != null ? NetworkImage(user.avatarUrl!) : null,
-                  child: user.avatarUrl == null
-                      ? Text(
-                          user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
-                          style: AppTextStyles.subtitle(context)
-                              .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
-                        )
-                      : null,
-                ),
+                child: Builder(builder: (context) {
+                  // §2.1 — resolve relative avatar paths so the image shows in
+                  // the list view too; §2.2 — deterministic initial color.
+                  final url = resolveMediaUrl(user.avatarUrl);
+                  return CircleAvatar(
+                    radius: context.wp(6.5),
+                    backgroundColor: userAvatarColor(user.id),
+                    backgroundImage: url != null ? NetworkImage(url) : null,
+                    child: url == null
+                        ? Text(
+                            user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
+                            style: AppTextStyles.subtitle(context)
+                                .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
+                          )
+                        : null,
+                  );
+                }),
               ),
               SizedBox(width: context.wp(3)),
               Expanded(

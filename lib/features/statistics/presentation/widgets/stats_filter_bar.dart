@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/theme/hex_color.dart';
 import '../../data/models/debater_stats_models.dart';
 import '../cubits/debater_stats_cubit.dart';
 import 'stats_theme.dart';
@@ -56,13 +57,16 @@ class StatsFilterBar extends StatelessWidget {
                 ),
             ],
           ),
-        // Chart stats: which dimension becomes parallel bars.
+        // Chart stats: which dimension becomes parallel bars. Follows the
+        // active filter dimension (§1.4).
         if (isBucketed)
           _ChipRow(
             label: 'Compare',
-            hint: f.series == StatsSeries.positions && f.positions.length < 2
+            hint: (f.series == StatsSeries.positions && f.positions.length < 2)
                 ? 'Pick 2+ positions below to split the bars'
-                : null,
+                : (f.series == StatsSeries.frameworks && f.frameworks.length < 2)
+                    ? 'Pick 2+ frameworks below to split the bars'
+                    : null,
             children: [
               StatsChip(
                 label: 'Combined',
@@ -70,12 +74,20 @@ class StatsFilterBar extends StatelessWidget {
                 accent: JadalColors.primaryBlue,
                 onTap: () => cubit.setSeries(StatsSeries.none),
               ),
-              StatsChip(
-                label: 'By position',
-                selected: f.series == StatsSeries.positions,
-                accent: JadalColors.primaryBlue,
-                onTap: () => cubit.setSeries(StatsSeries.positions),
-              ),
+              if (state.dim == StatsFilterDim.positions)
+                StatsChip(
+                  label: 'By position',
+                  selected: f.series == StatsSeries.positions,
+                  accent: JadalColors.primaryBlue,
+                  onTap: () => cubit.setSeries(StatsSeries.positions),
+                )
+              else
+                StatsChip(
+                  label: 'By framework',
+                  selected: f.series == StatsSeries.frameworks,
+                  accent: JadalColors.primaryBlue,
+                  onTap: () => cubit.setSeries(StatsSeries.frameworks),
+                ),
             ],
           ),
         // Ranking: ordering mode.
@@ -96,20 +108,52 @@ class StatsFilterBar extends StatelessWidget {
                 ),
             ],
           ),
-        // Positions (all stats).
+        // §1.4 — the filter dimension: position OR motion framework, never
+        // both. Switching clears the other's selection.
         _ChipRow(
-          label: 'Positions',
+          label: 'Filter by',
           children: [
-            for (final p in _positions)
-              StatsChip(
-                label: p.label,
-                selected: f.positions.contains(p.code),
-                enabled: !(isBestSpeaker && p.reply),
-                accent: JadalColors.primaryBlue,
-                onTap: () => cubit.togglePosition(p.code),
-              ),
+            StatsChip(
+              label: 'Position',
+              selected: state.dim == StatsFilterDim.positions,
+              accent: JadalColors.primaryOrange,
+              onTap: () => cubit.setDim(StatsFilterDim.positions),
+            ),
+            StatsChip(
+              label: 'Framework',
+              selected: state.dim == StatsFilterDim.frameworks,
+              accent: JadalColors.primaryOrange,
+              onTap: () => cubit.setDim(StatsFilterDim.frameworks),
+            ),
           ],
         ),
+        if (state.dim == StatsFilterDim.positions)
+          _ChipRow(
+            label: 'Positions',
+            children: [
+              for (final p in _positions)
+                StatsChip(
+                  label: p.label,
+                  selected: f.positions.contains(p.code),
+                  enabled: !(isBestSpeaker && p.reply),
+                  accent: JadalColors.primaryBlue,
+                  onTap: () => cubit.togglePosition(p.code),
+                ),
+            ],
+          )
+        else if (state.frameworkOptions.isNotEmpty)
+          _ChipRow(
+            label: 'Frameworks',
+            children: [
+              for (final fw in state.frameworkOptions)
+                StatsChip(
+                  label: fw.name,
+                  selected: f.frameworks.contains(fw.id),
+                  accent: colorFromHex(fw.colorHex) ?? JadalColors.primaryBlue,
+                  onTap: () => cubit.toggleFramework(fw.id),
+                ),
+            ],
+          ),
         // Month range (all stats).
         _ChipRow(
           label: 'Period',
@@ -128,7 +172,10 @@ class StatsFilterBar extends StatelessWidget {
                 if (v != null) cubit.setRange(to: v);
               },
             ),
-            if (f.from != null || f.to != null || f.positions.isNotEmpty)
+            if (f.from != null ||
+                f.to != null ||
+                f.positions.isNotEmpty ||
+                f.frameworks.isNotEmpty)
               StatsChip(
                 label: 'Reset',
                 selected: false,

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/constants/appImgaeAsset.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
@@ -154,10 +155,20 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                 builder: (context, reactionState) => SingleChildScrollView(
                   child: Column(
                     children: [
-                      if (blog.coverImageUrl != null)
+                      // §3.1 — no cover → same placeholder the list cards
+                      // use, instead of rendering no image at all.
+                      if (blog.coverImageUrl != null &&
+                          blog.coverImageUrl!.isNotEmpty)
                         BlogCoverImage(
                           imageUrl: blog.coverImageUrl!,
                           isDark: isDark,
+                        )
+                      else
+                        Image.asset(
+                          AppImageAsset.blogArticlePlaceholder,
+                          height: context.hp(30),
+                          width: double.infinity,
+                          fit: BoxFit.cover,
                         ),
                       Padding(
                         padding: EdgeInsets.all(context.wp(5)),

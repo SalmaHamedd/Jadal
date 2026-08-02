@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/function/media_url.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/theme/avatar_palette.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
@@ -191,24 +193,26 @@ class _UserResultTile extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
         child: Row(
           children: [
-            CircleAvatar(
-              radius: 16,
-              backgroundColor: JadalColors.primaryBlue,
-              backgroundImage: user.avatarUrl != null
-                  ? NetworkImage(user.avatarUrl!)
-                  : null,
-              child: user.avatarUrl == null
-                  ? Text(
-                      user.name.isEmpty
-                          ? '?'
-                          : user.name.characters.first.toUpperCase(),
-                      style: AppTextStyles.small(context).copyWith(
-                        fontWeight: FontWeight.w800,
-                        color: Colors.white,
-                      ),
-                    )
-                  : null,
-            ),
+            Builder(builder: (context) {
+              // §2.1/§2.2 — resolved avatar URL + deterministic initial color.
+              final url = resolveMediaUrl(user.avatarUrl);
+              return CircleAvatar(
+                radius: 16,
+                backgroundColor: userAvatarColor(user.id),
+                backgroundImage: url != null ? NetworkImage(url) : null,
+                child: url == null
+                    ? Text(
+                        user.name.isEmpty
+                            ? '?'
+                            : user.name.characters.first.toUpperCase(),
+                        style: AppTextStyles.small(context).copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: Colors.white,
+                        ),
+                      )
+                    : null,
+              );
+            }),
             const SizedBox(width: 10),
             Expanded(
               child: Text(

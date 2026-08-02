@@ -12,9 +12,14 @@ import 'package:jadal_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_filter_dialog.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
 import 'package:jadal_app/features/blog/presentation/screens/create_blog_screen.dart';
+import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
 
 class AllBlogsScreen extends StatefulWidget {
-  const AllBlogsScreen({super.key});
+  /// §2.5 — true when embedded as the Blog tab inside MainScreen: the shell
+  /// already paints the gradient and owns the drawer, so this screen skips its
+  /// own backdrop and shows the drawer button instead of a back arrow.
+  final bool inShell;
+  const AllBlogsScreen({super.key, this.inShell = false});
 
   @override
   State<AllBlogsScreen> createState() => _AllBlogsScreenState();
@@ -65,10 +70,15 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
   Widget build(BuildContext context) {
     // Same package as the rest of the app: transparent app bar over the shared
     // gradient backdrop (design only — the blog logic is untouched).
-    return JadalGradientBackground(
-      child: Scaffold(
+    final scaffold = Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
+        leading: widget.inShell
+            ? IconButton(
+                icon: const Icon(Icons.menu_rounded),
+                onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+              )
+            : null,
         title: _searching
             ? TextField(
                 controller: _searchController,
@@ -184,8 +194,10 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
           },
         ),
       ),
-      ),
     );
+    return widget.inShell
+        ? scaffold
+        : JadalGradientBackground(child: scaffold);
   }
 
   void _navigateToCreateBlog(BuildContext context) async {

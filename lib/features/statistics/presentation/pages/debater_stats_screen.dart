@@ -10,6 +10,8 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
+import '../../../live_debate/data/repositories/live_debate_repository.dart';
+import '../../../live_debate/presentation/widgets/debate_screen_header.dart';
 import '../../../profile/data/repositories/profile_repository.dart';
 import '../../data/models/debater_stats_models.dart';
 import '../../data/repositories/debater_stats_repository.dart';
@@ -22,13 +24,22 @@ import '../widgets/stats_improvement_view.dart';
 import '../widgets/stats_ranking_list.dart';
 import '../widgets/stats_theme.dart';
 
-/// The Debater Statistics screen. Pass a [debaterId] to view a specific debater
-/// (coach/admin); omit it to resolve the signed-in user from their profile —
-/// which is how the temporary entry point on the debates list reaches it.
+/// The statistics screen. Pass a [debaterId] to view a specific user; omit it
+/// to resolve the signed-in user from their profile.
+///
+/// §1.9 — [subjectRole] gates the content: debaters get all six stats;
+/// judges/trainers get an activity-only view (the debater-only metrics never
+/// render for them, and the backend 422s them anyway).
 class DebaterStatsScreen extends StatefulWidget {
   final int? debaterId;
   final String? debaterName;
-  const DebaterStatsScreen({super.key, this.debaterId, this.debaterName});
+  final String subjectRole;
+  const DebaterStatsScreen({
+    super.key,
+    this.debaterId,
+    this.debaterName,
+    this.subjectRole = 'debater',
+  });
 
   @override
   State<DebaterStatsScreen> createState() => _DebaterStatsScreenState();
@@ -37,6 +48,7 @@ class DebaterStatsScreen extends StatefulWidget {
 class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
   int? _id;
   String? _name;
+  String? _role;
   String? _error;
 
   @override
@@ -45,6 +57,7 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
     if (widget.debaterId != null) {
       _id = widget.debaterId;
       _name = widget.debaterName;
+      _role = widget.subjectRole;
     } else {
       _resolveSelf();
     }
@@ -58,6 +71,7 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
       (p) => setState(() {
         _id = p.id;
         _name = p.name;
+        _role = p.role;
       }),
     );
   }
@@ -72,22 +86,29 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
         backgroundColor: StatsTheme.isDark(context)
             ? JadalColors.darkBackground
             : JadalColors.lightBackground,
-        appBar: AppBar(
-          backgroundColor: Colors.transparent,
-          title: Text(
-            context.loc.statsTitle,
-            style: AppTextStyles.title(context),
+        // §1.7/§2.6 — in-body header over the edge-to-edge gradient (matches
+        // the debate details screen), instead of an AppBar seam.
+        body: JadalGradientBackground(
+          child: SafeArea(
+            child: Column(
+              children: [
+                DebateScreenHeader(title: context.loc.statsTitle),
+                Expanded(child: _resolving(context)),
+              ],
+            ),
           ),
         ),
-        body: JadalGradientBackground(child: _resolving(context)),
       );
     }
+    final role = _role ?? 'debater';
     return BlocProvider(
       create: (_) => DebaterStatsCubit(
         repo: di.sl<DebaterStatsRepository>(),
         debaterId: _id!,
+        subjectRole: role,
+        frameworksLoader: di.sl<LiveDebateRepository>().getMotionFrameworks,
       )..load(),
-      child: _StatsScaffold(debaterName: _name),
+      child: _StatsScaffold(debaterName: _name, subjectRole: role),
     );
   }
 
@@ -137,7 +158,8 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
 /// the "export to Excel sheet" action and the scrollable stats body.
 class _StatsScaffold extends StatelessWidget {
   final String? debaterName;
-  const _StatsScaffold({required this.debaterName});
+  final String subjectRole;
+  const _StatsScaffold({required this.debaterName, required this.subjectRole});
 
   bool _hasData(DebaterStatsState s) => switch (s.kind) {
     StatKind.ranking => s.ranking != null,
@@ -188,34 +210,44 @@ class _StatsScaffold extends StatelessWidget {
       backgroundColor: StatsTheme.isDark(context)
           ? JadalColors.darkBackground
           : JadalColors.lightBackground,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        title: Text(
-          debaterName == null
-              ? context.loc.statsTitle
-              : context.loc.statsTitleWithName(debaterName!),
-          style: AppTextStyles.title(context),
-        ),
-        actions: [
-          BlocBuilder<DebaterStatsCubit, DebaterStatsState>(
-            builder: (context, state) {
-              final canExport = _hasData(state);
-              return IconButton(
-                tooltip: context.loc.statsExportTooltip,
-                icon: const Icon(Icons.ios_share_rounded),
-                onPressed: canExport ? () => _export(context, state) : null,
-              );
-            },
+      // §1.7/§2.6 — in-body header over the edge-to-edge gradient (matches
+      // the debate details screen), instead of an AppBar seam.
+      body: JadalGradientBackground(
+        child: SafeArea(
+          child: Column(
+            children: [
+              DebateScreenHeader(
+                title: debaterName == null
+                    ? context.loc.statsTitle
+                    : context.loc.statsTitleWithName(debaterName!),
+                actions: [
+                  BlocBuilder<DebaterStatsCubit, DebaterStatsState>(
+                    builder: (context, state) {
+                      final canExport = _hasData(state);
+                      return IconButton(
+                        tooltip: context.loc.statsExportTooltip,
+                        icon: const Icon(Icons.ios_share_rounded),
+                        onPressed:
+                            canExport ? () => _export(context, state) : null,
+                      );
+                    },
+                  ),
+                ],
+              ),
+              Expanded(
+                child: _StatsView(debaterOnly: subjectRole == 'debater'),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
-      body: JadalGradientBackground(child: const _StatsView()),
     );
   }
 }
 
 class _StatsView extends StatelessWidget {
-  const _StatsView();
+  final bool debaterOnly;
+  const _StatsView({required this.debaterOnly});
 
   @override
   Widget build(BuildContext context) {
@@ -224,10 +256,16 @@ class _StatsView extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
           children: [
-            _KindSelector(active: state.kind),
-            const SizedBox(height: 16),
-            StatsCard(child: StatsFilterBar(state: state)),
-            const SizedBox(height: 16),
+            // §1.9 — judges/trainers only ever see activity: no stat tabs.
+            if (debaterOnly) ...[
+              _KindSelector(active: state.kind),
+              const SizedBox(height: 16),
+            ],
+            // §1.3 — activity has no filters at all.
+            if (state.kind != StatKind.activity) ...[
+              StatsCard(child: StatsFilterBar(state: state)),
+              const SizedBox(height: 16),
+            ],
             _Content(state: state),
           ],
         );

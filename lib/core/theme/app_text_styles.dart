@@ -18,30 +18,35 @@ abstract final class AppTextStyles {
 
   /// Big screen-level title (e.g. the Home tab's "Home"/"جدل" heading, the
   /// app name on auth screens).
+  ///
+  /// §2.6d — the title roles below sit deliberately far above [body] so a
+  /// heading is unmistakably a heading. Only the title end of the scale was
+  /// raised; [body] and everything under it keep their sizes so dense
+  /// screens (the live debate room, chips, meta rows) keep their density.
   static TextStyle displayTitle(BuildContext context) => TextStyle(
     fontFamily: _family,
-    fontSize: context.fontSize(24, min: 18, max: 28),
+    fontSize: context.fontSize(26, min: 20, max: 30),
     fontWeight: FontWeight.w800,
   );
 
   /// Dialog / bottom-sheet / large section headline.
   static TextStyle headline(BuildContext context) => TextStyle(
     fontFamily: _family,
-    fontSize: context.fontSize(19, min: 16, max: 22),
+    fontSize: context.fontSize(21, min: 17, max: 24),
     fontWeight: FontWeight.w800,
   );
 
   /// Standard app-bar title.
   static TextStyle title(BuildContext context) => TextStyle(
     fontFamily: _family,
-    fontSize: context.fontSize(17, min: 15, max: 19),
+    fontSize: context.fontSize(18.5, min: 16, max: 21),
     fontWeight: FontWeight.w800,
   );
 
   /// Card titles, section headers, list-tile primary text.
   static TextStyle subtitle(BuildContext context) => TextStyle(
     fontFamily: _family,
-    fontSize: context.fontSize(15, min: 13, max: 17),
+    fontSize: context.fontSize(16, min: 14, max: 18),
     fontWeight: FontWeight.w700,
   );
 

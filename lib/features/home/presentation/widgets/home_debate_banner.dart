@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
+import 'package:jadal_app/features/home/data/home_prefetch.dart';
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
 import 'package:jadal_app/features/live_debate/presentation/pages/backend_debate_detail_screen.dart';
@@ -42,10 +43,15 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
   }
 
   Future<void> _load() async {
+    // §4.1 — consume the splash-time prefetch when present; otherwise fetch
+    // as before.
     final repo = di.sl<LiveDebateRepository>();
-    final liveRes = await repo.getDebates(status: 'live', perPage: 1);
-    final regRes = await repo.getDebates(status: 'scheduled', perPage: 1);
-    final doneRes = await repo.getDebates(status: 'completed', perPage: 1);
+    final liveRes = await (HomePrefetch.takeLive() ??
+        repo.getDebates(status: 'live', perPage: 1));
+    final regRes = await (HomePrefetch.takeScheduled() ??
+        repo.getDebates(status: 'scheduled', perPage: 1));
+    final doneRes = await (HomePrefetch.takeCompleted() ??
+        repo.getDebates(status: 'completed', perPage: 1));
     if (!mounted) return;
     final entries = <_BannerEntry>[];
     liveRes.fold((_) {}, (p) {

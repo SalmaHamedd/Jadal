@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/widgets/jadal_bottom_nav_bar.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
+import '../../../blog/presentation/screens/all_blogs_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../live_debate/presentation/pages/debate_list_screen.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
-import '../../../search/presentation/screens/search_screen.dart';
 import '../widgets/jadal_app_drawer.dart';
 
 /// Global key so any nested tab screen (each has its own Scaffold) can open
@@ -17,7 +17,8 @@ final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
 /// The app shell after login: the shared gradient backdrop with no AppBar (so
 /// the wash runs edge-to-edge) and the bottom navigation between the four
-/// sections — Home, Debates (backend list with its stage tabs), Search and
+/// sections — Home, Debates (backend list with its stage tabs), Blog (§2.5 —
+/// replaced Search, which now lives behind the home app-bar icon) and
 /// Profile. Also owns the nav drawer (§9); swipe-to-open is restricted to the
 /// Home tab so it doesn't fight with gestures on the other tabs.
 class MainScreen extends StatefulWidget {
@@ -33,7 +34,7 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _screens = const [
     HomeScreen(),
     DebateListScreen(),
-    SearchScreen(),
+    AllBlogsScreen(inShell: true),
     ProfileScreen(),
   ];
 
@@ -71,9 +72,9 @@ class _MainScreenState extends State<MainScreen> {
               label: loc.navDebates,
             ),
             JadalNavItem(
-              icon: Icons.search_outlined,
-              activeIcon: Icons.search,
-              label: loc.navSearch,
+              icon: Icons.article_outlined,
+              activeIcon: Icons.article,
+              label: loc.navBlog,
             ),
             JadalNavItem(
               icon: Icons.person_outline,

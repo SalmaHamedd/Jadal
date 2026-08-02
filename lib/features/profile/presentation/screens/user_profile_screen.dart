@@ -15,8 +15,6 @@ import 'package:jadal_app/features/profile/presentation/widgets/profile_action_b
 import 'package:jadal_app/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/team_membership_list.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/user_debates_section.dart';
-import 'package:jadal_app/features/statistics/data/repositories/attendance_stats_repository.dart';
-import 'package:jadal_app/features/statistics/presentation/pages/attendance_stats_screen.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 
 /// Read-only profile for ANY user (self or another) — sprinkles §6. Reached
@@ -140,13 +138,19 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
         children: [
+          // §6.1 — the exact template the own-profile screen uses; only
+          // owner-only sections (private details, edit, logout) are absent.
           ProfileHeaderSection(
+            userId: p.id,
             name: p.name,
             avatarUrl: p.avatarUrl,
             roleLabel: _roleLabel(context, p.role),
+            points: p.points,
             location: p.location,
             tenure: p.tenure,
           ),
+          const SizedBox(height: 20),
+          _StatsButtons(profile: p),
           const SizedBox(height: 20),
           AchievementsStrip(
             userId: p.id,
@@ -179,7 +183,6 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
             ),
             const SizedBox(height: 20),
           ],
-          _StatsButtons(profile: p),
         ],
       ),
     );
@@ -203,7 +206,9 @@ class _StatsButtons extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        if (profile.role == 'debater')
+        // §1.9 — statistics are public for every role; judges/trainers open
+        // the activity-only view, debaters the full one.
+        if (profile.role != 'admin')
           Expanded(
             child: ProfileActionButton(
               text: 'Statistics',
@@ -214,32 +219,12 @@ class _StatsButtons extends StatelessWidget {
                   builder: (_) => DebaterStatsScreen(
                     debaterId: profile.id,
                     debaterName: profile.name,
+                    subjectRole: profile.role,
                   ),
                 ),
               ),
             ),
           ),
-        if (profile.role == 'debater') const SizedBox(width: 12),
-        Expanded(
-          child: ProfileActionButton(
-            text: profile.role == 'debater' ? 'Prep attendance' : 'Attendance',
-            icon: Icons.event_available_rounded,
-            onPressed: () => Navigator.push(
-              context,
-              MaterialPageRoute(
-                builder: (_) => AttendanceStatsScreen(
-                  role: switch (profile.role) {
-                    'judge' => AttendanceRole.judge,
-                    'trainer' => AttendanceRole.trainer,
-                    _ => AttendanceRole.debater,
-                  },
-                  userId: profile.id,
-                  userName: profile.name,
-                ),
-              ),
-            ),
-          ),
-        ),
       ],
     );
   }

@@ -1,12 +1,18 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/app_models/framework.dart';
 import '../../../../core/error/failures.dart';
 import '../../data/models/activity_stat_model.dart';
 import '../../data/models/debater_stats_models.dart';
 import '../../data/repositories/debater_stats_repository.dart';
 
 enum StatsStatus { initial, loading, loaded, error }
+
+/// §1.4 — which filter dimension is active. Position and framework are
+/// mutually exclusive (the backend 422s when both are sent), so the UI keeps
+/// exactly one dimension selectable and clears the other on switch.
+enum StatsFilterDim { positions, frameworks }
 
 /// One immutable snapshot driving the statistics screen. The currently-selected
 /// [kind] decides which of [bucketed]/[ranking]/[improvement] the UI reads. The
@@ -15,6 +21,8 @@ enum StatsStatus { initial, loading, loaded, error }
 class DebaterStatsState {
   final StatKind kind;
   final StatsFilter filter;
+  final StatsFilterDim dim;
+  final List<Framework> frameworkOptions;
   final RankingMode rankingMode;
   final int rankingLimit;
   final StatsStatus status;
@@ -31,6 +39,8 @@ class DebaterStatsState {
   const DebaterStatsState({
     required this.kind,
     required this.filter,
+    this.dim = StatsFilterDim.positions,
+    this.frameworkOptions = const [],
     required this.rankingMode,
     required this.rankingLimit,
     required this.status,
@@ -42,9 +52,10 @@ class DebaterStatsState {
     required this.requestId,
   });
 
-  factory DebaterStatsState.initial() => const DebaterStatsState(
-        kind: StatKind.winRate,
-        filter: StatsFilter(),
+  factory DebaterStatsState.initial({StatKind kind = StatKind.winRate}) =>
+      DebaterStatsState(
+        kind: kind,
+        filter: const StatsFilter(),
         rankingMode: RankingMode.top,
         rankingLimit: 10,
         status: StatsStatus.initial,
@@ -57,6 +68,8 @@ class DebaterStatsState {
   DebaterStatsState copyWith({
     StatKind? kind,
     StatsFilter? filter,
+    StatsFilterDim? dim,
+    List<Framework>? frameworkOptions,
     RankingMode? rankingMode,
     int? rankingLimit,
     StatsStatus? status,
@@ -71,6 +84,8 @@ class DebaterStatsState {
     return DebaterStatsState(
       kind: kind ?? this.kind,
       filter: filter ?? this.filter,
+      dim: dim ?? this.dim,
+      frameworkOptions: frameworkOptions ?? this.frameworkOptions,
       rankingMode: rankingMode ?? this.rankingMode,
       rankingLimit: rankingLimit ?? this.rankingLimit,
       status: status ?? this.status,
@@ -87,14 +102,41 @@ class DebaterStatsState {
 /// Drives the statistics screen: holds the shared filter + selected stat and
 /// re-fetches whenever either changes. Every setter emits immediately (so the
 /// chips feel instant) then loads the matching endpoint.
+///
+/// §1.9 — [subjectRole] gates the debater-only stats: for judges/trainers the
+/// screen only ever shows activity, so the cubit starts on it and never leaves.
 class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   final DebaterStatsRepository repo;
   final int debaterId;
+  final String subjectRole;
 
-  DebaterStatsCubit({required this.repo, required this.debaterId})
-      : super(DebaterStatsState.initial());
+  /// §1.4 — loads the framework filter options (`GET /motion-frameworks`);
+  /// injected so the statistics feature doesn't depend on the live-debate repo.
+  final Future<Either<Failure, List<Framework>>> Function()? frameworksLoader;
 
-  void load() => _fetch();
+  DebaterStatsCubit({
+    required this.repo,
+    required this.debaterId,
+    this.subjectRole = 'debater',
+    this.frameworksLoader,
+  }) : super(DebaterStatsState.initial(
+          kind: subjectRole == 'debater' ? StatKind.winRate : StatKind.activity,
+        ));
+
+  void load() {
+    _fetch();
+    _loadFrameworkOptions();
+  }
+
+  Future<void> _loadFrameworkOptions() async {
+    if (frameworksLoader == null || subjectRole != 'debater') return;
+    if (state.frameworkOptions.isNotEmpty) return;
+    final res = await frameworksLoader!();
+    if (isClosed) return;
+    // Silently keep an empty list on failure — the dimension chip stays
+    // usable and simply has nothing to select.
+    res.fold((_) {}, (list) => emit(state.copyWith(frameworkOptions: list)));
+  }
 
   void setKind(StatKind kind) {
     if (kind == state.kind) return;
@@ -112,10 +154,41 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
     _fetch();
   }
 
+  /// §1.4 — switch the active filter dimension. Clears the *other* dimension's
+  /// selection (they are mutually exclusive) and resets the series split, which
+  /// is tied to the active dimension.
+  void setDim(StatsFilterDim dim) {
+    if (dim == state.dim) return;
+    final hadSelection =
+        state.filter.positions.isNotEmpty || state.filter.frameworks.isNotEmpty;
+    final hadSeries = state.filter.series != StatsSeries.none;
+    emit(state.copyWith(
+      dim: dim,
+      filter: state.filter.copyWith(
+        positions: const [],
+        frameworks: const [],
+        series: StatsSeries.none,
+      ),
+    ));
+    // Only refetch when the switch actually changed the outgoing query.
+    if (hadSelection || hadSeries) _fetch();
+  }
+
   void togglePosition(String code) {
     final next = [...state.filter.positions];
     next.contains(code) ? next.remove(code) : next.add(code);
-    emit(state.copyWith(filter: state.filter.copyWith(positions: next)));
+    // §1.4 — never combined with frameworks.
+    emit(state.copyWith(
+        filter: state.filter.copyWith(positions: next, frameworks: const [])));
+    _fetch();
+  }
+
+  void toggleFramework(int id) {
+    final next = [...state.filter.frameworks];
+    next.contains(id) ? next.remove(id) : next.add(id);
+    // §1.4 — never combined with positions.
+    emit(state.copyWith(
+        filter: state.filter.copyWith(frameworks: next, positions: const [])));
     _fetch();
   }
 
@@ -171,7 +244,9 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
           (r) => emit(state.copyWith(status: StatsStatus.loaded, improvement: r)),
         );
       case StatKind.activity:
-        final res = await repo.getActivity(debaterId, filter);
+        // §1.3 — activity has no filters at all: always fetch unfiltered.
+        final res = await repo.getActivity(debaterId, const StatsFilter(),
+            role: subjectRole);
         if (id != state.requestId) return;
         res.fold(
           (l) => emit(state.copyWith(status: StatsStatus.error, error: l.message)),

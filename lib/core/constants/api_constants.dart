@@ -90,11 +90,6 @@ class ApiConstants {
   static String bestSpeakerUrl(int debaterId) => '${_statsBase(debaterId)}/best-speaker';
   static String scoreRankingUrl(int debaterId) => '${_statsBase(debaterId)}/score-ranking';
   static String improvementUrl(int debaterId) => '${_statsBase(debaterId)}/improvement';
-  static String prepAttendanceUrl(int debaterId) => '${_statsBase(debaterId)}/prep-attendance';
-  static String trainerAttendanceUrl(int trainerId) =>
-      '$baseUrl/trainers/$trainerId/stats/attendance';
-  static String judgeAttendanceUrl(int judgeId) =>
-      '$baseUrl/judges/$judgeId/stats/attendance';
 
   // ── Public profile / achievements / team history (sprinkles §6) ──────────────
   static String userProfileUrl(int id) => '$baseUrl/users/$id';

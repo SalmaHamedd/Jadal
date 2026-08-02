@@ -1052,6 +1052,12 @@ abstract class AppLocalizations {
   /// **'Search'**
   String get navSearch;
 
+  /// No description provided for @navBlog.
+  ///
+  /// In en, this message translates to:
+  /// **'Blog'**
+  String get navBlog;
+
   /// No description provided for @navProfile.
   ///
   /// In en, this message translates to:
@@ -1124,17 +1130,47 @@ abstract class AppLocalizations {
   /// **'Team analysis'**
   String get profileTeamAnalysis;
 
-  /// No description provided for @profilePrepAttendance.
+  /// No description provided for @achievementRankGold.
   ///
   /// In en, this message translates to:
-  /// **'Prep attendance'**
-  String get profilePrepAttendance;
+  /// **'Gold'**
+  String get achievementRankGold;
 
-  /// No description provided for @profileAttendance.
+  /// No description provided for @achievementRankSilver.
   ///
   /// In en, this message translates to:
-  /// **'Attendance'**
-  String get profileAttendance;
+  /// **'Silver'**
+  String get achievementRankSilver;
+
+  /// No description provided for @achievementRankBronze.
+  ///
+  /// In en, this message translates to:
+  /// **'Bronze'**
+  String get achievementRankBronze;
+
+  /// No description provided for @achievementRankHonorable.
+  ///
+  /// In en, this message translates to:
+  /// **'Honorable'**
+  String get achievementRankHonorable;
+
+  /// No description provided for @achievementRankParticipation.
+  ///
+  /// In en, this message translates to:
+  /// **'Participation'**
+  String get achievementRankParticipation;
+
+  /// No description provided for @achievementsSortDate.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get achievementsSortDate;
+
+  /// No description provided for @achievementsSortRank.
+  ///
+  /// In en, this message translates to:
+  /// **'Tier'**
+  String get achievementsSortRank;
 
   /// No description provided for @editProfileChooseSource.
   ///
@@ -2282,6 +2318,42 @@ abstract class AppLocalizations {
   /// **'Top of Jadal'**
   String get statsTopOfJadal;
 
+  /// No description provided for @statsFilterBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Filter by'**
+  String get statsFilterBy;
+
+  /// No description provided for @statsFilterDimPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get statsFilterDimPosition;
+
+  /// No description provided for @statsFilterDimFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'Framework'**
+  String get statsFilterDimFramework;
+
+  /// No description provided for @statsFilterPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get statsFilterPeriod;
+
+  /// No description provided for @statsFilterReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get statsFilterReset;
+
+  /// No description provided for @statsPickMonthHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a month (day is ignored)'**
+  String get statsPickMonthHelp;
+
   /// No description provided for @statsScopeDebaters.
   ///
   /// In en, this message translates to:
@@ -2347,30 +2419,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Avg member activity'**
   String get statsAvgMemberActivity;
-
-  /// No description provided for @statsAttendanceSubtitleDebater.
-  ///
-  /// In en, this message translates to:
-  /// **'How often you actually join your prep room'**
-  String get statsAttendanceSubtitleDebater;
-
-  /// No description provided for @statsAttendanceSubtitleTrainer.
-  ///
-  /// In en, this message translates to:
-  /// **'How often you attend your team\'s debates'**
-  String get statsAttendanceSubtitleTrainer;
-
-  /// No description provided for @statsAttendanceSubtitleJudge.
-  ///
-  /// In en, this message translates to:
-  /// **'How often you attend debates you\'re assigned to'**
-  String get statsAttendanceSubtitleJudge;
-
-  /// No description provided for @statsAttendanceTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'{name} · Attendance'**
-  String statsAttendanceTitle(String name);
 
   /// No description provided for @statsOverallPercent.
   ///
@@ -2909,13 +2957,13 @@ abstract class AppLocalizations {
   /// No description provided for @greetingWithName.
   ///
   /// In en, this message translates to:
-  /// **'Welcome, {name} 👋'**
+  /// **'Welcome, {name}'**
   String greetingWithName(String name);
 
   /// No description provided for @greeting.
   ///
   /// In en, this message translates to:
-  /// **'Welcome 👋'**
+  /// **'Welcome'**
   String get greeting;
 
   /// No description provided for @topDebaters.

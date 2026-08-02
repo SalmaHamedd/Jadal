@@ -3,6 +3,7 @@ import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
+import 'package:jadal_app/features/home/data/home_prefetch.dart';
 import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/statistics/data/models/leaderboard_models.dart';
 import 'package:jadal_app/features/statistics/data/repositories/leaderboard_repository.dart';
@@ -31,10 +32,12 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
   }
 
   Future<void> _load() async {
-    final res = await di.sl<LeaderboardRepository>().getLeaderboard(
-      LeaderboardScope.debaters,
-      LeaderboardMetric.points,
-    );
+    // §4.1 — consume the splash-time prefetch when present.
+    final res = await (HomePrefetch.takeLeaderboard() ??
+        di.sl<LeaderboardRepository>().getLeaderboard(
+          LeaderboardScope.debaters,
+          LeaderboardMetric.points,
+        ));
     if (!mounted) return;
     setState(() {
       _loading = false;
@@ -46,9 +49,9 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (!_loading && _top.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: Column(
+    // §2.6b/c — no extra gutter (the home column owns the rhythm) and the
+    // section title in theme text color: blue stays an accent, not the bulk.
+    return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
@@ -56,9 +59,11 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
             children: [
               Text(
                 context.loc.topDebaters,
-                style: AppTextStyles.headline(
-                  context,
-                ).copyWith(color: JadalColors.primaryBlue),
+                style: AppTextStyles.headline(context).copyWith(
+                  color: isDark
+                      ? JadalColors.darkTextPrimary
+                      : JadalColors.lightTextPrimary,
+                ),
               ),
               TextButton(
                 onPressed: () => Navigator.push(
@@ -116,7 +121,6 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
                   ),
           ),
         ],
-      ),
-    );
+      );
   }
 }

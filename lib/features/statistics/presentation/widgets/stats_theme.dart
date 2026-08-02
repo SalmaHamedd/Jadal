@@ -120,9 +120,15 @@ class StatsChip extends StatelessWidget {
                   ? StatsTheme.textSecondary(context)
                   : StatsTheme.textSecondary(context).withValues(alpha: 0.4),
             ),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-              child: Text(label),
+            // §1.2 — Center keeps the label vertically centred even when a
+            // fixed-height list stretches the chip taller than its content.
+            child: Center(
+              widthFactor: 1,
+              child: Padding(
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                child: Text(label),
+              ),
             ),
           ),
         ),

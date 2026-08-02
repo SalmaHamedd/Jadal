@@ -497,6 +497,9 @@ class AppLocalizationsAr extends AppLocalizations {
   String get navSearch => 'بحث';
 
   @override
+  String get navBlog => 'المدونة';
+
+  @override
   String get navProfile => 'حسابي';
 
   @override
@@ -533,10 +536,25 @@ class AppLocalizationsAr extends AppLocalizations {
   String get profileTeamAnalysis => 'تحليل الفريق';
 
   @override
-  String get profilePrepAttendance => 'حضور التحضير';
+  String get achievementRankGold => 'ذهبي';
 
   @override
-  String get profileAttendance => 'الحضور';
+  String get achievementRankSilver => 'فضي';
+
+  @override
+  String get achievementRankBronze => 'برونزي';
+
+  @override
+  String get achievementRankHonorable => 'شرفي';
+
+  @override
+  String get achievementRankParticipation => 'مشاركة';
+
+  @override
+  String get achievementsSortDate => 'التاريخ';
+
+  @override
+  String get achievementsSortRank => 'الفئة';
 
   @override
   String get editProfileChooseSource => 'اختر المصدر';
@@ -1186,6 +1204,24 @@ class AppLocalizationsAr extends AppLocalizations {
   String get statsTopOfJadal => 'الأوائل في جدل';
 
   @override
+  String get statsFilterBy => 'تصفية حسب';
+
+  @override
+  String get statsFilterDimPosition => 'المركز';
+
+  @override
+  String get statsFilterDimFramework => 'الإطار';
+
+  @override
+  String get statsFilterPeriod => 'الفترة';
+
+  @override
+  String get statsFilterReset => 'إعادة تعيين';
+
+  @override
+  String get statsPickMonthHelp => 'اختر شهرًا (يتم تجاهل اليوم)';
+
+  @override
   String get statsScopeDebaters => 'المناظرون';
 
   @override
@@ -1221,22 +1257,6 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get statsAvgMemberActivity => 'متوسط نشاط الأعضاء';
-
-  @override
-  String get statsAttendanceSubtitleDebater =>
-      'عدد مرات حضورك الفعلي لغرفة التحضير';
-
-  @override
-  String get statsAttendanceSubtitleTrainer => 'عدد مرات حضورك لمناظرات فريقك';
-
-  @override
-  String get statsAttendanceSubtitleJudge =>
-      'عدد مرات حضورك للمناظرات المكلف بها';
-
-  @override
-  String statsAttendanceTitle(String name) {
-    return '$name · الحضور';
-  }
 
   @override
   String statsOverallPercent(int percent) {
@@ -1520,11 +1540,11 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String greetingWithName(String name) {
-    return 'مرحباً بك، $name 👋';
+    return 'مرحباً بك، $name';
   }
 
   @override
-  String get greeting => 'مرحباً بك 👋';
+  String get greeting => 'مرحباً بك';
 
   @override
   String get topDebaters => 'أفضل المناظرين';

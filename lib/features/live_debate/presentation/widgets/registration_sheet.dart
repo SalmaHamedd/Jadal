@@ -45,6 +45,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
   bool _resolving = true;
   bool _showTeam = false;
   bool _showJudge = false;
+  bool _showSolo = true;
 
   @override
   void initState() {
@@ -53,7 +54,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
   }
 
   /// The visible options depend on the caller's account role (§UX):
-  ///  • judge   → Register as Judge (+ Solo, everyone can go solo)
+  ///  • judge   → Register as Judge ONLY (§5.4 — a judge can never go solo)
   ///  • trainer → Register your Team (+ Solo)
   ///  • debater → Solo; plus Team **only if they lead a registerable team**
   ///  • unknown/legacy session (role not cached) → be permissive: show all.
@@ -61,9 +62,11 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     final role = (await TokenStorage.getRole())?.toLowerCase();
     var showTeam = false;
     var showJudge = false;
+    var showSolo = true;
     switch (role) {
       case 'judge':
         showJudge = true;
+        showSolo = false;
       case 'trainer':
       case 'coach':
         showTeam = true;
@@ -82,6 +85,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     setState(() {
       _showTeam = showTeam;
       _showJudge = showJudge;
+      _showSolo = showSolo;
       _resolving = false;
     });
   }
@@ -131,14 +135,15 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
                   kind: RegistrationKind.team,
                   onTap: _onTeam,
                 ),
-              _actionButton(
-                context,
-                icon: Icons.person_rounded,
-                label: loc.registerAsSolo,
-                color: JadalColors.deepBlue,
-                kind: RegistrationKind.solo,
-                onTap: () => _submit(RegistrationKind.solo, null),
-              ),
+              if (_showSolo)
+                _actionButton(
+                  context,
+                  icon: Icons.person_rounded,
+                  label: loc.registerAsSolo,
+                  color: JadalColors.deepBlue,
+                  kind: RegistrationKind.solo,
+                  onTap: () => _submit(RegistrationKind.solo, null),
+                ),
               if (_showJudge)
                 _actionButton(
                   context,

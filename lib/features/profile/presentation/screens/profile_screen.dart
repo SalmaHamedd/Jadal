@@ -19,12 +19,11 @@ import 'package:jadal_app/features/profile/presentation/cubit/profile_cubit.dart
 import 'package:jadal_app/features/profile/presentation/screens/edit_profile_screen.dart';
 import 'package:jadal_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievements_strip.dart';
-import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
+import 'package:jadal_app/features/profile/presentation/widgets/profile_cards.dart';
+import 'package:jadal_app/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/team_membership_list.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/user_debates_section.dart';
-import 'package:jadal_app/features/statistics/data/repositories/attendance_stats_repository.dart';
-import 'package:jadal_app/features/statistics/presentation/pages/attendance_stats_screen.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/coach_team_summary_screen.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 
@@ -194,42 +193,21 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   padding: EdgeInsets.all(context.wp(5)),
                   child: Column(
                     children: [
-                      // ── Header card: identity + role + points ─────────────
-                      _FloatingCard(
-                        child: Column(
-                          children: [
-                            ProfileAvatar(
-                              name: profile.name,
-                              avatarUrl: profile.avatarUrl,
-                            ),
-                            SizedBox(height: context.hp(1)),
-                            Text(
-                              profile.name,
-                              style: AppTextStyles.headline(context),
-                            ),
-                            SizedBox(height: context.hp(1)),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                _HeaderChip(
-                                  icon: Icons.badge_outlined,
-                                  label: _roleLabel(context, profile.role),
-                                  color: JadalColors.primaryBlue,
-                                ),
-                                const SizedBox(width: 8),
-                                _HeaderChip(
-                                  icon: Icons.star_rounded,
-                                  label: '${profile.points} pts',
-                                  color: JadalColors.primaryOrange,
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
+                      // ── §6.1/§6.3 — the shared header template (cover asset
+                      // behind the avatar, name, role/points pills).
+                      ProfileHeaderSection(
+                        userId: profile.id,
+                        name: profile.name,
+                        avatarUrl: profile.avatarUrl,
+                        roleLabel: _roleLabel(context, profile.role),
+                        points: profile.points,
+                        location: profile.location,
                       ),
                       SizedBox(height: context.hp(2)),
-                      // ── Private details, grouped up top (V2 §8) ───────────
-                      _FloatingCard(
+                      // ── Private details (§6.7 — full email, aligned rows;
+                      // owner-only, so it simply doesn't render on the public
+                      // profile).
+                      ProfileCard(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
@@ -241,30 +219,30 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               ),
                             ),
                             SizedBox(height: context.hp(1)),
-                            _DetailRow(
+                            ProfileDetailRow(
                               icon: Icons.email_outlined,
                               label: 'Email',
                               value: profile.email,
                             ),
-                            _DetailRow(
+                            ProfileDetailRow(
                               icon: Icons.phone_outlined,
                               label: 'Phone',
                               value: profile.phone ?? 'Not provided',
                             ),
                             if (profile.age != null)
-                              _DetailRow(
+                              ProfileDetailRow(
                                 icon: Icons.cake_outlined,
                                 label: 'Age',
                                 value: '${profile.age}',
                               ),
                             if (profile.location != null &&
                                 profile.location!.isNotEmpty)
-                              _DetailRow(
+                              ProfileDetailRow(
                                 icon: Icons.location_on_outlined,
                                 label: 'Location',
                                 value: profile.location!,
                               ),
-                            _DetailRow(
+                            ProfileDetailRow(
                               icon: Icons.calendar_today_outlined,
                               label: 'Joined',
                               value: profile.createdAt.split('T')[0],
@@ -321,9 +299,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       SizedBox(height: context.hp(2)),
                       Row(
                         children: [
-                          // Entry point to the debater statistics screens (moved
-                          // here from the debates-list app bar).
-                          if (profile.role == 'debater')
+                          // §1.9 — every role gets a statistics entry; the
+                          // screen is activity-only for judges/trainers and
+                          // full for debaters (it resolves the role itself).
+                          if (profile.role != 'admin')
                             Expanded(
                               child: ProfileActionButton(
                                 text: context.loc.profileStatistics,
@@ -339,7 +318,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                               ),
                             ),
-                          if (profile.role == 'debater')
+                          if (profile.role == 'trainer')
                             const SizedBox(width: 12),
                           // V2 §3 — the coach's cross-team averages.
                           if (profile.role == 'trainer')
@@ -361,32 +340,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                 },
                               ),
                             ),
-                          if (profile.role == 'trainer')
-                            const SizedBox(width: 12),
-                          Expanded(
-                            child: ProfileActionButton(
-                              text: profile.role == 'debater'
-                                  ? context.loc.profilePrepAttendance
-                                  : context.loc.profileAttendance,
-                              icon: Icons.event_available_rounded,
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => AttendanceStatsScreen(
-                                      role: switch (profile.role) {
-                                        'judge' => AttendanceRole.judge,
-                                        'trainer' => AttendanceRole.trainer,
-                                        _ => AttendanceRole.debater,
-                                      },
-                                      userId: profile.id,
-                                      userName: profile.name,
-                                    ),
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
                         ],
                       ),
                       SizedBox(height: context.hp(2)),
@@ -423,43 +376,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                         SizedBox(height: context.hp(2)),
                       ],
-                      // ── V2 §9 — statistics visibility opt-out ─────────────
-                      _FloatingCard(
-                        child: Row(
-                          children: [
-                            const Icon(
-                              Icons.visibility_outlined,
-                              color: JadalColors.primaryBlue,
-                            ),
-                            const SizedBox(width: 12),
-                            Expanded(
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    'Share my statistics',
-                                    style: AppTextStyles.body(
-                                      context,
-                                    ).copyWith(fontWeight: FontWeight.w700),
-                                  ),
-                                  Text(
-                                    'Others can view your analysis and see you on the leaderboards',
-                                    style: AppTextStyles.small(
-                                      context,
-                                    ).copyWith(color: JadalColors.judgesGrey),
-                                  ),
-                                ],
-                              ),
-                            ),
-                            Switch(
-                              value: profile.statsVisible,
-                              activeThumbColor: JadalColors.primaryOrange,
-                              onChanged: (v) => _cubit.setStatsVisibility(v),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(height: context.hp(2)),
                       Center(
                         child: SizedBox(
                           width: MediaQuery.of(context).size.width * 0.5,
@@ -501,116 +417,3 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-/// The V2 §8 "floating card": every profile section sits on one of these
-/// instead of painting straight onto the shared gradient. Mirrors the
-/// statistics screens' StatsCard look so the app's elevated surfaces match.
-class _FloatingCard extends StatelessWidget {
-  final Widget child;
-  const _FloatingCard({required this.child});
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color:
-            (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
-                .withValues(alpha: dark ? 0.85 : 0.92),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: dark
-              ? Colors.white.withValues(alpha: 0.07)
-              : JadalColors.primaryBlue.withValues(alpha: 0.08),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.30 : 0.06),
-            blurRadius: 16,
-            spreadRadius: -4,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
-}
-
-/// Small icon+label pill used in the header card (role, points).
-class _HeaderChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final Color color;
-  const _HeaderChip({
-    required this.icon,
-    required this.label,
-    required this.color,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 15, color: color),
-          const SizedBox(width: 5),
-          Text(
-            label,
-            style: AppTextStyles.caption(
-              context,
-            ).copyWith(fontWeight: FontWeight.w800, color: color),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// One compact label/value line inside the private-details card.
-class _DetailRow extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _DetailRow({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        children: [
-          Icon(icon, size: 18, color: JadalColors.primaryBlue),
-          const SizedBox(width: 10),
-          Text(
-            label,
-            style: AppTextStyles.caption(
-              context,
-            ).copyWith(color: JadalColors.judgesGrey),
-          ),
-          const Spacer(),
-          Flexible(
-            child: Text(
-              value,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              textAlign: TextAlign.end,
-              style: AppTextStyles.bodyEmphasis(context),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}

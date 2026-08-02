@@ -314,8 +314,25 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
             if (ok == true && mounted) _reload();
           },
         );
-      case DebateStatus.announced:
       case DebateStatus.teamsSelected:
+        // §5.7 — sides are selected and prep is on: debaters whose prep room
+        // is open get a Join button into the rooms list, where their own prep
+        // room is the joinable one (`rooms.{prop|opp}.joinable_for_me` already
+        // accounts for prep-open state, stage 0 and the caller's side).
+        // Judges/trainers/viewers have both flags false → no button.
+        final prepJoinable = state.rooms.prop.joinableForMe ||
+            state.rooms.opp.joinableForMe;
+        if (!prepJoinable) return const SizedBox.shrink();
+        return _PrimaryButton(
+          label: loc.goToPrep,
+          icon: Icons.meeting_room_rounded,
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => DebateLobbyScreen(debateId: widget.debateId),
+            ),
+          ),
+        );
+      case DebateStatus.announced:
       case DebateStatus.completed:
       case DebateStatus.cancelled:
       case DebateStatus.unknown:

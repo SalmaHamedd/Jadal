@@ -227,39 +227,53 @@ class _NotJoinedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = DebateTheme.textSecondary(context);
+    // §5.5 — the placeholder's fixed-size stack (icon + two text lines) used
+    // to overflow when the bottom toolbar shrinks the card on small screens.
+    // FittedBox keeps the content's proportions and scales the whole block
+    // down with the card instead; the ConstrainedBox keeps text wrapping at
+    // roughly the card's width.
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.person_off_outlined, color: muted.withValues(alpha: 0.7), size: 26),
-          const SizedBox(height: 6),
-          Text(
-            context.loc.notJoinedYet,
-            textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w700,
-              fontSize: 11,
-              color: muted,
+      child: Center(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 120),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(Icons.person_off_outlined,
+                    color: muted.withValues(alpha: 0.7), size: 26),
+                const SizedBox(height: 6),
+                Text(
+                  context.loc.notJoinedYet,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w700,
+                    fontSize: 11,
+                    color: muted,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  name,
+                  textAlign: TextAlign.center,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontFamily: 'Cairo',
+                    fontWeight: FontWeight.w500,
+                    fontSize: 10,
+                    color: muted.withValues(alpha: 0.7),
+                  ),
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            name,
-            textAlign: TextAlign.center,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontFamily: 'Cairo',
-              fontWeight: FontWeight.w500,
-              fontSize: 10,
-              color: muted.withValues(alpha: 0.7),
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

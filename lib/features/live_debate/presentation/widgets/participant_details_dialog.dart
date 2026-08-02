@@ -258,12 +258,16 @@ class ParticipantDetailsDialog extends StatelessWidget {
       ),
     );
     if (confirmed == true) {
-      await cubit.disconnect();
-      if (context.mounted) {
-        Navigator.of(context)
-          ..maybePop()
-          ..maybePop();
-      }
+      if (!context.mounted) return;
+      // §5.1 — silent teardown: this flow owns its navigation, so the
+      // disconnect listener must not pop routes behind it. Direct pops (not
+      // maybePop): the room route now blocks maybePop behind the §5.2
+      // back-button confirm, which would double-confirm here.
+      final nav = Navigator.of(context);
+      await cubit.disconnect(notify: false);
+      if (!nav.mounted) return;
+      nav.pop(); // this dialog
+      if (nav.canPop()) nav.pop(); // room → rooms list
     }
   }
 }

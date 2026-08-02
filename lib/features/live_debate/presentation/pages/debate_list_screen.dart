@@ -173,6 +173,11 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
   bool _hasMore = true;
   String? _error;
 
+  /// §5.6 — sequences requests: a query/filter change invalidates any
+  /// in-flight response (which used to land in the freshly-cleared list) and
+  /// releases the `_loading` latch that used to swallow the reload.
+  int _requestSeq = 0;
+
   @override
   void initState() {
     super.initState();
@@ -184,9 +189,11 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
   void didUpdateWidget(covariant _SearchResultsView old) {
     super.didUpdateWidget(old);
     if (old.query != widget.query || old.filter != widget.filter) {
+      _requestSeq++; // drop whatever is still in flight
       _items.clear();
       _page = 1;
       _hasMore = true;
+      _loading = false;
       _load();
     }
   }
@@ -198,6 +205,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
 
   Future<void> _load() async {
     if (_loading || !_hasMore) return;
+    final seq = ++_requestSeq;
     setState(() {
       _loading = true;
       _error = null;
@@ -206,7 +214,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       widget.filter.copyWith(q: widget.query.isEmpty ? null : widget.query),
       page: _page,
     );
-    if (!mounted) return;
+    if (!mounted || seq != _requestSeq) return;
     res.fold(
       (f) => setState(() {
         _error = f.message;
@@ -214,7 +222,10 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       }),
       (pageData) => setState(() {
         _items.addAll(pageData.items);
-        _hasMore = pageData.items.isNotEmpty;
+        // §5.6 — meta-driven: the old items.isNotEmpty heuristic left
+        // _hasMore stuck on true after the last page, so the footer spinner
+        // kept showing after the results had already been returned.
+        _hasMore = pageData.meta.hasMore;
         _page++;
         _loading = false;
       }),

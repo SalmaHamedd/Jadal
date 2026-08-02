@@ -172,6 +172,7 @@
   "navHome": "Home",
   "navDebates": "Debates",
   "navSearch": "Search",
+  "navBlog": "Blog",
   "navProfile": "Profile",
   "searchTitle": "Search",
 
@@ -186,8 +187,13 @@
 
   "profileStatistics": "Statistics",
   "profileTeamAnalysis": "Team analysis",
-  "profilePrepAttendance": "Prep attendance",
-  "profileAttendance": "Attendance",
+  "achievementRankGold": "Gold",
+  "achievementRankSilver": "Silver",
+  "achievementRankBronze": "Bronze",
+  "achievementRankHonorable": "Honorable",
+  "achievementRankParticipation": "Participation",
+  "achievementsSortDate": "Date",
+  "achievementsSortRank": "Tier",
 
   "editProfileChooseSource": "Choose source",
   "editProfileCamera": "Camera",
@@ -481,6 +487,12 @@
   },
   "statsCouldNotUpdateFilters": "Could not update with these filters",
   "statsTopOfJadal": "Top of Jadal",
+  "statsFilterBy": "Filter by",
+  "statsFilterDimPosition": "Position",
+  "statsFilterDimFramework": "Framework",
+  "statsFilterPeriod": "Period",
+  "statsFilterReset": "Reset",
+  "statsPickMonthHelp": "Pick a month (day is ignored)",
   "statsScopeDebaters": "Debaters",
   "statsScopeTeams": "Teams",
   "statsMetricPoints": "Points",
@@ -498,13 +510,6 @@
   "statsAvgImprovement": "Avg improvement",
   "statsAvgWinRate": "Avg win rate",
   "statsAvgMemberActivity": "Avg member activity",
-  "statsAttendanceSubtitleDebater": "How often you actually join your prep room",
-  "statsAttendanceSubtitleTrainer": "How often you attend your team's debates",
-  "statsAttendanceSubtitleJudge": "How often you attend debates you're assigned to",
-  "statsAttendanceTitle": "{name} · Attendance",
-  "@statsAttendanceTitle": {
-    "placeholders": { "name": { "type": "String" } }
-  },
   "statsOverallPercent": "{percent}% overall",
   "@statsOverallPercent": {
     "placeholders": { "percent": { "type": "int" } }
@@ -612,11 +617,11 @@
   "notJoinedYet": "Hasn't joined yet",
   "waitingToJoin": "Waiting to join",
 
-  "greetingWithName": "Welcome, {name} 👋",
+  "greetingWithName": "Welcome, {name}",
   "@greetingWithName": {
     "placeholders": { "name": { "type": "String" } }
   },
-  "greeting": "Welcome 👋",
+  "greeting": "Welcome",
   "topDebaters": "Top debaters",
   "showMore": "Show more",
 

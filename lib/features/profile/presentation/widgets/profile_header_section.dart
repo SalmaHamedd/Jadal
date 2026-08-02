@@ -1,30 +1,37 @@
-﻿import 'package:cached_network_image/cached_network_image.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:jadal_app/core/constants/appImgaeAsset.dart';
+import 'package:jadal_app/core/function/media_url.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
-import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
+import 'package:jadal_app/core/theme/avatar_palette.dart';
 
-/// Cover band (reusing the app's own gradient palette) + a circular avatar
-/// overlapping the cover/body boundary, first-letter fallback when there's
-/// no `avatarUrl` (§6.1) — shared by the self Profile screen and the
-/// read-only [UserProfileScreen] for other users.
+/// §6.1/§6.3 — the ONE profile header, shared verbatim by the self Profile
+/// screen and the read-only [UserProfileScreen]: the fixed
+/// `Jadal_user_cover_image` asset as the cover band (behind the avatar — or
+/// behind the initial-letter fallback), the circular avatar overlapping the
+/// cover/body boundary, then name + role/points pills.
 class ProfileHeaderSection extends StatelessWidget {
+  final int userId;
   final String name;
   final String? avatarUrl;
   final String roleLabel;
+  final int? points;
   final String? location;
   final Duration? tenure;
 
   const ProfileHeaderSection({
     super.key,
+    required this.userId,
     required this.name,
     this.avatarUrl,
     required this.roleLabel,
+    this.points,
     this.location,
     this.tenure,
   });
 
-  static const double _coverHeight = 120;
+  static const double _coverHeight = 132;
   static const double _avatarRadius = 44;
 
   String get _tenureLabel {
@@ -43,6 +50,7 @@ class ProfileHeaderSection extends StatelessWidget {
     final textColor = isDark
         ? JadalColors.darkTextPrimary
         : JadalColors.lightTextPrimary;
+    final url = resolveMediaUrl(avatarUrl);
     return Column(
       children: [
         SizedBox(
@@ -52,16 +60,18 @@ class ProfileHeaderSection extends StatelessWidget {
             alignment: Alignment.topCenter,
             children: [
               ClipRRect(
-                borderRadius: const BorderRadius.vertical(
-                  bottom: Radius.circular(28),
-                ),
+                borderRadius: BorderRadius.circular(24),
                 child: SizedBox(
                   height: _coverHeight,
                   width: double.infinity,
-                  // Reuses the shared brand gradient as the cover art itself,
-                  // so a new profile screen never needs its own custom asset.
-                  child: const JadalGradientBackground(
-                    child: SizedBox.expand(),
+                  // §6.3 — the dedicated cover asset, shown behind the avatar
+                  // (image or initial fallback alike) on BOTH profile screens.
+                  child: Image.asset(
+                    AppImageAsset.userCoverImage,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, _, _) => const ColoredBox(
+                      color: JadalColors.deepBlue,
+                    ),
                   ),
                 ),
               ),
@@ -77,12 +87,11 @@ class ProfileHeaderSection extends StatelessWidget {
                   ),
                   child: CircleAvatar(
                     radius: _avatarRadius,
-                    backgroundColor: JadalColors.primaryBlue,
+                    // §2.2 — deterministic per-user color for the initial.
+                    backgroundColor: userAvatarColor(userId),
                     backgroundImage:
-                        (avatarUrl != null && avatarUrl!.isNotEmpty)
-                        ? CachedNetworkImageProvider(avatarUrl!)
-                        : null,
-                    child: (avatarUrl == null || avatarUrl!.isEmpty)
+                        url != null ? CachedNetworkImageProvider(url) : null,
+                    child: url == null
                         ? Text(
                             name.isNotEmpty
                                 ? name.substring(0, 1).toUpperCase()
@@ -103,12 +112,15 @@ class ProfileHeaderSection extends StatelessWidget {
           name,
           style: AppTextStyles.headline(context).copyWith(color: textColor),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         Wrap(
           alignment: WrapAlignment.center,
           spacing: 8,
+          runSpacing: 6,
           children: [
             _Pill(icon: Icons.badge_rounded, label: roleLabel),
+            if (points != null)
+              _Pill(icon: Icons.star_rounded, label: '$points pts'),
             if (location != null && location!.isNotEmpty)
               _Pill(icon: Icons.location_on_rounded, label: location!),
             if (tenure != null)

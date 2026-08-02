@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 
 import '../../../../core/storage/preferences_database.dart';
+import '../../../home/data/home_prefetch.dart';
 import '../../data/permissions_service.dart';
 
 part 'splash_state.dart';
@@ -21,9 +22,14 @@ class SplashCubit extends Cubit<SplashState> {
   Future<void> start() async {
     final stopwatch = Stopwatch()..start();
 
+    // §4.1 — warm the home screen's data while the splash animation plays,
+    // so the post-splash screen renders content rather than spinners. Only
+    // when signed in: without a token the calls would just 401.
+    final token = await _prefs.getToken();
+    if (token != null && token.isNotEmpty) HomePrefetch.start();
+
     final result = await _permissions.requestLiveDebatePermissions();
 
-    final token = await _prefs.getToken();
     final elapsed = stopwatch.elapsed;
     if (elapsed < _minDisplay) {
       await Future.delayed(_minDisplay - elapsed);

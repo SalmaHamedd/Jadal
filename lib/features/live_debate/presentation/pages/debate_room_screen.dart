@@ -12,6 +12,7 @@ import '../utils/debate_bell.dart';
 import '../utils/debate_theme.dart';
 import '../utils/debate_timeline.dart';
 import '../widgets/debate_action_row.dart';
+import '../widgets/debate_settings_sheet.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/main_speaker_card.dart';
 import '../widgets/news_ticker.dart';
@@ -57,7 +58,23 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    // §5.2 — the system back button must behave EXACTLY like "Leave session":
+    // same confirmation dialog, then out to the debate details screen. While
+    // not connected (connecting/failed) a plain pop back to the rooms list is
+    // kept, matching the failed-view's own leave button.
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        if (_phase != _ConnPhase.connected) {
+          final nav = Navigator.of(context);
+          if (nav.canPop()) nav.pop();
+          return;
+        }
+        DebateSettingsSheet.confirmAndLeave(
+            context, context.read<DebateController>());
+      },
+      child: Scaffold(
       backgroundColor: DebateTheme.background(context),
       // A3: the debate layout has no text input of its own (chat is a dialog) —
       // don't let a dialog's soft keyboard reflow/shrink the team cards underneath
@@ -217,6 +234,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
           ),
         ),
         ),
+      ),
       ),
     );
   }

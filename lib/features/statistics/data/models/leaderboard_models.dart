@@ -10,6 +10,52 @@ library;
 
 enum LeaderboardScope { debaters, teams }
 
+/// §1.5 — optional leaderboard filters. Constraints (BACKEND_RESPONSE §3):
+/// `positions` and `frameworks` are mutually exclusive (422); `positions` is
+/// rejected on the teams leaderboard (422); and `metric=points` rejects every
+/// filter (Elo is order-dependent) — the repository strips them for points.
+class LeaderboardFilter {
+  final String? from; // YYYY-MM
+  final String? to; // YYYY-MM
+  final List<String> positions;
+  final List<int> frameworks;
+
+  const LeaderboardFilter({
+    this.from,
+    this.to,
+    this.positions = const [],
+    this.frameworks = const [],
+  });
+
+  bool get isEmpty =>
+      from == null && to == null && positions.isEmpty && frameworks.isEmpty;
+
+  LeaderboardFilter copyWith({
+    String? from,
+    String? to,
+    bool clearFrom = false,
+    bool clearTo = false,
+    List<String>? positions,
+    List<int>? frameworks,
+  }) {
+    return LeaderboardFilter(
+      from: clearFrom ? null : (from ?? this.from),
+      to: clearTo ? null : (to ?? this.to),
+      positions: positions ?? this.positions,
+      frameworks: frameworks ?? this.frameworks,
+    );
+  }
+
+  Map<String, String> toQuery({required LeaderboardScope scope}) => {
+        'from': ?from,
+        'to': ?to,
+        // Positions are meaningless for a team aggregate — never sent there.
+        if (positions.isNotEmpty && scope == LeaderboardScope.debaters)
+          'positions': positions.join(','),
+        if (frameworks.isNotEmpty) 'frameworks': frameworks.join(','),
+      };
+}
+
 enum LeaderboardMetric {
   points('points'),
   winRate('win_rate'),

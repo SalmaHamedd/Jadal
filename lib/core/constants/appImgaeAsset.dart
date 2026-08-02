@@ -15,6 +15,8 @@ class AppImageAsset {
   static const String poiAskingImage = "$rootImages/poi_asking.png";
   static const String achievementPlaceholder =
       "$rootImages/achievement_placeholder.png";
+  // §6.3 — the fixed profile cover art (replaces the derived gradient cover).
+  static const String userCoverImage = "$rootImages/Jadal_user_cover_image.png";
   static const String blogArticlePlaceholder =
       "$rootImages/blog_article_placeholder.png";
   static const String emptyDebatesIllustration =

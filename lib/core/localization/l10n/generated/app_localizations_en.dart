@@ -498,6 +498,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navSearch => 'Search';
 
   @override
+  String get navBlog => 'Blog';
+
+  @override
   String get navProfile => 'Profile';
 
   @override
@@ -534,10 +537,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTeamAnalysis => 'Team analysis';
 
   @override
-  String get profilePrepAttendance => 'Prep attendance';
+  String get achievementRankGold => 'Gold';
 
   @override
-  String get profileAttendance => 'Attendance';
+  String get achievementRankSilver => 'Silver';
+
+  @override
+  String get achievementRankBronze => 'Bronze';
+
+  @override
+  String get achievementRankHonorable => 'Honorable';
+
+  @override
+  String get achievementRankParticipation => 'Participation';
+
+  @override
+  String get achievementsSortDate => 'Date';
+
+  @override
+  String get achievementsSortRank => 'Tier';
 
   @override
   String get editProfileChooseSource => 'Choose source';
@@ -1197,6 +1215,24 @@ class AppLocalizationsEn extends AppLocalizations {
   String get statsTopOfJadal => 'Top of Jadal';
 
   @override
+  String get statsFilterBy => 'Filter by';
+
+  @override
+  String get statsFilterDimPosition => 'Position';
+
+  @override
+  String get statsFilterDimFramework => 'Framework';
+
+  @override
+  String get statsFilterPeriod => 'Period';
+
+  @override
+  String get statsFilterReset => 'Reset';
+
+  @override
+  String get statsPickMonthHelp => 'Pick a month (day is ignored)';
+
+  @override
   String get statsScopeDebaters => 'Debaters';
 
   @override
@@ -1232,23 +1268,6 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get statsAvgMemberActivity => 'Avg member activity';
-
-  @override
-  String get statsAttendanceSubtitleDebater =>
-      'How often you actually join your prep room';
-
-  @override
-  String get statsAttendanceSubtitleTrainer =>
-      'How often you attend your team\'s debates';
-
-  @override
-  String get statsAttendanceSubtitleJudge =>
-      'How often you attend debates you\'re assigned to';
-
-  @override
-  String statsAttendanceTitle(String name) {
-    return '$name · Attendance';
-  }
 
   @override
   String statsOverallPercent(int percent) {
@@ -1533,11 +1552,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String greetingWithName(String name) {
-    return 'Welcome, $name 👋';
+    return 'Welcome, $name';
   }
 
   @override
-  String get greeting => 'Welcome 👋';
+  String get greeting => 'Welcome';
 
   @override
   String get topDebaters => 'Top debaters';

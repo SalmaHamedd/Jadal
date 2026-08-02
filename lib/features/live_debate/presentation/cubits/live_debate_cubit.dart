@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:livekit_client/livekit_client.dart';
 
@@ -175,15 +176,47 @@ class LiveDebateCubit extends DebateController {
   EventsListener<AudioVisualizerEvent>? _mutedVoiceListener;
   bool _mutedSpeakingDetected = false;
   bool _mutedBannerDismissed = false;
-  int _mutedVoiceHits = 0;
   bool _mutedMonitorStarting = false;
 
-  /// Average band magnitude (0..1) the voice must exceed to count as speaking.
-  static const double kMutedVoiceThreshold = 0.25;
+  /// Learned quiet level, and when the current above-threshold run began.
+  double _mutedVoiceFloor = 0;
+  DateTime? _mutedVoiceLoudSince;
 
-  /// Consecutive visualizer windows above the threshold before the banner shows
-  /// (debounces coughs / bumps).
-  static const int kMutedVoiceHitsToShow = 3;
+  /// Diagnostics: proves whether the native visualizer is actually feeding us
+  /// (see [_mutedVoiceWatchdog]) and throttles the level trace.
+  Timer? _mutedVoiceWatchdog;
+  int _mutedVoiceEvents = 0;
+  DateTime? _mutedVoiceLastTrace;
+
+  /// Detection is on the LOUDEST band, not the mean of all bands.
+  ///
+  /// The native analyzer (livekit_client 2.4.1, `Visualizer.kt`) normalises
+  /// each band as `(clamp(magnitude, 0.1, 8.0) - 0.1) / 7.9` over PCM scaled
+  /// to −1..1, and only the low ~3.7 kHz of the spectrum is analysed. Speech
+  /// therefore lights up two or three bands and leaves the rest near zero, so
+  /// the MEAN across seven bands sits around 0.02–0.05 even when someone is
+  /// talking loudly — the old `mean >= 0.25` test could effectively never be
+  /// satisfied, which is why the banner never appeared on device.
+  ///
+  /// Absolute levels also swing with mic gain and how close the phone is, so
+  /// the trigger is [_mutedVoiceFloor] (a slowly-learned quiet level) plus
+  /// [kMutedVoiceMargin], never below [kMutedVoiceMinPeak].
+  static const double kMutedVoiceMinPeak = 0.035;
+  static const double kMutedVoiceMargin = 0.03;
+
+  /// How fast the quiet level adapts. Only updated while BELOW the trigger, so
+  /// speech can never inflate the floor and mute the detector.
+  static const double kMutedVoiceFloorAlpha = 0.02;
+
+  /// Sustained speech required before the banner shows (debounces coughs and
+  /// desk bumps). Time-based, not a frame count: the native side emits ~100
+  /// windows/sec, so the old "3 windows" was ~30 ms.
+  static const Duration kMutedVoiceHold = Duration(milliseconds: 400);
+
+  /// If the native visualizer never delivers a window this long after start,
+  /// the probe pipeline itself is broken (rather than merely quiet) — log it
+  /// loudly instead of failing silently.
+  static const Duration kMutedVoiceWatchdog = Duration(seconds: 3);
 
   /// Whether the chat dialog is currently open — an incoming message is
   /// marked seen immediately while true; [unreadTeamChatCount] is derived
@@ -652,6 +685,9 @@ class LiveDebateCubit extends DebateController {
         if (!isClosed) emit(RemoteTrackReceivedState());
       })
       ..on<RoomDisconnectedEvent>((event) {
+        // §5.1 — an intentional leave already handles its own navigation;
+        // only unexpected disconnects notify the room screen.
+        if (_userLeaving || isClosed) return;
         emit(DebateDisconnectedState(reason: event.reason.toString()));
       })
       ..on<DataReceivedEvent>((event) => _onData(event.data));
@@ -1009,9 +1045,22 @@ class LiveDebateCubit extends DebateController {
         _mutedVoiceTrack = track;
         _mutedVoiceVisualizer = visualizer;
         _mutedVoiceListener = listener;
+        _mutedVoiceEvents = 0;
         await visualizer.start();
+        // `AudioVisualizerNative.start()` ignores the native call's success
+        // flag, so a "track not found" on the platform side would leave us
+        // with an EventChannel that simply never emits. Say so out loud.
+        _mutedVoiceWatchdog?.cancel();
+        _mutedVoiceWatchdog = Timer(kMutedVoiceWatchdog, () {
+          if (_mutedVoiceEvents == 0) {
+            dlog('media', 'muted-voice probe DEAD — no visualizer window in '
+                '${kMutedVoiceWatchdog.inSeconds}s; the native analyzer never '
+                'attached to the probe track (banner cannot fire)');
+          }
+        });
         dlog('media', 'muted-voice probe STARTED '
-            '(threshold=$kMutedVoiceThreshold, role=${_debateRole.wire})');
+            '(minPeak=$kMutedVoiceMinPeak, margin=$kMutedVoiceMargin, '
+            'hold=${kMutedVoiceHold.inMilliseconds}ms, role=${_debateRole.wire})');
       } catch (e) {
         dlog('media', 'muted-voice probe failed to start: $e');
       } finally {
@@ -1023,30 +1072,58 @@ class LiveDebateCubit extends DebateController {
   }
 
   void _onMutedVoiceEvent(AudioVisualizerEvent e) {
+    _mutedVoiceEvents++;
+    // First window proves the native pipeline is alive — the watchdog that
+    // would have reported it dead is no longer needed.
+    _mutedVoiceWatchdog?.cancel();
+    _mutedVoiceWatchdog = null;
     if (!_shouldMonitorMutedVoice) return;
-    double sum = 0;
-    var n = 0;
+
+    // Peak band, not the mean — see the note on [kMutedVoiceMinPeak].
+    var peak = 0.0;
     for (final v in e.event) {
       if (v is num) {
-        sum += v.toDouble();
-        n++;
+        final d = v.toDouble();
+        if (d > peak) peak = d;
       }
     }
-    final avg = n == 0 ? 0.0 : sum / n;
-    if (avg >= kMutedVoiceThreshold) {
-      _mutedVoiceHits++;
-      if (_mutedVoiceHits >= kMutedVoiceHitsToShow && !_mutedSpeakingDetected) {
+
+    final trigger = math.max(kMutedVoiceMinPeak, _mutedVoiceFloor + kMutedVoiceMargin);
+    final now = DateTime.now();
+
+    // A periodic trace of what the mic is really producing, so a device that
+    // still misbehaves can be diagnosed from the JADAL_DEBATE log instead of
+    // guesswork.
+    if (_mutedVoiceLastTrace == null ||
+        now.difference(_mutedVoiceLastTrace!) > const Duration(seconds: 2)) {
+      _mutedVoiceLastTrace = now;
+      dlog('media', 'muted-voice level peak=${peak.toStringAsFixed(3)} '
+          'floor=${_mutedVoiceFloor.toStringAsFixed(3)} '
+          'trigger=${trigger.toStringAsFixed(3)} windows=$_mutedVoiceEvents');
+    }
+
+    if (peak >= trigger) {
+      _mutedVoiceLoudSince ??= now;
+      final heldFor = now.difference(_mutedVoiceLoudSince!);
+      if (heldFor >= kMutedVoiceHold && !_mutedSpeakingDetected) {
         _mutedSpeakingDetected = true;
-        dlog('media', 'MUTED-SPEAKING detected (avg=${avg.toStringAsFixed(2)} '
-            '≥ $kMutedVoiceThreshold) → showing banner');
+        dlog('media', 'MUTED-SPEAKING detected (peak=${peak.toStringAsFixed(3)} '
+            '≥ trigger=${trigger.toStringAsFixed(3)} for ${heldFor.inMilliseconds}ms) '
+            '→ showing banner');
         if (!isClosed) emit(MutedSpeakingChangedState());
       }
     } else {
-      _mutedVoiceHits = 0;
+      _mutedVoiceLoudSince = null;
+      // Learn the quiet level only while below the trigger, so someone talking
+      // can never raise the floor above their own voice.
+      _mutedVoiceFloor =
+          _mutedVoiceFloor * (1 - kMutedVoiceFloorAlpha) + peak * kMutedVoiceFloorAlpha;
     }
   }
 
   Future<void> _stopMutedVoiceMonitor() async {
+    _mutedVoiceWatchdog?.cancel();
+    _mutedVoiceWatchdog = null;
     final track = _mutedVoiceTrack;
     final visualizer = _mutedVoiceVisualizer;
     final listener = _mutedVoiceListener;
@@ -1054,7 +1131,7 @@ class LiveDebateCubit extends DebateController {
     _mutedVoiceTrack = null;
     _mutedVoiceVisualizer = null;
     _mutedVoiceListener = null;
-    dlog('media', 'muted-voice probe STOPPED');
+    dlog('media', 'muted-voice probe STOPPED (windows=$_mutedVoiceEvents)');
     try {
       await visualizer?.stop();
       await visualizer?.dispose();
@@ -1072,7 +1149,8 @@ class LiveDebateCubit extends DebateController {
   /// Reset detection + the swipe-dismiss suppression (mic opened / role or
   /// speaker changed / probe stopped).
   void _clearMutedSpeaking() {
-    _mutedVoiceHits = 0;
+    _mutedVoiceLoudSince = null;
+    _mutedVoiceFloor = 0;
     final wasVisible = mutedSpeakingActive;
     _mutedSpeakingDetected = false;
     _mutedBannerDismissed = false;
@@ -2020,6 +2098,12 @@ class LiveDebateCubit extends DebateController {
     _signalResultNav();
   }
 
+  /// §5.3 — sharing reveals the result, so `revealed` IS the shared flag. The
+  /// base class returned a constant false, which kept the chair's "share
+  /// result" actions visible after the result had already been shared.
+  @override
+  bool get resultShared => resultView?.revealed ?? false;
+
   @override
   bool get isRoomClosed => _roomClosed;
 
@@ -2068,9 +2152,16 @@ class LiveDebateCubit extends DebateController {
   // Lifecycle
   // ──────────────────────────────────────────────────────────────────────────
 
+  /// §5.1 — true while an intentional local leave is tearing the room down,
+  /// so the RoomDisconnectedEvent listener stays quiet and can't double-pop
+  /// the navigator behind the leave flow's own navigation.
+  bool _userLeaving = false;
+
   @override
-  Future<void> disconnect() async {
-    dlog('leave', 'LEAVE ▸ local user leaving the room (userId=$_myUserId)');
+  Future<void> disconnect({bool notify = true}) async {
+    dlog('leave',
+        'LEAVE ▸ local user leaving the room (userId=$_myUserId, notify=$notify)');
+    _userLeaving = true;
     _stopLiveStatePolling();
     await _stopMutedVoiceMonitor();
     await _room?.disconnect();
@@ -2078,7 +2169,10 @@ class LiveDebateCubit extends DebateController {
     _connectionQualityTimer?.cancel();
     _localTimer?.cancel();
     _poiTimer?.cancel();
-    emit(DebateDisconnectedState(reason: 'User left the debate'));
+    _userLeaving = false;
+    if (notify && !isClosed) {
+      emit(DebateDisconnectedState(reason: 'User left the debate'));
+    }
   }
 
   @override

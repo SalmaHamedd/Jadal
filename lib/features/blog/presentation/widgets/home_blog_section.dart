@@ -1,6 +1,5 @@
 ﻿import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
@@ -28,19 +27,22 @@ class HomeBlogSection extends StatelessWidget {
           final blogs = state.blogs;
           final displayed = blogs.take(kHomeLatestArticlesCount).toList();
 
+          // §2.6b/c — aligned to the home column's shared gutter, title in
+          // theme text color (blue stays an accent).
+          final isDark = Theme.of(context).brightness == Brightness.dark;
           return Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: context.wp(2)),
-                child: Row(
+              Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       context.loc.latestArticles,
-                      style: AppTextStyles.headline(
-                        context,
-                      ).copyWith(color: JadalColors.primaryBlue),
+                      style: AppTextStyles.headline(context).copyWith(
+                        color: isDark
+                            ? JadalColors.darkTextPrimary
+                            : JadalColors.lightTextPrimary,
+                      ),
                     ),
                     TextButton(
                       onPressed: () => Navigator.push(
@@ -57,14 +59,10 @@ class HomeBlogSection extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
               ),
               if (displayed.isEmpty)
                 Padding(
-                  padding: EdgeInsets.symmetric(
-                    horizontal: context.wp(2),
-                    vertical: 24,
-                  ),
+                  padding: const EdgeInsets.symmetric(vertical: 24),
                   child: Center(
                     child: Text(
                       context.loc.noArticles,
@@ -75,28 +73,25 @@ class HomeBlogSection extends StatelessWidget {
                   ),
                 )
               else
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: context.wp(2)),
-                  child: Column(
-                    children: displayed.map((blog) {
-                      return BlogCard(
-                        blog: blog,
-                        onTap: () async {
-                          await Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => BlogDetailsScreen(
-                                slug: blog.slug,
-                                initialViews: blog.views,
-                              ),
+                Column(
+                  children: displayed.map((blog) {
+                    return BlogCard(
+                      blog: blog,
+                      onTap: () async {
+                        await Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlogDetailsScreen(
+                              slug: blog.slug,
+                              initialViews: blog.views,
                             ),
-                          );
-                          if (context.mounted)
-                            context.read<BlogCubit>().loadBlogs();
-                        },
-                      );
-                    }).toList(),
-                  ),
+                          ),
+                        );
+                        if (context.mounted)
+                          context.read<BlogCubit>().loadBlogs();
+                      },
+                    );
+                  }).toList(),
                 ),
             ],
           );

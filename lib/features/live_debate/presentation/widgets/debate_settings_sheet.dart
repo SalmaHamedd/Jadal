@@ -105,7 +105,12 @@ class DebateSettingsSheet {
                   icon: Icons.logout_rounded,
                   label: loc.leaveSession,
                   danger: true,
-                  onTap: () => _confirmLeave(context, sheetCtx, cubit),
+                  onTap: () {
+                    // Close the sheet first, then run the shared confirm/leave
+                    // flow on the room's own context (§5.1/§5.2).
+                    Navigator.of(sheetCtx).pop();
+                    confirmAndLeave(context, cubit);
+                  },
                 ),
                 const Divider(height: 24),
                 // Test-only theme toggle (no AppBar to hold it — §8.5).
@@ -127,40 +132,41 @@ class DebateSettingsSheet {
     );
   }
 
-  static Future<void> _confirmLeave(
-      BuildContext context, BuildContext sheetCtx, DebateController cubit) async {
+  /// §5.1/§5.2 — the ONE leave-session flow, shared by the settings-sheet item
+  /// and the system back button: confirm, tear the connection down silently
+  /// (no [DebateDisconnectedState] emission, so the room's pop-on-disconnect
+  /// listener can't race these pops — the old flow popped first and
+  /// disconnected after, and the listener sometimes fired mid-animation and
+  /// popped one route too many), then navigate deterministically to the
+  /// debate DETAILS screen: Details → RoomsList(lobby) → Room.
+  static Future<void> confirmAndLeave(
+      BuildContext context, DebateController cubit) async {
     final loc = context.loc;
     final confirmed = await showDialog<bool>(
-      context: sheetCtx,
-      builder: (_) => AlertDialog(
+      context: context,
+      builder: (dialogCtx) => AlertDialog(
         backgroundColor: DebateTheme.surface(context),
         title: Text(loc.areYouSure, style: AppTextStyles.title(context)),
         content: Text(loc.leaveDebateBody, style: AppTextStyles.body(context)),
         actions: [
           TextButton(
-            onPressed: () => Navigator.of(sheetCtx).pop(false),
+            onPressed: () => Navigator.of(dialogCtx).pop(false),
             child: Text(loc.cancel),
           ),
           TextButton(
-            onPressed: () => Navigator.of(sheetCtx).pop(true),
+            onPressed: () => Navigator.of(dialogCtx).pop(true),
             child: Text(loc.confirm,
                 style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
           ),
         ],
       ),
     );
-    if (confirmed == true) {
-      if (!context.mounted) return;
-      // Leave → back to the debate DETAILS screen, not the rooms list (§UX). The
-      // stack is Details → RoomsList(lobby) → Room, so we pop the settings sheet,
-      // then the room (its disconnect-listener is now gone, so it can't pop again),
-      // disconnect while the lobby still owns the cubit, then pop the rooms list.
-      final nav = Navigator.of(context);
-      if (sheetCtx.mounted) Navigator.of(sheetCtx).pop(); // close settings sheet
-      nav.pop(); // room → rooms list
-      await cubit.disconnect();
-      if (nav.mounted && nav.canPop()) nav.pop(); // rooms list → details
-    }
+    if (confirmed != true || !context.mounted) return;
+    final nav = Navigator.of(context);
+    await cubit.disconnect(notify: false);
+    if (!nav.mounted) return;
+    nav.pop(); // room → rooms list
+    if (nav.canPop()) nav.pop(); // rooms list → details
   }
 
   static Future<void> _confirmCloseRoom(

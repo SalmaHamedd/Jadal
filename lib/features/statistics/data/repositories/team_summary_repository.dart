@@ -10,7 +10,7 @@ import '../models/team_summary_model.dart';
 
 /// Read-only access to `GET /trainers/{id}/stats/team-summary` (V2 §3).
 /// Same auth policy as the other stats endpoints: self, admin, or public
-/// unless the target opted out via stats_visible.
+/// (§6.4: statistics are public — the old stats_visible gate is gone).
 class TeamSummaryRepository {
   final http.Client _client;
   TeamSummaryRepository({http.Client? client}) : _client = client ?? http.Client();

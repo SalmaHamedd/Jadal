@@ -63,10 +63,13 @@ class JadalBottomNavBar extends StatelessWidget {
                 final itemWidth = constraints.maxWidth / items.length;
                 return Stack(
                   children: [
-                    AnimatedPositioned(
+                    // §2.3 — `start` (not physical `left`): in RTL the item
+                    // Row mirrors, and a physical offset sent the pill to the
+                    // wrong side (pill on item 1, icons highlighting item 4).
+                    AnimatedPositionedDirectional(
                       duration: const Duration(milliseconds: 260),
                       curve: Curves.easeOutCubic,
-                      left: itemWidth * currentIndex,
+                      start: itemWidth * currentIndex,
                       top: 8,
                       bottom: 8,
                       width: itemWidth,

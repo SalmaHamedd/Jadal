@@ -8,9 +8,9 @@ import 'package:jadal_app/features/profile/data/repositories/profile_repository.
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
 import 'package:jadal_app/features/search/presentation/cubit/search_cubit.dart';
+import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/features/search/presentation/widgets/search_user_card.dart';
 import 'package:jadal_app/features/search/presentation/widgets/search_team_card.dart';
-import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -64,17 +64,16 @@ class _SearchScreenState extends State<SearchScreen> {
         ? JadalColors.darkTextSecondary
         : JadalColors.lightTextSecondary;
 
-    return Scaffold(
+    // §2.5 — no longer a bottom-nav tab: pushed from the home app bar, so it
+    // paints its own gradient backdrop and gets the implicit back button.
+    return JadalGradientBackground(
+      child: Scaffold(
       backgroundColor: Colors.transparent,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         titleSpacing: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu_rounded),
-          onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
-        ),
         title: Text(
           context.loc.searchTitle,
           style: AppTextStyles.displayTitle(
@@ -134,6 +133,7 @@ class _SearchScreenState extends State<SearchScreen> {
           ),
           Expanded(child: _buildResults(context)),
         ],
+      ),
       ),
     );
   }

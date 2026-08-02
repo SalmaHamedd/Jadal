@@ -1,5 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:fpdart/fpdart.dart' show Either;
+import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 
@@ -10,27 +12,13 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   ProfileCubit(this._repository) : super(ProfileInitial());
 
-  Future<void> loadProfile() async {
+  /// [warm] — §4.1: an already-in-flight result from the splash prefetch;
+  /// when given it replaces the network call for this load only.
+  Future<void> loadProfile({Future<Either<Failure, Profile>>? warm}) async {
     emit(ProfileLoading());
-    final result = await _repository.getProfile();
+    final result = await (warm ?? _repository.getProfile());
     result.fold(
       (failure) => emit(ProfileError(failure.message)),
-      (profile) => emit(ProfileLoaded(profile)),
-    );
-  }
-
-  /// V2 §9 — optimistic isn't needed here: the PUT returns the fresh profile,
-  /// so we re-emit ProfileLoaded from the response. On failure the previous
-  /// loaded state is kept (the switch snaps back) and an error surfaces via
-  /// the listener's snackbar path.
-  Future<void> setStatsVisibility(bool visible) async {
-    final previous = state;
-    final result = await _repository.setStatsVisibility(visible);
-    result.fold(
-      (failure) {
-        emit(ProfileError(failure.message));
-        if (previous is ProfileLoaded) emit(ProfileLoaded(previous.profile));
-      },
       (profile) => emit(ProfileLoaded(profile)),
     );
   }

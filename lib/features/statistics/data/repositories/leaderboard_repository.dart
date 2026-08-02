@@ -8,8 +8,9 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/services/token_storage.dart';
 import '../models/leaderboard_models.dart';
 
-/// Read-only access to the V2 §3 leaderboards. All-time, top-10, no date
-/// filter (per contract); opted-out users are already excluded server-side.
+/// Read-only access to the V2 §3 leaderboards (top-10). §1.5 adds the same
+/// filter set as own statistics (date range + positions|frameworks), except
+/// for `metric=points`, which stays unfiltered.
 class LeaderboardRepository {
   final http.Client _client;
   LeaderboardRepository({http.Client? client}) : _client = client ?? http.Client();
@@ -26,6 +27,7 @@ class LeaderboardRepository {
     LeaderboardScope scope,
     LeaderboardMetric metric, {
     int limit = 10,
+    LeaderboardFilter filter = const LeaderboardFilter(),
   }) async {
     if (!metric.availableFor(scope)) {
       return const Left(ServerFailure('Metric not available for teams'));
@@ -37,6 +39,10 @@ class LeaderboardRepository {
       final uri = Uri.parse(base).replace(queryParameters: {
         'metric': metric.wire,
         'limit': '$limit',
+        // §1.5 — points is an all-time Elo rating; the endpoint 422s any
+        // filter on it, so nothing is ever sent for that metric.
+        if (metric != LeaderboardMetric.points)
+          ...filter.toQuery(scope: scope),
       });
       final res = await _client.get(uri, headers: await _headers());
       Map<String, dynamic>? body;
