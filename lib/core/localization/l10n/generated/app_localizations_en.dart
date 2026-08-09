@@ -619,6 +619,34 @@ class AppLocalizationsEn extends AppLocalizations {
   String get achievements => 'Achievements';
 
   @override
+  String get privateDetails => 'Private details';
+
+  @override
+  String get fieldAge => 'Age';
+
+  @override
+  String get fieldJoined => 'Joined';
+
+  @override
+  String get notProvided => 'Not provided';
+
+  @override
+  String get pointsLabel => 'pts';
+
+  @override
+  String get tenureNew => 'New to debate';
+
+  @override
+  String tenureYears(int count) {
+    return '$count yr in debate';
+  }
+
+  @override
+  String tenureMonths(int count) {
+    return '$count mo in debate';
+  }
+
+  @override
   String get surveyDetailsTitle => 'Survey';
 
   @override

@@ -1,77 +1,72 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/widgets/jadal_surface.dart';
 
-/// §6.2 — the profile screens' shared surface: the app's standard floating
-/// card (mirrors the statistics screens' StatsCard) so both profile screens
-/// use exactly the same containers instead of painting text on the gradient.
+/// The profile screens' content surface. Now a thin alias over [JadalSurface]
+/// so Profile, Home and every other redesigned screen share one card
+/// treatment instead of each maintaining its own near-identical container.
 class ProfileCard extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;
   const ProfileCard({
     super.key,
     required this.child,
-    this.padding = const EdgeInsets.all(16),
+    this.padding = const EdgeInsets.all(18),
   });
 
   @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: padding,
-      decoration: BoxDecoration(
-        color:
-            (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
-                .withValues(alpha: dark ? 0.85 : 0.92),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: dark
-              ? Colors.white.withValues(alpha: 0.07)
-              : JadalColors.primaryBlue.withValues(alpha: 0.08),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.30 : 0.06),
-            blurRadius: 16,
-            spreadRadius: -4,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: child,
-    );
-  }
+  Widget build(BuildContext context) =>
+      JadalSurface(padding: padding, child: child);
 }
 
-/// §6.7 — one private-details line. Every row shares the same leading edge
-/// (icon → label → value in a single left-aligned column flow), and the value
-/// wraps freely instead of truncating — the full email is always visible.
+/// §6.7 — one private-details line.
+///
+/// Every row shares the same leading edge (the age row used to start further
+/// left than its neighbours), and the value wraps freely instead of
+/// truncating, so a long email is shown in full rather than elided. A hairline
+/// separates rows so the card reads as a table rather than a loose stack.
 class ProfileDetailRow extends StatelessWidget {
   final IconData icon;
   final String label;
   final String value;
+  final bool isLast;
+
   const ProfileDetailRow({
     super.key,
     required this.icon,
     required this.label,
     required this.value,
+    this.isLast = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 7),
+    final dark = jadalIsDark(context);
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 11),
+      decoration: isLast
+          ? null
+          : BoxDecoration(
+              border: Border(
+                bottom: BorderSide(
+                  color: dark
+                      ? Colors.white.withValues(alpha: 0.06)
+                      : JadalColors.primaryBlue.withValues(alpha: 0.07),
+                ),
+              ),
+            ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
-            width: 32,
-            height: 32,
+            width: 34,
+            height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: JadalColors.primaryBlue.withValues(alpha: 0.10),
-              borderRadius: BorderRadius.circular(10),
+              color: JadalColors.primaryBlue
+                  .withValues(alpha: dark ? 0.18 : 0.09),
+              borderRadius: BorderRadius.circular(11),
             ),
             child: Icon(icon, size: 16, color: JadalColors.primaryBlue),
           ),
@@ -82,15 +77,17 @@ class ProfileDetailRow extends StatelessWidget {
               children: [
                 Text(
                   label,
-                  style: AppTextStyles.small(
-                    context,
-                  ).copyWith(color: JadalColors.judgesGrey),
+                  style: AppTextStyles.small(context).copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: jadalTextSecondary(context),
+                  ),
                 ),
-                const SizedBox(height: 1),
+                const SizedBox(height: 2),
                 Text(
                   value,
                   softWrap: true,
-                  style: AppTextStyles.bodyEmphasis(context),
+                  style: AppTextStyles.bodyEmphasis(context)
+                      .copyWith(color: jadalTextPrimary(context)),
                 ),
               ],
             ),

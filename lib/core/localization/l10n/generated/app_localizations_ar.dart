@@ -618,6 +618,34 @@ class AppLocalizationsAr extends AppLocalizations {
   String get achievements => 'الإنجازات';
 
   @override
+  String get privateDetails => 'المعلومات الخاصة';
+
+  @override
+  String get fieldAge => 'العمر';
+
+  @override
+  String get fieldJoined => 'تاريخ الانضمام';
+
+  @override
+  String get notProvided => 'غير محدد';
+
+  @override
+  String get pointsLabel => 'نقطة';
+
+  @override
+  String get tenureNew => 'جديد في المناظرة';
+
+  @override
+  String tenureYears(int count) {
+    return '$count سنة في المناظرة';
+  }
+
+  @override
+  String tenureMonths(int count) {
+    return '$count شهر في المناظرة';
+  }
+
+  @override
   String get surveyDetailsTitle => 'الاستطلاع';
 
   @override

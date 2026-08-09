@@ -11,6 +11,8 @@ import 'core/app_cubit/app_states.dart';
 import 'core/localization/l10n/generated/app_localizations.dart';
 import 'core/theme/app_theme.dart';
 import 'di/injection_container.dart' as di;
+import 'features/notifications/data/push_service.dart';
+import 'features/notifications/presentation/push_router.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,6 +23,10 @@ Future<void> main() async {
   );
   await di.init();
   await di.sl<AppCubit>().load();
+  // §7 — start FCM before the first frame so a notification tap that launched
+  // the app is already retrievable via getInitialMessage(). Never throws: if
+  // Firebase can't start, push is simply disabled for the session.
+  await di.sl<PushService>().init();
   runApp(const JadalApp());
 }
 
@@ -40,6 +46,9 @@ class JadalApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
+            // §7.1 — notification taps route from outside the widget tree
+            // (including cold start, before any screen has built).
+            navigatorKey: rootNavigatorKey,
             title: 'Jadal',
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,

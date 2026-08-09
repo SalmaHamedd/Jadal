@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "610856031780",
+    "project_id": "jadal-platform",
+    "storage_bucket": "jadal-platform.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:610856031780:android:107b09c36d1c0d1b66eab1",
+        "android_client_info": {
+          "package_name": "com.jadalplatform.app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDk4X59MhuNd6DwMbOWoe6HEymdw47r-vI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

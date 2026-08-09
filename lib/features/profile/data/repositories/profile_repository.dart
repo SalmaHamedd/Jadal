@@ -5,6 +5,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
+import 'package:jadal_app/di/injection_container.dart' as di;
+import 'package:jadal_app/features/notifications/data/push_service.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/profile/data/models/profile_model.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
@@ -231,6 +233,13 @@ class ProfileRepository {
     try {
       final token = await PreferencesDatabase().getToken();
       if (token == null) return Left(AuthFailure('Not logged in'));
+
+      // §7 — unregister this device BEFORE the bearer token is discarded
+      // below. `DELETE /devices` is scoped to the authenticated caller, so
+      // doing it after the token is gone 401s and the device keeps receiving
+      // pushes for an account that has logged out. This is the single logout
+      // choke point, so ordering is guaranteed here regardless of caller.
+      await di.sl<PushService>().unregisterToken();
 
       final response = await http.post(
         Uri.parse(ApiConstants.logoutUrl),

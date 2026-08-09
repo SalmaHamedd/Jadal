@@ -108,6 +108,12 @@ class ApiConstants {
   // ── Blog search + filter option lists (sprinkles §10) ─────────────────────────
   static String get blogAuthorsUrl => '$baseUrl/blog/authors';
 
+  // ── Push notifications §7 — FCM device-token registry ────────────────────────
+  // POST upserts keyed on the token (reassigning it across users); DELETE is
+  // idempotent and scoped to the authenticated caller, so it must be called
+  // BEFORE the auth token is discarded on logout or it 401s.
+  static String get devicesUrl => '$baseUrl/devices';
+
   // ── V2 §3 — public leaderboards (top-10; best_speaker is debaters-only) ──────
   static String get leaderboardDebatersUrl => '$baseUrl/leaderboards/debaters';
   static String get leaderboardTeamsUrl => '$baseUrl/leaderboards/teams';

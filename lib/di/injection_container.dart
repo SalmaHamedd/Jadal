@@ -14,6 +14,8 @@ import '../features/live_debate/debate_mode_config.dart';
 import '../features/live_debate/presentation/cubits/connection_cubit.dart';
 import '../features/live_debate/presentation/cubits/debate_controller.dart';
 import '../features/live_debate/presentation/cubits/live_debate_cubit.dart';
+import '../features/notifications/data/device_repository.dart';
+import '../features/notifications/data/push_service.dart';
 import '../features/profile/data/repositories/profile_repository.dart';
 import '../features/splash/data/permissions_service.dart';
 import '../features/statistics/data/repositories/debater_stats_repository.dart';
@@ -39,6 +41,11 @@ Future<void> init() async {
   sl.registerLazySingleton<DebaterStatsRepository>(() => DebaterStatsRepositoryImpl());
   // V2 §3 — public leaderboards (home preview + public stats screen).
   sl.registerLazySingleton(() => LeaderboardRepository());
+  // §7 — FCM device-token registry (POST/DELETE /api/devices) + the FCM
+  // lifecycle owner. PushService is a singleton because it holds the message
+  // stream subscriptions and the last-registered locale.
+  sl.registerLazySingleton(() => DeviceRepository());
+  sl.registerLazySingleton(() => PushService(devices: sl<DeviceRepository>()));
   // param1 = the backend debate id to load (from the list → detail → join flow,
   // §13). Null falls back to `DebateModeConfig.devDebateId`.
   sl.registerFactoryParam<DebateController, int?, void>(

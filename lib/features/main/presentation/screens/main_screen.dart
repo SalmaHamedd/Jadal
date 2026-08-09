@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/app_cubit/app_cubit.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/widgets/jadal_bottom_nav_bar.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
+import '../../../../di/injection_container.dart' as di;
 import '../../../blog/presentation/screens/all_blogs_screen.dart';
 import '../../../home/presentation/screens/home_screen.dart';
 import '../../../live_debate/presentation/pages/debate_list_screen.dart';
+import '../../../notifications/data/push_service.dart';
 import '../../../profile/presentation/screens/profile_screen.dart';
 import '../widgets/jadal_app_drawer.dart';
 
@@ -28,6 +32,9 @@ class MainScreen extends StatefulWidget {
   State<MainScreen> createState() => _MainScreenState();
 }
 
+/// Index of the Profile tab in [_MainScreenState._screens].
+const int _profileTabIndex = 3;
+
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
 
@@ -37,6 +44,27 @@ class _MainScreenState extends State<MainScreen> {
     AllBlogsScreen(inShell: true),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    // §7 — this is the one place every authenticated entry path converges on:
+    // a fresh login AND a restart with a stored token both land here. Doing it
+    // in the login flow alone would leave a user who never logs out again
+    // permanently unregistered, and would miss FCM token rotation.
+    WidgetsBinding.instance.addPostFrameCallback((_) => _initPush());
+  }
+
+  Future<void> _initPush() async {
+    if (!mounted) return;
+    final push = di.sl<PushService>();
+    await push.registerToken(
+      locale: context.read<AppCubit>().state.locale.languageCode,
+    );
+    // Safe only now: the navigator is mounted, so a tap that cold-started the
+    // app can actually push its destination route.
+    await push.handleColdStart();
+  }
 
   void _onItemTapped(int index) {
     setState(() {
@@ -55,6 +83,11 @@ class _MainScreenState extends State<MainScreen> {
         drawerEnableOpenDragGesture: _selectedIndex == 0,
         body: SafeArea(
           bottom: false,
+          // Profile paints a full-bleed cover that must run behind the status
+          // bar, so that tab opts out of the shell's top inset and lets its
+          // own AppBar (which applies the inset itself) handle it. Every tab
+          // has an AppBar, so none of them lose their status-bar spacing.
+          top: _selectedIndex != _profileTabIndex,
           child: IndexedStack(index: _selectedIndex, children: _screens),
         ),
         bottomNavigationBar: JadalBottomNavBar(

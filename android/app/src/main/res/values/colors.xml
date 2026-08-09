@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Accent applied to the notification's small icon and header text.
+      Matches JadalColors.primaryOrange (0xFFEA7C1C) so a push looks like it
+      came from this app rather than from a generic system default.
+    -->
+    <color name="jadal_notification_accent">#EA7C1C</color>
+</resources>

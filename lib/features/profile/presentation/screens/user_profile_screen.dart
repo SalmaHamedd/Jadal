@@ -1,8 +1,9 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
+import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
@@ -11,17 +12,17 @@ import 'package:jadal_app/features/profile/data/repositories/profile_repository.
 import 'package:jadal_app/features/profile/domain/entities/public_user_profile.dart';
 import 'package:jadal_app/features/profile/domain/entities/team_membership.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievements_strip.dart';
-import 'package:jadal_app/features/profile/presentation/widgets/profile_action_button.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_header_section.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/team_membership_list.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/user_debates_section.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
 
-/// Read-only profile for ANY user (self or another) — sprinkles §6. Reached
-/// from a search result tap, or from a "view profile" affordance elsewhere.
-/// Layout: cover + avatar header → achievements strip → role-specific
-/// section (teams for debater/coach, latest debates for debater/judge,
-/// statistics buttons for all three).
+/// Read-only profile for another user.
+///
+/// §6.1 — this is the SAME template as the own-profile screen: identical dome
+/// cover, identical header, identical section cards, identical entrance
+/// motion. The only differences are the owner-only pieces that simply don't
+/// render here (private details, the edit action, logout).
 class UserProfileScreen extends StatefulWidget {
   final int userId;
   final String? userName;
@@ -39,10 +40,24 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   bool _loading = true;
   String? _error;
 
+  final ScrollController _scroll = ScrollController();
+  final ValueNotifier<double> _barT = ValueNotifier(0);
+
   @override
   void initState() {
     super.initState();
+    _scroll.addListener(() {
+      final t = (_scroll.offset / 150).clamp(0.0, 1.0);
+      if ((t - _barT.value).abs() > 0.01) _barT.value = t;
+    });
     _load();
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    _barT.dispose();
+    super.dispose();
   }
 
   Future<void> _load() async {
@@ -91,99 +106,170 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final p = _profile;
     return JadalGradientBackground(
       child: Scaffold(
         backgroundColor: Colors.transparent,
-        appBar: AppBar(
-          title: Text(
-            widget.userName ?? _profile?.name ?? context.loc.navProfile,
-            style: AppTextStyles.title(context),
+        // The cover runs to the very top, under the bar — same as own profile.
+        extendBodyBehindAppBar: true,
+        appBar: PreferredSize(
+          preferredSize: const Size.fromHeight(kToolbarHeight),
+          child: ValueListenableBuilder<double>(
+            valueListenable: _barT,
+            builder: (context, t, _) {
+              // While loading there is no cover behind the bar, so the icons
+              // must use the normal foreground colour immediately.
+              final over = p != null && !_loading;
+              final fg = over
+                  ? Color.lerp(Colors.white, jadalTextPrimary(context), t)!
+                  : jadalTextPrimary(context);
+              final surface = jadalIsDark(context)
+                  ? JadalColors.darkBackground
+                  : JadalColors.lightBackground;
+              return AppBar(
+                backgroundColor:
+                    surface.withValues(alpha: over ? t * 0.92 : 0),
+                elevation: 0,
+                scrolledUnderElevation: 0,
+                foregroundColor: fg,
+                iconTheme: IconThemeData(color: fg),
+                title: Opacity(
+                  opacity: over ? t : 1,
+                  child: Text(
+                    widget.userName ?? p?.name ?? context.loc.navProfile,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: AppTextStyles.title(context).copyWith(color: fg),
+                  ),
+                ),
+                actions: [
+                  if (p != null && p.role != 'admin')
+                    IconButton(
+                      tooltip: context.loc.profileStatistics,
+                      icon: const Icon(Icons.insights_rounded),
+                      color: fg,
+                      onPressed: () => Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => DebaterStatsScreen(
+                            debaterId: p.id,
+                            debaterName: p.name,
+                            subjectRole: p.role,
+                          ),
+                        ),
+                      ),
+                    ),
+                  const SizedBox(width: 4),
+                ],
+              );
+            },
           ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
             : _error != null
-            ? Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        _error!,
-                        textAlign: TextAlign.center,
-                        style: AppTextStyles.body(context),
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            _error!,
+                            textAlign: TextAlign.center,
+                            style: AppTextStyles.body(context),
+                          ),
+                          const SizedBox(height: 12),
+                          OutlinedButton(
+                            onPressed: _load,
+                            child: Text(context.loc.retry),
+                          ),
+                        ],
                       ),
-                      const SizedBox(height: 12),
-                      OutlinedButton(
-                        onPressed: _load,
-                        child: Text(context.loc.retry),
-                      ),
-                    ],
-                  ),
-                ),
-              )
-            : _buildBody(context, _profile!),
+                    ),
+                  )
+                : _buildBody(context, _profile!),
       ),
     );
   }
 
   Widget _buildBody(BuildContext context, PublicUserProfile p) {
+    final showTeams = p.role == 'debater' || p.role == 'trainer';
+    final showDebates = p.role == 'debater' || p.role == 'judge';
     return RefreshIndicator(
       onRefresh: _load,
       color: JadalColors.primaryOrange,
-      child: ListView(
+      child: SingleChildScrollView(
+        controller: _scroll,
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(20, 8, 20, 32),
-        children: [
-          // §6.1 — the exact template the own-profile screen uses; only
-          // owner-only sections (private details, edit, logout) are absent.
-          ProfileHeaderSection(
-            userId: p.id,
-            name: p.name,
-            avatarUrl: p.avatarUrl,
-            roleLabel: _roleLabel(context, p.role),
-            points: p.points,
-            location: p.location,
-            tenure: p.tenure,
-          ),
-          const SizedBox(height: 20),
-          _StatsButtons(profile: p),
-          const SizedBox(height: 20),
-          AchievementsStrip(
-            userId: p.id,
-            userName: p.name,
-            topAchievements: p.topAchievements,
-          ),
-          if (p.topAchievements.isNotEmpty) const SizedBox(height: 20),
-          if (p.role == 'debater' || p.role == 'trainer') ...[
-            Text(
-              context.loc.teamsSection,
-              style: AppTextStyles.subtitle(context).copyWith(
-                fontWeight: FontWeight.w800,
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? JadalColors.darkTextPrimary
-                    : JadalColors.lightTextPrimary,
+        child: Column(
+          children: [
+            JadalEntrance(
+              index: 0,
+              child: ProfileHeaderSection(
+                userId: p.id,
+                name: p.name,
+                avatarUrl: p.avatarUrl,
+                roleLabel: _roleLabel(context, p.role),
+                points: p.points,
+                location: p.location,
+                tenure: p.tenure,
               ),
             ),
-            TeamMembershipSection(
-              userId: p.id,
-              current: _teams,
-              isOwnProfile: false,
+            const SizedBox(height: 22),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+              child: Column(
+                children: [
+                  if (p.topAchievements.isNotEmpty)
+                    JadalEntrance(
+                      index: 1,
+                      child: AchievementsStrip(
+                        userId: p.id,
+                        userName: p.name,
+                        topAchievements: p.topAchievements,
+                      ),
+                    ),
+                  if (showTeams) ...[
+                    if (p.topAchievements.isNotEmpty)
+                      const SizedBox(height: 16),
+                    JadalEntrance(
+                      index: 2,
+                      child: JadalSurface(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            JadalSectionHeader(
+                              icon: Icons.groups_rounded,
+                              title: context.loc.teamsSection,
+                            ),
+                            const SizedBox(height: 6),
+                            TeamMembershipSection(
+                              userId: p.id,
+                              current: _teams,
+                              isOwnProfile: false,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ],
+                  if (showDebates) ...[
+                    const SizedBox(height: 16),
+                    JadalEntrance(
+                      index: 3,
+                      child: UserDebatesSection(
+                        userId: p.id,
+                        userName: p.name,
+                        latest: _debates,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
           ],
-          if (p.role == 'debater' || p.role == 'judge') ...[
-            UserDebatesSection(
-              userId: p.id,
-              userName: p.name,
-              latest: _debates,
-            ),
-            const SizedBox(height: 20),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -196,36 +282,4 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
     'admin' => context.loc.roleAdmin,
     _ => role,
   };
-}
-
-class _StatsButtons extends StatelessWidget {
-  final PublicUserProfile profile;
-  const _StatsButtons({required this.profile});
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // §1.9 — statistics are public for every role; judges/trainers open
-        // the activity-only view, debaters the full one.
-        if (profile.role != 'admin')
-          Expanded(
-            child: ProfileActionButton(
-              text: 'Statistics',
-              icon: Icons.insights_rounded,
-              onPressed: () => Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (_) => DebaterStatsScreen(
-                    debaterId: profile.id,
-                    debaterName: profile.name,
-                    subjectRole: profile.role,
-                  ),
-                ),
-              ),
-            ),
-          ),
-      ],
-    );
-  }
 }

@@ -218,6 +218,21 @@
   "noDebatesYet": "لا توجد مناظرات بعد",
   "achievements": "الإنجازات",
 
+  "privateDetails": "المعلومات الخاصة",
+  "fieldAge": "العمر",
+  "fieldJoined": "تاريخ الانضمام",
+  "notProvided": "غير محدد",
+  "pointsLabel": "نقطة",
+  "tenureNew": "جديد في المناظرة",
+  "tenureYears": "{count} سنة في المناظرة",
+  "@tenureYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tenureMonths": "{count} شهر في المناظرة",
+  "@tenureMonths": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
   "surveyDetailsTitle": "الاستطلاع",
   "surveyNoneAvailable": "لا توجد استطلاعات حالياً",
   "surveyAnswerAllQuestions": "يرجى الإجابة على جميع الأسئلة قبل الإرسال",

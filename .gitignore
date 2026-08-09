@@ -64,10 +64,19 @@ windows/build/
 web/flutter_service_worker.js
 web/.dart_tool/
 
-# Firebase
-google-services.json
-GoogleService-Info.plist
-firebase_app_id_file.json
+# Firebase CLIENT config files are deliberately NOT ignored — they must be
+# committed or a fresh clone / CI fails with an opaque Gradle error.
+# They are not secrets: google-services.json ships inside the APK, and its API
+# key is restricted by package name + signing certificate. Do not re-add
+# google-services.json / GoogleService-Info.plist here.
+
+# Firebase / Google service-account PRIVATE KEYS.
+# These are backend sending credentials and must NEVER be committed or shipped
+# inside an app bundle — an APK is trivially unpackable. They belong on the
+# server only.
+*firebase-adminsdk*.json
+*service-account*.json
+*-serviceaccount.json
 
 # Fastlane
 fastlane/report.xml

@@ -1,8 +1,12 @@
-﻿import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/function/media_url.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/theme/avatar_palette.dart';
+import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
@@ -12,6 +16,7 @@ import 'package:jadal_app/features/home/presentation/widgets/home_debate_banner.
 import 'package:jadal_app/features/home/presentation/widgets/top_debaters_preview.dart';
 import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
+import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:jadal_app/features/search/presentation/screens/search_screen.dart';
 
@@ -22,39 +27,120 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-/// §2.4 — the welcome message in its own dedicated surface: a full-width
-/// soft card matching the app's floating-card look, with the greeting at
-/// headline size instead of the old cramped subtitle line.
-class _WelcomeCard extends StatelessWidget {
-  final String greeting;
-  const _WelcomeCard({required this.greeting});
+/// The hero: avatar, greeting and name in one warm surface, with the rotating
+/// debate banner mounted directly beneath it inside the same block.
+///
+/// The banner was previously a third free-floating element; anchoring it to
+/// the greeting turns the top of the screen into a single composed unit and
+/// gives the banner the prominence it deserves as the one colourful thing on
+/// the screen.
+class _Hero extends StatelessWidget {
+  final Profile? profile;
+  const _Hero({required this.profile});
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-      decoration: BoxDecoration(
-        color:
-            (isDark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
-                .withValues(alpha: isDark ? 0.85 : 0.92),
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: isDark
-              ? Colors.white.withValues(alpha: 0.07)
-              : JadalColors.primaryBlue.withValues(alpha: 0.08),
-        ),
-      ),
-      child: Text(
-        greeting,
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: AppTextStyles.headline(context).copyWith(
-          color: isDark
-              ? JadalColors.darkTextPrimary
-              : JadalColors.lightTextPrimary,
-        ),
+    final dark = jadalIsDark(context);
+    final p = profile;
+    final url = resolveMediaUrl(p?.avatarUrl);
+    return JadalSurface(
+      accent: JadalColors.primaryOrange,
+      padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              // The avatar makes the greeting personal and gives the block a
+              // strong anchor point on the leading edge.
+              Container(
+                padding: const EdgeInsets.all(2.5),
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: const LinearGradient(
+                    colors: [JadalColors.primaryOrange, JadalColors.primaryBlue],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                  ),
+                ),
+                child: CircleAvatar(
+                  radius: 26,
+                  backgroundColor: p == null
+                      ? JadalColors.judgesGrey
+                      : userAvatarColor(p.id),
+                  backgroundImage:
+                      url != null ? CachedNetworkImageProvider(url) : null,
+                  child: (url == null && p != null)
+                      ? Text(
+                          p.name.isNotEmpty
+                              ? p.name.substring(0, 1).toUpperCase()
+                              : '?',
+                          style: AppTextStyles.headline(context)
+                              .copyWith(color: Colors.white),
+                        )
+                      : null,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      context.loc.greeting,
+                      style: AppTextStyles.small(context).copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: 0.3,
+                        color: JadalColors.primaryOrange,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      p?.name ?? '',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTextStyles.headline(context)
+                          .copyWith(color: jadalTextPrimary(context)),
+                    ),
+                  ],
+                ),
+              ),
+              if (p != null) ...[
+                const SizedBox(width: 8),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  decoration: BoxDecoration(
+                    color: JadalColors.primaryBlue
+                        .withValues(alpha: dark ? 0.22 : 0.10),
+                    borderRadius: BorderRadius.circular(14),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        '${p.points}',
+                        style: AppTextStyles.subtitle(context).copyWith(
+                          fontWeight: FontWeight.w900,
+                          color: JadalColors.primaryBlue,
+                        ),
+                      ),
+                      Text(
+                        context.loc.pointsLabel,
+                        style: AppTextStyles.small(context).copyWith(
+                          fontWeight: FontWeight.w700,
+                          color: JadalColors.primaryBlue,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ],
+          ),
+          const SizedBox(height: 16),
+          // Nested inside the hero so banner + greeting read as one unit.
+          const HomeDebateBanner(),
+        ],
       ),
     );
   }
@@ -96,15 +182,13 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           title: Builder(
             builder: (context) {
-              final isDark = Theme.of(context).brightness == Brightness.dark;
-              final titleColor = isDark
-                  ? JadalColors.darkTextPrimary
-                  : JadalColors.deepBlue;
               return Text(
                 context.loc.navHome,
-                style: AppTextStyles.displayTitle(
-                  context,
-                ).copyWith(color: titleColor),
+                style: AppTextStyles.displayTitle(context).copyWith(
+                  color: jadalIsDark(context)
+                      ? JadalColors.darkTextPrimary
+                      : JadalColors.deepBlue,
+                ),
               );
             },
           ),
@@ -120,42 +204,27 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
-        body: Builder(
-          builder: (context) {
-            // §2.6b — one shared 16px gutter for every block (the old mix of
-            // extra per-section paddings made the screen read as unrelated
-            // stacked parts), with an even 18px vertical rhythm.
-            return SafeArea(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // §2.4 — the welcome message gets its own surface card
-                    // (no text straight on the background, §2.6a) and a
-                    // noticeably larger size; the waving hand is gone.
-                    BlocBuilder<ProfileCubit, ProfileState>(
-                      builder: (context, state) {
-                        final greeting = state is ProfileLoaded
-                            ? context.loc.greetingWithName(state.profile.name)
-                            : context.loc.greeting;
-                        return _WelcomeCard(greeting: greeting);
-                      },
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                JadalEntrance(
+                  index: 0,
+                  child: BlocBuilder<ProfileCubit, ProfileState>(
+                    builder: (context, state) => _Hero(
+                      profile: state is ProfileLoaded ? state.profile : null,
                     ),
-                    const SizedBox(height: 18),
-                    const HomeDebateBanner(),
-                    const SizedBox(height: 18),
-                    // V2 §4 — top-3 of the points leaderboard, between the
-                    // banner and the blog strip; "show more" → full public
-                    // statistics.
-                    const TopDebatersPreview(),
-                    const SizedBox(height: 18),
-                    const HomeBlogSection(),
-                  ],
+                  ),
                 ),
-              ),
-            );
-          },
+                const SizedBox(height: 20),
+                const JadalEntrance(index: 1, child: TopDebatersPreview()),
+                const SizedBox(height: 20),
+                const JadalEntrance(index: 2, child: HomeBlogSection()),
+              ],
+            ),
+          ),
         ),
       ),
     );

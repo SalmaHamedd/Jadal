@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
-import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/screens/achievements_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
@@ -25,62 +25,27 @@ class AchievementsStrip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (topAchievements.isEmpty) return const SizedBox.shrink();
-    final isDark = Theme.of(context).brightness == Brightness.dark;
     final shown = topAchievements.take(6).toList();
     return ProfileCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                context.loc.achievements,
-                style: AppTextStyles.subtitle(context).copyWith(
-                  fontWeight: FontWeight.w800,
-                  color: isDark
-                      ? JadalColors.darkTextPrimary
-                      : JadalColors.lightTextPrimary,
-                ),
+          // Shared header (icon badge + title + small "show all" link) so this
+          // card matches the teams/debates cards it sits between.
+          JadalSectionHeader(
+            icon: Icons.military_tech_rounded,
+            title: context.loc.achievements,
+            accent: JadalColors.primaryOrange,
+            actionLabel: context.loc.showAll,
+            onAction: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) =>
+                    AchievementsScreen(userId: userId, userName: userName),
               ),
-              // Small text + small arrow — deliberately NOT a big bar.
-              InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (_) =>
-                        AchievementsScreen(userId: userId, userName: userName),
-                  ),
-                ),
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        context.loc.showAll,
-                        style: AppTextStyles.small(context).copyWith(
-                          fontWeight: FontWeight.w700,
-                          color: JadalColors.primaryOrange,
-                        ),
-                      ),
-                      const SizedBox(width: 2),
-                      Icon(
-                        Directionality.of(context) == TextDirection.rtl
-                            ? Icons.chevron_left_rounded
-                            : Icons.chevron_right_rounded,
-                        size: 15,
-                        color: JadalColors.primaryOrange,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 14),
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),

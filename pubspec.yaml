@@ -40,6 +40,9 @@ dependencies:
   # Export the debater-statistics analysis as a styled .xlsx sheet + share it.
   excel: ^4.0.6
   share_plus: ^10.1.4
+  firebase_core: ^4.13.0
+  firebase_messaging: ^16.5.0
+  flutter_local_notifications: ^22.3.0
 
 dev_dependencies:
   flutter_test:

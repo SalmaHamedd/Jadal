@@ -30,6 +30,12 @@ class SplashCubit extends Cubit<SplashState> {
 
     final result = await _permissions.requestLiveDebatePermissions();
 
+    // §7 — ask for notifications at first launch, after the debate-critical
+    // permissions so the essential prompts come first. The result is
+    // deliberately discarded and never feeds the gating below: declining push
+    // must not block entry to the app.
+    await _permissions.requestNotifications();
+
     final elapsed = stopwatch.elapsed;
     if (elapsed < _minDisplay) {
       await Future.delayed(_minDisplay - elapsed);

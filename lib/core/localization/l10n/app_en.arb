@@ -221,6 +221,21 @@
   "noDebatesYet": "No debates yet",
   "achievements": "Achievements",
 
+  "privateDetails": "Private details",
+  "fieldAge": "Age",
+  "fieldJoined": "Joined",
+  "notProvided": "Not provided",
+  "pointsLabel": "pts",
+  "tenureNew": "New to debate",
+  "tenureYears": "{count} yr in debate",
+  "@tenureYears": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "tenureMonths": "{count} mo in debate",
+  "@tenureMonths": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+
   "surveyDetailsTitle": "Survey",
   "surveyNoneAvailable": "No surveys currently available",
   "surveyAnswerAllQuestions": "Please answer all questions before submitting",

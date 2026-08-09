@@ -4,13 +4,72 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:jadal_app/core/extensions/responsive_extension.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
+import 'package:jadal_app/core/theme/app_colors.dart';
+import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
+import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/edit_profile_cubit.dart';
+import 'package:jadal_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
 import 'package:permission_handler/permission_handler.dart';
+
+/// §6.5 — the change-password entry, relocated from the profile screen's
+/// button row into the edit screen where the rest of the account edits live.
+class _ChangePasswordEntry extends StatelessWidget {
+  const _ChangePasswordEntry();
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(16);
+    final dark = jadalIsDark(context);
+    return Material(
+      color: JadalColors.primaryBlue.withValues(alpha: dark ? 0.16 : 0.08),
+      borderRadius: radius,
+      child: InkWell(
+        borderRadius: radius,
+        onTap: () => Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+        ),
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+          decoration: BoxDecoration(
+            borderRadius: radius,
+            border: Border.all(
+              color: JadalColors.primaryBlue.withValues(alpha: 0.24),
+            ),
+          ),
+          child: Row(
+            children: [
+              const Icon(Icons.lock_rounded,
+                  size: 19, color: JadalColors.primaryBlue),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
+                  context.loc.changePasswordButton,
+                  style: AppTextStyles.button(context).copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: JadalColors.primaryBlue,
+                  ),
+                ),
+              ),
+              Icon(
+                Directionality.of(context) == TextDirection.rtl
+                    ? Icons.chevron_left_rounded
+                    : Icons.chevron_right_rounded,
+                size: 20,
+                color: JadalColors.primaryBlue,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
 
 class EditProfileScreen extends StatefulWidget {
   final String currentName;
@@ -220,6 +279,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           },
                           isLoading: state is EditProfileLoading,
                         ),
+                        SizedBox(height: context.hp(3)),
+                        // Changing the password is an edit to your own
+                        // account, so it belongs here rather than as a button
+                        // competing for space on the profile screen itself.
+                        const _ChangePasswordEntry(),
                       ],
                     ),
                   ),

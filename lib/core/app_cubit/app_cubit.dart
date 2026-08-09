@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../di/injection_container.dart' as di;
+import '../../features/notifications/data/push_service.dart';
 import '../storage/preferences_database.dart';
 import 'app_states.dart';
 
@@ -36,6 +38,11 @@ class AppCubit extends Cubit<AppState> {
   Future<void> setLocale(Locale locale) async {
     emit(state.copyWith(locale: locale));
     await _prefs.setValue(_localeKey, locale.languageCode);
+    // §7 — the backend localises each push from the locale stored against the
+    // device, so a language switch must be pushed to the server or the user
+    // keeps receiving notifications in the language they just left.
+    // No-op when logged out or when Firebase failed to start.
+    await di.sl<PushService>().updateLocale(locale.languageCode);
   }
 
   Future<void> toggleLocale() async {

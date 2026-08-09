@@ -1,4 +1,4 @@
-package com.example.jadal_app
+package com.jadalplatform.app
 
 import io.flutter.embedding.android.FlutterActivity
 

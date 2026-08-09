@@ -1286,6 +1286,54 @@ abstract class AppLocalizations {
   /// **'Achievements'**
   String get achievements;
 
+  /// No description provided for @privateDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Private details'**
+  String get privateDetails;
+
+  /// No description provided for @fieldAge.
+  ///
+  /// In en, this message translates to:
+  /// **'Age'**
+  String get fieldAge;
+
+  /// No description provided for @fieldJoined.
+  ///
+  /// In en, this message translates to:
+  /// **'Joined'**
+  String get fieldJoined;
+
+  /// No description provided for @notProvided.
+  ///
+  /// In en, this message translates to:
+  /// **'Not provided'**
+  String get notProvided;
+
+  /// No description provided for @pointsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get pointsLabel;
+
+  /// No description provided for @tenureNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New to debate'**
+  String get tenureNew;
+
+  /// No description provided for @tenureYears.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} yr in debate'**
+  String tenureYears(int count);
+
+  /// No description provided for @tenureMonths.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} mo in debate'**
+  String tenureMonths(int count);
+
   /// No description provided for @surveyDetailsTitle.
   ///
   /// In en, this message translates to:
