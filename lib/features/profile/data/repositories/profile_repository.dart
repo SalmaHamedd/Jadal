@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:fpdart/fpdart.dart';
 import 'package:jadal_app/core/error/failures.dart';
 import 'package:jadal_app/core/constants/api_constants.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
+import 'package:jadal_app/core/services/session_identity.dart';
 import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/notifications/data/push_service.dart';
@@ -36,6 +38,12 @@ class ProfileRepository {
         final data = responseBody['data'];
         final profile = ProfileModel.fromJson(data);
         return Right(profile);
+      }
+      // A stale token used to fail silently here and leave the app looking
+      // signed in while every request 401'd. Tear the session down instead.
+      if (response.statusCode == 401) {
+        SessionGuard.onUnauthorized();
+        return Left(AuthFailure(message));
       }
 
       return Left(ServerFailure(message));
@@ -229,33 +237,41 @@ class ProfileRepository {
     }
   }
 
+  /// Signs out. **Always succeeds locally.**
+  ///
+  /// The server call is best-effort: it invalidates the token server-side and
+  /// unregisters the push device, both of which are worth doing — but neither
+  /// may block the sign-out. Previously a failed request returned `Left` and
+  /// left the credentials on disk, so a user whose session the server was
+  /// already rejecting could not get out of the app at all.
   Future<Either<Failure, String>> logout() async {
+    final token = await PreferencesDatabase().getToken();
+    String? message;
     try {
-      final token = await PreferencesDatabase().getToken();
-      if (token == null) return Left(AuthFailure('Not logged in'));
+      if (token != null) {
+        // §7 — unregister this device BEFORE the bearer token is discarded
+        // below. `DELETE /devices` is scoped to the authenticated caller, so
+        // doing it after the token is gone 401s and the device keeps receiving
+        // pushes for an account that has logged out. This is the single logout
+        // choke point, so ordering is guaranteed here regardless of caller.
+        await di.sl<PushService>().unregisterToken();
 
-      // §7 — unregister this device BEFORE the bearer token is discarded
-      // below. `DELETE /devices` is scoped to the authenticated caller, so
-      // doing it after the token is gone 401s and the device keeps receiving
-      // pushes for an account that has logged out. This is the single logout
-      // choke point, so ordering is guaranteed here regardless of caller.
-      await di.sl<PushService>().unregisterToken();
-
-      final response = await http.post(
-        Uri.parse(ApiConstants.logoutUrl),
-        headers: {'Authorization': 'Bearer $token'},
-      );
-
-      final Map<String, dynamic> body = jsonDecode(response.body);
-      if (response.statusCode == 200 && body['success'] == true) {
-        await PreferencesDatabase().removeValue('AUTH_TOKEN');
-        await PreferencesDatabase().removeValue('user_id');
-        return Right(body['message'] ?? 'Logged out successfully');
-      } else {
-        return Left(ServerFailure(body['message'] ?? 'Logout failed'));
+        final response = await http.post(
+          Uri.parse(ApiConstants.logoutUrl),
+          headers: {'Authorization': 'Bearer $token'},
+        );
+        final Map<String, dynamic> body = jsonDecode(response.body);
+        message = body['message'] as String?;
       }
-    } catch (e) {
-      return Left(NetworkFailure('Network error: $e'));
+    } catch (_) {
+      // Offline or rejected — fall through and clear locally anyway.
     }
+
+    // One atomic write, and it runs whatever the server said.
+    await PreferencesDatabase().removeValues(const ['AUTH_TOKEN', 'user_id']);
+    // MF_FU §1.1 — drop the cached drawer identity too, or the next account to
+    // sign in briefly sees the previous user's name/points.
+    await SessionIdentity.clear();
+    return Right(message ?? 'Logged out successfully');
   }
 }

@@ -161,8 +161,13 @@ abstract class AppTheme {
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: orangeAccent,
-          foregroundColor:
-              scheme.brightness == Brightness.dark ? Colors.black : Colors.white,
+          // MF_FU §7.3 — white on the brand orange is only 2.84:1, and this is
+          // the app's PRIMARY button. Near-black on the same orange is 6.77:1
+          // (AAA), so the brand colour is kept exactly and the label changes
+          // instead. Dark theme already pairs its lighter orange with black.
+          foregroundColor: scheme.brightness == Brightness.dark
+              ? Colors.black
+              : const Color(0xFF0B0F14),
           elevation: 0,
           minimumSize: const Size.fromHeight(52),
           shape: RoundedRectangleBorder(

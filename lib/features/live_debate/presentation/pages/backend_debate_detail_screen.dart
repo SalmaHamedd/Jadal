@@ -22,6 +22,8 @@ import '../widgets/result_summary_view.dart';
 import 'debate_lobby_screen.dart';
 import '../../../complaints/data/repositories/complaint_repository_impl.dart';
 import '../../../complaints/presentation/screens/create_complaint_screen.dart';
+import '../../../../core/error/failure_text.dart';
+import '../../../../core/widgets/jadal_error_view.dart';
 
 /// Debate detail via `GET /live-state` (§13): motion (coloured framework chips +
 /// tags), judges, prop/opp speakers with their order + reply, the stages, and —
@@ -1056,35 +1058,10 @@ class _ErrorView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.loc;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 56,
-              color: JadalColors.judgesGrey,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body(
-                context,
-              ).copyWith(color: DebateTheme.textPrimary(context)),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(loc.retry, style: AppTextStyles.button(context)),
-            ),
-          ],
-        ),
-      ),
+    // Printed the raw failure string before.
+    return JadalErrorView(
+      message: FailureText.fromMessage(context, message),
+      onRetry: onRetry,
     );
   }
 }

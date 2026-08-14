@@ -3367,6 +3367,516 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count}y'**
   String elapsedYearsShort(int count);
+
+  /// No description provided for @drawerAboutUs.
+  ///
+  /// In en, this message translates to:
+  /// **'About us'**
+  String get drawerAboutUs;
+
+  /// No description provided for @contactEmail.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get contactEmail;
+
+  /// No description provided for @contactPhone.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone'**
+  String get contactPhone;
+
+  /// No description provided for @contactInstagram.
+  ///
+  /// In en, this message translates to:
+  /// **'Instagram'**
+  String get contactInstagram;
+
+  /// No description provided for @contactWhatsapp.
+  ///
+  /// In en, this message translates to:
+  /// **'WhatsApp'**
+  String get contactWhatsapp;
+
+  /// No description provided for @contactWebsite.
+  ///
+  /// In en, this message translates to:
+  /// **'Website'**
+  String get contactWebsite;
+
+  /// No description provided for @copiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get copiedToClipboard;
+
+  /// No description provided for @searchDebatesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search all debates'**
+  String get searchDebatesHint;
+
+  /// No description provided for @statsActivitySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations, attendance, viewing and missed debates, as weighted points'**
+  String get statsActivitySubtitle;
+
+  /// No description provided for @statsActivityPoints.
+  ///
+  /// In en, this message translates to:
+  /// **'activity points'**
+  String get statsActivityPoints;
+
+  /// No description provided for @statsActivityTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Activity trend'**
+  String get statsActivityTrend;
+
+  /// No description provided for @statsActivityBreakdown.
+  ///
+  /// In en, this message translates to:
+  /// **'What made this number'**
+  String get statsActivityBreakdown;
+
+  /// No description provided for @statsActivityByPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'By period'**
+  String get statsActivityByPeriod;
+
+  /// No description provided for @statsActivityRegistrations.
+  ///
+  /// In en, this message translates to:
+  /// **'Registrations'**
+  String get statsActivityRegistrations;
+
+  /// No description provided for @statsActivityAttendance.
+  ///
+  /// In en, this message translates to:
+  /// **'Attendance'**
+  String get statsActivityAttendance;
+
+  /// No description provided for @statsActivityWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'Watched debates'**
+  String get statsActivityWatched;
+
+  /// No description provided for @statsActivityMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'Missed debates'**
+  String get statsActivityMissed;
+
+  /// No description provided for @statsActivityCountRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} registered'**
+  String statsActivityCountRegistered(int count);
+
+  /// No description provided for @statsActivityCountAttended.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} attended'**
+  String statsActivityCountAttended(int count);
+
+  /// No description provided for @statsActivityCountWatched.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} watched'**
+  String statsActivityCountWatched(int count);
+
+  /// No description provided for @statsActivityCountMissed.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} missed'**
+  String statsActivityCountMissed(int count);
+
+  /// No description provided for @statsActivityLongerPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a longer period to see the trend'**
+  String get statsActivityLongerPeriod;
+
+  /// No description provided for @statsGroupBy.
+  ///
+  /// In en, this message translates to:
+  /// **'Group by'**
+  String get statsGroupBy;
+
+  /// No description provided for @statsCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get statsCompare;
+
+  /// No description provided for @statsOrder.
+  ///
+  /// In en, this message translates to:
+  /// **'Order'**
+  String get statsOrder;
+
+  /// No description provided for @statsPositionsLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Positions'**
+  String get statsPositionsLabel;
+
+  /// No description provided for @statsFrameworksLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Frameworks'**
+  String get statsFrameworksLabel;
+
+  /// No description provided for @statsPeriod.
+  ///
+  /// In en, this message translates to:
+  /// **'Period'**
+  String get statsPeriod;
+
+  /// No description provided for @statsFrom.
+  ///
+  /// In en, this message translates to:
+  /// **'From'**
+  String get statsFrom;
+
+  /// No description provided for @statsTo.
+  ///
+  /// In en, this message translates to:
+  /// **'To'**
+  String get statsTo;
+
+  /// No description provided for @statsReset.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset'**
+  String get statsReset;
+
+  /// No description provided for @statsCombined.
+  ///
+  /// In en, this message translates to:
+  /// **'Combined'**
+  String get statsCombined;
+
+  /// No description provided for @statsByPosition.
+  ///
+  /// In en, this message translates to:
+  /// **'By position'**
+  String get statsByPosition;
+
+  /// No description provided for @statsByFramework.
+  ///
+  /// In en, this message translates to:
+  /// **'By framework'**
+  String get statsByFramework;
+
+  /// No description provided for @statsAllTime.
+  ///
+  /// In en, this message translates to:
+  /// **'All time'**
+  String get statsAllTime;
+
+  /// No description provided for @statsYear.
+  ///
+  /// In en, this message translates to:
+  /// **'Year'**
+  String get statsYear;
+
+  /// No description provided for @statsMonth.
+  ///
+  /// In en, this message translates to:
+  /// **'Month'**
+  String get statsMonth;
+
+  /// No description provided for @statsRankTop.
+  ///
+  /// In en, this message translates to:
+  /// **'Top'**
+  String get statsRankTop;
+
+  /// No description provided for @statsRankBottom.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottom'**
+  String get statsRankBottom;
+
+  /// No description provided for @statsRankLatest.
+  ///
+  /// In en, this message translates to:
+  /// **'Latest'**
+  String get statsRankLatest;
+
+  /// No description provided for @statsRankEarliest.
+  ///
+  /// In en, this message translates to:
+  /// **'Earliest'**
+  String get statsRankEarliest;
+
+  /// No description provided for @statsPositionLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Position'**
+  String get statsPositionLabel;
+
+  /// No description provided for @statsFrameworkLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Framework'**
+  String get statsFrameworkLabel;
+
+  /// No description provided for @statsHintPickPositions.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick 2+ positions below to split the bars'**
+  String get statsHintPickPositions;
+
+  /// No description provided for @statsHintPickFrameworks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick 2+ frameworks below to split the bars'**
+  String get statsHintPickFrameworks;
+
+  /// No description provided for @statsAllTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'All teams'**
+  String get statsAllTeams;
+
+  /// No description provided for @statsTeamPast.
+  ///
+  /// In en, this message translates to:
+  /// **'past'**
+  String get statsTeamPast;
+
+  /// No description provided for @statsSeeDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'See details'**
+  String get statsSeeDetails;
+
+  /// No description provided for @statsForTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'For {team}'**
+  String statsForTeam(String team);
+
+  /// No description provided for @statsSquadActivity.
+  ///
+  /// In en, this message translates to:
+  /// **'Squad activity'**
+  String get statsSquadActivity;
+
+  /// No description provided for @statsPerMemberAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'{value} per member'**
+  String statsPerMemberAverage(String value);
+
+  /// No description provided for @statsKindCombinations.
+  ///
+  /// In en, this message translates to:
+  /// **'Line-ups'**
+  String get statsKindCombinations;
+
+  /// No description provided for @statsMinDebates.
+  ///
+  /// In en, this message translates to:
+  /// **'Min debates'**
+  String get statsMinDebates;
+
+  /// No description provided for @statsTeamBaseline.
+  ///
+  /// In en, this message translates to:
+  /// **'Team average: {value} over {count} debates'**
+  String statsTeamBaseline(String value, int count);
+
+  /// No description provided for @statsShowingLineups.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing {shown} of {total} line-ups — the rest have too few debates to compare'**
+  String statsShowingLineups(int shown, int total);
+
+  /// No description provided for @statsLineupDebates.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} debates'**
+  String statsLineupDebates(int count);
+
+  /// No description provided for @statsLineupLeft.
+  ///
+  /// In en, this message translates to:
+  /// **'left'**
+  String get statsLineupLeft;
+
+  /// No description provided for @statsCombinationsEmptyNoDebates.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed debates in this period yet.'**
+  String get statsCombinationsEmptyNoDebates;
+
+  /// No description provided for @statsCombinationsEmptyNoScores.
+  ///
+  /// In en, this message translates to:
+  /// **'These debates have no usable speaker scores yet.'**
+  String get statsCombinationsEmptyNoScores;
+
+  /// No description provided for @statsCombinationsEmptyBelowMin.
+  ///
+  /// In en, this message translates to:
+  /// **'No line-up has played {count} or more times yet — lower the minimum to compare.'**
+  String statsCombinationsEmptyBelowMin(int count);
+
+  /// No description provided for @statsVsTeamAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'vs team average'**
+  String get statsVsTeamAverage;
+
+  /// No description provided for @statsKindRating.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating'**
+  String get statsKindRating;
+
+  /// No description provided for @statsRatingSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How debaters rated your judging after the result was revealed'**
+  String get statsRatingSubtitle;
+
+  /// No description provided for @statsRatingsCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} ratings'**
+  String statsRatingsCount(int count);
+
+  /// No description provided for @statsPeerAverage.
+  ///
+  /// In en, this message translates to:
+  /// **'Other judges: {value}'**
+  String statsPeerAverage(String value);
+
+  /// No description provided for @statsRatingCoverage.
+  ///
+  /// In en, this message translates to:
+  /// **'{rated} of {judged} debates you judged received ratings'**
+  String statsRatingCoverage(int rated, int judged);
+
+  /// No description provided for @statsRatingTooFew.
+  ///
+  /// In en, this message translates to:
+  /// **'Too few ratings to be meaningful yet'**
+  String get statsRatingTooFew;
+
+  /// No description provided for @statsRatingDistribution.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating distribution'**
+  String get statsRatingDistribution;
+
+  /// No description provided for @statsRatingTrend.
+  ///
+  /// In en, this message translates to:
+  /// **'Rating over time'**
+  String get statsRatingTrend;
+
+  /// No description provided for @statsRatingEmptyNoRatings.
+  ///
+  /// In en, this message translates to:
+  /// **'You have judged debates, but nobody has rated them yet.'**
+  String get statsRatingEmptyNoRatings;
+
+  /// No description provided for @statsRatingEmptyNeverJudged.
+  ///
+  /// In en, this message translates to:
+  /// **'No completed debates judged yet.'**
+  String get statsRatingEmptyNeverJudged;
+
+  /// No description provided for @teamJoinRequestPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Join request'**
+  String get teamJoinRequestPill;
+
+  /// No description provided for @teamLeaveRequestPill.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave request'**
+  String get teamLeaveRequestPill;
+
+  /// No description provided for @teamMembersCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String teamMembersCount(int count);
+
+  /// No description provided for @teamStatusInactiveShort.
+  ///
+  /// In en, this message translates to:
+  /// **'inactive'**
+  String get teamStatusInactiveShort;
+
+  /// No description provided for @errorNoConnection.
+  ///
+  /// In en, this message translates to:
+  /// **'No internet connection. Check your network and try again.'**
+  String get errorNoConnection;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong on our side. Please try again in a moment.'**
+  String get errorServer;
+
+  /// No description provided for @errorGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong. Please try again.'**
+  String get errorGeneric;
+
+  /// No description provided for @errorSessionExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'Your session has ended. Please sign in again.'**
+  String get errorSessionExpired;
+
+  /// No description provided for @errorNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find what you were looking for.'**
+  String get errorNotFound;
+
+  /// No description provided for @errorNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'You don\'t have permission to do that.'**
+  String get errorNotAllowed;
+
+  /// No description provided for @errorTooManyRequests.
+  ///
+  /// In en, this message translates to:
+  /// **'Too many attempts. Please wait a moment and try again.'**
+  String get errorTooManyRequests;
+
+  /// No description provided for @errorPullToRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Pull down to try again'**
+  String get errorPullToRetry;
+
+  /// No description provided for @logoutAnyway.
+  ///
+  /// In en, this message translates to:
+  /// **'Log out'**
+  String get logoutAnyway;
+
+  /// No description provided for @frameworksCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} frameworks used across the platform'**
+  String frameworksCount(int count);
 }
 
 class _AppLocalizationsDelegate

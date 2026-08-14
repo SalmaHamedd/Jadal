@@ -10,6 +10,7 @@ import '../../../../core/services/token_storage.dart';
 import '../models/activity_stat_model.dart';
 import '../models/debater_stats_models.dart';
 import 'debater_stats_repository.dart';
+import '../../../../core/services/session_guard.dart';
 
 /// HTTP implementation. Matches the app's repository convention: `http.Client` +
 /// `TokenStorage` bearer + `Accept: application/json` + `Either<Failure, T>`,
@@ -50,6 +51,9 @@ class DebaterStatsRepositoryImpl implements DebaterStatsRepository {
       final message = asString(body?['message']);
       switch (code) {
         case 401:
+          // Rejected token: clear the session and return to login,
+          // instead of leaving the user in an app where nothing works.
+          SessionGuard.onUnauthorized();
           await TokenStorage.deleteToken();
           return Left(AuthFailure(message ?? 'Unauthenticated'));
         case 403:

@@ -2,6 +2,8 @@ import 'package:excel/excel.dart';
 
 import '../../data/models/activity_stat_model.dart';
 import '../../data/models/debater_stats_models.dart';
+import '../../data/models/judge_rating_model.dart';
+import '../../data/models/team_analysis_models.dart';
 
 /// Builds the "debate sheet" — a styled `.xlsx` export of whatever analysis is
 /// on screen, with its current filters. Design (per request): orange header
@@ -53,6 +55,8 @@ class StatsExcelExporter {
     ScoreRanking? ranking,
     ImprovementStat? improvement,
     ActivityStat? activity,
+    JudgeRatingStat? judgeRating,
+    TeamCombinationsStat? combinations,
   }) {
     final excel = Excel.createExcel();
     const sheetName = 'Analysis';
@@ -85,6 +89,9 @@ class StatsExcelExporter {
       case StatKind.activity:
         if (activity == null) return null;
         row = _writeActivity(sheet, row, activity);
+      case StatKind.judgeRating:
+        if (judgeRating == null) return null;
+        row = _writeJudgeRating(sheet, row, judgeRating);
     }
 
     sheet.setColumnWidth(0, 24);
@@ -98,6 +105,73 @@ class StatsExcelExporter {
   /// A suggested file name (no path) for the export.
   static String fileName(StatKind kind) =>
       'jadal-${kind.name}-${DateTime.now().toIso8601String().substring(0, 10)}.xlsx';
+
+  static String teamFileName(String metric) =>
+      'jadal-team-$metric-${DateTime.now().toIso8601String().substring(0, 10)}.xlsx';
+
+  /// MF_FU §9 — the coach's per-team analysis. Same sheet style as [build];
+  /// separate entry point because a team export is scoped by team + metric
+  /// rather than by [StatKind] + debater, and because the line-up analysis has
+  /// no debater-side equivalent.
+  static List<int>? buildTeam({
+    required String teamName,
+    required String metric,
+    required StatsFilter filter,
+    BucketedStat? bucketed,
+    ImprovementStat? improvement,
+    ActivityStat? activity,
+    int membersCounted = 0,
+    TeamCombinationsStat? combinations,
+  }) {
+    final excel = Excel.createExcel();
+    const sheetName = 'Analysis';
+    final sheet = excel[sheetName];
+    final defaultSheet = excel.getDefaultSheet();
+    if (defaultSheet != null && defaultSheet != sheetName) {
+      excel.delete(defaultSheet);
+    }
+    excel.setDefaultSheet(sheetName);
+
+    var row = 0;
+    _put(
+      sheet,
+      0,
+      row,
+      TextCellValue('$metric — $teamName'),
+      _titleStyle,
+    );
+    row += 2;
+    row = _writeFilters(sheet, row, StatKind.winRate, filter, RankingMode.top);
+    row += 1;
+
+    if (combinations != null) {
+      row = _writeCombinations(sheet, row, combinations);
+    } else if (improvement != null) {
+      row = _writeImprovement(sheet, row, improvement);
+    } else if (activity != null) {
+      if (membersCounted > 0) {
+        _put(sheet, 0, row, TextCellValue('Members counted'), _labelStyle);
+        _put(sheet, 1, row, IntCellValue(membersCounted), _cellStyle);
+        row += 2;
+      }
+      row = _writeActivity(sheet, row, activity);
+    } else if (bucketed != null) {
+      row = _writeBucketed(
+        sheet,
+        row,
+        metric == 'win-rate' ? StatKind.winRate : StatKind.avgScore,
+        bucketed,
+      );
+    } else {
+      return null;
+    }
+
+    sheet.setColumnWidth(0, 30);
+    for (var c = 1; c <= 10; c++) {
+      sheet.setColumnWidth(c, 16);
+    }
+    return excel.save();
+  }
 
   // ── sections ──────────────────────────────────────────────────────────────
 
@@ -333,6 +407,221 @@ class StatsExcelExporter {
 
   // ── helpers ───────────────────────────────────────────────────────────────
 
+  /// The coach's team-summary card (four averages). Small on purpose — the
+  /// backend ships scalars here, not series.
+  static List<int>? buildTeamSummary({
+    required String scopeLabel,
+    required int teamsCounted,
+    required double improvement,
+    required double winRate,
+    required double avgScore,
+    required double memberActivity,
+  }) {
+    final excel = Excel.createExcel();
+    const sheetName = 'Analysis';
+    final sheet = excel[sheetName];
+    final defaultSheet = excel.getDefaultSheet();
+    if (defaultSheet != null && defaultSheet != sheetName) {
+      excel.delete(defaultSheet);
+    }
+    excel.setDefaultSheet(sheetName);
+
+    var row = 0;
+    _put(sheet, 0, row, TextCellValue('Team analysis — $scopeLabel'), _titleStyle);
+    row += 2;
+    _put(sheet, 0, row, TextCellValue('Teams counted'), _labelStyle);
+    _put(sheet, 1, row, IntCellValue(teamsCounted), _cellStyle);
+    row += 2;
+
+    _put(sheet, 0, row, TextCellValue('Metric'), _headerStyle);
+    _put(sheet, 1, row, TextCellValue('Value'), _headerStyle);
+    row++;
+    for (final e in <(String, double, bool)>[
+      ('Average improvement', improvement, false),
+      ('Average win rate', winRate * 100, true),
+      ('Average score', avgScore, true),
+      ('Average member activity', memberActivity, false),
+    ]) {
+      _put(sheet, 0, row, TextCellValue(e.$1), _cellStyle);
+      _put(
+        sheet,
+        1,
+        row,
+        DoubleCellValue(_round1(e.$2)),
+        // Improvement/activity are signed indices, not 0–100 scores, so the
+        // 50% red/green threshold would be meaningless on them.
+        e.$3 ? _metricStyle(e.$2) : _cellStyle,
+      );
+      row++;
+    }
+
+    sheet.setColumnWidth(0, 30);
+    sheet.setColumnWidth(1, 16);
+    return excel.save();
+  }
+
+  /// MF_FU §11 — the judge's received ratings: headline average, coverage, the
+  /// full distribution, and the per-period trend.
+  static int _writeJudgeRating(Sheet s, int row, JudgeRatingStat d) {
+    _put(s, 0, row, TextCellValue('Average rating'), _labelStyle);
+    _put(
+      s,
+      1,
+      row,
+      d.avgRating == null
+          ? TextCellValue('—')
+          : DoubleCellValue(_round2(d.avgRating!)),
+      _cellStyle,
+    );
+    _put(
+      s,
+      2,
+      row,
+      TextCellValue('out of ${d.scaleMax}'),
+      _cellStyle,
+    );
+    row++;
+
+    for (final e in <(String, CellValue)>[
+      ('Ratings received', IntCellValue(d.ratingsCount)),
+      ('Debates rated', IntCellValue(d.debatesRated)),
+      ('Debates judged', IntCellValue(d.debatesJudged)),
+      (
+        'Coverage',
+        d.coverage == null
+            ? TextCellValue('—')
+            : TextCellValue('${(d.coverage! * 100).round()}%'),
+      ),
+      (
+        'Other judges average',
+        d.peerAverage == null
+            ? TextCellValue('—')
+            : DoubleCellValue(_round2(d.peerAverage!)),
+      ),
+    ]) {
+      _put(s, 0, row, TextCellValue(e.$1), _labelStyle);
+      _put(s, 1, row, e.$2, _cellStyle);
+      row++;
+    }
+    row++;
+
+    _put(s, 0, row, TextCellValue('Rating'), _headerStyle);
+    _put(s, 1, row, TextCellValue('Count'), _headerStyle);
+    row++;
+    for (var v = d.scaleMax; v >= d.scaleMin; v--) {
+      _put(s, 0, row, IntCellValue(v), _cellStyle);
+      _put(s, 1, row, IntCellValue(d.distribution[v] ?? 0), _cellStyle);
+      row++;
+    }
+
+    if (d.buckets.isNotEmpty) {
+      row++;
+      _put(s, 0, row, TextCellValue('Period'), _headerStyle);
+      _put(s, 1, row, TextCellValue('Average'), _headerStyle);
+      _put(s, 2, row, TextCellValue('Ratings'), _headerStyle);
+      _put(s, 3, row, TextCellValue('Debates rated'), _headerStyle);
+      row++;
+      for (final b in d.buckets) {
+        _put(s, 0, row, TextCellValue(b.label), _cellStyle);
+        _put(
+          s,
+          1,
+          row,
+          // A quiet period is null, not zero — keep that distinction in the
+          // sheet rather than writing a misleading 0.
+          b.avgRating == null
+              ? TextCellValue('—')
+              : DoubleCellValue(_round2(b.avgRating!)),
+          _cellStyle,
+        );
+        _put(s, 2, row, IntCellValue(b.ratingsCount), _cellStyle);
+        _put(s, 3, row, IntCellValue(b.debatesRated), _cellStyle);
+        row++;
+      }
+    }
+    return row;
+  }
+
+  /// MF_FU §9.3 — the team's line-ups, ranked, with the team baseline so each
+  /// row can be read as a delta rather than a bare figure.
+  static int _writeCombinations(Sheet s, int row, TeamCombinationsStat d) {
+    for (final e in <(String, CellValue)>[
+      ('Team', TextCellValue(d.teamName)),
+      ('Ranked by', TextCellValue(d.metric.wire)),
+      ('Debates considered', IntCellValue(d.totalDebatesConsidered)),
+      ('Distinct line-ups', IntCellValue(d.distinctCombinations)),
+      ('Minimum appearances', IntCellValue(d.minDebates)),
+      (
+        'Team win rate',
+        d.baseline.winRate == null
+            ? TextCellValue('—')
+            : TextCellValue('${(d.baseline.winRate! * 100).round()}%'),
+      ),
+      (
+        'Team average score',
+        d.baseline.avgScore == null
+            ? TextCellValue('—')
+            : DoubleCellValue(_round1(d.baseline.avgScore!)),
+      ),
+    ]) {
+      _put(s, 0, row, TextCellValue(e.$1), _labelStyle);
+      _put(s, 1, row, e.$2, _cellStyle);
+      row++;
+    }
+    row++;
+
+    _put(s, 0, row, TextCellValue('Line-up'), _headerStyle);
+    _put(s, 1, row, TextCellValue('Size'), _headerStyle);
+    _put(s, 2, row, TextCellValue('Debates'), _headerStyle);
+    _put(s, 3, row, TextCellValue('Wins'), _headerStyle);
+    _put(s, 4, row, TextCellValue('Win rate'), _headerStyle);
+    _put(s, 5, row, TextCellValue('Avg score'), _headerStyle);
+    _put(s, 6, row, TextCellValue('Last played'), _headerStyle);
+    row++;
+
+    for (final c in d.combinations) {
+      // Departed members are marked so a historical line-up isn't mistaken for
+      // one the coach can still field.
+      final names = c.members
+          .map((m) => m.isCurrentMember ? m.name : '${m.name} (left)')
+          .join(', ');
+      _put(s, 0, row, TextCellValue(names), _cellStyle);
+      _put(s, 1, row, IntCellValue(c.size), _cellStyle);
+      _put(s, 2, row, IntCellValue(c.nDebates), _cellStyle);
+      _put(s, 3, row, IntCellValue(c.wins), _cellStyle);
+      final winPct = (c.winRate ?? 0) * 100;
+      _put(
+        s,
+        4,
+        row,
+        c.winRate == null
+            ? TextCellValue('—')
+            : DoubleCellValue(_round1(winPct)),
+        c.winRate == null ? _cellStyle : _metricStyle(winPct),
+      );
+      _put(
+        s,
+        5,
+        row,
+        c.avgScore == null
+            ? TextCellValue('—')
+            : DoubleCellValue(_round1(c.avgScore!)),
+        c.avgScore == null ? _cellStyle : _metricStyle(c.avgScore!),
+      );
+      _put(
+        s,
+        6,
+        row,
+        TextCellValue(
+          c.lastDebateAt?.toIso8601String().substring(0, 10) ?? '—',
+        ),
+        _cellStyle,
+      );
+      row++;
+    }
+    return row;
+  }
+
   static void _put(Sheet s, int col, int row, CellValue value, CellStyle style) {
     final cell = s.cell(CellIndex.indexByColumnRow(columnIndex: col, rowIndex: row));
     cell.value = value;
@@ -349,5 +638,6 @@ class StatsExcelExporter {
         StatKind.ranking => 'Score ranking',
         StatKind.improvement => 'Improvement',
         StatKind.activity => 'Activity',
+        StatKind.judgeRating => 'Judge rating',
       };
 }

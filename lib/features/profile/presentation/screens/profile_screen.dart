@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 import 'package:jadal_app/core/widgets/jadal_snack_bar.dart';
 import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
@@ -64,6 +67,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _barT.dispose();
     _cubit.close();
     super.dispose();
+  }
+
+  /// Re-runs everything on the screen, including the sections behind the
+  /// [_extrasLoaded] latch.
+  ///
+  /// That latch is why leaving a team used to keep showing it under "current
+  /// teams" until the app was restarted: `_loadExtras` runs from `build`, so
+  /// without resetting the latch a reload refreshed the profile header and
+  /// left the teams / achievements / debates lists frozen at their first fetch.
+  Future<void> _refreshAll() async {
+    _extrasLoaded = false;
+    await _cubit.loadProfile();
   }
 
   Future<void> _loadExtras(Profile profile) async {
@@ -262,7 +277,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
             );
           }
           if (state is ProfileError) {
-            JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+            JadalSnackBar.show(
+              context,
+              FailureText.fromMessage(context, state.message),
+              type: SnackBarType.error,
+            );
           }
         },
         builder: (context, state) {
@@ -270,15 +289,31 @@ class _ProfileScreenState extends State<ProfileScreen> {
             return const Center(child: CircularProgressIndicator());
           }
           if (state is ProfileError) {
-            return Center(
+            // The profile is where a user lands when things go wrong, so this
+            // state must always offer a way OUT — not just "retry". Without a
+            // logout here, a session the server keeps rejecting leaves the user
+            // stuck on a screen whose only button re-runs the failing call.
+            return SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
               child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text(context.loc.errorWithMessage(state.message)),
-                  const SizedBox(height: 16),
-                  ElevatedButton(
-                    onPressed: () => _cubit.loadProfile(),
-                    child: Text(context.loc.retry),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.16),
+                  JadalErrorView(
+                    message: FailureText.fromMessage(context, state.message),
+                    onRetry: _refreshAll,
+                  ),
+                  TextButton.icon(
+                    // Device-only sign-out: clears the stored token and goes
+                    // to login WITHOUT calling `POST /auth/logout`. We are on
+                    // this screen precisely because requests are failing, so a
+                    // logout that depends on one would fail too and leave the
+                    // user stuck with no way out.
+                    onPressed: SessionGuard.signOutLocally,
+                    icon: const Icon(Icons.logout_rounded, size: 18),
+                    label: Text(context.loc.logoutAnyway),
+                    style: TextButton.styleFrom(
+                      foregroundColor: JadalColors.negativeRed,
+                    ),
                   ),
                 ],
               ),
@@ -294,7 +329,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               profile.role == 'debater' || profile.role == 'judge';
 
           return RefreshIndicator(
-            onRefresh: () => _cubit.loadProfile(),
+            onRefresh: _refreshAll,
             color: JadalColors.primaryOrange,
             child: SingleChildScrollView(
               controller: _scroll,
@@ -349,6 +384,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                   TeamMembershipSection(
                                     userId: profile.id,
                                     current: _teams,
+                                    // Leaving a team happens on the team's own
+                                    // screen; without this the roster here
+                                    // stayed stale until an app restart.
+                                    onMembershipChanged: _refreshAll,
                                   ),
                                 ],
                               ),
@@ -428,10 +467,13 @@ class _PrivateDetails extends StatelessWidget {
             title: loc.privateDetails,
           ),
           const SizedBox(height: 8),
+          // MF_FU §2.3 — one accent per field so the card reads as a set of
+          // distinct details rather than five identical blue rows.
           ProfileDetailRow(
             icon: Icons.email_outlined,
             label: loc.email,
             value: profile.email,
+            accent: JadalColors.primaryBlue,
           ),
           ProfileDetailRow(
             icon: Icons.phone_outlined,
@@ -439,23 +481,27 @@ class _PrivateDetails extends StatelessWidget {
             value: profile.phone?.isNotEmpty == true
                 ? profile.phone!
                 : loc.notProvided,
+            accent: JadalColors.positiveGreen,
           ),
           if (profile.age != null)
             ProfileDetailRow(
               icon: Icons.cake_outlined,
               label: loc.fieldAge,
               value: '${profile.age}',
+              accent: JadalColors.deepBlue,
             ),
           if (profile.location != null && profile.location!.isNotEmpty)
             ProfileDetailRow(
               icon: Icons.location_on_outlined,
               label: loc.fieldLocation,
               value: profile.location!,
+              accent: JadalColors.primaryOrange,
             ),
           ProfileDetailRow(
             icon: Icons.calendar_today_outlined,
             label: loc.fieldJoined,
             value: profile.createdAt.split('T').first,
+            accent: JadalColors.judgesGrey,
             isLast: true,
           ),
         ],
@@ -470,33 +516,44 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // MF_FU §2.5 — a solid red block, not a 9%-alpha tint with a red outline.
+    // This is the page's terminal action and should read like one.
     const red = JadalColors.negativeRed;
-    final dark = jadalIsDark(context);
-    return Material(
-      color: red.withValues(alpha: dark ? 0.18 : 0.09),
-      borderRadius: BorderRadius.circular(16),
-      child: InkWell(
+    return DecoratedBox(
+      decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        onTap: onTap,
-        child: Container(
-          width: double.infinity,
-          height: 54,
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: red.withValues(alpha: 0.35)),
+        boxShadow: [
+          BoxShadow(
+            color: red.withValues(alpha: 0.25),
+            blurRadius: 12,
+            spreadRadius: -2,
+            offset: const Offset(0, 4),
           ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.logout_rounded, size: 19, color: red),
-              const SizedBox(width: 10),
-              Text(
-                context.loc.logout,
-                style: AppTextStyles.button(context)
-                    .copyWith(color: red, fontWeight: FontWeight.w800),
-              ),
-            ],
+        ],
+      ),
+      child: Material(
+        color: red,
+        borderRadius: BorderRadius.circular(16),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(16),
+          onTap: onTap,
+          child: SizedBox(
+            width: double.infinity,
+            height: 54,
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.logout_rounded, size: 19, color: Colors.white),
+                const SizedBox(width: 10),
+                Text(
+                  context.loc.logout,
+                  style: AppTextStyles.button(context).copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

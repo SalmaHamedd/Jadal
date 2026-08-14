@@ -58,7 +58,10 @@ class _Hero extends StatelessWidget {
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   gradient: const LinearGradient(
-                    colors: [JadalColors.primaryOrange, JadalColors.primaryBlue],
+                    colors: [
+                      JadalColors.primaryOrange,
+                      JadalColors.primaryBlue,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -68,15 +71,17 @@ class _Hero extends StatelessWidget {
                   backgroundColor: p == null
                       ? JadalColors.judgesGrey
                       : userAvatarColor(p.id),
-                  backgroundImage:
-                      url != null ? CachedNetworkImageProvider(url) : null,
+                  backgroundImage: url != null
+                      ? CachedNetworkImageProvider(url)
+                      : null,
                   child: (url == null && p != null)
                       ? Text(
                           p.name.isNotEmpty
                               ? p.name.substring(0, 1).toUpperCase()
                               : '?',
-                          style: AppTextStyles.headline(context)
-                              .copyWith(color: Colors.white),
+                          style: AppTextStyles.headline(context).copyWith(
+                            color: userAvatarForeground(userAvatarColor(p.id)),
+                          ),
                         )
                       : null,
                 ),
@@ -99,8 +104,9 @@ class _Hero extends StatelessWidget {
                       p?.name ?? '',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTextStyles.headline(context)
-                          .copyWith(color: jadalTextPrimary(context)),
+                      style: AppTextStyles.headline(
+                        context,
+                      ).copyWith(color: jadalTextPrimary(context)),
                     ),
                   ],
                 ),
@@ -108,11 +114,14 @@ class _Hero extends StatelessWidget {
               if (p != null) ...[
                 const SizedBox(width: 8),
                 Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 7,
+                  ),
                   decoration: BoxDecoration(
-                    color: JadalColors.primaryBlue
-                        .withValues(alpha: dark ? 0.22 : 0.10),
+                    color: JadalColors.primaryBlue.withValues(
+                      alpha: dark ? 0.22 : 0.10,
+                    ),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Column(
@@ -147,6 +156,10 @@ class _Hero extends StatelessWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
+  /// Bumped on pull-to-refresh so sections that own their own fetch (rather
+  /// than reading a cubit this screen can reload) reload too.
+  int _refreshTick = 0;
+
   @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
@@ -184,7 +197,10 @@ class _HomeScreenState extends State<HomeScreen> {
             builder: (context) {
               return Text(
                 context.loc.navHome,
-                style: AppTextStyles.displayTitle(context).copyWith(
+                // App-bar titles use the `title` role (18.5) — `displayTitle`
+                // (26) is for in-body screen headings and read oversized in a
+                // bar. This matches the blog screen, which was already right.
+                style: AppTextStyles.title(context).copyWith(
                   color: jadalIsDark(context)
                       ? JadalColors.darkTextPrimary
                       : JadalColors.deepBlue,
@@ -204,25 +220,48 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ),
+        // Swipe down to reload. Without this the only way to refresh Home was
+        // to leave the tab and come back, which is not a discoverable gesture.
+        // `AlwaysScrollableScrollPhysics` matters: the column can be shorter
+        // than the viewport, and a non-scrollable list never reports the drag.
         body: SafeArea(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                JadalEntrance(
-                  index: 0,
-                  child: BlocBuilder<ProfileCubit, ProfileState>(
-                    builder: (context, state) => _Hero(
-                      profile: state is ProfileLoaded ? state.profile : null,
+          child: Builder(
+            builder: (context) => RefreshIndicator(
+              color: JadalColors.primaryOrange,
+              onRefresh: () async {
+                // Sections with their own fetch watch this tick.
+                setState(() => _refreshTick++);
+                await Future.wait([
+                  context.read<BlogCubit>().loadBlogs(),
+                  context.read<ProfileCubit>().loadProfile(),
+                ]);
+              },
+              child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    JadalEntrance(
+                      index: 0,
+                      child: BlocBuilder<ProfileCubit, ProfileState>(
+                        builder: (context, state) => _Hero(
+                          profile: state is ProfileLoaded
+                              ? state.profile
+                              : null,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 20),
+                    JadalEntrance(
+                      index: 1,
+                      child: TopDebatersPreview(refreshTick: _refreshTick),
+                    ),
+                    const SizedBox(height: 20),
+                    const JadalEntrance(index: 2, child: HomeBlogSection()),
+                  ],
                 ),
-                const SizedBox(height: 20),
-                const JadalEntrance(index: 1, child: TopDebatersPreview()),
-                const SizedBox(height: 20),
-                const JadalEntrance(index: 2, child: HomeBlogSection()),
-              ],
+              ),
             ),
           ),
         ),

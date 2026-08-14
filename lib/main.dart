@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/login_cubit.dart';
+import 'package:jadal_app/features/auth/presentation/screens/login_screen.dart';
 import 'package:jadal_app/features/splash/presentation/cubit/splash_cubit.dart';
 import 'package:jadal_app/features/splash/presentation/screens/splash_screen.dart';
 import 'core/app_cubit/app_cubit.dart';
@@ -27,6 +29,11 @@ Future<void> main() async {
   // the app is already retrievable via getInitialMessage(). Never throws: if
   // Firebase can't start, push is simply disabled for the session.
   await di.sl<PushService>().init();
+  // A rejected token must be able to bounce the user back to login from a
+  // repository, which has no BuildContext — so the guard borrows the root
+  // navigator and is told how to build the login screen.
+  SessionGuard.navigatorKey = rootNavigatorKey;
+  SessionGuard.loginBuilder = (_) => const LoginScreen();
   runApp(const JadalApp());
 }
 

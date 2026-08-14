@@ -15,6 +15,7 @@ import 'package:jadal_app/features/teams/domain/entities/team_member.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/team_join_cubit.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/team_leave_cubit.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 /// A team info view — reached from a profile's team list (with [membership]
 /// set, so it can show role/joined/left and a "leave team" action for the
@@ -291,8 +292,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
             listener: (context, state) {
               if (state is TeamLeaveError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               } else if (state is TeamLeaveSuccess) {
@@ -311,8 +311,7 @@ class _TeamInfoScreenState extends State<TeamInfoScreen> {
             listener: (context, state) {
               if (state is TeamJoinError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               } else if (state is TeamJoinSuccess) {

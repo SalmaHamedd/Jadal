@@ -11,6 +11,7 @@ import 'package:jadal_app/features/blog/domain/entities/blog.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/screens/all_blogs_screen.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 const int kHomeLatestArticlesCount = 1;
 
@@ -77,7 +78,7 @@ class HomeBlogSection extends StatelessWidget {
             height: 110,
             child: Center(
               child: Text(
-                context.loc.errorWithMessage(state.message),
+                FailureText.fromMessage(context, state.message),
                 textAlign: TextAlign.center,
                 style: AppTextStyles.body(context)
                     .copyWith(color: jadalTextSecondary(context)),

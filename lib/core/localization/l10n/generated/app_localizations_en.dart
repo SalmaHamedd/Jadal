@@ -1779,4 +1779,301 @@ class AppLocalizationsEn extends AppLocalizations {
   String elapsedYearsShort(int count) {
     return '${count}y';
   }
+
+  @override
+  String get drawerAboutUs => 'About us';
+
+  @override
+  String get contactEmail => 'Email';
+
+  @override
+  String get contactPhone => 'Phone';
+
+  @override
+  String get contactInstagram => 'Instagram';
+
+  @override
+  String get contactWhatsapp => 'WhatsApp';
+
+  @override
+  String get contactWebsite => 'Website';
+
+  @override
+  String get copiedToClipboard => 'Copied to clipboard';
+
+  @override
+  String get searchDebatesHint => 'Search all debates';
+
+  @override
+  String get statsActivitySubtitle =>
+      'Registrations, attendance, viewing and missed debates, as weighted points';
+
+  @override
+  String get statsActivityPoints => 'activity points';
+
+  @override
+  String get statsActivityTrend => 'Activity trend';
+
+  @override
+  String get statsActivityBreakdown => 'What made this number';
+
+  @override
+  String get statsActivityByPeriod => 'By period';
+
+  @override
+  String get statsActivityRegistrations => 'Registrations';
+
+  @override
+  String get statsActivityAttendance => 'Attendance';
+
+  @override
+  String get statsActivityWatched => 'Watched debates';
+
+  @override
+  String get statsActivityMissed => 'Missed debates';
+
+  @override
+  String statsActivityCountRegistered(int count) {
+    return '$count registered';
+  }
+
+  @override
+  String statsActivityCountAttended(int count) {
+    return '$count attended';
+  }
+
+  @override
+  String statsActivityCountWatched(int count) {
+    return '$count watched';
+  }
+
+  @override
+  String statsActivityCountMissed(int count) {
+    return '$count missed';
+  }
+
+  @override
+  String get statsActivityLongerPeriod =>
+      'Pick a longer period to see the trend';
+
+  @override
+  String get statsGroupBy => 'Group by';
+
+  @override
+  String get statsCompare => 'Compare';
+
+  @override
+  String get statsOrder => 'Order';
+
+  @override
+  String get statsPositionsLabel => 'Positions';
+
+  @override
+  String get statsFrameworksLabel => 'Frameworks';
+
+  @override
+  String get statsPeriod => 'Period';
+
+  @override
+  String get statsFrom => 'From';
+
+  @override
+  String get statsTo => 'To';
+
+  @override
+  String get statsReset => 'Reset';
+
+  @override
+  String get statsCombined => 'Combined';
+
+  @override
+  String get statsByPosition => 'By position';
+
+  @override
+  String get statsByFramework => 'By framework';
+
+  @override
+  String get statsAllTime => 'All time';
+
+  @override
+  String get statsYear => 'Year';
+
+  @override
+  String get statsMonth => 'Month';
+
+  @override
+  String get statsRankTop => 'Top';
+
+  @override
+  String get statsRankBottom => 'Bottom';
+
+  @override
+  String get statsRankLatest => 'Latest';
+
+  @override
+  String get statsRankEarliest => 'Earliest';
+
+  @override
+  String get statsPositionLabel => 'Position';
+
+  @override
+  String get statsFrameworkLabel => 'Framework';
+
+  @override
+  String get statsHintPickPositions =>
+      'Pick 2+ positions below to split the bars';
+
+  @override
+  String get statsHintPickFrameworks =>
+      'Pick 2+ frameworks below to split the bars';
+
+  @override
+  String get statsAllTeams => 'All teams';
+
+  @override
+  String get statsTeamPast => 'past';
+
+  @override
+  String get statsSeeDetails => 'See details';
+
+  @override
+  String statsForTeam(String team) {
+    return 'For $team';
+  }
+
+  @override
+  String get statsSquadActivity => 'Squad activity';
+
+  @override
+  String statsPerMemberAverage(String value) {
+    return '$value per member';
+  }
+
+  @override
+  String get statsKindCombinations => 'Line-ups';
+
+  @override
+  String get statsMinDebates => 'Min debates';
+
+  @override
+  String statsTeamBaseline(String value, int count) {
+    return 'Team average: $value over $count debates';
+  }
+
+  @override
+  String statsShowingLineups(int shown, int total) {
+    return 'Showing $shown of $total line-ups — the rest have too few debates to compare';
+  }
+
+  @override
+  String statsLineupDebates(int count) {
+    return '$count debates';
+  }
+
+  @override
+  String get statsLineupLeft => 'left';
+
+  @override
+  String get statsCombinationsEmptyNoDebates =>
+      'No completed debates in this period yet.';
+
+  @override
+  String get statsCombinationsEmptyNoScores =>
+      'These debates have no usable speaker scores yet.';
+
+  @override
+  String statsCombinationsEmptyBelowMin(int count) {
+    return 'No line-up has played $count or more times yet — lower the minimum to compare.';
+  }
+
+  @override
+  String get statsVsTeamAverage => 'vs team average';
+
+  @override
+  String get statsKindRating => 'Rating';
+
+  @override
+  String get statsRatingSubtitle =>
+      'How debaters rated your judging after the result was revealed';
+
+  @override
+  String statsRatingsCount(int count) {
+    return '$count ratings';
+  }
+
+  @override
+  String statsPeerAverage(String value) {
+    return 'Other judges: $value';
+  }
+
+  @override
+  String statsRatingCoverage(int rated, int judged) {
+    return '$rated of $judged debates you judged received ratings';
+  }
+
+  @override
+  String get statsRatingTooFew => 'Too few ratings to be meaningful yet';
+
+  @override
+  String get statsRatingDistribution => 'Rating distribution';
+
+  @override
+  String get statsRatingTrend => 'Rating over time';
+
+  @override
+  String get statsRatingEmptyNoRatings =>
+      'You have judged debates, but nobody has rated them yet.';
+
+  @override
+  String get statsRatingEmptyNeverJudged => 'No completed debates judged yet.';
+
+  @override
+  String get teamJoinRequestPill => 'Join request';
+
+  @override
+  String get teamLeaveRequestPill => 'Leave request';
+
+  @override
+  String teamMembersCount(int count) {
+    return '$count members';
+  }
+
+  @override
+  String get teamStatusInactiveShort => 'inactive';
+
+  @override
+  String get errorNoConnection =>
+      'No internet connection. Check your network and try again.';
+
+  @override
+  String get errorServer =>
+      'Something went wrong on our side. Please try again in a moment.';
+
+  @override
+  String get errorGeneric => 'Something went wrong. Please try again.';
+
+  @override
+  String get errorSessionExpired =>
+      'Your session has ended. Please sign in again.';
+
+  @override
+  String get errorNotFound => 'We couldn\'t find what you were looking for.';
+
+  @override
+  String get errorNotAllowed => 'You don\'t have permission to do that.';
+
+  @override
+  String get errorTooManyRequests =>
+      'Too many attempts. Please wait a moment and try again.';
+
+  @override
+  String get errorPullToRetry => 'Pull down to try again';
+
+  @override
+  String get logoutAnyway => 'Log out';
+
+  @override
+  String frameworksCount(int count) {
+    return '$count frameworks used across the platform';
+  }
 }

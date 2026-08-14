@@ -13,6 +13,8 @@ import 'package:jadal_app/features/complaints/presentation/cubit/complaint_cubit
 import 'package:jadal_app/features/complaints/presentation/screens/create_complaint_screen.dart';
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
 import 'package:jadal_app/features/live_debate/domain/debate_search_filter.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 /// The caller's own complaints — `GET /complaints/mine`. The endpoint only
 /// returns `debate_id`, so this separately loads the caller's own debate
@@ -136,34 +138,14 @@ class _MyComplaintsScreenState extends State<MyComplaintsScreen> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(
-                            Icons.error_outline,
-                            size: 60,
-                            color: JadalColors.judgesGrey,
-                          ),
-                          const SizedBox(height: 16),
-                          Text(
-                            context.loc.errorWithMessage(state.message),
-                            style: AppTextStyles.subtitle(context),
-                            textAlign: TextAlign.center,
-                          ),
-                          const SizedBox(height: 24),
-                          ElevatedButton(
-                            onPressed: () => context
+                          JadalErrorView(
+                            message: FailureText.fromMessage(
+                              context,
+                              state.message,
+                            ),
+                            onRetry: () => context
                                 .read<ComplaintCubit>()
                                 .loadMyComplaints(),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: JadalColors.primaryOrange,
-                              foregroundColor: Colors.white,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 24,
-                                vertical: 12,
-                              ),
-                            ),
-                            child: Text(context.loc.retry),
                           ),
                         ],
                       ),

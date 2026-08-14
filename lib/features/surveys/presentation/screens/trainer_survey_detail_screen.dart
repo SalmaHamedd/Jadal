@@ -14,6 +14,7 @@ import 'package:jadal_app/features/surveys/presentation/screens/trainer_survey_r
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_panel.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_status_chip.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class TrainerSurveyDetailScreen extends StatelessWidget {
   final int surveyId;
@@ -88,8 +89,7 @@ class TrainerSurveyDetailScreen extends StatelessWidget {
                 Navigator.pop(context, true);
               } else if (state is DeleteTrainerSurveyError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               }

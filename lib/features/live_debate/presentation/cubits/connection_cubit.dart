@@ -9,7 +9,10 @@ part 'connection_state.dart';
 class ConnectionCubit extends Cubit<ConnectionStates> {
   ConnectionCubit() : super(ConnectionInitialState());
 
-  static const Duration _hideAfter = Duration(milliseconds: 3500);
+  /// Was 3500ms (too quick to aim at), then briefly 8000ms (too long — the bar
+  /// overstayed). 5000ms is the settled value. Every reveal path and
+  /// [resetHideTimer] share this one constant.
+  static const Duration _hideAfter = Duration(milliseconds: 5000);
 
   bool showActions = false;
 

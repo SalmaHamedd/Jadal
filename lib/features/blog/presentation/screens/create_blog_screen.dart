@@ -16,6 +16,7 @@ import 'package:jadal_app/features/blog/domain/entities/category.dart';
 import 'package:jadal_app/features/blog/domain/entities/tag.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/create_blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/multi_select_field.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class CreateBlogScreen extends StatefulWidget {
   const CreateBlogScreen({super.key});
@@ -67,8 +68,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
     if (sizeInBytes > _maxCoverImageBytes) {
       if (mounted) {
         JadalSnackBar.show(
-          context,
-          'حجم الصورة كبير جداً، الحد الأقصى 8 ميجابايت',
+          context, FailureText.fromMessage(context, 'حجم الصورة كبير جداً، الحد الأقصى 8 ميجابايت'),
           type: SnackBarType.error,
         );
       }
@@ -184,8 +184,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
             Navigator.pop(context, true);
           } else if (state is CreateBlogError) {
             JadalSnackBar.show(
-              context,
-              state.message,
+              context, FailureText.fromMessage(context, state.message),
               type: SnackBarType.error,
             );
           }
@@ -332,8 +331,7 @@ class _CreateBlogScreenState extends State<CreateBlogScreen> {
                         final content = _contentController.text.trim();
                         if (title.isEmpty || content.isEmpty) {
                           JadalSnackBar.show(
-                            context,
-                            context.loc.titleContentRequired,
+                            context, FailureText.fromMessage(context, context.loc.titleContentRequired),
                             type: SnackBarType.error,
                           );
                           return;

@@ -32,12 +32,18 @@ class ProfileDetailRow extends StatelessWidget {
   final String value;
   final bool isLast;
 
+  /// MF_FU §2.3 — a per-field accent instead of the same blue on every row.
+  /// Deliberately small: only the icon plate, the icon, and a hair of tint on
+  /// the value. The layout, hairlines and typography are untouched.
+  final Color accent;
+
   const ProfileDetailRow({
     super.key,
     required this.icon,
     required this.label,
     required this.value,
     this.isLast = false,
+    this.accent = JadalColors.primaryBlue,
   });
 
   @override
@@ -64,11 +70,10 @@ class ProfileDetailRow extends StatelessWidget {
             height: 34,
             alignment: Alignment.center,
             decoration: BoxDecoration(
-              color: JadalColors.primaryBlue
-                  .withValues(alpha: dark ? 0.18 : 0.09),
+              color: accent.withValues(alpha: dark ? 0.18 : 0.09),
               borderRadius: BorderRadius.circular(11),
             ),
-            child: Icon(icon, size: 16, color: JadalColors.primaryBlue),
+            child: Icon(icon, size: 16, color: accent),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -86,8 +91,17 @@ class ProfileDetailRow extends StatelessWidget {
                 Text(
                   value,
                   softWrap: true,
-                  style: AppTextStyles.bodyEmphasis(context)
-                      .copyWith(color: jadalTextPrimary(context)),
+                  style: AppTextStyles.bodyEmphasis(context).copyWith(
+                    // A hint of the accent in light theme; dark keeps the
+                    // plain primary so the value never dims.
+                    color: dark
+                        ? jadalTextPrimary(context)
+                        : Color.lerp(
+                            jadalTextPrimary(context),
+                            accent,
+                            0.22,
+                          ),
+                  ),
                 ),
               ],
             ),

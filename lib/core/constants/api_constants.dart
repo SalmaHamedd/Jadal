@@ -126,4 +126,27 @@ class ApiConstants {
   static String debaterActivityUrl(int id) => '${_statsBase(id)}/activity';
   static String trainerActivityUrl(int id) => '$baseUrl/trainers/$id/stats/activity';
   static String judgeActivityUrl(int id) => '$baseUrl/judges/$id/stats/activity';
+
+  // ── MF_FU §3 — per-team coach analytics ──────────────────────────────────────
+  /// The coach's teams, for the analysis screen's team picker. `GET /teams` is
+  /// NOT reusable here: it is scoped to the caller rather than the subject,
+  /// doesn't exclude random teams for a trainer caller, and has no
+  /// `members_count` (BACKEND_REPLY_MF_FU §3.1b).
+  static String trainerTeamsUrl(int trainerId) =>
+      '$baseUrl/trainers/$trainerId/teams';
+
+  /// `metric` ∈ win-rate | avg-score | improvement | activity. Same query
+  /// params and same response envelopes as the debater endpoints, so the
+  /// existing parsers are reused unchanged.
+  static String teamStatUrl(int teamId, String metric) =>
+      '$baseUrl/teams/$teamId/stats/$metric';
+
+  /// MF_FU §4 — which line-up performs best. Coach/admin only (403 otherwise):
+  /// a line-up analysis tells any reader which three people to prepare against.
+  static String teamCombinationsUrl(int teamId) =>
+      '$baseUrl/teams/$teamId/stats/combinations';
+
+  // ── MF_FU §5 — judge ratings received (aggregates only, never per-rating) ────
+  static String judgeRatingsUrl(int judgeId) =>
+      '$baseUrl/judges/$judgeId/stats/ratings';
 }

@@ -12,6 +12,7 @@ import 'package:jadal_app/features/surveys/domain/entities/survey_details.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_question_input.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_results.dart';
 import 'package:jadal_app/features/surveys/domain/repositories/trainer_survey_repository.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 
 class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
   final http.Client client;
@@ -51,6 +52,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
         final surveys = data.map((item) => SurveyModel.fromJson(item)).toList();
         return Right(surveys);
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));
@@ -81,6 +84,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
       if (response.statusCode == 200 && json['success'] == true) {
         return Right(SurveyDetailsModel.fromJson(json['data']));
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));
@@ -127,6 +132,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
           json['success'] == true) {
         return Right(SurveyDetailsModel.fromJson(json['data'] ?? {}));
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));
@@ -171,6 +178,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
       if (response.statusCode == 200 && json['success'] == true) {
         return Right(SurveyResultsModel.fromJson(id, json['data'] ?? {}));
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));
@@ -230,6 +239,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
       if (response.statusCode == 200 && json['success'] == true) {
         return Right(SurveyDetailsModel.fromJson(json['data']));
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));
@@ -278,6 +289,8 @@ class TrainerSurveyRepositoryImpl implements TrainerSurveyRepository {
       if (response.statusCode == 200 && json['success'] == true) {
         return const Right(null);
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure(json['message'] ?? 'Unauthenticated'));
       } else if (response.statusCode == 403) {
         return Left(ForbiddenFailure(json['message'] ?? 'Unauthorized'));

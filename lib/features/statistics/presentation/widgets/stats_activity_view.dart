@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/activity_stat_model.dart';
@@ -29,7 +30,14 @@ class StatsActivityView extends StatelessWidget {
             duration: const Duration(milliseconds: 900),
             curve: Curves.easeOutCubic,
             builder: (context, v, _) => Text(
-              (v >= 0 ? '+' : '') + v.toStringAsFixed(0),
+              // Arrow + sign, not colour alone (MF_FU §7.5).
+              (v > 0
+                      ? '▲ '
+                      : v < 0
+                      ? '▼ '
+                      : '') +
+                  (v >= 0 ? '+' : '') +
+                  v.toStringAsFixed(0),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w900,
@@ -41,7 +49,7 @@ class StatsActivityView extends StatelessWidget {
         ),
         Center(
           child: Text(
-            'activity points',
+            context.loc.statsActivityPoints,
             style: AppTextStyles.caption(context).copyWith(
               fontWeight: FontWeight.w700,
               color: StatsTheme.textSecondary(context),
@@ -49,9 +57,14 @@ class StatsActivityView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
+        // MF_FU §8.2 — the chart was never "removed": it is gated on ≥2
+        // buckets, and the screen used to pin group_by to `none`, which always
+        // returns a single all-time bucket. With grouping restored this
+        // renders; when a period genuinely has one bucket, say so rather than
+        // silently dropping the section.
         if (data.buckets.length >= 2) ...[
           Text(
-            'Activity trend',
+            context.loc.statsActivityTrend,
             style: AppTextStyles.body(context).copyWith(
               fontWeight: FontWeight.w800,
               color: StatsTheme.textSecondary(context),
@@ -60,13 +73,20 @@ class StatsActivityView extends StatelessWidget {
           const SizedBox(height: 10),
           SizedBox(height: 90, child: _TrendLine(buckets: data.buckets)),
           const SizedBox(height: 18),
+        ] else ...[
+          Text(
+            context.loc.statsActivityLongerPeriod,
+            style: AppTextStyles.small(context).copyWith(
+              fontStyle: FontStyle.italic,
+              color: StatsTheme.textSecondary(context),
+            ),
+          ),
+          const SizedBox(height: 18),
         ],
         Text(
-          'What made this number',
-          style: TextStyle(
-            fontFamily: 'Cairo',
+          context.loc.statsActivityBreakdown,
+          style: AppTextStyles.body(context).copyWith(
             fontWeight: FontWeight.w800,
-            fontSize: 13,
             color: StatsTheme.textSecondary(context),
           ),
         ),
@@ -75,7 +95,7 @@ class StatsActivityView extends StatelessWidget {
         if (data.buckets.isNotEmpty) ...[
           const SizedBox(height: 18),
           Text(
-            'By period',
+            context.loc.statsActivityByPeriod,
             style: AppTextStyles.body(context).copyWith(
               fontWeight: FontWeight.w800,
               color: StatsTheme.textSecondary(context),
@@ -96,26 +116,32 @@ class _BreakdownRows extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = context.loc;
     final rows = <(IconData, String, String, ActivitySignal)>[
       (
         Icons.how_to_reg_rounded,
-        'Registrations',
-        'registered',
+        loc.statsActivityRegistrations,
+        loc.statsActivityCountRegistered(breakdown.registration.count),
         breakdown.registration,
       ),
       (
         Icons.event_available_rounded,
-        'Attendance',
-        'attended',
+        loc.statsActivityAttendance,
+        loc.statsActivityCountAttended(breakdown.attendance.count),
         breakdown.attendance,
       ),
       (
         Icons.visibility_rounded,
-        'Watched debates',
-        'watched',
+        loc.statsActivityWatched,
+        loc.statsActivityCountWatched(breakdown.viewing.count),
         breakdown.viewing,
       ),
-      (Icons.event_busy_rounded, 'Missed debates', 'missed', breakdown.penalty),
+      (
+        Icons.event_busy_rounded,
+        loc.statsActivityMissed,
+        loc.statsActivityCountMissed(breakdown.penalty.count),
+        breakdown.penalty,
+      ),
     ];
     return Column(
       children: [
@@ -139,7 +165,7 @@ class _BreakdownRows extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsetsDirectional.only(end: 10),
                     child: Text(
-                      '${r.$4.count} ${r.$3}',
+                      r.$3,
                       style: AppTextStyles.small(
                         context,
                       ).copyWith(color: StatsTheme.textSecondary(context)),
@@ -224,8 +250,19 @@ class _BucketRow extends StatelessWidget {
   }
 }
 
-String _signed(double v) =>
-    (v >= 0 ? '+' : '') + v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+/// MF_FU §7.5 — colour must never be the only carrier of meaning. Positive and
+/// negative deltas take an arrow **and** a sign, so they stay readable under
+/// red–green colour-vision deficiency (where the green and red collapse toward
+/// each other) and in greyscale.
+String _signed(double v) {
+  final arrow = v > 0
+      ? '▲ '
+      : v < 0
+      ? '▼ '
+      : '';
+  final sign = v >= 0 ? '+' : '';
+  return arrow + sign + v.toStringAsFixed(v == v.roundToDouble() ? 0 : 1);
+}
 
 /// A line-with-area trend of the per-bucket totals. Unlike the improvement
 /// sparkline (fixed 0–100 score scale), activity points are unbounded and can

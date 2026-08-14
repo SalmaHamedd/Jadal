@@ -3,9 +3,12 @@ import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/theme/hex_color.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
+import 'package:jadal_app/features/live_debate/presentation/utils/debate_theme.dart';
 
 /// Read-only list of every motion framework defined in the system (§9 drawer
 /// entry) — reuses the same `/motion-frameworks` endpoint the debate search
@@ -41,7 +44,9 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
         _loading = false;
       }),
       (list) => setState(() {
-        _frameworks = [for (final f in list) (id: f.id, name: f.name, colorHex: f.colorHex)];
+        _frameworks = [
+          for (final f in list) (id: f.id, name: f.name, colorHex: f.colorHex),
+        ];
         _loading = false;
       }),
     );
@@ -53,60 +58,132 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent,
         appBar: AppBar(
-          title: Text(context.loc.statsFrameworksTitle,
-              style: AppTextStyles.title(context).copyWith(fontWeight: FontWeight.w800)),
+          title: Text(
+            context.loc.statsFrameworksTitle,
+            style: AppTextStyles.title(
+              context,
+            ).copyWith(fontWeight: FontWeight.w800),
+          ),
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
+            // Printed the raw failure string before — that is where a
+            // transport exception showed up on screen.
             : _error != null
-                ? Center(child: Text(_error!, style: AppTextStyles.body(context)))
-                // §2.7 — a 2-column grid of proper containers instead of the
-                // old bare dot-and-title rows; frameworks are a core part of
-                // the app and the screen should carry that weight.
-                : GridView.builder(
-                    padding: const EdgeInsets.all(16),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      mainAxisSpacing: 12,
-                      crossAxisSpacing: 12,
-                      childAspectRatio: 1.5,
+            ? JadalErrorScrollView(
+                message: FailureText.fromMessage(context, _error),
+                onRetry: _load,
+              )
+            // §2.7 — a grid of proper containers instead of the old bare
+            // dot-and-title rows; frameworks are a core part of the app and
+            // the screen should carry that weight.
+            //
+            // MF_FU §3.1 — the old fixed 2-column / 1.5-aspect grid gave
+            // each tile a hard height that a long (often Arabic) framework
+            // name overflowed. maxCrossAxisExtent lets wide screens go to
+            // three columns instead of stretching two, and mainAxisExtent
+            // sizes the tile for the banner + label rather than by ratio.
+            : RefreshIndicator(
+                color: JadalColors.primaryOrange,
+                onRefresh: _load,
+                child: CustomScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  slivers: [
+                    // A short lead-in so the screen opens with a sentence
+                    // rather than dropping straight into a bare grid — the
+                    // grid alone read as a list of unexplained labels.
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(16, 4, 16, 14),
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 38,
+                              height: 38,
+                              alignment: Alignment.center,
+                              decoration: BoxDecoration(
+                                color: JadalColors.primaryOrange.withValues(
+                                  alpha: 0.14,
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(
+                                Icons.local_library_rounded,
+                                size: 20,
+                                color: JadalColors.primaryOrange,
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: Text(
+                                context.loc.frameworksCount(_frameworks.length),
+                                style: AppTextStyles.caption(context).copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: DebateTheme.textSecondary(context),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                    itemCount: _frameworks.length,
-                    itemBuilder: (context, i) {
-                      final f = _frameworks[i];
-                      final color = colorFromHex(f.colorHex) ?? JadalColors.primaryBlue;
-                      return _FrameworkCard(name: f.name, color: color);
-                    },
-                  ),
+                    SliverPadding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                      sliver: SliverGrid(
+                        gridDelegate:
+                            const SliverGridDelegateWithMaxCrossAxisExtent(
+                              maxCrossAxisExtent: 220,
+                              mainAxisExtent: 158,
+                              mainAxisSpacing: 12,
+                              crossAxisSpacing: 12,
+                            ),
+                        delegate: SliverChildBuilderDelegate((context, i) {
+                          final f = _frameworks[i];
+                          final color =
+                              colorFromHex(f.colorHex) ??
+                              JadalColors.primaryBlue;
+                          return _FrameworkCard(
+                            name: f.name,
+                            color: color,
+                            index: i,
+                          );
+                        }, childCount: _frameworks.length),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
       ),
     );
   }
 }
 
-/// One framework tile: the framework's color as a tinted icon badge on the
-/// app's standard elevated surface, name beneath.
+/// One framework tile (MF_FU §3): a muted banner in the framework's own colour
+/// carrying the icon, and the name on the standard elevated surface beneath.
+/// The name scales down to fit rather than overflowing its fixed tile height.
 class _FrameworkCard extends StatelessWidget {
   final String name;
   final Color color;
-  const _FrameworkCard({required this.name, required this.color});
+  final int index;
+  const _FrameworkCard({
+    required this.name,
+    required this.color,
+    this.index = 0,
+  });
+
+  static const double _bannerHeight = 58;
 
   @override
   Widget build(BuildContext context) {
     final dark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      padding: const EdgeInsets.all(12),
+    final surface =
+        (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
+            .withValues(alpha: dark ? 0.85 : 0.92);
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color:
-            (dark ? JadalColors.darkSurfaceElevated : JadalColors.lightSurface)
-                .withValues(alpha: dark ? 0.85 : 0.92),
         borderRadius: BorderRadius.circular(18),
-        border: Border.all(
-          color: dark
-              ? Colors.white.withValues(alpha: 0.07)
-              : JadalColors.primaryBlue.withValues(alpha: 0.08),
-        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: dark ? 0.30 : 0.06),
@@ -116,32 +193,118 @@ class _FrameworkCard extends StatelessWidget {
           ),
         ],
       ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.16),
-              borderRadius: BorderRadius.circular(13),
-            ),
-            child: Icon(Icons.category_rounded, color: color, size: 22),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            name,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.subtitle(context).copyWith(
-              fontWeight: FontWeight.w800,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(18),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: surface,
+            border: Border.all(
               color: dark
-                  ? JadalColors.darkTextPrimary
-                  : JadalColors.lightTextPrimary,
+                  ? Colors.white.withValues(alpha: 0.07)
+                  : JadalColors.primaryBlue.withValues(alpha: 0.08),
             ),
+            borderRadius: BorderRadius.circular(18),
           ),
-        ],
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Muted banner — deliberately low-saturation so a grid of them
+              // reads as a set, not a box of highlighters. The soft diagonal
+              // and the oversized watermark glyph give each tile some depth
+              // instead of a flat colour block.
+              SizedBox(
+                height: _bannerHeight,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: AlignmentDirectional.topStart,
+                            end: AlignmentDirectional.bottomEnd,
+                            colors: [
+                              color.withValues(alpha: dark ? 0.30 : 0.20),
+                              color.withValues(alpha: dark ? 0.14 : 0.08),
+                            ],
+                          ),
+                          border: Border(
+                            bottom: BorderSide(
+                              color: color.withValues(alpha: 0.30),
+                              width: 1.2,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    // Watermark: clipped by the card, reads as texture.
+                    PositionedDirectional(
+                      end: -10,
+                      top: -6,
+                      child: Icon(
+                        Icons.format_quote_rounded,
+                        size: 62,
+                        color: color.withValues(alpha: dark ? 0.16 : 0.12),
+                      ),
+                    ),
+                    PositionedDirectional(
+                      start: 12,
+                      top: 0,
+                      bottom: 0,
+                      child: Center(
+                        child: Container(
+                          width: 34,
+                          height: 34,
+                          alignment: Alignment.center,
+                          decoration: BoxDecoration(
+                            color: color,
+                            borderRadius: BorderRadius.circular(11),
+                            boxShadow: [
+                              BoxShadow(
+                                color: color.withValues(alpha: 0.35),
+                                blurRadius: 8,
+                                offset: const Offset(0, 3),
+                              ),
+                            ],
+                          ),
+                          child: const Icon(
+                            Icons.local_library_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 10,
+                  ),
+                  child: Center(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      child: Text(
+                        name,
+                        maxLines: 3,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: AppTextStyles.subtitle(context).copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: dark
+                              ? JadalColors.darkTextPrimary
+                              : JadalColors.lightTextPrimary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

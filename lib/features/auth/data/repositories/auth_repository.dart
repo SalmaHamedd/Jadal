@@ -6,6 +6,8 @@ import 'package:http/http.dart' as http;
 import '../../../../core/constants/api_constants.dart';
 import '../../../../core/error/failures.dart';
 import '../../../../core/storage/preferences_database.dart';
+import '../../../../core/services/contact_info.dart';
+import '../../../../core/services/session_identity.dart';
 import '../../../../core/services/token_storage.dart';
 import '../../domain/entities/user.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -36,14 +38,22 @@ class ApiAuthRepository implements AuthRepository {
         final user = UserModel.fromJson(data['user']);
         // Cache the account role for role-gated UI (registration options, etc.).
         await TokenStorage.saveRole(user.role);
-        // Sprinkles §9 — support contact info, editable server-side without an
-        // app release. Cached locally so the drawer can show it without
-        // re-hitting login.
+        // MF_FU §1.1 — the full identity bundle, so the nav drawer renders in
+        // one frame off the login payload instead of firing two live
+        // `GET /profile` calls on every open.
+        await SessionIdentity.cache(
+          id: user.id,
+          name: user.name,
+          role: user.role,
+          avatarUrl: user.avatarUrl,
+          points: user.points,
+        );
+        // Sprinkles §9 / MF_FU §2 — support contact info, editable server-side
+        // without an app release. Cached locally so the drawer can show it
+        // without re-hitting login.
         final contact = data['contact'];
         if (contact is Map) {
-          await PreferencesDatabase().setValue('contact_email', contact['email']);
-          await PreferencesDatabase().setValue('contact_phone', contact['phone']);
-          await PreferencesDatabase().setValue('contact_instagram', contact['instagram']);
+          await ContactInfo.cache(contact);
         }
         return Right(user);
       }

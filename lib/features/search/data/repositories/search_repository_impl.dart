@@ -8,6 +8,7 @@ import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 import 'package:jadal_app/features/search/domain/entities/search_team.dart';
 import 'package:jadal_app/features/search/domain/repositories/search_repository.dart';
 import 'package:jadal_app/features/search/data/models/search_response_model.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 
 class SearchRepositoryImpl implements SearchRepository {
   final http.Client client;
@@ -52,6 +53,8 @@ class SearchRepositoryImpl implements SearchRepository {
           return Left(ServerFailure(json['message'] ?? 'Search failed'));
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else if (response.statusCode == 422) {
         final body = jsonDecode(response.body);

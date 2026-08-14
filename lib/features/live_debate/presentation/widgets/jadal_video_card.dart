@@ -30,6 +30,10 @@ class JadalVideoCard extends StatelessWidget {
   /// Bars colour for the volume meter when the mic is on.
   final Color? micActiveColor;
 
+  /// Width of an obstruction centred on the card's bottom edge (the chair's
+  /// stop/resume timer button). The name row keeps clear of it.
+  final double bottomCenterReserved;
+
   const JadalVideoCard({
     super.key,
     required this.name,
@@ -44,10 +48,17 @@ class JadalVideoCard extends StatelessWidget {
     this.nameColor,
     this.micLevel,
     this.micActiveColor,
+    this.bottomCenterReserved = 0,
   });
 
   @override
   Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) => _build(context, constraints.maxWidth),
+    );
+  }
+
+  Widget _build(BuildContext context, double cardWidth) {
     final scale = (mainAxis / 168).clamp(0.5, 2.2);
     // The mic badge was reading too small on the big main card, so nudge the cap
     // up (and the floor up for the small grid tiles) — clearly visible on the
@@ -67,7 +78,7 @@ class JadalVideoCard extends StatelessWidget {
               child: live
                   ? VideoTrackRenderer(
                       videoTrack!,
-                     // fit: VideoViewFit.cover,
+                      // fit: VideoViewFit.cover,
                     )
                   : Center(
                       child: Container(
@@ -92,10 +103,18 @@ class JadalVideoCard extends StatelessWidget {
             ),
           ),
           // Name (overflow-safe).
+          //
+          // On the main speaker card the chair's stop/resume button straddles
+          // the bottom edge, centred — it used to sit right on top of the name.
+          // [bottomCenterReserved] pulls the name's trailing edge back to just
+          // before the button, so it shrinks/ellipsises into the free space
+          // instead of running underneath it.
           PositionedDirectional(
             bottom: 6 * scale,
             start: 8 * scale,
-            end: 8 * scale,
+            end: bottomCenterReserved > 0
+                ? (cardWidth / 2) + (bottomCenterReserved / 2) + 6
+                : 8 * scale,
             child: Text(
               name,
               maxLines: 1,
@@ -104,7 +123,9 @@ class JadalVideoCard extends StatelessWidget {
                 // Over a video the name sits on dark footage → white. On the
                 // avatar/card surface it must follow the theme (dark in light
                 // theme) like the team cards, not be hard-coded white.
-                color: live ? Colors.white : (nameColor ?? DebateTheme.textPrimary(context)),
+                color: live
+                    ? Colors.white
+                    : (nameColor ?? DebateTheme.textPrimary(context)),
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w600,
                 fontSize: 13 * scale,

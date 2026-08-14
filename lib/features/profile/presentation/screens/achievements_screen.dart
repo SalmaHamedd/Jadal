@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
-import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/widgets/jadal_gradient_background.dart';
+import 'package:jadal_app/core/widgets/jadal_segmented_switch.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
@@ -167,8 +167,9 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   }
 }
 
-/// The Date | Tier segmented control (§6.8) — same pill-toggle look as the
-/// public statistics scope switch.
+/// The Date | Tier segmented control (§6.8). MF_FU §4 — now the shared
+/// [JadalSegmentedSwitch], so its hit area covers the whole segment rather
+/// than just the label, and it can no longer drift from the statistics one.
 class _SortSwitch extends StatelessWidget {
   final AchievementSort active;
   final ValueChanged<AchievementSort> onChanged;
@@ -176,80 +177,16 @@ class _SortSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    return Container(
-      height: 42,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: dark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          for (final sort in AchievementSort.values)
-            Expanded(
-              child: _SortButton(
-                label: sort == AchievementSort.date
-                    ? context.loc.achievementsSortDate
-                    : context.loc.achievementsSortRank,
-                icon: sort == AchievementSort.date
-                    ? Icons.calendar_month_rounded
-                    : Icons.military_tech_rounded,
-                selected: sort == active,
-                onTap: () => onChanged(sort),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _SortButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  const _SortButton({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final selectedColor =
-        dark ? JadalColors.darkTextPrimary : JadalColors.lightTextPrimary;
-    final mutedColor =
-        (dark ? JadalColors.darkTextSecondary : JadalColors.lightTextSecondary)
-            .withValues(alpha: 0.6);
-    return Material(
-      color: selected
-          ? JadalColors.primaryOrange.withValues(alpha: 0.14)
-          : Colors.transparent,
-      borderRadius: BorderRadius.circular(12),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, size: 16, color: selected ? selectedColor : mutedColor),
-            const SizedBox(width: 6),
-            Text(
-              label,
-              style: AppTextStyles.body(context).copyWith(
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected ? selectedColor : mutedColor,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return JadalSegmentedSwitch<AchievementSort>(
+      values: AchievementSort.values,
+      active: active,
+      onChanged: onChanged,
+      labelOf: (sort) => sort == AchievementSort.date
+          ? context.loc.achievementsSortDate
+          : context.loc.achievementsSortRank,
+      iconOf: (sort) => sort == AchievementSort.date
+          ? Icons.calendar_month_rounded
+          : Icons.military_tech_rounded,
     );
   }
 }

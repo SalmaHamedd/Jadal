@@ -15,6 +15,7 @@ import 'package:jadal_app/features/profile/presentation/cubit/edit_profile_cubit
 import 'package:jadal_app/features/profile/presentation/screens/change_password_screen.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 /// §6.5 — the change-password entry, relocated from the profile screen's
 /// button row into the edit screen where the rest of the account edits live.
@@ -159,7 +160,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         final requested = await Permission.camera.request();
         if (!requested.isGranted) {
           if (!mounted) return;
-          JadalSnackBar.show(context, context.loc.cameraPermissionRequired, type: SnackBarType.error);
+          JadalSnackBar.show(context, FailureText.fromMessage(context, context.loc.cameraPermissionRequired), type: SnackBarType.error);
           return;
         }
       }
@@ -186,7 +187,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               JadalSnackBar.show(context, context.loc.profileUpdatedSuccess, type: SnackBarType.success);
               Navigator.pop(context, state.updatedProfile);
             } else if (state is EditProfileError) {
-              JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+              JadalSnackBar.show(context, FailureText.fromMessage(context, state.message), type: SnackBarType.error);
             } else if (state is EditProfileAvatarUploaded) {
               setState(() {
                 _avatarUrl = state.newAvatarUrl;

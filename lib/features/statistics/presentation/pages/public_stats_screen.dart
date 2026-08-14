@@ -8,6 +8,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/theme/avatar_palette.dart';
 import '../../../../core/theme/hex_color.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
+import '../../../../core/widgets/jadal_segmented_switch.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../../live_debate/data/repositories/live_debate_repository.dart';
 import '../../../live_debate/presentation/widgets/debate_screen_header.dart';
@@ -17,6 +18,8 @@ import '../../data/repositories/leaderboard_repository.dart';
 import '../cubits/debater_stats_cubit.dart' show StatsFilterDim;
 import '../cubits/leaderboard_cubit.dart';
 import '../widgets/stats_theme.dart';
+import '../../../../core/error/failure_text.dart';
+import '../../../../core/widgets/jadal_error_view.dart';
 
 /// V2 §3/§4 — the public statistics screen behind the home screen's
 /// "show more": top-10 leaderboards for debaters and teams across every
@@ -265,6 +268,10 @@ class _MonthChip extends StatelessWidget {
   }
 }
 
+/// MF_FU §4 — the shared [JadalSegmentedSwitch]. Previously this segment had no
+/// selected fill at all (selection read through font weight only) and its ink
+/// only covered the label, because the track's Row centred its children instead
+/// of stretching them.
 class _ScopeSwitch extends StatelessWidget {
   final LeaderboardScope active;
   final ValueChanged<LeaderboardScope> onChanged;
@@ -272,80 +279,16 @@ class _ScopeSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final dark = StatsTheme.isDark(context);
-    return Container(
-      height: 44,
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: dark
-            ? Colors.white.withValues(alpha: 0.06)
-            : Colors.white.withValues(alpha: 0.7),
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Row(
-        children: [
-          for (final scope in LeaderboardScope.values)
-            Expanded(
-              child: _ScopeButton(
-                label: scope == LeaderboardScope.debaters
-                    ? context.loc.statsScopeDebaters
-                    : context.loc.statsScopeTeams,
-                icon: scope == LeaderboardScope.debaters
-                    ? Icons.person_rounded
-                    : Icons.groups_rounded,
-                selected: scope == active,
-                onTap: () => onChanged(scope),
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ScopeButton extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final bool selected;
-  final VoidCallback onTap;
-  const _ScopeButton({
-    required this.label,
-    required this.icon,
-    required this.selected,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    // §1.1 — no gradient fill: the selected side reads through text emphasis
-    // alone (bright/high-contrast vs muted).
-    final selectedColor = StatsTheme.textPrimary(context);
-    final mutedColor =
-        StatsTheme.textSecondary(context).withValues(alpha: 0.55);
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        borderRadius: BorderRadius.circular(12),
-        onTap: onTap,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              icon,
-              size: 17,
-              color: selected ? selectedColor : mutedColor,
-            ),
-            const SizedBox(width: 7),
-            Text(
-              label,
-              style: AppTextStyles.body(context).copyWith(
-                fontWeight: selected ? FontWeight.w800 : FontWeight.w600,
-                color: selected ? selectedColor : mutedColor,
-              ),
-            ),
-          ],
-        ),
-      ),
+    return JadalSegmentedSwitch<LeaderboardScope>(
+      values: LeaderboardScope.values,
+      active: active,
+      onChanged: onChanged,
+      labelOf: (scope) => scope == LeaderboardScope.debaters
+          ? context.loc.statsScopeDebaters
+          : context.loc.statsScopeTeams,
+      iconOf: (scope) => scope == LeaderboardScope.debaters
+          ? Icons.person_rounded
+          : Icons.groups_rounded,
     );
   }
 }
@@ -394,32 +337,13 @@ class _Board extends StatelessWidget {
   Widget build(BuildContext context) {
     if (state.status == LeaderboardStatus.error) {
       return StatsCard(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(
-              Icons.error_outline_rounded,
-              size: 44,
-              color: JadalColors.judgesGrey,
-            ),
-            const SizedBox(height: 10),
-            Text(
-              state.error ?? context.loc.statsSomethingWrong,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body(
-                context,
-              ).copyWith(color: StatsTheme.textPrimary(context)),
-            ),
-            const SizedBox(height: 14),
-            OutlinedButton.icon(
-              onPressed: context.read<LeaderboardCubit>().load,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(
-                context.loc.retry,
-                style: AppTextStyles.button(context),
-              ),
-            ),
-          ],
+        child: JadalErrorView(
+          compact: true,
+          message: FailureText.fromMessage(
+            context,
+            state.error ?? context.loc.statsSomethingWrong,
+          ),
+          onRetry: context.read<LeaderboardCubit>().load,
         ),
       );
     }
@@ -550,7 +474,9 @@ class LeaderboardRow extends StatelessWidget {
                             : entry.name.characters.first.toUpperCase(),
                         style: AppTextStyles.body(context).copyWith(
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: userAvatarForeground(
+                            userAvatarColor(entry.subjectId),
+                          ),
                         ),
                       )
                     : null,

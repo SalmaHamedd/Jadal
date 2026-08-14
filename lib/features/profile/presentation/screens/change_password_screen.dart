@@ -8,6 +8,7 @@ import 'package:jadal_app/features/auth/presentation/widgets/auth_button.dart';
 import 'package:jadal_app/features/auth/presentation/widgets/auth_text_field.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/presentation/cubit/change_password_cubit.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class ChangePasswordScreen extends StatefulWidget {
   const ChangePasswordScreen({super.key});
@@ -57,8 +58,7 @@ class _ChangePasswordScreenState extends State<ChangePasswordScreen> {
               Navigator.pop(context);
             } else if (state is ChangePasswordError) {
               JadalSnackBar.show(
-                context,
-                state.message,
+                context, FailureText.fromMessage(context, state.message),
                 type: SnackBarType.error,
               );
             }

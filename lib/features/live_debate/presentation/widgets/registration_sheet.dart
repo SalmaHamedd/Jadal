@@ -10,6 +10,7 @@ import '../../data/models/registration_models.dart';
 import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_registration.dart';
 import '../utils/debate_theme.dart';
+import '../../../../core/error/failure_text.dart';
 
 /// Registration entry (§15.1): pick team / solo / judge and POST to
 /// `/debates/{id}/register`. Team registration needs the caller's team id (the
@@ -225,7 +226,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     final failure = res.fold((l) => l, (_) => null);
     if (failure != null) {
       if (widget.rootContext.mounted) {
-        JadalSnackBar.show(widget.rootContext, failure.message, type: SnackBarType.error);
+        JadalSnackBar.show(widget.rootContext, FailureText.fromMessage(widget.rootContext, failure.message), type: SnackBarType.error);
       }
       return null;
     }
@@ -252,7 +253,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     Navigator.of(context).pop(res.isRight());
     if (!widget.rootContext.mounted) return;
     res.fold(
-      (f) => JadalSnackBar.show(widget.rootContext, f.message, type: SnackBarType.error),
+      (f) => JadalSnackBar.show(widget.rootContext, FailureText.fromMessage(widget.rootContext, f.message), type: SnackBarType.error),
       (msg) => JadalSnackBar.show(widget.rootContext, msg, type: SnackBarType.success),
     );
   }

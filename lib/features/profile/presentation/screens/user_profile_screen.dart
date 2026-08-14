@@ -16,6 +16,8 @@ import 'package:jadal_app/features/profile/presentation/widgets/profile_header_s
 import 'package:jadal_app/features/profile/presentation/widgets/team_membership_list.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/user_debates_section.dart';
 import 'package:jadal_app/features/statistics/presentation/pages/debater_stats_screen.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 /// Read-only profile for another user.
 ///
@@ -167,26 +169,11 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
         ),
         body: _loading
             ? const Center(child: CircularProgressIndicator())
+            // Printed the raw failure string before.
             : _error != null
-                ? Center(
-                    child: Padding(
-                      padding: const EdgeInsets.all(24),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            _error!,
-                            textAlign: TextAlign.center,
-                            style: AppTextStyles.body(context),
-                          ),
-                          const SizedBox(height: 12),
-                          OutlinedButton(
-                            onPressed: _load,
-                            child: Text(context.loc.retry),
-                          ),
-                        ],
-                      ),
-                    ),
+                ? JadalErrorView(
+                    message: FailureText.fromMessage(context, _error),
+                    onRetry: _load,
                   )
                 : _buildBody(context, _profile!),
       ),

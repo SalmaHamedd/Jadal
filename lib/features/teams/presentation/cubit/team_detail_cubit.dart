@@ -25,7 +25,11 @@ class TeamDetailCubit extends Cubit<TeamDetailState> {
     final result = await repository.addMembers(teamId: state.team.id, memberIds: memberIds);
     result.fold(
       (failure) => emit(state.copyWith(busy: false, error: failure.message)),
-      (team) => emit(TeamDetailState(team: team)),
+      // MF_FU §10.6 — copyWith, NOT a fresh TeamDetailState: constructing a new
+      // state resets `joinRequests`/`leaveRequests` to their `const []` default,
+      // which wiped the pending-request sections off the screen after any
+      // successful mutation.
+      (team) => emit(state.copyWith(busy: false, team: team)),
     );
   }
 
@@ -139,17 +143,53 @@ class TeamDetailCubit extends Cubit<TeamDetailState> {
     );
   }
 
+  /// Reorders the roster. The new order is applied **optimistically** so the
+  /// list settles where the finger dropped it instead of snapping back to the
+  /// old order until the server echoes the team; a failure rolls it back.
   Future<void> updatePriorities(List<TeamMemberPriority> members) async {
-    emit(state.copyWith(busy: true, clearError: true));
+    final previous = state.team;
+    final order = {for (final m in members) m.userId: m.priority};
+    final reordered = [...state.team.members]
+      ..sort((a, b) => (order[a.userId] ?? a.priority)
+          .compareTo(order[b.userId] ?? b.priority));
+    emit(state.copyWith(
+      busy: true,
+      clearError: true,
+      team: _teamWithMembers([
+        for (var i = 0; i < reordered.length; i++)
+          reordered[i].copyWith(priority: i + 1),
+      ]),
+    ));
+
     final result = await repository.updateMembersPriority(
-      teamId: state.team.id,
+      teamId: previous.id,
       members: members,
     );
     result.fold(
-      (failure) => emit(state.copyWith(busy: false, error: failure.message)),
-      (team) => emit(TeamDetailState(team: team)),
+      // Roll back to the pre-drag order — leaving the optimistic order on
+      // screen after a failed write would misreport the saved state.
+      (failure) => emit(state.copyWith(
+        busy: false,
+        error: failure.message,
+        team: previous,
+      )),
+      // MF_FU §10.6 — copyWith, NOT a fresh TeamDetailState (see addMembers).
+      (team) => emit(state.copyWith(busy: false, team: team)),
     );
   }
+
+  Team _teamWithMembers(List<TeamMember> members) => Team(
+        id: state.team.id,
+        name: state.team.name,
+        status: state.team.status,
+        isRandom: state.team.isRandom,
+        membersCount: state.team.membersCount,
+        leader: state.team.leader,
+        createdBy: state.team.createdBy,
+        members: members,
+        createdAt: state.team.createdAt,
+        updatedAt: state.team.updatedAt,
+      );
 
   Future<void> deactivate() async {
     emit(state.copyWith(busy: true, clearError: true));

@@ -8,7 +8,10 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/error/failure_text.dart';
+import '../../../../core/widgets/jadal_error_view.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
+import '../../../../core/widgets/jadal_segmented_switch.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../../live_debate/data/repositories/live_debate_repository.dart';
 import '../../../live_debate/presentation/widgets/debate_screen_header.dart';
@@ -21,6 +24,7 @@ import '../widgets/stats_activity_view.dart';
 import '../widgets/stats_bar_chart.dart';
 import '../widgets/stats_filter_bar.dart';
 import '../widgets/stats_improvement_view.dart';
+import '../widgets/stats_judge_rating_view.dart';
 import '../widgets/stats_ranking_list.dart';
 import '../widgets/stats_theme.dart';
 
@@ -114,40 +118,12 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
 
   Widget _resolving(BuildContext context) {
     if (_error != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline_rounded,
-                size: 52,
-                color: JadalColors.judgesGrey,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _error!,
-                textAlign: TextAlign.center,
-                style: AppTextStyles.body(
-                  context,
-                ).copyWith(color: StatsTheme.textPrimary(context)),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton.icon(
-                onPressed: () => setState(() {
-                  _error = null;
-                  _resolveSelf();
-                }),
-                icon: const Icon(Icons.refresh_rounded),
-                label: Text(
-                  context.loc.retry,
-                  style: AppTextStyles.button(context),
-                ),
-              ),
-            ],
-          ),
-        ),
+      return JadalErrorView(
+        message: FailureText.fromMessage(context, _error),
+        onRetry: () => setState(() {
+          _error = null;
+          _resolveSelf();
+        }),
       );
     }
     return const Center(child: CircularProgressIndicator());
@@ -165,6 +141,7 @@ class _StatsScaffold extends StatelessWidget {
     StatKind.ranking => s.ranking != null,
     StatKind.improvement => s.improvement != null,
     StatKind.activity => s.activity != null,
+    StatKind.judgeRating => s.judgeRating != null,
     _ => s.bucketed != null,
   };
 
@@ -184,6 +161,7 @@ class _StatsScaffold extends StatelessWidget {
         ranking: state.ranking,
         improvement: state.improvement,
         activity: state.activity,
+        judgeRating: state.judgeRating,
       );
       if (bytes == null) {
         messenger.showSnackBar(SnackBar(content: Text(nothingToExport)));
@@ -227,15 +205,19 @@ class _StatsScaffold extends StatelessWidget {
                       return IconButton(
                         tooltip: context.loc.statsExportTooltip,
                         icon: const Icon(Icons.ios_share_rounded),
-                        onPressed:
-                            canExport ? () => _export(context, state) : null,
+                        onPressed: canExport
+                            ? () => _export(context, state)
+                            : null,
                       );
                     },
                   ),
                 ],
               ),
               Expanded(
-                child: _StatsView(debaterOnly: subjectRole == 'debater'),
+                child: _StatsView(
+                  debaterOnly: subjectRole == 'debater',
+                  isJudge: subjectRole == 'judge',
+                ),
               ),
             ],
           ),
@@ -247,29 +229,117 @@ class _StatsScaffold extends StatelessWidget {
 
 class _StatsView extends StatelessWidget {
   final bool debaterOnly;
-  const _StatsView({required this.debaterOnly});
+  final bool isJudge;
+  const _StatsView({required this.debaterOnly, required this.isJudge});
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<DebaterStatsCubit, DebaterStatsState>(
       builder: (context, state) {
-        return ListView(
-          padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
-          children: [
-            // §1.9 — judges/trainers only ever see activity: no stat tabs.
-            if (debaterOnly) ...[
-              _KindSelector(active: state.kind),
+        return RefreshIndicator(
+          color: JadalColors.primaryOrange,
+          onRefresh: () async => context.read<DebaterStatsCubit>().load(),
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
+            children: [
+              // §1.9 — judges/trainers only ever see activity, so there are no
+              // stat tabs for them. MF_FU §8.1 — but the stat still has to name
+              // itself, or the screen presents an unlabelled number.
+              if (debaterOnly)
+                _KindSelector(active: state.kind)
+              else if (isJudge)
+                // MF_FU §11 — judges have two stats now, so the header card
+                // becomes a real selector.
+                JadalSegmentedSwitch<StatKind>(
+                  values: const [StatKind.activity, StatKind.judgeRating],
+                  active: state.kind,
+                  onChanged: context.read<DebaterStatsCubit>().setKind,
+                  labelOf: (k) => k == StatKind.activity
+                      ? context.loc.statsKindActivity
+                      : context.loc.statsKindRating,
+                  iconOf: (k) => k == StatKind.activity
+                      ? Icons.local_fire_department_rounded
+                      : Icons.star_rounded,
+                )
+              else
+                const _StatHeaderCard(),
               const SizedBox(height: 16),
-            ],
-            // §1.3 — activity has no filters at all.
-            if (state.kind != StatKind.activity) ...[
-              StatsCard(child: StatsFilterBar(state: state)),
+              // MF_FU §8.2 — activity takes from/to/group_by (and nothing else),
+              // so it gets a reduced bar rather than none at all. Hiding the bar
+              // outright is what made the trend chart unreachable.
+              StatsCard(
+                child: StatsFilterBar(
+                  state: state,
+                  // Judge ratings have no position dimension, and the framework
+                  // options are only fetched for debater subjects — so it takes
+                  // the same reduced period/grouping bar as activity.
+                  periodOnly:
+                      state.kind == StatKind.activity ||
+                      state.kind == StatKind.judgeRating,
+                ),
+              ),
               const SizedBox(height: 16),
+              _Content(state: state),
             ],
-            _Content(state: state),
-          ],
+          ),
         );
       },
+    );
+  }
+}
+
+/// MF_FU §8.1 — judges and trainers see exactly one stat, so the tab strip is
+/// hidden for them; without this card the screen showed a big number with
+/// nothing naming it. Names the stat and says what it actually measures.
+class _StatHeaderCard extends StatelessWidget {
+  const _StatHeaderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = context.loc;
+    return StatsCard(
+      padding: const EdgeInsets.all(14),
+      child: Row(
+        children: [
+          Container(
+            width: 40,
+            height: 40,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: JadalColors.primaryOrange.withValues(alpha: 0.14),
+              borderRadius: BorderRadius.circular(13),
+            ),
+            child: const Icon(
+              Icons.local_fire_department_rounded,
+              size: 21,
+              color: JadalColors.primaryOrange,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  loc.statsKindActivity,
+                  style: AppTextStyles.subtitle(context).copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: StatsTheme.textPrimary(context),
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  loc.statsActivitySubtitle,
+                  style: AppTextStyles.small(
+                    context,
+                  ).copyWith(color: StatsTheme.textSecondary(context)),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -395,6 +465,7 @@ class _Content extends StatelessWidget {
     StatKind.ranking => state.ranking != null,
     StatKind.improvement => state.improvement != null,
     StatKind.activity => state.activity != null,
+    StatKind.judgeRating => state.judgeRating != null,
     _ => state.bucketed != null,
   };
 
@@ -458,6 +529,13 @@ class _Content extends StatelessWidget {
         return KeyedSubtree(
           key: const ValueKey('activity'),
           child: StatsCard(child: StatsActivityView(data: state.activity!)),
+        );
+      case StatKind.judgeRating:
+        return KeyedSubtree(
+          key: const ValueKey('judgeRating'),
+          child: StatsCard(
+            child: StatsJudgeRatingView(data: state.judgeRating!),
+          ),
         );
       default:
         return KeyedSubtree(
@@ -583,31 +661,10 @@ class _ErrorCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final cubit = context.read<DebaterStatsCubit>();
     return StatsCard(
-      child: Column(
-        children: [
-          const Icon(
-            Icons.error_outline_rounded,
-            size: 44,
-            color: JadalColors.judgesGrey,
-          ),
-          const SizedBox(height: 10),
-          Text(
-            message,
-            textAlign: TextAlign.center,
-            style: AppTextStyles.body(
-              context,
-            ).copyWith(color: StatsTheme.textPrimary(context)),
-          ),
-          const SizedBox(height: 14),
-          OutlinedButton.icon(
-            onPressed: cubit.load,
-            icon: const Icon(Icons.refresh_rounded),
-            label: Text(
-              context.loc.retry,
-              style: AppTextStyles.button(context),
-            ),
-          ),
-        ],
+      child: JadalErrorView(
+        compact: true,
+        message: FailureText.fromMessage(context, message),
+        onRetry: cubit.load,
       ),
     );
   }

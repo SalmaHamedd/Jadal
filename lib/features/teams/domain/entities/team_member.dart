@@ -20,4 +20,15 @@ class TeamMember {
   });
 
   bool get isCurrent => status == 'current';
+
+  /// Used for the roster's optimistic reorder, which renumbers priorities
+  /// locally before the server confirms them.
+  TeamMember copyWith({int? priority}) => TeamMember(
+        id: id,
+        userId: userId,
+        priority: priority ?? this.priority,
+        status: status,
+        joinedAt: joinedAt,
+        user: user,
+      );
 }

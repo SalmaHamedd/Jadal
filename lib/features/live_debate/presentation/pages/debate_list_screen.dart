@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -5,6 +7,8 @@ import '../../../../core/constants/appImgaeAsset.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
+import '../../../../core/error/failure_text.dart';
+import '../../../../core/widgets/jadal_error_view.dart';
 import '../../../../core/widgets/jadal_gradient_background.dart';
 import '../../../../di/injection_container.dart' as di;
 import '../../data/models/debate_list_model.dart';
@@ -12,9 +16,9 @@ import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_search_filter.dart';
 import '../../domain/debate_status.dart';
 import '../cubits/debate_list_cubit.dart';
-import '../utils/debate_date.dart';
 import '../utils/debate_theme.dart';
 import '../widgets/debate_filter_dialog.dart';
+import '../widgets/debate_list_card.dart';
 import 'backend_debate_detail_screen.dart';
 import '../../../main/presentation/screens/main_screen.dart';
 
@@ -36,7 +40,31 @@ class _DebateListScreenState extends State<DebateListScreen> {
   String _query = '';
   DebateSearchFilter _filter = const DebateSearchFilter();
 
+  /// MF_FU §5.6 — `onChanged` used to commit the query on every keystroke, and
+  /// each commit fired a `/debates/search` request. The results view sequences
+  /// them so there was no correctness bug, just a request storm; this coalesces
+  /// a burst of typing into one call.
+  Timer? _debounce;
+
   bool get _isFiltering => _query.isNotEmpty || !_filter.isEmpty;
+
+  void _onQueryChanged(String value) {
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      if (mounted && value != _query) setState(() => _query = value);
+    });
+  }
+
+  void _toggleSearch() {
+    setState(() {
+      if (_searching) {
+        _debounce?.cancel();
+        _searchController.clear();
+        _query = '';
+      }
+      _searching = !_searching;
+    });
+  }
 
   Future<void> _openFilterDialog() async {
     final result = await showDialog<DebateSearchFilter>(
@@ -48,6 +76,7 @@ class _DebateListScreenState extends State<DebateListScreen> {
 
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     super.dispose();
   }
@@ -83,39 +112,23 @@ class _DebateListScreenState extends State<DebateListScreen> {
             elevation: 0,
             scrolledUnderElevation: 0,
             titleSpacing: 0,
-            leading: _searching
-                ? null
-                : IconButton(
-                    icon: const Icon(Icons.menu_rounded),
-                    onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
-                  ),
-            title: _searching
-                ? TextField(
-                    controller: _searchController,
-                    autofocus: true,
-                    style: AppTextStyles.body(context),
-                    decoration: InputDecoration(
-                      hintText: loc.debatesTitle,
-                      border: InputBorder.none,
-                    ),
-                    onChanged: (v) => setState(() => _query = v),
-                  )
-                : Text(
-                    loc.debatesTitle,
-                    style: AppTextStyles.displayTitle(
-                      context,
-                    ).copyWith(color: titleColor),
-                  ),
+            leading: IconButton(
+              icon: const Icon(Icons.menu_rounded),
+              onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
+            ),
+            // MF_FU §5 — the title stays put when search opens (the field now
+            // lives in `bottom:`, where the stage tabs were), so the header
+            // doesn't jump and the field gets full width and real padding
+            // instead of being crammed into the title slot at titleSpacing 0.
+            title: Text(
+              loc.debatesTitle,
+              // `title` (18.5), not `displayTitle` (26) — see home_screen.
+              style: AppTextStyles.title(context).copyWith(color: titleColor),
+            ),
             actions: [
               IconButton(
                 icon: Icon(_searching ? Icons.close : Icons.search),
-                onPressed: () => setState(() {
-                  if (_searching) {
-                    _searchController.clear();
-                    _query = '';
-                  }
-                  _searching = !_searching;
-                }),
+                onPressed: _toggleSearch,
               ),
               IconButton(
                 icon: Badge(
@@ -127,7 +140,25 @@ class _DebateListScreenState extends State<DebateListScreen> {
               ),
             ],
             // The statistics entry moved to the Profile tab.
-            bottom: _isFiltering
+            //
+            // Search replaces the stage tabs outright: `/debates/search` runs
+            // across every status, so a stage selector next to it would be
+            // meaningless. Gate on `_searching`, not `_isFiltering` — the tabs
+            // used to linger until the first character was typed.
+            bottom: _searching
+                ? PreferredSize(
+                    preferredSize: const Size.fromHeight(64),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
+                      child: _SearchField(
+                        controller: _searchController,
+                        hint: loc.searchDebatesHint,
+                        onChanged: _onQueryChanged,
+                        onClear: _toggleSearch,
+                      ),
+                    ),
+                  )
+                : _isFiltering
                 ? null
                 : TabBar(
                     isScrollable: true,
@@ -141,13 +172,96 @@ class _DebateListScreenState extends State<DebateListScreen> {
                     tabs: [for (final t in tabs) Tab(text: t.label)],
                   ),
           ),
-          body: _isFiltering
+          // Opening search switches straight to the cross-status result list
+          // (an empty query returns everything), so the stage tabs never sit
+          // underneath a search field.
+          body: (_searching || _isFiltering)
               ? _SearchResultsView(query: _query, filter: _filter)
               : TabBarView(
                   children: [
                     for (final t in tabs) _StatusTab(status: t.status),
                   ],
                 ),
+        ),
+      ),
+    );
+  }
+}
+
+/// MF_FU §5 — the debates search field: a proper contained input with padding,
+/// sitting full-width where the stage tabs normally are.
+class _SearchField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
+
+  const _SearchField({
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    required this.onClear,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final dark = DebateTheme.isDark(context);
+    return TextField(
+      controller: controller,
+      autofocus: true,
+      textInputAction: TextInputAction.search,
+      onSubmitted: (_) => FocusScope.of(context).unfocus(),
+      style: AppTextStyles.body(context).copyWith(
+        color: DebateTheme.textPrimary(context),
+      ),
+      onChanged: onChanged,
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: AppTextStyles.body(
+          context,
+        ).copyWith(color: DebateTheme.textSecondary(context)),
+        filled: true,
+        fillColor: DebateTheme.surfaceElevated(context),
+        isDense: true,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 14,
+          vertical: 12,
+        ),
+        prefixIcon: Icon(
+          Icons.search_rounded,
+          size: 20,
+          color: DebateTheme.textSecondary(context),
+        ),
+        suffixIcon: IconButton(
+          icon: Icon(
+            Icons.close_rounded,
+            size: 18,
+            color: DebateTheme.textSecondary(context),
+          ),
+          onPressed: onClear,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.10)
+                : JadalColors.primaryBlue.withValues(alpha: 0.12),
+          ),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: BorderSide(
+            color: dark
+                ? Colors.white.withValues(alpha: 0.10)
+                : JadalColors.primaryBlue.withValues(alpha: 0.12),
+          ),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(14),
+          borderSide: const BorderSide(
+            color: JadalColors.primaryOrange,
+            width: 1.6,
+          ),
         ),
       ),
     );
@@ -295,7 +409,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
           );
         }
         final item = _items[i];
-        return _DebateListCard(
+        return DebateListCard(
           item: item,
           onTap: () => Navigator.of(context).push(
             MaterialPageRoute(
@@ -419,7 +533,7 @@ class _StatusListState extends State<_StatusList> {
                       );
                     }
                     final item = state.items[i];
-                    return _DebateListCard(
+                    return DebateListCard(
                       item: item,
                       onTap: () => Navigator.of(context).push(
                         MaterialPageRoute(
@@ -438,174 +552,6 @@ class _StatusListState extends State<_StatusList> {
   }
 }
 
-class _DebateListCard extends StatelessWidget {
-  final DebateListItem item;
-  final VoidCallback onTap;
-  const _DebateListCard({required this.item, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    final dark = DebateTheme.isDark(context);
-    final radius = BorderRadius.circular(20);
-    // Every card floats the SAME way — one soft neutral elevation, no per-stage
-    // colour. The single blue→orange accent stripe is the only brand colour and
-    // it's identical on every card, so the list reads calm and elegant.
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        borderRadius: radius,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: dark ? 0.36 : 0.08),
-            blurRadius: 16,
-            spreadRadius: -3,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
-      child: Material(
-        color: DebateTheme.surfaceElevated(context),
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          child: DecoratedBox(
-            // A hairline keeps the elevated surface from melting into the dark
-            // blue background.
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: Border.all(
-                color: dark
-                    ? Colors.white.withValues(alpha: 0.06)
-                    : JadalColors.primaryBlue.withValues(alpha: 0.06),
-              ),
-            ),
-            child: IntrinsicHeight(
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Container(
-                    width: 5,
-                    decoration: const BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          JadalColors.primaryBlue,
-                          JadalColors.primaryOrange,
-                        ],
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            item.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: AppTextStyles.title(context).copyWith(
-                              height: 1.3,
-                              color: DebateTheme.textPrimary(context),
-                            ),
-                          ),
-                          // Registration cards show only title/format/date (§U2).
-                          if (item.status != DebateStatus.scheduled &&
-                              item.motion?.text.isNotEmpty == true) ...[
-                            const SizedBox(height: 8),
-                            Text(
-                              item.motion!.text,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppTextStyles.body(context).copyWith(
-                                height: 1.4,
-                                color: DebateTheme.textSecondary(context),
-                              ),
-                            ),
-                          ],
-                          const SizedBox(height: 12),
-                          Row(
-                            children: [
-                              if (item.tag != null && item.tag!.isNotEmpty) ...[
-                                Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 9,
-                                    vertical: 3,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: JadalColors.primaryOrange.withValues(
-                                      alpha: 0.12,
-                                    ),
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                  child: Text(
-                                    item.tag!,
-                                    style: AppTextStyles.small(context)
-                                        .copyWith(
-                                          fontWeight: FontWeight.w700,
-                                          color: JadalColors.primaryOrange,
-                                        ),
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                              ],
-                              if (item.format.name != null) ...[
-                                Icon(
-                                  Icons.tune_rounded,
-                                  size: 15,
-                                  color: DebateTheme.textSecondary(context),
-                                ),
-                                const SizedBox(width: 5),
-                                Text(
-                                  item.format.name!,
-                                  style: AppTextStyles.caption(context)
-                                      .copyWith(
-                                        color: DebateTheme.textSecondary(
-                                          context,
-                                        ),
-                                      ),
-                                ),
-                                const SizedBox(width: 14),
-                              ],
-                              if (item.scheduledAt != null) ...[
-                                Icon(
-                                  Icons.event_rounded,
-                                  size: 15,
-                                  color: DebateTheme.textSecondary(context),
-                                ),
-                                const SizedBox(width: 5),
-                                Flexible(
-                                  child: Text(
-                                    formatDebateDate(item.scheduledAt),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: AppTextStyles.caption(context)
-                                        .copyWith(
-                                          color: DebateTheme.textSecondary(
-                                            context,
-                                          ),
-                                        ),
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
-
 class _ErrorRetry extends StatelessWidget {
   final String message;
   final VoidCallback onRetry;
@@ -613,35 +559,12 @@ class _ErrorRetry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = context.loc;
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.cloud_off_rounded,
-              size: 56,
-              color: JadalColors.judgesGrey,
-            ),
-            const SizedBox(height: 12),
-            Text(
-              message,
-              textAlign: TextAlign.center,
-              style: AppTextStyles.body(
-                context,
-              ).copyWith(color: DebateTheme.textPrimary(context)),
-            ),
-            const SizedBox(height: 16),
-            OutlinedButton.icon(
-              onPressed: onRetry,
-              icon: const Icon(Icons.refresh_rounded),
-              label: Text(loc.retry, style: AppTextStyles.button(context)),
-            ),
-          ],
-        ),
-      ),
+    // The raw failure string used to be printed here verbatim, which is how a
+    // transport exception ended up on screen. Everything goes through
+    // FailureText now, and the retry control is the shared one.
+    return JadalErrorView(
+      message: FailureText.fromMessage(context, message),
+      onRetry: onRetry,
     );
   }
 }

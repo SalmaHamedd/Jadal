@@ -9,6 +9,7 @@ import 'package:jadal_app/features/surveys/data/models/survey_model.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey.dart';
 import 'package:jadal_app/features/surveys/domain/entities/survey_details.dart';
 import 'package:jadal_app/features/surveys/domain/repositories/survey_repository.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 
 class SurveyRepositoryImpl implements SurveyRepository {
   final http.Client client;
@@ -49,6 +50,8 @@ class SurveyRepositoryImpl implements SurveyRepository {
           return Left(ServerFailure(json['message'] ?? 'Failed to load surveys'));
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else {
         return Left(ServerFailure('Server error: ${response.statusCode}'));
@@ -81,6 +84,8 @@ class SurveyRepositoryImpl implements SurveyRepository {
           return Left(ServerFailure(json['message'] ?? 'Failed to load survey'));
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else if (response.statusCode == 404) {
         return Left(NotFoundFailure('Survey not found'));
@@ -119,6 +124,8 @@ class SurveyRepositoryImpl implements SurveyRepository {
           return Left(ServerFailure(json['message'] ?? 'Failed to submit response'));
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else if (response.statusCode == 422) {
         final errorsRaw = json['errors'];

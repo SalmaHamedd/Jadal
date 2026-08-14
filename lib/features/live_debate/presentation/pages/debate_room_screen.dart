@@ -20,6 +20,7 @@ import '../widgets/poi_widgets.dart';
 import '../widgets/speakers_section.dart';
 import '../widgets/top_bar_widgets.dart';
 import 'result_room_screen.dart';
+import '../../../../core/error/failure_text.dart';
 
 /// Layout 2 — the live debate room (§8.3). Body-only (no AppBar). Connects to
 /// LiveKit on init and, for test mode (§9), treats the local user as the first
@@ -123,7 +124,8 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is DebateFinishedState,
               listener: (context, _) => JadalSnackBar.show(
-                context, context.loc.debateFinished,
+                context,
+                context.loc.debateFinished,
                 type: SnackBarType.success,
               ),
             ),
@@ -185,8 +187,11 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
                       _error = state.message;
                     });
                   } else {
-                    JadalSnackBar.show(context, state.message,
-                        type: SnackBarType.error);
+                    JadalSnackBar.show(
+                      context,
+                      FailureText.fromMessage(context, state.message),
+                      type: SnackBarType.error,
+                    );
                   }
                 }
               },
@@ -327,18 +332,29 @@ class _DebateView extends StatelessWidget {
                           (c.maxHeight - freed - gaps).clamp(0.0, double.infinity);
                       final mainH = base * 0.40 + freed * 0.75;
                       final speakersH = base * 0.60 + freed * 0.25;
+                      // The main card's slot is taller than its artwork by the
+                      // timer button's overhang (the button must stay inside a
+                      // hit-testable box). That extra height is taken back out
+                      // of the 16dp gap first and only then out of the speakers
+                      // area, so the card renders at `mainH` exactly as before
+                      // and the column's total height is unchanged.
+                      const gap = 16.0;
+                      const overhang = kMainSpeakerBottomOverhang;
+                      final gapAfterMain = (gap - overhang).clamp(0.0, gap);
+                      final speakersAdjusted =
+                          speakersH - (overhang - gap).clamp(0.0, overhang);
                       return Column(
                         children: [
                           SizedBox(
-                            height: mainH,
+                            height: mainH + overhang,
                             child: const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 12),
                               child: MainSpeakerCard(),
                             ),
                           ),
-                          const SizedBox(height: 16),
+                          SizedBox(height: gapAfterMain),
                           SizedBox(
-                            height: speakersH,
+                            height: speakersAdjusted,
                             child: const Padding(
                               padding: EdgeInsets.symmetric(horizontal: 12),
                               child: SpeakersSection(),
@@ -646,7 +662,9 @@ class _ConnectionFailedView extends StatelessWidget {
             if (message.isNotEmpty) ...[
               const SizedBox(height: 8),
               Text(
-                message,
+                // Was the raw failure string — a LiveKit/socket exception is
+                // meaningless to a debater waiting to join.
+                FailureText.fromMessage(context, message),
                 textAlign: TextAlign.center,
                 maxLines: 4,
                 overflow: TextOverflow.ellipsis,

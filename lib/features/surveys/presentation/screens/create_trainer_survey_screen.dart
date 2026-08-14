@@ -13,6 +13,7 @@ import 'package:jadal_app/features/surveys/domain/repositories/trainer_survey_re
 import 'package:jadal_app/features/surveys/presentation/cubit/create_trainer_survey_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_question_editor_list.dart';
 import 'package:jadal_app/features/teams/presentation/widgets/team_picker_field.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 /// Creates a new survey for the trainer's own team(s).
 ///
@@ -156,14 +157,12 @@ class _CreateTrainerSurveyScreenState extends State<CreateTrainerSurveyScreen> {
                     Navigator.pop(context, true);
                   } else if (state is CreateTrainerSurveyPartialSuccess) {
                     JadalSnackBar.show(
-                      context,
-                      context.loc.surveyPartialSuccess(state.message),
+                      context, FailureText.fromMessage(context, context.loc.surveyPartialSuccess(state.message)),
                       type: SnackBarType.error,
                     );
                   } else if (state is CreateTrainerSurveyError) {
                     JadalSnackBar.show(
-                      context,
-                      state.message,
+                      context, FailureText.fromMessage(context, state.message),
                       type: SnackBarType.error,
                     );
                   }

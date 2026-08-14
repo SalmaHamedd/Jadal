@@ -12,6 +12,7 @@ import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
 import 'package:jadal_app/features/teams/presentation/cubit/create_team_cubit.dart';
 import 'package:jadal_app/features/teams/presentation/widgets/user_search_picker.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 /// Creates a new team: name + members (searched by name), with one of the
 /// picked members chosen as leader — matching `POST /teams`'s
@@ -113,8 +114,7 @@ class _CreateTeamScreenState extends State<CreateTeamScreen> {
                 Navigator.pop(context, true);
               } else if (state is CreateTeamError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               }

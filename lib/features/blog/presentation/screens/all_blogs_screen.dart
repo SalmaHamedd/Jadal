@@ -13,6 +13,8 @@ import 'package:jadal_app/features/blog/presentation/widgets/blog_filter_dialog.
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
 import 'package:jadal_app/features/blog/presentation/screens/create_blog_screen.dart';
 import 'package:jadal_app/features/main/presentation/screens/main_screen.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 class AllBlogsScreen extends StatefulWidget {
   /// §2.5 — true when embedded as the Blog tab inside MainScreen: the shell
@@ -176,18 +178,9 @@ class _AllBlogsScreenState extends State<AllBlogsScreen> {
                 ),
               );
             } else if (state is BlogError) {
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(context.loc.errorWithMessage(state.message)),
-                    const SizedBox(height: 16),
-                    ElevatedButton(
-                      onPressed: _refresh,
-                      child: Text(context.loc.retry),
-                    ),
-                  ],
-                ),
+              return JadalErrorScrollView(
+                message: FailureText.fromMessage(context, state.message),
+                onRetry: () async => _refresh(),
               );
             }
             return const SizedBox();

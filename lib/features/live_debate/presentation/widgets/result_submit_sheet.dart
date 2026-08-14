@@ -9,6 +9,7 @@ import '../../data/models/debate_models.dart';
 import '../../domain/debate_result_view.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
+import '../../../../core/error/failure_text.dart';
 
 /// The chair's result-submit UI (§10): a winning-side picker, one **integer
 /// 0–100** score slider per speech (from [DebateController.scoreableStages]) and
@@ -63,7 +64,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
   Future<void> _submit() async {
     final loc = context.loc;
     if (_winning == null) {
-      JadalSnackBar.show(context, loc.selectWinningSideFirst, type: SnackBarType.error);
+      JadalSnackBar.show(context, FailureText.fromMessage(context, loc.selectWinningSideFirst), type: SnackBarType.error);
       return;
     }
     setState(() => _submitting = true);
@@ -93,7 +94,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
       listenWhen: (_, s) => s is DebateErrorState,
       listener: (ctx, s) {
         if (s is DebateErrorState) {
-          JadalSnackBar.show(ctx, s.message, type: SnackBarType.error);
+          JadalSnackBar.show(ctx, FailureText.fromMessage(ctx, s.message), type: SnackBarType.error);
         }
       },
       child: Padding(

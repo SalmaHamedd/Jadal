@@ -207,7 +207,7 @@ class _UserResultTile extends StatelessWidget {
                             : user.name.characters.first.toUpperCase(),
                         style: AppTextStyles.small(context).copyWith(
                           fontWeight: FontWeight.w800,
-                          color: Colors.white,
+                          color: userAvatarForeground(userAvatarColor(user.id)),
                         ),
                       )
                     : null,

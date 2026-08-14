@@ -23,6 +23,7 @@ import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
 import '../models/team_chat_history_model.dart';
 import 'live_debate_repository.dart';
+import '../../../../core/services/session_guard.dart';
 
 /// HTTP implementation of [LiveDebateRepository] (matches the app's
 /// repository-pattern convention: `http.Client` + `TokenStorage` bearer +
@@ -104,6 +105,9 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     dlog('http', '✗ $label — FAILURE $code: ${message ?? "(no message)"}');
     switch (code) {
       case 401:
+        // Rejected token: clear the session and return to login,
+        // instead of leaving the user in an app where nothing works.
+        SessionGuard.onUnauthorized();
         await TokenStorage.deleteToken(); // bounce to login + clear token (§G)
         return Left(AuthFailure(message ?? 'Unauthenticated'));
       case 403:

@@ -28,6 +28,21 @@ Color jadalTextSecondary(BuildContext context) => jadalIsDark(context)
     ? JadalColors.darkTextSecondary
     : JadalColors.lightTextSecondary;
 
+/// MF_FU §7.3 — the theme-aware replacement for a bare `JadalColors.judgesGrey`
+/// used as **text**.
+///
+/// `judgesGrey` (#9A9A9A) is tuned for the dark ground, where it measures
+/// 5.39:1. On the light ground it is only 2.62:1 — below AA (4.5) and below
+/// even the 3:1 non-text floor — so a caption painted with it is genuinely hard
+/// to read. This picks the light-ground value (5.02:1) when appropriate and
+/// leaves dark theme exactly as it was.
+///
+/// Use this for muted TEXT. A grey used purely as an icon tint or a divider is
+/// fine as-is.
+Color jadalMuted(BuildContext context) => jadalIsDark(context)
+    ? JadalColors.judgesGrey
+    : JadalColors.judgesGreyLight;
+
 /// A content card: tonal fill over the shared gradient, hairline border and a
 /// soft drop shadow. [accent] tints the fill very slightly, which is how a
 /// section can feel "warm" or "cool" without painting a saturated block.

@@ -13,6 +13,7 @@ import '../widgets/debate_screen_header.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/result_submit_sheet.dart';
 import '../widgets/result_summary_view.dart';
+import '../../../../core/error/failure_text.dart';
 
 /// Result room (§8.1 / §10). Locked until the chair finishes the debate; then:
 /// the chair submits scores → reveals (confetti) or closes the main room; a
@@ -62,7 +63,7 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
                 if (state is ResultRevealedState) {
                   setState(() => _showConfetti = true);
                 } else if (state is DebateErrorState) {
-                  JadalSnackBar.show(context, state.message, type: SnackBarType.error);
+                  JadalSnackBar.show(context, FailureText.fromMessage(context, state.message), type: SnackBarType.error);
                 }
               },
               buildWhen: (_, s) =>

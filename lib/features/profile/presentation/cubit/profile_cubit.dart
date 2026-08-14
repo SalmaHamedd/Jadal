@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart' show Either;
 import 'package:jadal_app/core/error/failures.dart';
+import 'package:jadal_app/core/services/session_identity.dart';
 import 'package:jadal_app/features/profile/data/repositories/profile_repository.dart';
 import 'package:jadal_app/features/profile/domain/entities/profile.dart';
 
@@ -19,7 +20,19 @@ class ProfileCubit extends Cubit<ProfileState> {
     final result = await (warm ?? _repository.getProfile());
     result.fold(
       (failure) => emit(ProfileError(failure.message)),
-      (profile) => emit(ProfileLoaded(profile)),
+      (profile) {
+        // MF_FU §1.1 — keep the drawer's cached identity current. Points and
+        // avatar change while the app is open; without this the drawer would
+        // show the values as of login until the next sign-in.
+        SessionIdentity.cache(
+          id: profile.id,
+          name: profile.name,
+          role: profile.role,
+          avatarUrl: profile.avatarUrl,
+          points: profile.points,
+        );
+        emit(ProfileLoaded(profile));
+      },
     );
   }
 

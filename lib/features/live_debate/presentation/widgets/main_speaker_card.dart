@@ -72,15 +72,26 @@ class MainSpeakerCard extends StatelessWidget {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            final h = constraints.maxHeight;
+            // The stop/resume button straddles the card's bottom edge, and
+            // hit-testing does not extend past a parent's bounds — so the
+            // button's lower half is reserved INSIDE this box and the card art
+            // is inset by that much. The room screen hands us a slot that is
+            // [kMainSpeakerBottomOverhang] taller than the artwork should be,
+            // and takes that height back out of the gap below, so the card
+            // renders at exactly its original size and the column's total is
+            // unchanged. Reserved unconditionally (not just for the chair) so
+            // the layout doesn't shift between roles.
+            const overhang = kMainSpeakerBottomOverhang;
+            final h = constraints.maxHeight - overhang;
             return Stack(
-              // Clip.none so the chair's stop/resume button can straddle the
-              // bottom edge (its lower half sits below the card).
-              clipBehavior: Clip.none,
               children: [
                 // Neutral card surface (§11) — the side colour now lives only in
                 // the animated progress ring, not the card body.
-                Positioned.fill(
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: overhang,
                   child: Container(
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(cardRadius),
@@ -110,13 +121,23 @@ class MainSpeakerCard extends StatelessWidget {
                       micActiveColor: sideColor,
                       mainAxis: h,
                       borderRadius: cardRadius,
+                      // Keep the speaker's name clear of the chair's
+                      // stop/resume button, which is centred on this card's
+                      // bottom edge and used to sit right on top of it.
+                      bottomCenterReserved: cubit.canControlTimer
+                          ? _kTimerButtonSize + 16
+                          : 0,
                     ),
                   ),
                 ),
                 // The chair advanced to a speaker who isn't in the room yet →
                 // make that explicit instead of showing a silent avatar.
                 if (!speakerPresent)
-                  Positioned.fill(
+                  Positioned(
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: overhang,
                     child: IgnorePointer(
                       child: Center(
                         child: Container(
@@ -149,7 +170,11 @@ class MainSpeakerCard extends StatelessWidget {
                   ),
                 // The timer rendered AS a gradient animated border (§11): a
                 // progress ring (blue/orange by side) that fills with the speech.
-                Positioned.fill(
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  bottom: overhang,
                   child: IgnorePointer(
                     child: TweenAnimationBuilder<double>(
                       tween: Tween<double>(begin: 0, end: progress),
@@ -190,15 +215,23 @@ class MainSpeakerCard extends StatelessWidget {
                 // with the tool bar — so when the bar is hidden the button is too,
                 // and the tap that reveals the bar can't be mistaken for a (missed)
                 // press on a button that wouldn't have stopped the timer anyway.
+                // MF_FU §6.2 — the button used to sit at `bottom: -22`, so half
+                // of it hung OUTSIDE this Stack. `Clip.none` makes the overflow
+                // visible but hit-testing does not extend past a parent's
+                // bounds, so taps on its lower half fell through to the room's
+                // background handler and just toggled the tool bar. It now sits
+                // fully inside the Stack (see the reserved overhang below), and
+                // is 64dp instead of 46dp.
                 if (cubit.canControlTimer)
                   Positioned(
                     left: 0,
                     right: 0,
-                    bottom: -22,
+                    bottom: 0,
                     child: Center(
                       child: BlocBuilder<ConnectionCubit, ConnectionStates>(
                         builder: (context, _) {
-                          final show = context.read<ConnectionCubit>().showActions;
+                          final connection = context.read<ConnectionCubit>();
+                          final show = connection.showActions;
                           return IgnorePointer(
                             ignoring: !show,
                             child: AnimatedScale(
@@ -210,7 +243,13 @@ class MainSpeakerCard extends StatelessWidget {
                                 duration: const Duration(milliseconds: 200),
                                 child: _TimerControlButton(
                                   isPaused: cubit.isPaused,
-                                  onTap: cubit.toggleTimerPause,
+                                  onTap: () {
+                                    // Pressing the button counts as interacting
+                                    // with the bar — otherwise pausing could be
+                                    // followed immediately by everything hiding.
+                                    connection.resetHideTimer();
+                                    cubit.toggleTimerPause();
+                                  },
                                 ),
                               ),
                             ),
@@ -415,6 +454,18 @@ class _IntroCard extends StatelessWidget {
   }
 }
 
+/// The chair's stop/resume button diameter. Originally 46 (below the 48dp
+/// Material minimum, 3 of which were border); briefly 64, which read as
+/// oversized. 56 is 1.25× the original — comfortably tappable without
+/// dominating the card.
+const double _kTimerButtonSize = 56;
+
+/// How much taller than its artwork the main card's slot must be, so the lower
+/// half of the timer button stays inside a hit-testable box. The room screen
+/// reclaims this from the gap beneath the card, so the column total is
+/// unchanged — see [MainSpeakerCard].
+const double kMainSpeakerBottomOverhang = _kTimerButtonSize / 2;
+
 /// C1 / Update 1: the chair's circular, icon-only stop/resume timer button. Its
 /// border is the card surface colour so it reads as straddling the card edge.
 class _TimerControlButton extends StatelessWidget {
@@ -424,27 +475,42 @@ class _TimerControlButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 46,
-        height: 46,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [JadalColors.primaryBlue, JadalColors.primaryOrange],
+    return Semantics(
+      button: true,
+      child: Material(
+        type: MaterialType.transparency,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onTap,
+          child: Container(
+            width: _kTimerButtonSize,
+            height: _kTimerButtonSize,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              gradient: const LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [JadalColors.primaryBlue, JadalColors.primaryOrange],
+              ),
+              border: Border.all(
+                color: DebateTheme.background(context),
+                width: 4,
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.28),
+                  blurRadius: 8,
+                ),
+              ],
+            ),
+            child: Icon(
+              isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
+              color: Colors.white,
+              size: 28,
+            ),
           ),
-          border: Border.all(color: DebateTheme.background(context), width: 3),
-          boxShadow: [
-            BoxShadow(color: Colors.black.withValues(alpha: 0.28), blurRadius: 8),
-          ],
-        ),
-        child: Icon(
-          isPaused ? Icons.play_arrow_rounded : Icons.pause_rounded,
-          color: Colors.white,
-          size: 26,
         ),
       ),
     );

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/app_cubit/app_cubit.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -112,18 +110,9 @@ class DebateSettingsSheet {
                     confirmAndLeave(context, cubit);
                   },
                 ),
-                const Divider(height: 24),
-                // Test-only theme toggle (no AppBar to hold it — §8.5).
-                _Item(
-                  icon: Icons.brightness_6_rounded,
-                  label: loc.themeToggleTest,
-                  onTap: () {
-                    context
-                        .read<AppCubit>()
-                        .toggleTheme(MediaQuery.platformBrightnessOf(context));
-                    Navigator.of(sheetCtx).pop();
-                  },
-                ),
+                // The theme toggle used to live here as a test-only shortcut.
+                // Removed: switching theme belongs in the nav drawer, and it has
+                // no business being a one-tap action mid-debate.
               ],
             ),
           ),

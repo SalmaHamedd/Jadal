@@ -16,6 +16,7 @@ import 'package:jadal_app/features/blog/presentation/widgets/blog_cover_image.da
 import 'package:jadal_app/features/blog/presentation/widgets/blog_author_info.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_chips.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_stats_row.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class BlogDetailsScreen extends StatefulWidget {
   final String slug;
@@ -77,7 +78,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
     final result = await _repository.deleteBlog(blogId);
     result.fold(
       (failure) {
-        JadalSnackBar.show(context, failure.message, type: SnackBarType.error);
+        JadalSnackBar.show(context, FailureText.fromMessage(context, failure.message), type: SnackBarType.error);
         setState(() => _isDeleting = false);
       },
       (_) {
@@ -149,7 +150,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
               return BlocConsumer<BlogReactionCubit, BlogReactionState>(
                 listenWhen: (prev, curr) => curr.error != null && prev.error != curr.error,
                 listener: (context, reactionState) {
-                  JadalSnackBar.show(context, reactionState.error!, type: SnackBarType.error);
+                  JadalSnackBar.show(context, FailureText.fromMessage(context, reactionState.error!), type: SnackBarType.error);
                   context.read<BlogReactionCubit>().dismissError();
                 },
                 builder: (context, reactionState) => SingleChildScrollView(

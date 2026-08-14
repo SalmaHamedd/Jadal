@@ -5,7 +5,9 @@ import '../../../../core/app_models/framework.dart';
 import '../../../../core/error/failures.dart';
 import '../../data/models/activity_stat_model.dart';
 import '../../data/models/debater_stats_models.dart';
+import '../../data/models/judge_rating_model.dart';
 import '../../data/repositories/debater_stats_repository.dart';
+import '../../data/repositories/team_analysis_repository.dart';
 
 enum StatsStatus { initial, loading, loaded, error }
 
@@ -30,6 +32,7 @@ class DebaterStatsState {
   final ScoreRanking? ranking;
   final ImprovementStat? improvement;
   final ActivityStat? activity;
+  final JudgeRatingStat? judgeRating;
   final String? error;
 
   /// Monotonically increasing id of the latest fetch — lets the cubit drop the
@@ -48,6 +51,7 @@ class DebaterStatsState {
     this.ranking,
     this.improvement,
     this.activity,
+    this.judgeRating,
     this.error,
     required this.requestId,
   });
@@ -77,6 +81,7 @@ class DebaterStatsState {
     ScoreRanking? ranking,
     ImprovementStat? improvement,
     ActivityStat? activity,
+    JudgeRatingStat? judgeRating,
     String? error,
     bool clearError = false,
     int? requestId,
@@ -93,6 +98,7 @@ class DebaterStatsState {
       ranking: ranking ?? this.ranking,
       improvement: improvement ?? this.improvement,
       activity: activity ?? this.activity,
+      judgeRating: judgeRating ?? this.judgeRating,
       error: clearError ? null : (error ?? this.error),
       requestId: requestId ?? this.requestId,
     );
@@ -113,6 +119,10 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   /// §1.4 — loads the framework filter options (`GET /motion-frameworks`);
   /// injected so the statistics feature doesn't depend on the live-debate repo.
   final Future<Either<Failure, List<Framework>>> Function()? frameworksLoader;
+
+  /// MF_FU §11 — judge ratings live on their own endpoint, outside the
+  /// debater-stats repository.
+  final TeamAnalysisRepository _analysisRepo = TeamAnalysisRepository();
 
   DebaterStatsCubit({
     required this.repo,
@@ -138,9 +148,27 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
     res.fold((_) {}, (list) => emit(state.copyWith(frameworkOptions: list)));
   }
 
+  /// The grouping the user had on a chart stat, parked while activity forces
+  /// its own default so switching back doesn't silently reset it.
+  StatsGroupBy? _groupByBeforeActivity;
+
   void setKind(StatKind kind) {
     if (kind == state.kind) return;
-    emit(state.copyWith(kind: kind, clearError: true));
+    var filter = state.filter;
+    // MF_FU §8.2 — activity's chart needs ≥2 buckets, and the screen used to
+    // leave group_by at `none` (one all-time bucket), so the trend line was
+    // unreachable. Default it to monthly on entry and restore the user's own
+    // grouping when they leave.
+    if (kind == StatKind.activity && state.kind != StatKind.activity) {
+      _groupByBeforeActivity = filter.groupBy;
+      filter = filter.copyWith(groupBy: StatsGroupBy.month);
+    } else if (kind != StatKind.activity && state.kind == StatKind.activity) {
+      filter = filter.copyWith(
+        groupBy: _groupByBeforeActivity ?? StatsGroupBy.none,
+      );
+      _groupByBeforeActivity = null;
+    }
+    emit(state.copyWith(kind: kind, filter: filter, clearError: true));
     _fetch();
   }
 
@@ -244,13 +272,33 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
           (r) => emit(state.copyWith(status: StatsStatus.loaded, improvement: r)),
         );
       case StatKind.activity:
-        // §1.3 — activity has no filters at all: always fetch unfiltered.
-        final res = await repo.getActivity(debaterId, const StatsFilter(),
+        // MF_FU §8.2 — was `const StatsFilter()`, which pinned every activity
+        // request to group_by=none no matter what the user picked, so the
+        // response only ever had one bucket and the trend chart could never
+        // render. The real filter goes through now; the repository already
+        // strips the dimensions this endpoint doesn't accept, keeping only
+        // from/to/group_by.
+        final res = await repo.getActivity(debaterId, filter,
             role: subjectRole);
         if (id != state.requestId) return;
         res.fold(
           (l) => emit(state.copyWith(status: StatsStatus.error, error: l.message)),
           (r) => emit(state.copyWith(status: StatsStatus.loaded, activity: r)),
+        );
+      case StatKind.judgeRating:
+        // MF_FU §11 — judges only. Takes from/to/group_by/frameworks; there is
+        // no position dimension for a judge.
+        final res = await _analysisRepo.getJudgeRatings(
+          debaterId,
+          from: filter.from,
+          to: filter.to,
+          groupBy: filter.groupBy,
+          frameworks: filter.frameworks,
+        );
+        if (id != state.requestId) return;
+        res.fold(
+          (l) => emit(state.copyWith(status: StatsStatus.error, error: l.message)),
+          (r) => emit(state.copyWith(status: StatsStatus.loaded, judgeRating: r)),
         );
     }
   }

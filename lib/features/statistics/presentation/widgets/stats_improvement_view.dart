@@ -40,8 +40,10 @@ class StatsImprovementView extends StatelessWidget {
             tween: Tween(begin: 0, end: shownIndex),
             duration: const Duration(milliseconds: 900),
             curve: Curves.easeOutCubic,
+            // MF_FU §7.5 — arrow + sign so direction survives colour-vision
+            // deficiency and greyscale, not colour alone.
             builder: (context, v, _) => Text(
-              (v >= 0 ? '+' : '') + v.toStringAsFixed(1),
+              signedWithArrow(v),
               style: TextStyle(
                 fontFamily: 'Cairo',
                 fontWeight: FontWeight.w900,
@@ -353,9 +355,17 @@ class _Components extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final rows = <(String, double, String)>[
-      ('Score trend', c.slopeScore, c.slopeScore.toStringAsFixed(1)),
-      ('Win-rate trend', c.slopeWinrate, c.slopeWinrate.toStringAsFixed(2)),
-      ('Consistency', c.consistency, c.consistency.toStringAsFixed(2)),
+      ('Score trend', c.slopeScore, signedWithArrow(c.slopeScore)),
+      (
+        'Win-rate trend',
+        c.slopeWinrate,
+        signedWithArrow(c.slopeWinrate, decimals: 2),
+      ),
+      (
+        'Consistency',
+        c.consistency,
+        signedWithArrow(c.consistency, decimals: 2),
+      ),
     ];
     return Column(
       children: [

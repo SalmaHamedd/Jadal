@@ -57,8 +57,12 @@ class SearchUserCard extends StatelessWidget {
                     child: url == null
                         ? Text(
                             user.name.isEmpty ? '?' : user.name.characters.first.toUpperCase(),
-                            style: AppTextStyles.subtitle(context)
-                                .copyWith(fontWeight: FontWeight.w800, color: Colors.white),
+                            style: AppTextStyles.subtitle(context).copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: userAvatarForeground(
+                                userAvatarColor(user.id),
+                              ),
+                            ),
                           )
                         : null,
                   );

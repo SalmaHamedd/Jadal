@@ -21,7 +21,13 @@ class BlogCard extends StatelessWidget {
       margin: EdgeInsets.only(bottom: context.hp(1.2)),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       elevation: 2,
-      color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,
+      // In dark mode `darkSurface` (#162640) sits too close to the scaffold's
+      // `darkBackground` (#0D1B2E) — the cards barely separated from the page.
+      // `darkSurfaceElevated` (#1E3250) is the app's standard raised tone and
+      // gives the list real definition.
+      color: isDark
+          ? JadalColors.darkSurfaceElevated
+          : JadalColors.lightSurface,
       child: InkWell(
         borderRadius: BorderRadius.circular(16),
         onTap: () {

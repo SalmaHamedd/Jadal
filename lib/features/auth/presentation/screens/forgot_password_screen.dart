@@ -11,6 +11,7 @@ import '../../../../core/widgets/jadal_snack_bar.dart';
 import '../cubit/forgot_password_cubit.dart';
 import '../widgets/auth_button.dart';
 import '../widgets/auth_text_field.dart';
+import '../../../../core/error/failure_text.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -177,10 +178,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                               >(
                                 listener: (context, state) {
                                   if (state is ForgotPasswordFailure) {
-                                    JadalSnackBar.show(
-                                      context,
-                                      state.message,
-                                      type: SnackBarType.error,
+                                    JadalSnackBar.show(context, FailureText.fromMessage(context, state.message), type: SnackBarType.error,
                                     );
                                   }
                                   if (state is ForgotPasswordSuccess) {

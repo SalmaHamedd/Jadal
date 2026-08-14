@@ -16,11 +16,18 @@ class TeamMembershipSection extends StatefulWidget {
   final int userId;
   final List<TeamMembership> current;
   final bool isOwnProfile;
+
+  /// Called after the user comes back from a team's screen, since they may
+  /// have left the team there. The profile owns the roster list, so it has to
+  /// re-fetch — otherwise a team you just left keeps showing as current.
+  final Future<void> Function()? onMembershipChanged;
+
   const TeamMembershipSection({
     super.key,
     required this.userId,
     required this.current,
     this.isOwnProfile = true,
+    this.onMembershipChanged,
   });
 
   @override
@@ -47,14 +54,21 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
     );
   }
 
+  /// MF_FU §2.1 — belt and braces. The backend already excludes random teams
+  /// from both endpoints; if one ever leaks through, the profile stays clean.
+  static List<TeamMembership> _real(List<TeamMembership> items) =>
+      items.where((t) => !t.isRandom).toList();
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark
         ? JadalColors.darkTextPrimary
         : JadalColors.lightTextPrimary;
+    final current = _real(widget.current);
+    final history = _history == null ? null : _real(_history!);
 
-    if (widget.current.isEmpty && _history == null) {
+    if (current.isEmpty && history == null) {
       return _HistoryToggle(
         expanded: false,
         loading: _loadingHistory,
@@ -65,11 +79,12 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        for (final t in widget.current)
+        for (final t in current)
           _TeamMembershipCard(
             membership: t,
             textColor: textColor,
             isOwnProfile: widget.isOwnProfile,
+            onReturned: widget.onMembershipChanged,
           ),
         Padding(
           padding: const EdgeInsets.only(top: 2),
@@ -81,8 +96,8 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
                 : () => setState(() => _history = null),
           ),
         ),
-        if (_history != null && !_loadingHistory)
-          if (_history!.isEmpty)
+        if (history != null && !_loadingHistory)
+          if (history.isEmpty)
             Padding(
               padding: const EdgeInsets.symmetric(vertical: 8),
               child: Text(
@@ -93,12 +108,13 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
               ),
             )
           else
-            for (final t in _history!)
+            for (final t in history)
               _TeamMembershipCard(
                 membership: t,
                 textColor: textColor,
                 past: true,
                 isOwnProfile: widget.isOwnProfile,
+                onReturned: widget.onMembershipChanged,
               ),
       ],
     );
@@ -150,11 +166,13 @@ class _TeamMembershipCard extends StatelessWidget {
   final Color textColor;
   final bool past;
   final bool isOwnProfile;
+  final Future<void> Function()? onReturned;
   const _TeamMembershipCard({
     required this.membership,
     required this.textColor,
     this.past = false,
     required this.isOwnProfile,
+    this.onReturned,
   });
 
   String _elapsed(BuildContext context) {
@@ -193,17 +211,21 @@ class _TeamMembershipCard extends StatelessWidget {
       ),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () => Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) => TeamInfoScreen(
-              teamId: membership.teamId,
-              teamName: membership.teamName,
-              membership: membership,
-              canLeave: isOwnProfile,
+        onTap: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => TeamInfoScreen(
+                teamId: membership.teamId,
+                teamName: membership.teamName,
+                membership: membership,
+                canLeave: isOwnProfile,
+              ),
             ),
-          ),
-        ),
+          );
+          // The user may have left the team while they were in there.
+          await onReturned?.call();
+        },
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           child: Row(

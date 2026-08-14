@@ -59,7 +59,6 @@
   "permissionCamera": "Camera",
   "permissionMicrophone": "Microphone",
   "permissionBluetooth": "Bluetooth",
-
   "lobbyTitle": "Debate Rooms",
   "proposition": "Proposition",
   "opposition": "Opposition",
@@ -77,7 +76,6 @@
   "needOrderBody": "Go to your team's preparation room and select the speaker order before joining the live debate.",
   "goToPrep": "Go to prep room",
   "joiningAsAudience": "Joining as audience",
-
   "prepRoomTitle": "Preparation",
   "prepEndsIn": "Prep ends in",
   "selectSpeakerOrder": "Select speaker order",
@@ -88,13 +86,11 @@
   "dragToReorder": "Drag to reorder the speakers (1st, 2nd, 3rd).",
   "replySpeaker": "Reply speaker (1st or 2nd only)",
   "saveOrder": "Save order",
-
   "tapNextToStart": "Tap Next to start the debate.",
   "extraTime": "EXTRA TIME",
   "nowSpeaking": "Now speaking",
   "debateFinished": "The debate has finished.",
   "backToDebate": "Back to debate",
-
   "newsPoisOpen": "POIs are now open.",
   "newsLastChance": "One minute until POIs close — last chance to ask.",
   "newsPoisClosed": "Protected period — POIs are now closed.",
@@ -106,13 +102,11 @@
   "goLiveSession": "Go to live session",
   "introductionsLabel": "Introductions",
   "poiAcceptedNews": "Your POI was accepted",
-
   "audience": "Audience",
   "searchHint": "Search…",
   "noMatches": "No matches",
   "categories": "Categories",
   "tags": "Tags",
-
   "poiTitle": "Point of Information",
   "poiPrompt": "A debater is requesting a POI. Accept or refuse?",
   "accept": "Accept",
@@ -120,7 +114,6 @@
   "poiYourTurn": "Your POI was accepted",
   "poiSpeakNow": "Open your mic and make your point, then tap Done.",
   "poiDone": "Done",
-
   "forceMute": "Force mute",
   "forceCameraOff": "Force camera off",
   "allowCamera": "Allow camera",
@@ -128,7 +121,6 @@
   "areYouSure": "Are you sure?",
   "confirm": "Confirm",
   "leaveToProfileWarning": "This will leave the debate.",
-
   "muteAll": "Mute all",
   "openLobbyMode": "Open-lobby mode",
   "teamChat": "Team chat",
@@ -139,7 +131,6 @@
   "messageHint": "Message your team…",
   "newMessages": "New messages",
   "micMutedWhileSpeaking": "You're on — but your mic is off. Unmute to be heard.",
-
   "submitResult": "Submit result",
   "submitResultTitle": "Submit Result",
   "submitResultPrompt": "Enter each speaker's score, pick the winning side, then submit.",
@@ -168,14 +159,12 @@
   "ratingCommentHint": "Tell us more about your rating (optional)",
   "submitRating": "Submit rating",
   "updateRating": "Update rating",
-
   "navHome": "Home",
   "navDebates": "Debates",
   "navSearch": "Search",
   "navBlog": "Blog",
   "navProfile": "Profile",
   "searchTitle": "Search",
-
   "drawerAnalysis": "Your analysis",
   "drawerFrameworks": "Frameworks in the system",
   "drawerSurveys": "Surveys",
@@ -184,7 +173,6 @@
   "drawerMyTeams": "My Teams",
   "drawerJoinTeam": "Join a Team",
   "drawerContactUs": "Contact us",
-
   "profileStatistics": "Statistics",
   "profileTeamAnalysis": "Team analysis",
   "achievementRankGold": "Gold",
@@ -194,7 +182,6 @@
   "achievementRankParticipation": "Participation",
   "achievementsSortDate": "Date",
   "achievementsSortRank": "Tier",
-
   "editProfileChooseSource": "Choose source",
   "editProfileCamera": "Camera",
   "editProfileGallery": "Gallery",
@@ -209,18 +196,25 @@
   "saveChanges": "Save Changes",
   "userAchievementsTitle": "{name} — Achievements",
   "@userAchievementsTitle": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "noAchievementsYet": "No achievements yet",
   "userDebatesTitle": "{name} — Debates",
   "@userDebatesTitle": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "latestDebates": "Latest debates",
   "showAll": "Show all",
   "noDebatesYet": "No debates yet",
   "achievements": "Achievements",
-
   "privateDetails": "Private details",
   "fieldAge": "Age",
   "fieldJoined": "Joined",
@@ -229,13 +223,20 @@
   "tenureNew": "New to debate",
   "tenureYears": "{count} yr in debate",
   "@tenureYears": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "tenureMonths": "{count} mo in debate",
   "@tenureMonths": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
-
   "surveyDetailsTitle": "Survey",
   "surveyNoneAvailable": "No surveys currently available",
   "surveyAnswerAllQuestions": "Please answer all questions before submitting",
@@ -254,7 +255,11 @@
   "surveyStatusClosed": "Closed",
   "surveyClosesOnDate": "Closes on {date}",
   "@surveyClosesOnDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "surveyQuestionsHeader": "Questions",
   "surveyNoQuestionsYet": "No questions for this survey yet",
@@ -265,25 +270,43 @@
   "surveyNoResponsesYet": "No responses to this survey yet",
   "surveyTotalResponsesLabel": "Total responses: {count}",
   "@surveyTotalResponsesLabel": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "surveyAnswersSummary": "Answers summary",
   "surveyResponsesCountLabel": "Responses ({count})",
   "@surveyResponsesCountLabel": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "surveyNoAnswersYet": "No answers to this question yet",
   "surveyAverageLabel": "Average: {avg} / {max} ({count} responses)",
   "@surveyAverageLabel": {
     "placeholders": {
-      "avg": { "type": "String" },
-      "max": { "type": "String" },
-      "count": { "type": "String" }
+      "avg": {
+        "type": "String"
+      },
+      "max": {
+        "type": "String"
+      },
+      "count": {
+        "type": "String"
+      }
     }
   },
   "surveyTextAnswersCount": "{count} text answers (see below)",
   "@surveyTextAnswersCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "surveyTargetTeams": "Target teams",
   "surveyChooseAtLeastOneTeam": "Choose at least one team",
@@ -302,15 +325,27 @@
   "surveyCreatedSuccess": "Survey created successfully",
   "surveyPartialSuccess": "The survey was created, but its questions couldn't be saved: {message}. Surveys can't be edited after creation, so it will stay without questions — you may prefer to create a new one instead.",
   "@surveyPartialSuccess": {
-    "placeholders": { "message": { "type": "String" } }
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
   },
   "surveyClosesInDays": "Closes in {days} days",
   "@surveyClosesInDays": {
-    "placeholders": { "days": { "type": "int" } }
+    "placeholders": {
+      "days": {
+        "type": "int"
+      }
+    }
   },
   "surveyClosesInHours": "Closes in {hours} hours",
   "@surveyClosesInHours": {
-    "placeholders": { "hours": { "type": "int" } }
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      }
+    }
   },
   "surveyClosesSoon": "Closing soon",
   "surveyAnsweredChip": "Answered",
@@ -318,7 +353,11 @@
   "surveyAddQuestion": "Add question",
   "surveyQuestionNumber": "Question {number}",
   "@surveyQuestionNumber": {
-    "placeholders": { "number": { "type": "int" } }
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
   },
   "surveyQuestionTextHint": "Question text",
   "surveyQuestionTypeLabel": "Question type",
@@ -328,10 +367,13 @@
   "surveyOptionsMinTwo": "Options (at least two)",
   "surveyOptionHint": "Option {number}",
   "@surveyOptionHint": {
-    "placeholders": { "number": { "type": "int" } }
+    "placeholders": {
+      "number": {
+        "type": "int"
+      }
+    }
   },
   "surveyAddOption": "Add option",
-
   "complaintNewComplaint": "New complaint",
   "complaintNoneYet": "You haven't filed any complaints yet",
   "complaintStatusOpen": "Under review",
@@ -340,7 +382,11 @@
   "complaintStatusClosed": "Closed",
   "complaintDebateFallback": "Debate #{id}",
   "@complaintDebateFallback": {
-    "placeholders": { "id": { "type": "int" } }
+    "placeholders": {
+      "id": {
+        "type": "int"
+      }
+    }
   },
   "complaintAdminResponseLabel": "Admin response",
   "complaintChooseDebate": "Choose the debate this complaint is about",
@@ -353,9 +399,12 @@
   "debateSearchHint": "Search for a debate by title...",
   "debateSearchFailed": "Search failed: {error}",
   "@debateSearchFailed": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
-
   "teamSearchHint": "Search for a team by name...",
   "teamNoneAvailableToJoin": "No teams currently available to join",
   "teamLeaveDialogTitle": "Leave team",
@@ -364,8 +413,8 @@
   "teamSendRequestButton": "Send request",
   "teamJoinDialogTitle": "Join the team",
   "teamJoinDialogBody": "A join request will be sent to the team's trainer for approval. Continue?",
-  "teamRoleLeader": "Team leader",
-  "teamRoleTrainer": "Trainer",
+  "teamRoleLeader": "Leader",
+  "teamRoleTrainer": "Coach",
   "teamRoleMember": "Member",
   "teamJoinedDateLabel": "Joined on",
   "teamLeftDateLabel": "Left on",
@@ -395,59 +444,103 @@
   "teamRemoveMemberTitle": "Remove member",
   "teamRemoveMemberBody": "Remove {name} from the team?",
   "@teamRemoveMemberBody": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamRemoveButton": "Remove",
   "teamAcceptLeaveRequestTitle": "Accept leave request",
   "teamRejectLeaveRequestTitle": "Reject leave request",
   "teamLeaveRequestAcceptBody": "{name} will leave the team immediately. Continue?",
   "@teamLeaveRequestAcceptBody": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamLeaveRequestRejectBody": "{name} will remain a member of the team. Reject this request?",
   "@teamLeaveRequestRejectBody": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamAcceptJoinRequestTitle": "Accept join request",
   "teamRejectJoinRequestTitle": "Reject join request",
   "teamJoinRequestAcceptBody": "{name} will join the team immediately. Continue?",
   "@teamJoinRequestAcceptBody": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamJoinRequestRejectBody": "{name} will not join the team. Reject this request?",
   "@teamJoinRequestRejectBody": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamAcceptButton": "Accept",
   "teamRejectButton": "Reject",
   "teamAddMembers": "Add members",
   "teamAddCount": "Add ({count})",
   "@teamAddCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "teamDeactivatedMsg": "Team deactivated",
   "teamStatusActive": "Active",
   "teamStatusInactive": "Inactive",
   "teamLeaderLabel": "Leader: {name}",
   "@teamLeaderLabel": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamJoinRequestsHeader": "Join requests ({count})",
   "@teamJoinRequestsHeader": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "teamLeaveRequestsHeader": "Leave requests ({count})",
   "@teamLeaveRequestsHeader": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "teamMembersHeaderCount": "Members ({count})",
   "@teamMembersHeaderCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "teamDragToReorderHint": "Drag the handle to change priority",
   "teamRequestedOnDate": "Requested on {date}",
   "@teamRequestedOnDate": {
-    "placeholders": { "date": { "type": "String" } }
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
   },
   "teamNewTeamTitle": "New team",
   "teamAddAtLeastTwoMembers": "Add at least two members",
@@ -458,32 +551,51 @@
   "teamAddMembersHint": "Add at least two members, then choose the team's leader among them",
   "teamLeaderSuffix": "{name} (leader)",
   "@teamLeaderSuffix": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "teamCreateButton": "Create team",
   "teamNoneYet": "No teams yet",
   "teamMembersCountShort": "{count} members",
   "@teamMembersCountShort": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "userSearchHint": "Search by name...",
   "teamLoadListFailed": "Couldn't load teams: {message}",
   "@teamLoadListFailed": {
-    "placeholders": { "message": { "type": "String" } }
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
   },
   "teamNoneAvailableForYou": "No teams available to you yet",
-
   "statsTitle": "Statistics",
   "statsTitleWithName": "{name} · Statistics",
   "@statsTitleWithName": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "statsNothingToExport": "Nothing to export yet",
   "statsShareText": "Jadal debate analysis sheet",
   "statsShareSubject": "Jadal debate analysis",
   "statsExportFailed": "Export failed: {error}",
   "@statsExportFailed": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
   "statsExportTooltip": "Export sheet",
   "statsKindWinRate": "Win rate",
@@ -498,7 +610,11 @@
   "statsBestSpeakerTitle": "Best-speaker rate",
   "statsDebatesCount": "{count} debates",
   "@statsDebatesCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "statsCouldNotUpdateFilters": "Could not update with these filters",
   "statsTopOfJadal": "Top of Jadal",
@@ -515,27 +631,50 @@
   "statsTeamAnalysisTitle": "Team analysis",
   "statsTeamAnalysisTitleWithName": "{name} · Team analysis",
   "@statsTeamAnalysisTitleWithName": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "statsAveragedAcrossTeams": "Averaged across your teams",
   "statsTeamsCount": "{count} teams",
   "@statsTeamsCount": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "statsAvgImprovement": "Avg improvement",
   "statsAvgWinRate": "Avg win rate",
   "statsAvgMemberActivity": "Avg member activity",
   "statsOverallPercent": "{percent}% overall",
   "@statsOverallPercent": {
-    "placeholders": { "percent": { "type": "int" } }
+    "placeholders": {
+      "percent": {
+        "type": "int"
+      }
+    }
   },
   "statsAttendedCount": "{attended}/{selected} attended",
   "@statsAttendedCount": {
-    "placeholders": { "attended": { "type": "int" }, "selected": { "type": "int" } }
+    "placeholders": {
+      "attended": {
+        "type": "int"
+      },
+      "selected": {
+        "type": "int"
+      }
+    }
   },
   "statsRegisteredNotHeldAgainst": "Registered {count} times — selection is the admin's call, not held against you.",
   "@statsRegisteredNotHeldAgainst": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "statsFrameworksTitle": "Frameworks",
   "filterStatusScheduled": "Scheduled",
@@ -546,7 +685,11 @@
   "filterStatusCancelled": "Cancelled",
   "filterFormatFallback": "Format {id}",
   "@filterFormatFallback": {
-    "placeholders": { "id": { "type": "String" } }
+    "placeholders": {
+      "id": {
+        "type": "String"
+      }
+    }
   },
   "filterDebatesTitle": "Filter debates",
   "filterLabelStatus": "Status",
@@ -569,11 +712,9 @@
   "filterDateRangeLabel": "Date range",
   "filterFromLabel": "From",
   "filterToLabel": "To",
-
   "mutedSpeakingTitle": "Your mic is off",
   "mutedSpeakingBody": "You seem to be talking, but no one can hear you.",
   "unmuteAction": "Unmute",
-
   "debatesTitle": "Debates",
   "tabRegistration": "Registration",
   "tabAnnounced": "Announced",
@@ -600,14 +741,12 @@
   "scheduledLabel": "Scheduled",
   "speakersPerSideLabel": "Speakers per side",
   "cancellationReasonLabel": "Cancellation reason",
-
   "resetPasswordTitle": "Reset your password",
   "resetPasswordSubtitle": "Enter the code sent to your email and choose a new password.",
   "resetCode": "Reset code",
   "newPassword": "New password",
   "confirmPassword": "Confirm password",
   "resetPasswordButton": "Reset password",
-
   "firstTeam": "First team",
   "secondTeam": "Second team",
   "speaking": "Speaking",
@@ -626,28 +765,32 @@
   "roomClosedStatus": "Room closed",
   "teamIdLabel": "Team ID",
   "teamRegisterPrompt": "Enter your team's ID to register the whole team. You must be the team's leader or coach.",
-
   "connectingToRoom": "Connecting to the debate room…",
   "connectionFailed": "Couldn't connect to the room. Please try again.",
   "notJoinedYet": "Hasn't joined yet",
   "waitingToJoin": "Waiting to join",
-
   "greetingWithName": "Welcome, {name}",
   "@greetingWithName": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
   "greeting": "Welcome",
   "topDebaters": "Top debaters",
   "showMore": "Show more",
-
   "latestArticles": "Latest articles",
   "viewAll": "View all",
   "noArticles": "No articles",
   "errorWithMessage": "Error: {message}",
   "@errorWithMessage": {
-    "placeholders": { "message": { "type": "String" } }
+    "placeholders": {
+      "message": {
+        "type": "String"
+      }
+    }
   },
-
   "searchUsersTeamsHint": "Search for users or teams…",
   "searchUsersTeamsPrompt": "Search for users or teams",
   "noResults": "No results",
@@ -658,13 +801,20 @@
   "roleAdmin": "Admin",
   "membersCountLabel": "{count} members",
   "@membersCountLabel": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "coachNameLabel": "Coach: {name}",
   "@coachNameLabel": {
-    "placeholders": { "name": { "type": "String" } }
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
-
   "searchArticlesHint": "Search articles…",
   "allArticles": "All articles",
   "newArticle": "New article",
@@ -672,7 +822,11 @@
   "deleteArticle": "Delete article",
   "deleteArticleConfirm": "Are you sure you want to delete \"{title}\"?",
   "@deleteArticleConfirm": {
-    "placeholders": { "title": { "type": "String" } }
+    "placeholders": {
+      "title": {
+        "type": "String"
+      }
+    }
   },
   "delete": "Delete",
   "articleDeleted": "Article deleted successfully",
@@ -691,9 +845,12 @@
   "titleContentRequired": "Title and content are required",
   "optionsLoadError": "Failed to load options: {error}",
   "@optionsLoadError": {
-    "placeholders": { "error": { "type": "String" } }
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
   },
-
   "submitComplaintTooltip": "Submit a complaint",
   "registrantsTitle": "Registrants",
   "registrantsTeamsLabel": "Teams",
@@ -703,30 +860,236 @@
   "registeredJudgesTitle": "Registered judges",
   "soloApplicantsTitle": "Solo applicants",
   "noneYetLabel": "None yet.",
-
   "editProfileButton": "Edit Profile",
   "changePasswordButton": "Change Password",
   "changePasswordTitle": "Change Password",
   "currentPassword": "Current Password",
   "updatePasswordButton": "Update Password",
-
-  "teamRoleLeader": "Leader",
-  "teamRoleTrainer": "Coach",
-  "teamRoleMember": "Member",
   "currentPill": "Current",
   "noPastTeams": "No past teams",
   "showPastTeams": "Show past teams",
   "hidePastTeams": "Hide past teams",
   "elapsedDaysShort": "{count} days",
   "@elapsedDaysShort": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "elapsedMonthsShort": "{count}mo",
   "@elapsedMonthsShort": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   },
   "elapsedYearsShort": "{count}y",
   "@elapsedYearsShort": {
-    "placeholders": { "count": { "type": "int" } }
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "drawerAboutUs": "About us",
+  "contactEmail": "Email",
+  "contactPhone": "Phone",
+  "contactInstagram": "Instagram",
+  "contactWhatsapp": "WhatsApp",
+  "contactWebsite": "Website",
+  "copiedToClipboard": "Copied to clipboard",
+  "searchDebatesHint": "Search all debates",
+  "statsActivitySubtitle": "Registrations, attendance, viewing and missed debates, as weighted points",
+  "statsActivityPoints": "activity points",
+  "statsActivityTrend": "Activity trend",
+  "statsActivityBreakdown": "What made this number",
+  "statsActivityByPeriod": "By period",
+  "statsActivityRegistrations": "Registrations",
+  "statsActivityAttendance": "Attendance",
+  "statsActivityWatched": "Watched debates",
+  "statsActivityMissed": "Missed debates",
+  "statsActivityCountRegistered": "{count} registered",
+  "@statsActivityCountRegistered": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsActivityCountAttended": "{count} attended",
+  "@statsActivityCountAttended": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsActivityCountWatched": "{count} watched",
+  "@statsActivityCountWatched": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsActivityCountMissed": "{count} missed",
+  "@statsActivityCountMissed": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsActivityLongerPeriod": "Pick a longer period to see the trend",
+  "statsGroupBy": "Group by",
+  "statsCompare": "Compare",
+  "statsOrder": "Order",
+  "statsPositionsLabel": "Positions",
+  "statsFrameworksLabel": "Frameworks",
+  "statsPeriod": "Period",
+  "statsFrom": "From",
+  "statsTo": "To",
+  "statsReset": "Reset",
+  "statsCombined": "Combined",
+  "statsByPosition": "By position",
+  "statsByFramework": "By framework",
+  "statsAllTime": "All time",
+  "statsYear": "Year",
+  "statsMonth": "Month",
+  "statsRankTop": "Top",
+  "statsRankBottom": "Bottom",
+  "statsRankLatest": "Latest",
+  "statsRankEarliest": "Earliest",
+  "statsPositionLabel": "Position",
+  "statsFrameworkLabel": "Framework",
+  "statsHintPickPositions": "Pick 2+ positions below to split the bars",
+  "statsHintPickFrameworks": "Pick 2+ frameworks below to split the bars",
+  "statsAllTeams": "All teams",
+  "statsTeamPast": "past",
+  "statsSeeDetails": "See details",
+  "statsForTeam": "For {team}",
+  "@statsForTeam": {
+    "placeholders": {
+      "team": {
+        "type": "String"
+      }
+    }
+  },
+  "statsSquadActivity": "Squad activity",
+  "statsPerMemberAverage": "{value} per member",
+  "@statsPerMemberAverage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statsKindCombinations": "Line-ups",
+  "statsMinDebates": "Min debates",
+  "statsTeamBaseline": "Team average: {value} over {count} debates",
+  "@statsTeamBaseline": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      },
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsShowingLineups": "Showing {shown} of {total} line-ups — the rest have too few debates to compare",
+  "@statsShowingLineups": {
+    "placeholders": {
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "statsLineupDebates": "{count} debates",
+  "@statsLineupDebates": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsLineupLeft": "left",
+  "statsCombinationsEmptyNoDebates": "No completed debates in this period yet.",
+  "statsCombinationsEmptyNoScores": "These debates have no usable speaker scores yet.",
+  "statsCombinationsEmptyBelowMin": "No line-up has played {count} or more times yet — lower the minimum to compare.",
+  "@statsCombinationsEmptyBelowMin": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsVsTeamAverage": "vs team average",
+  "statsKindRating": "Rating",
+  "statsRatingSubtitle": "How debaters rated your judging after the result was revealed",
+  "statsRatingsCount": "{count} ratings",
+  "@statsRatingsCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statsPeerAverage": "Other judges: {value}",
+  "@statsPeerAverage": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "statsRatingCoverage": "{rated} of {judged} debates you judged received ratings",
+  "@statsRatingCoverage": {
+    "placeholders": {
+      "rated": {
+        "type": "int"
+      },
+      "judged": {
+        "type": "int"
+      }
+    }
+  },
+  "statsRatingTooFew": "Too few ratings to be meaningful yet",
+  "statsRatingDistribution": "Rating distribution",
+  "statsRatingTrend": "Rating over time",
+  "statsRatingEmptyNoRatings": "You have judged debates, but nobody has rated them yet.",
+  "statsRatingEmptyNeverJudged": "No completed debates judged yet.",
+  "teamJoinRequestPill": "Join request",
+  "teamLeaveRequestPill": "Leave request",
+  "teamMembersCount": "{count} members",
+  "@teamMembersCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "teamStatusInactiveShort": "inactive",
+  "errorNoConnection": "No internet connection. Check your network and try again.",
+  "errorServer": "Something went wrong on our side. Please try again in a moment.",
+  "errorGeneric": "Something went wrong. Please try again.",
+  "errorSessionExpired": "Your session has ended. Please sign in again.",
+  "errorNotFound": "We couldn't find what you were looking for.",
+  "errorNotAllowed": "You don't have permission to do that.",
+  "errorTooManyRequests": "Too many attempts. Please wait a moment and try again.",
+  "errorPullToRetry": "Pull down to try again",
+  "logoutAnyway": "Log out",
+  "frameworksCount": "{count} frameworks used across the platform",
+  "@frameworksCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
   }
 }

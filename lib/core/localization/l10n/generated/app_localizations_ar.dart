@@ -1766,4 +1766,297 @@ class AppLocalizationsAr extends AppLocalizations {
   String elapsedYearsShort(int count) {
     return '$countس';
   }
+
+  @override
+  String get drawerAboutUs => 'من نحن';
+
+  @override
+  String get contactEmail => 'البريد الإلكتروني';
+
+  @override
+  String get contactPhone => 'الهاتف';
+
+  @override
+  String get contactInstagram => 'إنستغرام';
+
+  @override
+  String get contactWhatsapp => 'واتساب';
+
+  @override
+  String get contactWebsite => 'الموقع الإلكتروني';
+
+  @override
+  String get copiedToClipboard => 'تم النسخ';
+
+  @override
+  String get searchDebatesHint => 'ابحث في كل المناظرات';
+
+  @override
+  String get statsActivitySubtitle =>
+      'التسجيلات والحضور والمشاهدة والمناظرات الفائتة، كنقاط موزونة';
+
+  @override
+  String get statsActivityPoints => 'نقاط النشاط';
+
+  @override
+  String get statsActivityTrend => 'منحنى النشاط';
+
+  @override
+  String get statsActivityBreakdown => 'مما تكوّن هذا الرقم';
+
+  @override
+  String get statsActivityByPeriod => 'حسب الفترة';
+
+  @override
+  String get statsActivityRegistrations => 'التسجيلات';
+
+  @override
+  String get statsActivityAttendance => 'الحضور';
+
+  @override
+  String get statsActivityWatched => 'مناظرات تمت مشاهدتها';
+
+  @override
+  String get statsActivityMissed => 'مناظرات فائتة';
+
+  @override
+  String statsActivityCountRegistered(int count) {
+    return '$count تسجيل';
+  }
+
+  @override
+  String statsActivityCountAttended(int count) {
+    return '$count حضور';
+  }
+
+  @override
+  String statsActivityCountWatched(int count) {
+    return '$count مشاهدة';
+  }
+
+  @override
+  String statsActivityCountMissed(int count) {
+    return '$count فائتة';
+  }
+
+  @override
+  String get statsActivityLongerPeriod => 'اختر فترة أطول لعرض المنحنى';
+
+  @override
+  String get statsGroupBy => 'التجميع حسب';
+
+  @override
+  String get statsCompare => 'المقارنة';
+
+  @override
+  String get statsOrder => 'الترتيب';
+
+  @override
+  String get statsPositionsLabel => 'المواقع';
+
+  @override
+  String get statsFrameworksLabel => 'الأطر';
+
+  @override
+  String get statsPeriod => 'الفترة';
+
+  @override
+  String get statsFrom => 'من';
+
+  @override
+  String get statsTo => 'إلى';
+
+  @override
+  String get statsReset => 'إعادة تعيين';
+
+  @override
+  String get statsCombined => 'مجتمعة';
+
+  @override
+  String get statsByPosition => 'حسب الموقع';
+
+  @override
+  String get statsByFramework => 'حسب الإطار';
+
+  @override
+  String get statsAllTime => 'كل الأوقات';
+
+  @override
+  String get statsYear => 'سنة';
+
+  @override
+  String get statsMonth => 'شهر';
+
+  @override
+  String get statsRankTop => 'الأعلى';
+
+  @override
+  String get statsRankBottom => 'الأدنى';
+
+  @override
+  String get statsRankLatest => 'الأحدث';
+
+  @override
+  String get statsRankEarliest => 'الأقدم';
+
+  @override
+  String get statsPositionLabel => 'الموقع';
+
+  @override
+  String get statsFrameworkLabel => 'الإطار';
+
+  @override
+  String get statsHintPickPositions => 'اختر موقعين أو أكثر لتقسيم الأعمدة';
+
+  @override
+  String get statsHintPickFrameworks => 'اختر إطارين أو أكثر لتقسيم الأعمدة';
+
+  @override
+  String get statsAllTeams => 'كل الفرق';
+
+  @override
+  String get statsTeamPast => 'سابق';
+
+  @override
+  String get statsSeeDetails => 'عرض التفاصيل';
+
+  @override
+  String statsForTeam(String team) {
+    return 'لفريق $team';
+  }
+
+  @override
+  String get statsSquadActivity => 'نشاط الفريق';
+
+  @override
+  String statsPerMemberAverage(String value) {
+    return '$value لكل عضو';
+  }
+
+  @override
+  String get statsKindCombinations => 'التشكيلات';
+
+  @override
+  String get statsMinDebates => 'أقل عدد مناظرات';
+
+  @override
+  String statsTeamBaseline(String value, int count) {
+    return 'متوسط الفريق: $value خلال $count مناظرة';
+  }
+
+  @override
+  String statsShowingLineups(int shown, int total) {
+    return 'عرض $shown من $total تشكيلة — البقية عدد مناظراتها غير كافٍ للمقارنة';
+  }
+
+  @override
+  String statsLineupDebates(int count) {
+    return '$count مناظرة';
+  }
+
+  @override
+  String get statsLineupLeft => 'غادر';
+
+  @override
+  String get statsCombinationsEmptyNoDebates =>
+      'لا توجد مناظرات مكتملة في هذه الفترة بعد.';
+
+  @override
+  String get statsCombinationsEmptyNoScores =>
+      'هذه المناظرات لا تحتوي على درجات متحدثين صالحة بعد.';
+
+  @override
+  String statsCombinationsEmptyBelowMin(int count) {
+    return 'لا توجد تشكيلة لعبت $count مرات أو أكثر بعد — قلّل الحد الأدنى للمقارنة.';
+  }
+
+  @override
+  String get statsVsTeamAverage => 'مقارنة بمتوسط الفريق';
+
+  @override
+  String get statsKindRating => 'التقييم';
+
+  @override
+  String get statsRatingSubtitle =>
+      'كيف قيّم المتناظرون تحكيمك بعد إعلان النتيجة';
+
+  @override
+  String statsRatingsCount(int count) {
+    return '$count تقييم';
+  }
+
+  @override
+  String statsPeerAverage(String value) {
+    return 'بقية الحكام: $value';
+  }
+
+  @override
+  String statsRatingCoverage(int rated, int judged) {
+    return '$rated من $judged مناظرة حكّمتها حصلت على تقييم';
+  }
+
+  @override
+  String get statsRatingTooFew => 'عدد التقييمات غير كافٍ بعد';
+
+  @override
+  String get statsRatingDistribution => 'توزيع التقييمات';
+
+  @override
+  String get statsRatingTrend => 'التقييم عبر الزمن';
+
+  @override
+  String get statsRatingEmptyNoRatings =>
+      'لقد حكّمت مناظرات، لكن لم يقم أحد بتقييمها بعد.';
+
+  @override
+  String get statsRatingEmptyNeverJudged =>
+      'لا توجد مناظرات مكتملة تم تحكيمها بعد.';
+
+  @override
+  String get teamJoinRequestPill => 'طلب انضمام';
+
+  @override
+  String get teamLeaveRequestPill => 'طلب مغادرة';
+
+  @override
+  String teamMembersCount(int count) {
+    return '$count عضو';
+  }
+
+  @override
+  String get teamStatusInactiveShort => 'غير نشط';
+
+  @override
+  String get errorNoConnection =>
+      'لا يوجد اتصال بالإنترنت. تحقّق من الشبكة وحاول مرة أخرى.';
+
+  @override
+  String get errorServer => 'حدث خطأ لدينا. يرجى المحاولة بعد قليل.';
+
+  @override
+  String get errorGeneric => 'حدث خطأ ما. يرجى المحاولة مرة أخرى.';
+
+  @override
+  String get errorSessionExpired => 'انتهت جلستك. يرجى تسجيل الدخول مرة أخرى.';
+
+  @override
+  String get errorNotFound => 'لم نتمكن من العثور على ما تبحث عنه.';
+
+  @override
+  String get errorNotAllowed => 'ليس لديك صلاحية للقيام بذلك.';
+
+  @override
+  String get errorTooManyRequests =>
+      'محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.';
+
+  @override
+  String get errorPullToRetry => 'اسحب للأسفل لإعادة المحاولة';
+
+  @override
+  String get logoutAnyway => 'تسجيل الخروج';
+
+  @override
+  String frameworksCount(int count) {
+    return '$count إطارًا مستخدمًا في المنصة';
+  }
 }

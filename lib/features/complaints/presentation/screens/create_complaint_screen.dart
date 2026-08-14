@@ -10,6 +10,7 @@ import 'package:jadal_app/features/complaints/domain/repositories/complaint_repo
 import 'package:jadal_app/features/complaints/presentation/cubit/create_complaint_cubit.dart';
 import 'package:jadal_app/features/complaints/presentation/widgets/debate_picker_field.dart';
 import 'package:jadal_app/features/live_debate/data/models/debate_list_model.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 /// Files a new complaint about a debate — `POST /complaints`. Reached either
 /// from "My Complaints" (picks a debate via search) or directly from a
@@ -98,8 +99,7 @@ class _CreateComplaintScreenState extends State<CreateComplaintScreen> {
                 Navigator.pop(context, true);
               } else if (state is CreateComplaintError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               }

@@ -13,6 +13,7 @@ import 'package:jadal_app/features/surveys/presentation/cubit/survey_details_cub
 import 'package:jadal_app/features/surveys/presentation/cubit/survey_response_cubit.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_question_field.dart';
 import 'package:jadal_app/features/surveys/presentation/widgets/survey_state_views.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class SurveyDetailsScreen extends StatefulWidget {
   final int surveyId;
@@ -98,8 +99,7 @@ class _SurveyDetailsScreenState extends State<SurveyDetailsScreen> {
                 );
               } else if (state is SurveyResponseError) {
                 JadalSnackBar.show(
-                  context,
-                  state.message,
+                  context, FailureText.fromMessage(context, state.message),
                   type: SnackBarType.error,
                 );
               }

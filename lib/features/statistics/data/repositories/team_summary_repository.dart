@@ -23,9 +23,21 @@ class TeamSummaryRepository {
     };
   }
 
-  Future<Either<Failure, TeamSummaryStat>> getTeamSummary(int trainerId) async {
+  /// MF_FU §3.1a — omit [teamId] for the all-teams average (unchanged
+  /// behaviour); pass it for that one team, where `teams_counted` becomes 1.
+  /// An unknown id and a team this trainer doesn't coach both return 403,
+  /// deliberately indistinguishable so the endpoint can't be used to probe
+  /// which team ids exist.
+  Future<Either<Failure, TeamSummaryStat>> getTeamSummary(
+    int trainerId, {
+    int? teamId,
+  }) async {
     try {
-      final uri = Uri.parse(ApiConstants.trainerTeamSummaryUrl(trainerId));
+      final uri = Uri.parse(
+        ApiConstants.trainerTeamSummaryUrl(trainerId),
+      ).replace(
+        queryParameters: teamId == null ? null : {'team_id': '$teamId'},
+      );
       final res = await _client.get(uri, headers: await _headers());
       Map<String, dynamic>? body;
       if (res.body.isNotEmpty) {

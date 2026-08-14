@@ -5,6 +5,8 @@ import 'package:jadal_app/core/localization/l10n/context_localiztion.dart';
 import 'package:jadal_app/core/theme/app_colors.dart';
 import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/core/theme/avatar_palette.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/home/data/home_prefetch.dart';
@@ -21,7 +23,12 @@ import 'package:jadal_app/features/statistics/presentation/pages/public_stats_sc
 /// podium reads as a result at a glance: the winner is centred and raised,
 /// second and third flank them, and each plinth is sized by rank.
 class TopDebatersPreview extends StatefulWidget {
-  const TopDebatersPreview({super.key});
+  /// Bumped by Home on pull-to-refresh. This section owns its own fetch (it is
+  /// not driven by a cubit Home can reload), so it needs an explicit nudge —
+  /// otherwise a refresh reloads everything except this block.
+  final int refreshTick;
+
+  const TopDebatersPreview({super.key, this.refreshTick = 0});
 
   @override
   State<TopDebatersPreview> createState() => _TopDebatersPreviewState();
@@ -31,29 +38,56 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
   bool _loading = true;
   List<LeaderboardEntry> _top = const [];
 
+  /// Set when the fetch failed.
+  ///
+  /// This used to be swallowed (`res.fold((_) {}, …)`), which combined with the
+  /// "hide when empty" guard below meant that opening the app with no network
+  /// made this whole section **disappear** — while every other block showed an
+  /// error and recovered once the connection came back. It never returned,
+  /// because nothing re-ran the fetch. Now a failure is a visible, retryable
+  /// state like everywhere else.
+  String? _error;
+
   @override
   void initState() {
     super.initState();
     _load();
   }
 
+  @override
+  void didUpdateWidget(covariant TopDebatersPreview old) {
+    super.didUpdateWidget(old);
+    // Home pulls-to-refresh by rebuilding with a new refresh tick; without
+    // this the section would keep whatever it fetched on first mount.
+    if (old.refreshTick != widget.refreshTick) _load();
+  }
+
   Future<void> _load() async {
+    if (mounted) setState(() => _loading = true);
     // §4.1 — consume the splash-time prefetch when present.
-    final res = await (HomePrefetch.takeLeaderboard() ??
-        di.sl<LeaderboardRepository>().getLeaderboard(
-          LeaderboardScope.debaters,
-          LeaderboardMetric.points,
-        ));
+    final res =
+        await (HomePrefetch.takeLeaderboard() ??
+            di.sl<LeaderboardRepository>().getLeaderboard(
+              LeaderboardScope.debaters,
+              LeaderboardMetric.points,
+            ));
     if (!mounted) return;
     setState(() {
       _loading = false;
-      res.fold((_) {}, (board) => _top = board.entries.take(3).toList());
+      res.fold((f) => _error = f.message, (board) {
+        _error = null;
+        _top = board.entries.take(3).toList();
+      });
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (!_loading && _top.isEmpty) return const SizedBox.shrink();
+    // Hide only when the load SUCCEEDED and there is genuinely nothing to
+    // show. A failure must never look like "no data".
+    if (!_loading && _error == null && _top.isEmpty) {
+      return const SizedBox.shrink();
+    }
     // Podium order: 2nd on the leading side, 1st centred, 3rd trailing.
     LeaderboardEntry? at(int rank) {
       for (final e in _top) {
@@ -87,6 +121,12 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
                   child: CircularProgressIndicator(strokeWidth: 2.5),
                 ),
               ),
+            )
+          else if (_error != null)
+            JadalErrorView(
+              compact: true,
+              message: FailureText.fromMessage(context, _error),
+              onRetry: _load,
             )
           else
             Row(
@@ -124,7 +164,11 @@ class _Plinth extends StatelessWidget {
     final color = _colors[rank]!;
     final first = rank == 1;
     final avatarRadius = first ? 30.0 : 24.0;
-    final plinthHeight = switch (rank) { 1 => 62.0, 2 => 46.0, _ => 36.0 };
+    final plinthHeight = switch (rank) {
+      1 => 62.0,
+      2 => 46.0,
+      _ => 36.0,
+    };
     final dark = jadalIsDark(context);
 
     // An empty slot still occupies its column so the podium keeps its shape
@@ -167,14 +211,19 @@ class _Plinth extends StatelessWidget {
             child: CircleAvatar(
               radius: avatarRadius,
               backgroundColor: userAvatarColor(e.subjectId),
-              backgroundImage:
-                  url != null ? CachedNetworkImageProvider(url) : null,
+              backgroundImage: url != null
+                  ? CachedNetworkImageProvider(url)
+                  : null,
               child: url == null
                   ? Text(
-                      e.name.isEmpty ? '?' : e.name.substring(0, 1).toUpperCase(),
+                      e.name.isEmpty
+                          ? '?'
+                          : e.name.substring(0, 1).toUpperCase(),
                       style: AppTextStyles.subtitle(context).copyWith(
                         fontWeight: FontWeight.w900,
-                        color: Colors.white,
+                        color: userAvatarForeground(
+                          userAvatarColor(e.subjectId),
+                        ),
                       ),
                     )
                   : null,
@@ -197,7 +246,10 @@ class _Plinth extends StatelessWidget {
             color,
             plinthHeight,
             dark,
-            value: LeaderboardRow.formatValue(LeaderboardMetric.points, e.value),
+            value: LeaderboardRow.formatValue(
+              LeaderboardMetric.points,
+              e.value,
+            ),
           ),
         ],
       ),

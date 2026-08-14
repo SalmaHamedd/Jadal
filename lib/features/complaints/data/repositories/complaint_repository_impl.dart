@@ -7,6 +7,7 @@ import 'package:jadal_app/core/storage/preferences_database.dart';
 import 'package:jadal_app/features/complaints/data/models/complaint_model.dart';
 import 'package:jadal_app/features/complaints/domain/entities/complaint.dart';
 import 'package:jadal_app/features/complaints/domain/repositories/complaint_repository.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 
 class ComplaintRepositoryImpl implements ComplaintRepository {
   final http.Client client;
@@ -26,6 +27,9 @@ class ComplaintRepositoryImpl implements ComplaintRepository {
   Failure _failureFor(int statusCode, Map<String, dynamic> json, String fallback) {
     switch (statusCode) {
       case 401:
+        // Rejected token: clear the session and return to login,
+        // instead of leaving the user in an app where nothing works.
+        SessionGuard.onUnauthorized();
         return AuthFailure(json['message'] ?? 'Unauthenticated');
       case 403:
         return ForbiddenFailure(json['message'] ?? 'Unauthorized');

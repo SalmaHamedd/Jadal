@@ -7,7 +7,17 @@ import '../../../../core/function/json_utils.dart';
 
 /// Which stat is on screen. The first three share the bucketed series shape;
 /// ranking, improvement and activity (V2 §7) have their own.
-enum StatKind { winRate, avgScore, bestSpeaker, ranking, improvement, activity }
+/// MF_FU §11 adds [judgeRating] — judges-only, backed by
+/// `GET /judges/{id}/stats/ratings`.
+enum StatKind {
+  winRate,
+  avgScore,
+  bestSpeaker,
+  ranking,
+  improvement,
+  activity,
+  judgeRating,
+}
 
 /// Time bucket for the chart stats (1, 2, 2.5).
 enum StatsGroupBy { none, year, month }

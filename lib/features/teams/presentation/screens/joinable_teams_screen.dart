@@ -10,6 +10,8 @@ import 'package:jadal_app/features/teams/domain/entities/team.dart';
 import 'package:jadal_app/features/teams/domain/repositories/team_repository.dart';
 import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.dart';
 import 'package:jadal_app/features/teams/presentation/widgets/team_list_card.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
+import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 /// A debater's "find a team to join" browser — `GET /teams` for a debater
 /// returns active, non-random teams they're not already on, and this lets
@@ -125,35 +127,9 @@ class _JoinableTeamsScreenState extends State<JoinableTeamsScreen> {
       return const Center(child: CircularProgressIndicator());
     }
     if (_error != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.error_outline, size: 60, color: JadalColors.judgesGrey),
-            const SizedBox(height: 16),
-            Text(
-              context.loc.errorWithMessage(_error!),
-              style: AppTextStyles.subtitle(context),
-              textAlign: TextAlign.center,
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton(
-              onPressed: _load,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: JadalColors.primaryOrange,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 12,
-                ),
-              ),
-              child: Text(context.loc.retry),
-            ),
-          ],
-        ),
+      return JadalErrorScrollView(
+        message: FailureText.fromMessage(context, _error),
+        onRetry: _load,
       );
     }
     if (_teams.isEmpty) {

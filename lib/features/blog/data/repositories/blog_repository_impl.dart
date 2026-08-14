@@ -15,6 +15,7 @@ import 'package:jadal_app/features/blog/domain/entities/category.dart';
 import 'package:jadal_app/features/blog/domain/entities/tag.dart';
 import 'package:jadal_app/features/blog/domain/repositories/blog_repository.dart';
 import 'package:jadal_app/features/blog/data/models/blog_model.dart';
+import 'package:jadal_app/core/services/session_guard.dart';
 
 class BlogRepositoryImpl implements BlogRepository {
   final http.Client client;
@@ -55,6 +56,8 @@ class BlogRepositoryImpl implements BlogRepository {
           return Left(ServerFailure(json['message'] ?? 'Failed to load blogs'));
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else {
         return Left(ServerFailure('Server error: ${response.statusCode}'));
@@ -105,6 +108,8 @@ class BlogRepositoryImpl implements BlogRepository {
         }
         return Left(ServerFailure(json['message'] ?? 'Failed to search blogs'));
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       }
       return Left(ServerFailure('Server error: ${response.statusCode}'));
@@ -168,6 +173,8 @@ class BlogRepositoryImpl implements BlogRepository {
           );
         }
       } else if (response.statusCode == 401) {
+        // Rejected token: clear the session and return to login.
+        SessionGuard.onUnauthorized();
         return Left(AuthFailure('Unauthenticated'));
       } else if (response.statusCode == 404) {
         return Left(ServerFailure('Article not found'));

@@ -7,6 +7,7 @@ import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/blog/presentation/cubit/blog_cubit.dart';
 import 'package:jadal_app/features/blog/presentation/widgets/blog_card.dart';
 import 'package:jadal_app/features/blog/presentation/screens/blog_details_screen.dart';
+import 'package:jadal_app/core/error/failure_text.dart';
 
 class BlogListSection extends StatelessWidget {
   const BlogListSection({super.key});
@@ -63,7 +64,7 @@ class BlogListSection extends StatelessWidget {
             ],
           );
         } else if (state is BlogError) {
-          return Center(child: Text(context.loc.errorWithMessage(state.message)));
+          return Center(child: Text(FailureText.fromMessage(context, state.message)));
         }
         return const SizedBox();
       },

@@ -43,6 +43,19 @@ dependencies:
   firebase_core: ^4.13.0
   firebase_messaging: ^16.5.0
   flutter_local_notifications: ^22.3.0
+  # MF_FU §1.2 — the drawer's about-us rows deep-link out (tel:, mailto:,
+  # instagram://, wa.me), so each contact value opens the right app.
+  url_launcher: ^6.3.1
+
+# url_launcher_android 6.3.30 pulls androidx.browser:browser:1.9.0, which does
+# not resolve from the repos the Android build is configured with (google(),
+# mavenCentral(), the Flutter storage mirror, jitpack) — the build fails at
+# :app:checkDebugAarMetadata with "Could not find androidx.browser:browser:1.9.0".
+# 6.3.14 is the last line that depends on androidx.browser 1.8.0, which is
+# present in google(). Nothing in the app uses an API newer than that.
+# Remove this override once browser 1.9.0 is actually published to Google Maven.
+dependency_overrides:
+  url_launcher_android: 6.3.14
 
 dev_dependencies:
   flutter_test:

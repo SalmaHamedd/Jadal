@@ -137,8 +137,13 @@ class ProfileHeaderSection extends StatelessWidget {
                             name.isNotEmpty
                                 ? name.substring(0, 1).toUpperCase()
                                 : '?',
-                            style: AppTextStyles.displayTitle(context)
-                                .copyWith(fontSize: 38, color: Colors.white),
+                            style: AppTextStyles.displayTitle(context).copyWith(
+                              fontSize: 38,
+                              // One palette stop can't carry white legibly.
+                              color: userAvatarForeground(
+                                userAvatarColor(userId),
+                              ),
+                            ),
                           )
                         : null,
                   ),
@@ -165,37 +170,44 @@ class ProfileHeaderSection extends StatelessWidget {
         // stat bar rather than scattered pills.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Row(
-            children: [
-              Expanded(
-                child: _WideChip(
-                  icon: Icons.badge_rounded,
-                  label: roleLabel,
-                  color: JadalColors.primaryBlue,
-                ),
-              ),
-              if (points != null) ...[
-                const SizedBox(width: 10),
+          // MF_FU §2.2 — IntrinsicHeight + stretch so all three chips match the
+          // tallest one. They used to size to their own content, and the points
+          // chip was the only one with a second line, so it stood taller than
+          // its neighbours. The unit now sits inline with the value instead.
+          child: IntrinsicHeight(
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
                 Expanded(
                   child: _WideChip(
-                    icon: Icons.star_rounded,
-                    label: '$points',
-                    caption: context.loc.pointsLabel,
-                    color: JadalColors.primaryOrange,
+                    icon: Icons.badge_rounded,
+                    label: roleLabel,
+                    color: JadalColors.primaryBlue,
                   ),
                 ),
-              ],
-              if (tenure != null) ...[
-                const SizedBox(width: 10),
-                Expanded(
-                  child: _WideChip(
-                    icon: Icons.timelapse_rounded,
-                    label: _tenureLabel(context),
-                    color: JadalColors.positiveGreen,
+                if (points != null) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _WideChip(
+                      icon: Icons.star_rounded,
+                      label: '$points',
+                      unit: context.loc.pointsLabel,
+                      color: JadalColors.primaryOrange,
+                    ),
                   ),
-                ),
+                ],
+                if (tenure != null) ...[
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _WideChip(
+                      icon: Icons.timelapse_rounded,
+                      label: _tenureLabel(context),
+                      color: JadalColors.positiveGreen,
+                    ),
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
         if (location != null && location!.isNotEmpty) ...[
@@ -221,24 +233,29 @@ class ProfileHeaderSection extends StatelessWidget {
   }
 }
 
-/// A full-width tonal chip: icon, then the value, with an optional caption
-/// underneath. Sized by its column, never by its text.
+/// A full-width tonal chip: icon, then the value with an optional [unit] on the
+/// **same line**. Sized by its column, never by its text — and every chip in a
+/// row ends up the same height because the row stretches them (see above).
 class _WideChip extends StatelessWidget {
   final IconData icon;
   final String label;
-  final String? caption;
+  final String? unit;
   final Color color;
   const _WideChip({
     required this.icon,
     required this.label,
-    this.caption,
+    this.unit,
     required this.color,
   });
+
+  /// Floor so a one-word role and a long tenure string still make an even row.
+  static const double _minHeight = 62;
 
   @override
   Widget build(BuildContext context) {
     final dark = jadalIsDark(context);
     return Container(
+      constraints: const BoxConstraints(minHeight: _minHeight),
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
       decoration: BoxDecoration(
         color: color.withValues(alpha: dark ? 0.20 : 0.11),
@@ -246,28 +263,42 @@ class _WideChip extends StatelessWidget {
         border: Border.all(color: color.withValues(alpha: 0.28)),
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, size: 17, color: color),
           const SizedBox(height: 5),
-          Text(
-            label,
-            maxLines: 1,
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.ellipsis,
-            style: AppTextStyles.body(context)
-                .copyWith(fontWeight: FontWeight.w800, color: color),
-          ),
-          if (caption != null)
-            Text(
-              caption!,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: AppTextStyles.small(context).copyWith(
-                fontWeight: FontWeight.w600,
-                color: color.withValues(alpha: 0.75),
-              ),
+          // scaleDown keeps a 4-digit score (and long localized labels) on one
+          // line instead of ellipsising or wrapping into a second row.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              textBaseline: TextBaseline.alphabetic,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              children: [
+                Text(
+                  label,
+                  maxLines: 1,
+                  textAlign: TextAlign.center,
+                  style: AppTextStyles.body(
+                    context,
+                  ).copyWith(fontWeight: FontWeight.w800, color: color),
+                ),
+                if (unit != null) ...[
+                  const SizedBox(width: 4),
+                  Text(
+                    unit!,
+                    maxLines: 1,
+                    style: AppTextStyles.small(context).copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: color.withValues(alpha: 0.75),
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
         ],
       ),
     );
