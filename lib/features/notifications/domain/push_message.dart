@@ -1,9 +1,7 @@
-/// Push-notification payload model (§7).
-///
+/// Push-notification payload model.
 /// The backend sends every value in the FCM `data` block as a **string** (an
 /// FCM constraint), always including `type`, plus at most one entity id. This
 /// parses that into something the router can switch on safely.
-///
 /// Deliberately tolerant: an unrecognised `type`, or a known type whose id is
 /// missing or unparseable, degrades to [PushType.unknown] rather than throwing.
 /// A push that cannot be routed must never crash the app — the backend can add
@@ -11,9 +9,8 @@
 library;
 
 /// The seven live notification types.
-///
 /// `debate_created` is deliberately ABSENT. The backend removed it outright
-/// (BACKEND_REPLY_TO_FRONTEND §A): restricting it to "open for registration"
+///: restricting it to "open for registration"
 /// was a no-op, because debates are created in `scheduled` — which *is* the
 /// registration-open state — so it would still have notified every user on
 /// every creation. Nothing will ever arrive with that type; do not add it back

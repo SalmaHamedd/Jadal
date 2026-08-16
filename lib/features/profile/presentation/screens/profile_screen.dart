@@ -71,7 +71,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   /// Re-runs everything on the screen, including the sections behind the
   /// [_extrasLoaded] latch.
-  ///
   /// That latch is why leaving a team used to keep showing it under "current
   /// teams" until the app was restarted: `_loadExtras` runs from `build`, so
   /// without resetting the latch a reload refreshed the profile header and
@@ -218,7 +217,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   actions: profile == null
                       ? const []
                       : [
-                          // §6.5 — the old full-width button row is gone; the
+                          // The old full-width button row is gone; the
                           // owner-only actions are icons up here instead.
                           _BarAction(
                             icon: Icons.edit_rounded,
@@ -449,7 +448,7 @@ class _BarAction extends StatelessWidget {
   }
 }
 
-/// §6.7 — the private-details card. Owner-only, so it simply never renders on
+/// The private-details card. Owner-only, so it simply never renders on
 /// someone else's profile.
 class _PrivateDetails extends StatelessWidget {
   final Profile profile;
@@ -467,7 +466,7 @@ class _PrivateDetails extends StatelessWidget {
             title: loc.privateDetails,
           ),
           const SizedBox(height: 8),
-          // MF_FU §2.3 — one accent per field so the card reads as a set of
+          // One accent per field so the card reads as a set of
           // distinct details rather than five identical blue rows.
           ProfileDetailRow(
             icon: Icons.email_outlined,
@@ -516,7 +515,7 @@ class _LogoutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MF_FU §2.5 — a solid red block, not a 9%-alpha tint with a red outline.
+    // A solid red block, not a 9%-alpha tint with a red outline.
     // This is the page's terminal action and should read like one.
     const red = JadalColors.negativeRed;
     return DecoratedBox(

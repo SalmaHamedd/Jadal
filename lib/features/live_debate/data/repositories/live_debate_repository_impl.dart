@@ -28,7 +28,6 @@ import '../../../../core/services/session_guard.dart';
 /// HTTP implementation of [LiveDebateRepository] (matches the app's
 /// repository-pattern convention: `http.Client` + `TokenStorage` bearer +
 /// `Accept: application/json` + `Either<Failure, T>`). Error mapping follows
-/// docs §G.
 class LiveDebateRepositoryImpl implements LiveDebateRepository {
   final http.Client _client;
 
@@ -38,14 +37,13 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
     final token = await TokenStorage.getToken();
     return {
       if (json) 'Content-Type': 'application/json',
-      'Accept': 'application/json', // mandatory (§0)
+      'Accept': 'application/json', // required by the API
       if (token != null) 'Authorization': 'Bearer $token',
     };
   }
 
   /// Runs [run], catching network errors, then maps the response to the decoded
   /// envelope body (`{success,message,data,…}`) or a [Failure].
-  ///
   /// Logs the request line + (optional) request body before the call and the
   /// status + FULL response body after it, tagged with [label], so the whole
   /// backend conversation shows up in the trace/file. Sensitive fields (room
@@ -108,12 +106,16 @@ class LiveDebateRepositoryImpl implements LiveDebateRepository {
         // Rejected token: clear the session and return to login,
         // instead of leaving the user in an app where nothing works.
         SessionGuard.onUnauthorized();
-        await TokenStorage.deleteToken(); // bounce to login + clear token (§G)
+        await TokenStorage.deleteToken(); // bounce to login + clear token
         return Left(AuthFailure(message ?? 'Unauthenticated'));
       case 403:
         return Left(ForbiddenFailure(message ?? 'Forbidden'));
       case 404:
         return Left(NotFoundFailure(message ?? 'Not found'));
+      case 410:
+        // Guest share link outside the debate's viewing window. Deliberately
+        // not an auth failure — logging in wouldn't help whoever hit this.
+        return Left(GoneFailure(message ?? 'No longer available'));
       case 422:
         return Left(ValidationFailure(message ?? 'Validation error',
             errors: _parseErrors(body)));

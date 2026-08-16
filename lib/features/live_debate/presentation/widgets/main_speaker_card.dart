@@ -11,7 +11,7 @@ import '../utils/debate_timeline.dart';
 import 'debate_timer.dart';
 import 'jadal_video_card.dart';
 
-/// The visual focus of Layout 2 (§8.3 B): a large rounded card for the current
+/// The visual focus of Layout 2: a large rounded card for the current
 /// speaker with the timer attached. Coloured by the speaker's side (prop=blue,
 /// opp=orange) and the current timer tier.
 class MainSpeakerCard extends StatelessWidget {
@@ -26,7 +26,7 @@ class MainSpeakerCard extends StatelessWidget {
         final dark = DebateTheme.isDark(context);
         final slot = cubit.currentSlot;
 
-        // C3: the intro phase (live session started, no speech yet) shows the
+        // The intro phase (live session started, no speech yet) shows the
         // chair in the main card to welcome/introduce — no timer.
         if (cubit.isIntro) {
           return _IntroCard(
@@ -44,7 +44,7 @@ class MainSpeakerCard extends StatelessWidget {
         final accent = DebateTheme.tierAccent(tier, side, dark);
         final sideColor = DebateTheme.sideColor(side);
         final isOver = tier == DebateTier.timeOff;
-        // Timer ring (§U4b): corners alternate side colour (top-right/bottom-left)
+        // Timer ring: corners alternate side colour (top-right/bottom-left)
         // with the base colour (top-left/bottom-right) — dark base in light theme,
         // light base in dark theme — at ~80% alpha. Time-over paints it all red.
         final cornerBase = dark
@@ -85,7 +85,7 @@ class MainSpeakerCard extends StatelessWidget {
             final h = constraints.maxHeight - overhang;
             return Stack(
               children: [
-                // Neutral card surface (§11) — the side colour now lives only in
+                // Neutral card surface — the side colour now lives only in
                 // the animated progress ring, not the card body.
                 Positioned(
                   top: 0,
@@ -168,7 +168,7 @@ class MainSpeakerCard extends StatelessWidget {
                       ),
                     ),
                   ),
-                // The timer rendered AS a gradient animated border (§11): a
+                // The timer rendered AS a gradient animated border: a
                 // progress ring (blue/orange by side) that fills with the speech.
                 Positioned(
                   top: 0,
@@ -210,18 +210,12 @@ class MainSpeakerCard extends StatelessWidget {
                     isReply: slot.isReply,
                   ),
                 ),
-                // C1 / Update 1: chair-only stop/resume timer button, straddling
-                // the bottom-centre edge. It appears/disappears (animated) together
-                // with the tool bar — so when the bar is hidden the button is too,
-                // and the tap that reveals the bar can't be mistaken for a (missed)
-                // press on a button that wouldn't have stopped the timer anyway.
-                // MF_FU §6.2 — the button used to sit at `bottom: -22`, so half
-                // of it hung OUTSIDE this Stack. `Clip.none` makes the overflow
-                // visible but hit-testing does not extend past a parent's
-                // bounds, so taps on its lower half fell through to the room's
-                // background handler and just toggled the tool bar. It now sits
-                // fully inside the Stack (see the reserved overhang below), and
-                // is 64dp instead of 46dp.
+                // Chair-only stop/resume timer button, straddling the bottom
+                // edge. It fades in and out with the tool bar so a tap meant to
+                // reveal the bar is never mistaken for a press on it.
+                // It must stay fully inside the Stack (see the reserved
+                // overhang below): hit-testing doesn't extend past a parent's
+                // bounds, so an overhanging half would swallow taps.
                 if (cubit.canControlTimer)
                   Positioned(
                     left: 0,
@@ -269,7 +263,7 @@ class MainSpeakerCard extends StatelessWidget {
 
 /// Draws the main card's timer as a rounded-rect progress ring: a faint full
 /// track plus a gradient stroke (side colours) that fills from the top-centre
-/// clockwise as the speech elapses (§11).
+/// clockwise as the speech elapses.
 class _ProgressRingPainter extends CustomPainter {
   final double progress; // 0..1
   final Gradient gradient;
@@ -395,7 +389,7 @@ class _IdleCard extends StatelessWidget {
   }
 }
 
-/// C3: the intro main card — the chair (welcome) with an "Introductions" chip and
+/// The intro main card — the chair (welcome) with an "Introductions" chip and
 /// NO timer, shown after the chair starts the live session and before P1.
 class _IntroCard extends StatelessWidget {
   final String hostId;

@@ -38,7 +38,7 @@ class ApiAuthRepository implements AuthRepository {
         final user = UserModel.fromJson(data['user']);
         // Cache the account role for role-gated UI (registration options, etc.).
         await TokenStorage.saveRole(user.role);
-        // MF_FU §1.1 — the full identity bundle, so the nav drawer renders in
+        // The full identity bundle, so the nav drawer renders in
         // one frame off the login payload instead of firing two live
         // `GET /profile` calls on every open.
         await SessionIdentity.cache(
@@ -48,7 +48,7 @@ class ApiAuthRepository implements AuthRepository {
           avatarUrl: user.avatarUrl,
           points: user.points,
         );
-        // Sprinkles §9 / MF_FU §2 — support contact info, editable server-side
+        // / — support contact info, editable server-side
         // without an app release. Cached locally so the drawer can show it
         // without re-hitting login.
         final contact = data['contact'];

@@ -1,13 +1,11 @@
 import '../../../../core/function/json_utils.dart';
 
-/// MF_FU §5 — the judge's average rating received.
-///
+/// The judge's average rating received.
 /// Source data is the existing `POST /feedback` `rating_judgement` rows. The
 /// backend confirmed `to_user_id` is **enforced** on those (and validated to be
 /// a judge *of that debate*), so a rating always belongs to one named judge —
 /// multi-judge panels need no special handling, and nothing here is ever a
 /// panel average presented as an individual's score.
-///
 /// Aggregates only: no rater ids, no names, no free-text comments.
 class JudgeRatingStat {
   final int judgeId;

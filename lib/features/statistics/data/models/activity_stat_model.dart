@@ -1,7 +1,6 @@
 import '../../../../core/function/json_utils.dart';
 
-/// V2 §7 — the participation/activity score.
-///
+/// The participation/activity score.
 /// `GET /debaters|trainers|judges/{id}/stats/activity?from=&to=&group_by=`
 /// returns raw weighted point totals (NOT percentages — no ceiling is defined
 /// server-side), bucketed like the other stats, with a per-bucket and total

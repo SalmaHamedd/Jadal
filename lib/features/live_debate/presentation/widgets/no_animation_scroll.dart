@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Instantly snaps pages without spring animation (ported from the legacy
-/// `InstantSnapScrollPhysics`). Available for paged grid layouts (§8.2).
+/// `InstantSnapScrollPhysics`). Available for paged grid layouts.
 class InstantSnapScrollPhysics extends PageScrollPhysics {
   const InstantSnapScrollPhysics({super.parent});
 

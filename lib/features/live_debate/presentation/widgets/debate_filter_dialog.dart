@@ -8,7 +8,7 @@ import 'package:jadal_app/features/live_debate/data/repositories/live_debate_rep
 import 'package:jadal_app/features/live_debate/domain/debate_search_filter.dart';
 import 'package:jadal_app/features/search/data/repositories/search_repository_impl.dart';
 
-/// The filter dialog for debate search (§8) — fetches every option list on
+/// The filter dialog for debate search — fetches every option list on
 /// open (formats, frameworks, distinct debate tags, judges, teams) and lets
 /// the user multi-select each dimension, plus a searchable user picker and a
 /// date range. "Motion tag" isn't offered — backend confirmed it isn't real

@@ -13,10 +13,10 @@ import '../models/registration_models.dart';
 import '../models/room_token_model.dart';
 import '../models/team_chat_history_model.dart';
 
-/// REST surface for the backend live-debate mode (§6/§7). All calls send the
+/// REST surface for the backend live-debate mode. All calls send the
 /// Sanctum bearer + `Accept: application/json` and return `Either<Failure, T>`.
 abstract class LiveDebateRepository {
-  /// `GET /debates?status=…&per_page=…&page=…` — one status per list tab (§13).
+  /// `GET /debates?status=…&per_page=…&page=…` — one status per list tab.
   Future<Either<Failure, DebateListPage>> getDebates({
     required String status,
     int page = 1,
@@ -24,7 +24,7 @@ abstract class LiveDebateRepository {
   });
 
   /// `GET /debates/{id}/live-state` — the full picture; fetch on screen entry
-  /// and re-fetch on the room-availability events (§7).
+  /// and re-fetch on the room-availability events.
   Future<Either<Failure, LiveStateModel>> getLiveState(int debateId);
 
   /// `GET /debates/{id}/token?room={main|prop|opp|result}` — fresh, room-scoped.
@@ -45,14 +45,14 @@ abstract class LiveDebateRepository {
   /// `POST /debates/{id}/rollback-to-lobby` — chair: back to stage 0.
   Future<Either<Failure, Unit>> rollbackToLobby(int debateId);
 
-  /// `POST /debates/{id}/timer` `{action:"pause"|"resume"}` (V11 §0) — chair:
+  /// `POST /debates/{id}/timer` `{action:"pause"|"resume"}` — chair:
   /// server-authoritative pause/resume; the server broadcasts `timer_update`.
   Future<Either<Failure, Unit>> setTimer({
     required int debateId,
     required String action,
   });
 
-  /// `POST /debates/{id}/start-live` (V11 §1) — chair: enter the live session
+  /// `POST /debates/{id}/start-live` — chair: enter the live session
   /// from the lobby (intro phase); `current_stage` stays 0, broadcasts
   /// `debate_mode_started`.
   Future<Either<Failure, Unit>> startLive(int debateId);
@@ -70,7 +70,7 @@ abstract class LiveDebateRepository {
     required DebateResultModel result,
   });
 
-  /// `POST /debates/{id}/result/reveal` — chair reveals (confetti path, §10).
+  /// `POST /debates/{id}/result/reveal` — chair reveals (confetti path).
   Future<Either<Failure, Unit>> revealResult(int debateId);
 
   /// `POST /debates/{id}/close-main` — chair closes the main room (auto-reveals).
@@ -78,7 +78,7 @@ abstract class LiveDebateRepository {
 
   /// `POST /debates/{id}/close-room` — chair force-closes the room: reveals a
   /// pending result or cancels the debate, broadcasts `room_closed`, then deletes
-  /// the main LiveKit room (§FE-7). Returns the updated live-state.
+  /// the main LiveKit room. Returns the updated live-state.
   Future<Either<Failure, LiveStateModel>> closeRoom(int debateId);
 
   /// `POST /feedback` — `rating_debate` / `rating_judgement` (after reveal only).
@@ -90,20 +90,20 @@ abstract class LiveDebateRepository {
     String? content,
   });
 
-  // ── Registration (§15.1) ──────────────────────────────────────────────────────
+  // ── Registration ──────────────────────────────────────────────────────
   /// `POST /debates/{id}/register` — self-register as a team / solo debater /
   /// judge. Returns the backend's (bilingual) success message on 201.
   Future<Either<Failure, String>> register(DebateRegistration request);
 
-  /// V12 §1 — `GET /debates/{id}/registerable-teams`: the teams the caller may
+  /// `GET /debates/{id}/registerable-teams`: the teams the caller may
   /// register for this debate (each with an eligibility flag).
   Future<Either<Failure, RegisterableTeams>> getRegisterableTeams(int debateId);
 
-  /// V12 §3 — `GET /debates/{id}/registrations`: who registered so far, split
+  /// `GET /debates/{id}/registrations`: who registered so far, split
   /// into teams / judges / solo (for the three registrant dialogs).
   Future<Either<Failure, DebateRegistrations>> getRegistrations(int debateId);
 
-  // ── Persistent team chat (sprinkles §2) ───────────────────────────────────────
+  // ── Persistent team chat ───────────────────────────────────────
   /// `GET /debates/{id}/chat` — the caller's own team chat history (team
   /// resolved server-side, never passed by the client).
   Future<Either<Failure, List<TeamChatHistoryMessage>>> getChatHistory(int debateId);
@@ -119,7 +119,7 @@ abstract class LiveDebateRepository {
   /// chat as seen by them. No body.
   Future<Either<Failure, Unit>> markChatRead(int debateId);
 
-  // ── Debate search + filter option lists (sprinkles §8) ────────────────────────
+  // ── Debate search + filter option lists ────────────────────────
   /// `GET /debates/search` — same paginated shape as [getDebates].
   Future<Either<Failure, DebateListPage>> searchDebates(
     DebateSearchFilter filter, {

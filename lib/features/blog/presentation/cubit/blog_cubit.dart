@@ -13,7 +13,7 @@ class BlogCubit extends Cubit<BlogState> {
 
   BlogCubit(this.repository) : super(BlogInitial());
 
-  /// [warm] — §4.1: an already-in-flight result from the splash prefetch;
+  /// [warm] —: an already-in-flight result from the splash prefetch;
   /// when given it replaces the network call for this load only.
   Future<void> loadBlogs({Future<Either<Failure, List<Blog>>>? warm}) async {
     emit(BlogLoading());
@@ -24,7 +24,7 @@ class BlogCubit extends Cubit<BlogState> {
     );
   }
 
-  /// Search + filter (§10) — replaces the plain list load whenever a query or
+  /// Search + filter — replaces the plain list load whenever a query or
   /// filter is active.
   Future<void> searchBlogs(BlogSearchFilter filter) async {
     emit(BlogLoading());

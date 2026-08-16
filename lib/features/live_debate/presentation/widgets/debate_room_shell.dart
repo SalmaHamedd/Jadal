@@ -7,7 +7,7 @@ import 'debate_action_row.dart';
 
 /// Wraps a room body with the tap-to-reveal / auto-hiding bottom action row so
 /// the (role-appropriate) tool bar is available in **every** room — open-lobby,
-/// prep and result — not just the live debate (§9.3). Requires a [ConnectionCubit]
+/// prep and result — not just the live debate. Requires a [ConnectionCubit]
 /// above it in the tree. Also paints the shared brand-gradient backdrop so prep
 /// and result rooms match the rest of the live-debate feature.
 class DebateRoomShell extends StatelessWidget {

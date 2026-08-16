@@ -84,7 +84,7 @@ Map<String, dynamic> _liveStateData() => {
         {'id': 104, 'order_index': 5, 'name': 'Proposition 3', 'is_reply': false, 'participant_id': 40, 'speaker_user_id': 11, 'duration_seconds': 420, 'status': 'completed'},
         {'id': 105, 'order_index': 6, 'name': 'Opposition 3', 'is_reply': false, 'participant_id': 52, 'speaker_user_id': 24, 'duration_seconds': 420, 'status': 'completed'},
       ],
-      // F-FIX 1: per-stage scores nested under scores.stages (NOT top-level).
+      // Per-stage scores nest under scores.stages, not at the top level.
       'result': {
         'id': 5,
         'winning_side': 'proposition',
@@ -104,12 +104,12 @@ Map<String, dynamic> _liveStateData() => {
     };
 
 void main() {
-  group('live-state parses the backend V4 contract', () {
+  group('live-state parses the backend contract', () {
     late LiveStateModel state;
 
     setUp(() => state = LiveStateModel.fromJson(_liveStateData()));
 
-    test('lifecycle: status stays live, result phase open (V3 B1)', () {
+    test('lifecycle: status stays live, result phase open', () {
       expect(state.debate.status, DebateStatus.live);
       expect(state.debate.isCompleted, isFalse);
       expect(state.debate.speechesCompleted, isTrue); // speeches_completed_at set
@@ -120,7 +120,7 @@ void main() {
       expect(resultPhaseOpen, isTrue);
     });
 
-    test('rooms: result is judges-only joinable; roles parse incl. debater_* (F-FIX 2)', () {
+    test('rooms: result is judges-only joinable; roles parse incl. debater_*', () {
       expect(state.rooms.main.joinableForMe, isTrue);
       expect(state.rooms.main.roleIfJoined, DebateRoomRole.judgeChair);
       expect(state.rooms.prop.roleIfJoined, DebateRoomRole.debaterSpeaker);
@@ -135,20 +135,20 @@ void main() {
       expect(state.isJudge(30), isTrue);
     });
 
-    test('multi-role speaking_order keeps the duplicate user (V3 B4 / FE-7)', () {
+    test('multi-role speaking_order keeps the duplicate user', () {
       final order = state.proposition.speakingOrder;
       expect(order.length, 3);
       expect(order.map((s) => s.userId).toList(), [11, 12, 11]); // user 11 holds slots 1 & 3
       expect(order[2].participantId, 40);
     });
 
-    test('reply speaker reads is_reply_speaker flag (F-FIX 3)', () {
+    test('reply speaker reads is_reply_speaker flag', () {
       expect(state.opposition.replySpeaker?.user.id, 23);
       expect(state.opposition.speakers.firstWhere((s) => s.user.id == 23).isReplySpeaker, isTrue);
       expect(state.proposition.speakers.first.isReplySpeaker, isFalse);
     });
 
-    test('stages carry the phase id + server-resolved speaker (V3 B8 / B3)', () {
+    test('stages carry the phase id + server-resolved speaker', () {
       final s1 = state.stages.firstWhere((s) => s.orderIndex == 1);
       expect(s1.id, 100); // stages[].id present → POST /stages/{id}/poi works
       expect(s1.speakerUserId, 11);
@@ -156,7 +156,7 @@ void main() {
     });
   });
 
-  group('result view renders from scores.stages (F-FIX 1)', () {
+  group('result view renders from scores.stages', () {
     late DebateResultView view;
 
     setUp(() => view = DebateResultView.fromLiveState(LiveStateModel.fromJson(_liveStateData())));
@@ -179,7 +179,7 @@ void main() {
     });
   });
 
-  group('result submit payload matches the backend (FE-1)', () {
+  group('result submit payload matches the backend', () {
     test('stage_scores are integers, one per stage', () {
       final model = DebateResultModel(
         winningSide: 'proposition',
@@ -201,7 +201,7 @@ void main() {
     });
   });
 
-  group('role enum (F-FIX 2)', () {
+  group('role enum', () {
     test('both debater_* wire values count as a debater', () {
       expect(DebateRoomRole.fromWire('debater_member').isDebater, isTrue);
       expect(DebateRoomRole.fromWire('debater_speaker').isDebater, isTrue);

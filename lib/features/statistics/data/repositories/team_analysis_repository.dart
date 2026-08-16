@@ -12,8 +12,7 @@ import '../models/debater_stats_models.dart';
 import '../models/judge_rating_model.dart';
 import '../models/team_analysis_models.dart';
 
-/// MF_FU §3–§5 — the round's new read-only analytics.
-///
+///– — the round's new read-only analytics.
 /// The per-team metric endpoints return the **debater envelopes verbatim**
 /// (same keys, same `grouping` values, same `label` formats), so
 /// [BucketedStat] / [ImprovementStat] / [ActivityStat] are reused unchanged
@@ -72,7 +71,7 @@ class TeamAnalysisRepository {
     }
   }
 
-  // ── §3.1b — the coach's teams, for the picker ──────────────────────────────
+  // ── The coach's teams, for the picker ──────────────────────────────
   Future<Either<Failure, List<TrainerTeam>>> getTrainerTeams(
     int trainerId,
   ) async {
@@ -86,7 +85,7 @@ class TeamAnalysisRepository {
     });
   }
 
-  // ── §3.2 — per-team metrics, reusing the debater shapes ────────────────────
+  // ── Per-team metrics, reusing the debater shapes ────────────────────
   Future<Either<Failure, BucketedStat>> getTeamBucketed(
     int teamId,
     String metric, // 'win-rate' | 'avg-score'
@@ -135,7 +134,7 @@ class TeamAnalysisRepository {
     });
   }
 
-  // ── §4 — line-up (combination) analysis ────────────────────────────────────
+  // ── Line-up (combination) analysis ────────────────────────────────────
   Future<Either<Failure, TeamCombinationsStat>> getTeamCombinations(
     int teamId, {
     String? from,
@@ -163,7 +162,7 @@ class TeamAnalysisRepository {
         );
   }
 
-  // ── §5 — judge ratings received ────────────────────────────────────────────
+  // ── Judge ratings received ────────────────────────────────────────────
   Future<Either<Failure, JudgeRatingStat>> getJudgeRatings(
     int judgeId, {
     String? from,

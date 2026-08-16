@@ -40,7 +40,7 @@ class StatsImprovementView extends StatelessWidget {
             tween: Tween(begin: 0, end: shownIndex),
             duration: const Duration(milliseconds: 900),
             curve: Curves.easeOutCubic,
-            // MF_FU §7.5 — arrow + sign so direction survives colour-vision
+            // Arrow + sign so direction survives colour-vision
             // deficiency and greyscale, not colour alone.
             builder: (context, v, _) => Text(
               signedWithArrow(v),

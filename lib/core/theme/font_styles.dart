@@ -3,21 +3,21 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 // TextStyle defaultFontStyle = GoogleFonts.Cairo(
-//   color: blackColor,
-//   fontSize: 11,
-//   fontWeight: FontWeight.w500,
-// );
+// color: blackColor,
+// fontSize: 11,
+// fontWeight: FontWeight.w500,
+//);
 // TextStyle headerTableTextStyle = GoogleFonts.Cairo(
-//   color: blackColor,
-//   fontSize: 12,
-//   fontWeight: FontWeight.w800,
-// );
+// color: blackColor,
+// fontSize: 12,
+// fontWeight: FontWeight.w800,
+//);
 
 // TextStyle textFieldLabelStyle = GoogleFonts.Cairo(
-//   color: blackColor,
-//   fontSize: 14,
-//   fontWeight: FontWeight.w500,
-// );
+// color: blackColor,
+// fontSize: 14,
+// fontWeight: FontWeight.w500,
+//);
 
 TextStyle textFromStyle = const TextStyle(
   color: AppColors.blackColor,
@@ -65,24 +65,24 @@ TextStyle textButton = const TextStyle(
 );
 
 // TextStyle textFromStyle = const TextStyle(
-//     color: AppColors.blackColor,
-//     fontSize: 15,
-//     fontWeight: FontWeight.w500,
-//     fontFamily: "Fredoka");
+// color: AppColors.blackColor,
+// fontSize: 15,
+// fontWeight: FontWeight.w500,
+// fontFamily: "Fredoka");
 // TextStyle defaultFontStyle = const TextStyle(
-//     color: AppColors.blackColor,
-//     fontSize: 11,
-//     fontWeight: FontWeight.w500,
-//     fontFamily: "Cairo");
+// color: AppColors.blackColor,
+// fontSize: 11,
+// fontWeight: FontWeight.w500,
+// fontFamily: "Cairo");
 
 // TextStyle headerTableTextStyle = const TextStyle(
-//     color: AppColors.blackColor,
-//     fontSize: 12,
-//     fontWeight: FontWeight.w800,
-//     fontFamily: "Cairo");
+// color: AppColors.blackColor,
+// fontSize: 12,
+// fontWeight: FontWeight.w800,
+// fontFamily: "Cairo");
 
 // TextStyle textFieldLabelStyle = const TextStyle(
-//     color: AppColors.blackColor,
-//     fontSize: 14,
-//     fontWeight: FontWeight.w500,
-//     fontFamily: "Cairo");
+// color: AppColors.blackColor,
+// fontSize: 14,
+// fontWeight: FontWeight.w500,
+// fontFamily: "Cairo");

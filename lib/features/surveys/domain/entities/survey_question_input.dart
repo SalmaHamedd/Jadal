@@ -2,7 +2,6 @@ import 'package:jadal_app/features/surveys/domain/entities/survey_question.dart'
 
 /// A question definition used when replacing a survey's question list via
 /// `PUT /admin/surveys/{id}` or `PUT /trainer/surveys/{id}`.
-///
 /// This is intentionally separate from [SurveyQuestion] (the read-model
 /// returned by the API) since the write shape differs: `options` depends on
 /// `type`, and `order_index` is optional there.

@@ -15,7 +15,7 @@ import '../widgets/debate_screen_header.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/speaker_order_dialog.dart';
 
-/// Prep room (Layout 1, §8.1). Shows the team grid, a prep countdown, and — for
+/// Prep room (Layout 1). Shows the team grid, a prep countdown, and — for
 /// the current leader only — the speaker-order control. The control reacts live
 /// to presence (recomputed from the cubit's presentIds).
 class PrepRoomScreen extends StatefulWidget {
@@ -80,7 +80,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
           final leader = DebateAccess.currentLeader(team, present);
           final isLeader = leader?.id == cubit.data.currentUserId;
           final order = cubit.orderFor(widget.side);
-          // Issue 1: show who is ACTUALLY in the prep room (real LiveKit
+          // Show who is ACTUALLY in the prep room (real LiveKit
           // presence), not the whole roster — same rule the live room uses. The
           // prep room is connected (the lobby joins it before pushing), and mock
           // mode reports everyone present so the solo demo is unchanged.
@@ -106,7 +106,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     height: 48,
-                    // Solid side colour — no gradient in the prep room (§U4a).
+                    // Solid side colour — no gradient in the prep room.
                     child: FilledButton.icon(
                       style: FilledButton.styleFrom(
                         backgroundColor: DebateTheme.sideColor(widget.side),
@@ -123,7 +123,7 @@ class _PrepRoomScreenState extends State<PrepRoomScreen> {
                           team: team,
                           current: order,
                           replyEnabled: cubit.data.format.replySpeech,
-                          slotCount: cubit.speakersPerSide, // FE-8: N slots, dup allowed
+                          slotCount: cubit.speakersPerSide, // N slots, dup allowed
                           onConfirm: (ordered, replyId) => cubit.setSpeakerOrder(
                             teamId: team.teamId,
                             orderedSpeakerIds: ordered,

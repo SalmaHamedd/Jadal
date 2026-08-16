@@ -4,7 +4,7 @@
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
 
-    <!-- §7 — push notifications. Runtime-granted on Android 13+ (API 33);
+    <!-- Push notifications. Runtime-granted on Android 13+ (API 33),
          auto-granted below that. -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
@@ -56,13 +56,26 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Debate share links: https://jadal-platform.com/d/{id}.
+                 autoVerify makes Android open the app directly instead of
+                 offering a chooser, which requires
+                 https://jadal-platform.com/.well-known/assetlinks.json to list
+                 this package and its signing fingerprints. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data
+                    android:scheme="https"
+                    android:host="jadal-platform.com"
+                    android:pathPrefix="/d/"/>
+            </intent-filter>
         </activity>
-        <!-- §7 — defaults FCM applies when the SYSTEM builds the notification,
-             i.e. while the app is backgrounded or terminated. Foreground
-             messages are drawn by flutter_local_notifications instead, which
-             is configured with the same icon/channel in PushService so both
-             paths look identical.
-             The channel id must match kPushChannelId in push_service.dart. -->
+        <!-- Defaults FCM applies when the system builds the notification, i.e.
+             while the app is backgrounded or terminated. Foreground messages
+             are drawn by flutter_local_notifications instead, configured with
+             the same icon and channel in PushService so both paths look the
+             same. The channel id must match kPushChannelId there. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
             android:resource="@drawable/ic_notification" />

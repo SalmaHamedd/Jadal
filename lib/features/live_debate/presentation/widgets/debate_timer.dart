@@ -6,7 +6,7 @@ import '../utils/debate_theme.dart';
 import '../utils/debate_timeline.dart';
 
 /// Timer chip attached to the main speaker card. Generalized from the legacy
-/// `ScalableDebateTimer`: all thresholds come from [timeline] (§8.3 B), and the
+/// `ScalableDebateTimer`: all thresholds come from [timeline], and the
 /// colour follows the current [DebateTier] (protected/open/extra/timeOff).
 class DebateTimerBadge extends StatelessWidget {
   final int elapsedSeconds;
@@ -36,7 +36,7 @@ class DebateTimerBadge extends StatelessWidget {
     final minutes = (elapsedSeconds ~/ 60).toString().padLeft(2, '0');
     final seconds = (elapsedSeconds % 60).toString().padLeft(2, '0');
 
-    // Reply speeches have no POIs, so never show the "POIs open" wording (§U4b).
+    // Reply speeches have no POIs, so never show the "POIs open" wording.
     final label = switch (tier) {
       DebateTier.protected => loc.protected,
       DebateTier.open => isReply ? loc.speaking : loc.open,

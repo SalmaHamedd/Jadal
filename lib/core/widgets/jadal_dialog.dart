@@ -3,8 +3,7 @@ import 'package:flutter/material.dart';
 import '../constants/constants.dart';
 import '../theme/app_text_styles.dart';
 
-/// Styled dialog shell used across the live-debate feature (§3.4).
-///
+/// Styled dialog shell used across the live-debate feature.
 /// Mirrors the `CustomDialog(width, height, firstColor, secondColor, bodyColor,
 /// title, body)` contract the legacy `call` feature referenced (that file does
 /// not exist in this project), re-skinned with the Jadal palette. The header is

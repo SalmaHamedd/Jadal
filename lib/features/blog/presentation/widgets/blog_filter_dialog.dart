@@ -6,7 +6,7 @@ import 'package:jadal_app/core/widgets/filter_dialog_pieces.dart';
 import 'package:jadal_app/features/blog/data/repositories/blog_repository_impl.dart';
 import 'package:jadal_app/features/blog/domain/blog_search_filter.dart';
 
-/// The filter dialog for blog search (§10) — category (confirmed mapping of
+/// The filter dialog for blog search — category (confirmed mapping of
 /// the product's "framework" ask) + tag as equal, separate dimensions, plus
 /// publisher and "liked by me". Mirrors [DebateFilterDialog]'s shape.
 class BlogFilterDialog extends StatefulWidget {

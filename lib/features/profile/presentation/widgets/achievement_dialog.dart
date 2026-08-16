@@ -8,7 +8,7 @@ import 'package:jadal_app/core/widgets/jadal_dialog.dart';
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
 
-/// §6.8 — tapping an achievement opens this dialog: the image with its flush
+/// Tapping an achievement opens this dialog: the image with its flush
 /// tier ring, the rank written out clearly, and the FULL name scrollable in
 /// the body (same Expanded → Center → SingleChildScrollView pattern as the
 /// live debate's motion dialog).

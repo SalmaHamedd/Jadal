@@ -7,7 +7,7 @@ import 'package:jadal_app/features/profile/presentation/screens/achievements_scr
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/profile_cards.dart';
 
-/// §6.8 — the profile's achievements block: at most 6 achievements laid out
+/// The profile's achievements block: at most 6 achievements laid out
 /// as 2 rows of 3 inside the shared profile card, with a SMALL "show all"
 /// affordance (small font + small arrow) opening the full page. Renders
 /// nothing if there are no achievements at all.

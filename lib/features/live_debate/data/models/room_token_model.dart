@@ -1,8 +1,7 @@
 import '../../../../core/function/json_utils.dart';
 import '../../domain/debate_room_role.dart';
 
-/// Response of `GET /debates/{id}/token?room={main|prop|opp|result}` (docs §C/§D).
-///
+/// Response of `GET /debates/{id}/token?room={main|prop|opp|result}`.
 /// Tokens are **room-scoped** (fetch a fresh one on every room switch) with a
 /// 2-hour TTL. Gate the UI on [roleInRoom] — not the user's global role.
 class RoomTokenModel {

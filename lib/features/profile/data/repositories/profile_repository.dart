@@ -163,7 +163,7 @@ class ProfileRepository {
     }
   }
 
-  // ── Public profile / achievements / team history (sprinkles §6) ────────────
+  // ── Public profile / achievements / team history ────────────
 
   Future<Either<Failure, PublicUserProfile>> getUserProfile(int userId) async {
     try {
@@ -184,9 +184,9 @@ class ProfileRepository {
     }
   }
 
-  /// §6.8 — `sort` is `date` (assigned_at desc, backend default) or `rank`
+  /// `sort` is `date` (assigned_at desc, backend default) or `rank`
   /// (gold → … → participation, recency within a tier). Response is
-  /// `data: [...]` with a sibling `meta` pagination block (BACKEND_RESPONSE §0.2).
+  /// `data: [...]` with a sibling `meta` pagination block.
   Future<Either<Failure, List<Achievement>>> getUserAchievements(
     int userId, {
     int page = 1,
@@ -238,7 +238,6 @@ class ProfileRepository {
   }
 
   /// Signs out. **Always succeeds locally.**
-  ///
   /// The server call is best-effort: it invalidates the token server-side and
   /// unregisters the push device, both of which are worth doing — but neither
   /// may block the sign-out. Previously a failed request returned `Left` and
@@ -249,7 +248,7 @@ class ProfileRepository {
     String? message;
     try {
       if (token != null) {
-        // §7 — unregister this device BEFORE the bearer token is discarded
+        // Unregister this device BEFORE the bearer token is discarded
         // below. `DELETE /devices` is scoped to the authenticated caller, so
         // doing it after the token is gone 401s and the device keeps receiving
         // pushes for an account that has logged out. This is the single logout
@@ -269,7 +268,7 @@ class ProfileRepository {
 
     // One atomic write, and it runs whatever the server said.
     await PreferencesDatabase().removeValues(const ['AUTH_TOKEN', 'user_id']);
-    // MF_FU §1.1 — drop the cached drawer identity too, or the next account to
+    // Drop the cached drawer identity too, or the next account to
     // sign in briefly sees the previous user's name/points.
     await SessionIdentity.clear();
     return Right(message ?? 'Logged out successfully');

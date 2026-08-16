@@ -17,7 +17,7 @@ import 'package:jadal_app/core/error/failure_text.dart';
 import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 class AllBlogsScreen extends StatefulWidget {
-  /// §2.5 — true when embedded as the Blog tab inside MainScreen: the shell
+  /// True when embedded as the Blog tab inside MainScreen: the shell
   /// already paints the gradient and owns the drawer, so this screen skips its
   /// own backdrop and shows the drawer button instead of a back arrow.
   final bool inShell;

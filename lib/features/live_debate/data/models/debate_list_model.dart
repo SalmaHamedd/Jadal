@@ -3,7 +3,7 @@ import '../../../../core/app_models/motion.dart';
 import '../../../../core/function/json_utils.dart';
 import '../../domain/debate_status.dart';
 
-/// One lightweight item from `GET /debates?status=…` (§13). Enough for a list
+/// One lightweight item from `GET /debates?status=…`. Enough for a list
 /// card; the detail screen fetches `live-state` for the full picture. The list
 /// `motion` is **minimal** (id + text only — no tags/frameworks) and the item
 /// carries **no result/winner**.

@@ -26,19 +26,11 @@ class StatsTheme {
       : JadalColors.primaryBlue.withValues(alpha: 0.08);
 
   /// A distinct, on-brand colour per series index (cycles).
-  /// MF_FU §7.4a — the chart series palette.
   ///
-  /// The previous set was unusable under colour-vision deficiency and partly
-  /// broken for normal vision too: orange vs gold measured CIEDE2000 ΔE **1.3**
-  /// under protanopia (literally the same colour) and 4.8 under deuteranopia,
-  /// while blue vs deepBlue was ΔE 10.7 for *normal* vision. Three to five of
-  /// the 28 pairs fell below the ΔE 11 "distinct" threshold.
-  ///
-  /// Brand blue and orange stay in slots 1–2 so charts still read as Jadal;
-  /// 3–8 are replaced. Measured worst pair now ΔE 8.0, with **zero** failing
-  /// pairs for normal vision and for deuteranopia. The two residual weak pairs
-  /// only appear once a chart has 6+ series — add a fill pattern there rather
-  /// than a ninth hue.
+  /// Brand blue and orange hold slots 1–2 so charts still read as Jadal; the
+  /// rest are chosen to stay distinguishable under colour-blindness, which the
+  /// old orange/gold and blue/deep-blue pairs were not. Charts with six or more
+  /// series should add a fill pattern rather than a ninth hue.
   static const List<Color> seriesColors = [
     JadalColors.primaryBlue,   // #0352A1
     JadalColors.primaryOrange, // #EA7C1C
@@ -54,13 +46,11 @@ class StatsTheme {
       seriesColors[index % seriesColors.length];
 }
 
-/// MF_FU §7.5 — the app's second-signal helper for signed values.
-///
+/// The app's second-signal helper for signed values.
 /// Colour must never be the only carrier of meaning: under red–green
 /// colour-vision deficiency (the most common kind) a "good" green and a "bad"
 /// red converge, and in greyscale they are identical. Prefixing an arrow and an
 /// explicit sign makes the direction readable without any colour at all.
-///
 /// Rule for new code: if a widget branches a **colour** on state, it must
 /// branch a **glyph or label** on the same state in the same commit.
 String signedWithArrow(double v, {int decimals = 1}) {
@@ -152,7 +142,7 @@ class StatsChip extends StatelessWidget {
                   ? StatsTheme.textSecondary(context)
                   : StatsTheme.textSecondary(context).withValues(alpha: 0.4),
             ),
-            // §1.2 — Center keeps the label vertically centred even when a
+            // Center keeps the label vertically centred even when a
             // fixed-height list stretches the chip taller than its content.
             child: Center(
               widthFactor: 1,

@@ -6,6 +6,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:jadal_app/features/splash/presentation/screens/permission_settings_dialog.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
+import '../../../../core/services/deep_link_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/screens/login_screen.dart';
 import '../../../main/presentation/screens/main_screen.dart';
@@ -122,8 +123,14 @@ class _SplashViewState extends State<_SplashView> with TickerProviderStateMixin 
 
     return BlocListener<SplashCubit, SplashState>(
       listener: (context, state) {
-        if (state is SplashNavigateToLogin) _navigate(const LoginScreen());
-        if (state is SplashNavigateToHome)  _navigate(const MainScreen());
+        if (state is SplashNavigateToLogin) {
+          _navigate(const LoginScreen());
+          DeepLinkService.consumePending();
+        }
+        if (state is SplashNavigateToHome) {
+          _navigate(const MainScreen());
+          DeepLinkService.consumePending();
+        }
         if (state is SplashNavigateToPermissions) {
           PermissionSettingsDialog.show(
             context,
@@ -277,7 +284,7 @@ class _SplashViewState extends State<_SplashView> with TickerProviderStateMixin 
                           child: Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 48),
                             child: Text(
-                              // Same slogan already keyed in the .arb files.
+                              // Same slogan already keyed in the.arb files.
                               context.loc.appSlogan,
                               textAlign: TextAlign.center,
                               style: const TextStyle(

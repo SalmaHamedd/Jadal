@@ -14,18 +14,16 @@ class PhaseConfig {
       );
 }
 
-/// Backend debate format, parsed **defensively from both representations** (§6):
-///
-///  - `live-state.format` — an object: `{speech_time_seconds, has_reply_speech,
-///    reply_time_seconds, motion_reveal_offset_hours, prep_rooms_open_offset_hours,
-///    speakers_per_side, total_stages}`.
-///  - `GET /debates[].format` — `{id, name, description, phase_config}` where
-///    **`phase_config` is either a List of phases OR a Map** with the same object
-///    shape as `live-state.format`.
-///
-/// ⚠️ Never assume one shape — branch on `is List` / `is Map`. All scalar
-/// accessors are nullable; [phases] is possibly empty. Durations can be `null`
-/// for seeded/template debates, so guard before using them.
+/// Backend debate format, parsed **defensively from both representations**:
+/// - `live-state.format` — an object: `{speech_time_seconds, has_reply_speech,
+/// reply_time_seconds, motion_reveal_offset_hours, prep_rooms_open_offset_hours,
+/// speakers_per_side, total_stages}`.
+/// - `GET /debates[].format` — `{id, name, description, phase_config}` where
+/// **`phase_config` is either a List of phases OR a Map** with the same object
+/// shape as `live-state.format`.
+/// Never assume one shape — branch on `is List` / `is Map`. All scalar
+/// accessors are nullable and [phases] may be empty; durations are null for
+/// seeded or template debates, so guard before using them.
 class DebateFormatModel {
   final int? id;
   final String? name;
@@ -58,13 +56,12 @@ class DebateFormatModel {
   });
 
   /// Parses format data from either `live-state.format` or
-  /// `GET /debates[].format` — as of the sprinkles-round backend response,
-  /// live-state.format is a strict superset of the debate-list shape (it now
-  /// also carries `id`/`name`/`description`/`phase_config`), so both shapes
-  /// can be parsed the same way: flat top-level scalars are read directly,
-  /// and `phase_config` is handled polymorphically (List → [phases], Map →
-  /// fallback scalars for the older debate-list shape where they only ever
-  /// lived nested inside `phase_config`).
+  /// `GET /debates[].format`.
+  ///
+  /// live-state.format is a strict superset of the debate-list shape, so both
+  /// parse the same way: flat top-level scalars are read directly, and
+  /// `phase_config` is handled polymorphically — a List becomes [phases], a Map
+  /// supplies fallback scalars for the older debate-list shape.
   factory DebateFormatModel.fromJson(Map<String, dynamic> j) {
     final pc = j['phase_config'];
     List<PhaseConfig> phases = const [];

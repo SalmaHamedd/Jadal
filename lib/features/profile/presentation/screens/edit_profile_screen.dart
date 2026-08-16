@@ -17,7 +17,7 @@ import 'package:jadal_app/features/profile/presentation/widgets/profile_avatar.d
 import 'package:permission_handler/permission_handler.dart';
 import 'package:jadal_app/core/error/failure_text.dart';
 
-/// §6.5 — the change-password entry, relocated from the profile screen's
+/// The change-password entry, relocated from the profile screen's
 /// button row into the edit screen where the rest of the account edits live.
 class _ChangePasswordEntry extends StatelessWidget {
   const _ChangePasswordEntry();

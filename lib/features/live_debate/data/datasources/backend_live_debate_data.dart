@@ -28,7 +28,7 @@ class BackendLiveDebateData implements LiveDebateData {
           DebateFormatModel.hoursOffsetToDuration(f.prepRoomsOpenOffsetHours ?? 1),
       speechDuration: Duration(seconds: speech),
       // Backend has no protected/extra-time fields — POI windows come from the
-      // manual rules (§9.1); keep a nominal protected window for tier coloring.
+      // manual rules; keep a nominal protected window for tier coloring.
       protectedPeriod: const Duration(minutes: 1),
       extraTime: const Duration(seconds: 30),
       replySpeech: f.hasReply,
@@ -46,7 +46,7 @@ class BackendLiveDebateData implements LiveDebateData {
   @override
   TeamInfo get oppositionTeam => _team(state.opposition, DebateSide.opposition);
 
-  /// FE-7: the number of fixed speaking slots per side (= `speakers_per_side`),
+  /// The number of fixed speaking slots per side (= `speakers_per_side`),
   /// so both team columns render the SAME count (a 2-person side no longer
   /// stretches its cards to a 3-person side's height — the shorter side just
   /// leaves its bottom slot(s) empty). Falls back to the larger side's roster so
@@ -62,7 +62,7 @@ class BackendLiveDebateData implements LiveDebateData {
 
   TeamInfo _team(SideInfo side, DebateSide s) {
     // Distinct roster (one entry per speaker), phase-order sorted. The fixed
-    // N-slot rendering (FE-7) is applied at the widget layer off [slotsPerSide];
+    // N-slot rendering is applied at the widget layer off [slotsPerSide];
     // this stays the canonical roster used by the prep/lobby grids + the order
     // dialog's dropdown, so those are unaffected.
     final ordered = side.orderedSpeakers;

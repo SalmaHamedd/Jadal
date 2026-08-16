@@ -5,7 +5,7 @@ import '../../data/repositories/live_debate_repository.dart';
 
 enum DebateListStatus { initial, loading, ready, loadingMore, error }
 
-/// One status tab's paginated list state (§13).
+/// One status tab's paginated list state.
 class DebateListState {
   final DebateListStatus status;
   final List<DebateListItem> items;
@@ -36,7 +36,7 @@ class DebateListState {
 }
 
 /// Loads one debate-list tab from `GET /debates?status=…` with `meta`-driven
-/// pagination (§13). One instance per tab.
+/// pagination. One instance per tab.
 class DebateListCubit extends Cubit<DebateListState> {
   final LiveDebateRepository repo;
   final String statusFilter; // wire value (e.g. 'scheduled', 'teams-selected')

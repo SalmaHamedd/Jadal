@@ -156,7 +156,7 @@ class _BlogDetailsScreenState extends State<BlogDetailsScreen> {
                 builder: (context, reactionState) => SingleChildScrollView(
                   child: Column(
                     children: [
-                      // §3.1 — no cover → same placeholder the list cards
+                      // No cover → same placeholder the list cards
                       // use, instead of rendering no image at all.
                       if (blog.coverImageUrl != null &&
                           blog.coverImageUrl!.isNotEmpty)

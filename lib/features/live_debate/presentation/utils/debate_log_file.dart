@@ -4,18 +4,15 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:path_provider/path_provider.dart';
 
-/// Mirrors every `dlog(...)` line to an on-device text file so a tester can pull
-/// the FULL, untruncated live-debate trace off the device and share it.
+/// Mirrors every `dlog(...)` line to a file on the device so a tester can pull
+/// the full live-debate trace off it.
 ///
-/// Why a file and not just the console: Android `logcat` (and most terminals)
-/// truncate a single very long line — e.g. a complete `live-state` JSON body —
-/// so the console trace is lossy exactly where it matters most. The file is not
-/// truncated, so the raw backend/socket payloads land there in full.
+/// A file rather than the console because logcat truncates very long lines,
+/// which is exactly where a `live-state` body matters most.
 ///
-/// Lifecycle: lazy. The first `write(...)` resolves a writable directory and
-/// opens the file in append mode, buffering any lines that arrive before the
-/// path resolves. All writes are serialized through a single future chain so
-/// lines never interleave, and nothing here ever throws into the caller.
+/// Opens lazily on the first write, buffers anything logged before the path
+/// resolves, serialises writes so lines can't interleave, and never throws
+/// back into the caller.
 class DebateLogFile {
   DebateLogFile._();
   static final DebateLogFile instance = DebateLogFile._();

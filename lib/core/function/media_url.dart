@@ -1,6 +1,6 @@
 import '../constants/api_constants.dart';
 
-/// Resolves a possibly-relative media path against the API origin (§2.1 —
+/// Resolves a possibly-relative media path against the API origin (—
 /// some endpoints return `/storage/…` paths where others return absolute
 /// URLs; a relative path fed to NetworkImage silently renders nothing).
 /// Doubled `/storage/https://…` URLs are treated as absent, matching the

@@ -1,4 +1,4 @@
-/// A user's membership on a team, current or past (sprinkles §6.4).
+/// A user's membership on a team, current or past.
 /// `leftAt` is null for current memberships.
 class TeamMembership {
   final int teamId;
@@ -7,7 +7,7 @@ class TeamMembership {
   final DateTime? joinedAt;
   final DateTime? leftAt;
 
-  /// MF_FU §2.1 — auto-generated per-debate teams (created when a solo debater
+  /// Auto-generated per-debate teams (created when a solo debater
   /// is assigned to an ad-hoc side) are not real memberships and must never
   /// appear on a profile. The backend now excludes them from both
   /// `GET /users/{id}/teams` and `/teams/history`, and returns this flag so the

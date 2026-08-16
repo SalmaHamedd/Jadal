@@ -10,16 +10,16 @@ import '../utils/debate_theme.dart';
 import 'participant_details_dialog.dart';
 import 'speaker_card.dart';
 
-/// Speakers-section layout (§11): two side columns of speaker cards with a
+/// Speakers-section layout: two side columns of speaker cards with a
 /// narrow central channel that holds the POI pill. Flex weights sum to 100
 /// (38 / 24 / 38) so the teams sit either side of a clear middle gap.
 const int kSpeakerColumnFlex = 38;
 const int kSpeakerGapFlex = 24;
 
-/// Speakers section (§8.3 C): 3 proposition cards on the left (blue), 3
+/// Speakers section: 3 proposition cards on the left (blue), 3
 /// opposition cards on the right (orange), with a central POI channel between
 /// them. Each card is wrapped in a [SelectableCard] so a tap reveals its 3-dots
-/// → participant details (§9.2).
+/// → participant details.
 class SpeakersSection extends StatelessWidget {
   const SpeakersSection({super.key});
 
@@ -28,7 +28,7 @@ class SpeakersSection extends StatelessWidget {
     return BlocBuilder<DebateController, DebateStates>(
       builder: (context, state) {
         final cubit = context.read<DebateController>();
-        // A1: the sides are FIXED regardless of the app locale (incl. Arabic RTL):
+        // The sides are FIXED regardless of the app locale (incl. Arabic RTL):
         // **opposition on the LEFT, proposition on the RIGHT.** Forcing LTR on this
         // row keeps that order; the per-card POI badge still anchors to the outer edge.
         return Directionality(
@@ -40,7 +40,7 @@ class SpeakersSection extends StatelessWidget {
                 flex: kSpeakerColumnFlex,
                 child: _column(context, cubit, DebateSide.opposition),
               ),
-              // FE-5: POIs render as a badge anchored to the asking debater's own
+              // POIs render as a badge anchored to the asking debater's own
               // card (see SpeakerCard); the old centered pill is gone — this is the gap.
               const Expanded(flex: kSpeakerGapFlex, child: SizedBox.shrink()),
               Expanded(
@@ -55,17 +55,17 @@ class SpeakersSection extends StatelessWidget {
   }
 
   Widget _column(BuildContext context, DebateController cubit, DebateSide side) {
-    // Issue 8: ONLY the current main speaker may accept/answer a POI — not every
+    // ONLY the current main speaker may accept/answer a POI — not every
     // device that happens to see the raised-hand badge.
     final canAnswer = cubit.iAmCurrentSpeaker;
-    // FE-7: render a FIXED N slots per side (= speakers per side) so both columns
+    // Render a FIXED N slots per side (= speakers per side) so both columns
     // are equal height; a side with fewer speakers leaves its bottom slot(s) as a
     // quiet "not joined" placeholder rather than stretching its cards.
     final count = cubit.speakersPerSide;
     final order = cubit.orderFor(side);
     final slot = cubit.currentSlot;
     // The id currently featured in the MAIN speaker card — its video lives there,
-    // so we never also render it in a side card (video shown once, §multi-role).
+    // so we never also render it in a side card (video shown once).
     final currentMainId =
         slot == null ? null : cubit.debaterAt(slot.side, slot.orderIndex).id;
 
@@ -150,9 +150,9 @@ class SpeakersSection extends StatelessWidget {
   }
 }
 
-/// The speaker's accept/refuse prompt for an incoming POI (§8.4). [askerUserId]
+/// The speaker's accept/refuse prompt for an incoming POI. [askerUserId]
 /// is the debater whose card was tapped, so accepting/refusing targets that
-/// SPECIFIC asker (FE-5) — letting the speaker answer the 2nd asker, not the 1st.
+/// SPECIFIC asker — letting the speaker answer the 2nd asker, not the 1st.
 void showPoiAcceptRefuse(BuildContext context, DebateController cubit,
     {String? askerUserId}) {
   final loc = context.loc;

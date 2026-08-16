@@ -4,12 +4,10 @@ import '../localization/l10n/context_localiztion.dart';
 import 'failures.dart';
 
 /// Turns a failure into something an end user can actually act on.
-///
 /// The app used to render whatever string the repository happened to put in the
-/// failure — `"Network error: SocketException: Failed host lookup ..."`, or a
+/// failure — `"Network error: SocketException: Failed host lookup..."`, or a
 /// backend message with both languages pipe-separated. Those are debugging
 /// aids, not user-facing copy.
-///
 /// The rule here: **transport and server problems are described by their
 /// TYPE**, never by the raw string; only messages the backend wrote *for the
 /// user* (validation, business rules) are passed through — and even then the
@@ -39,6 +37,9 @@ abstract class FailureText {
       AuthFailure() => loc.errorSessionExpired,
       RateLimitFailure() => loc.errorTooManyRequests,
       NotFoundFailure() => _passThroughOr(context, failure.message, loc.errorNotFound),
+      // The backend writes a proper bilingual sentence for a closed share link,
+      // so show it rather than a generic error.
+      GoneFailure() => _passThroughOr(context, failure.message, loc.errorLinkExpired),
       // 403 and 422 carry a reason the user needs (why an action was refused,
       // which field is wrong), so they are shown when they look human-written.
       ForbiddenFailure() => _passThroughOr(context, failure.message, loc.errorNotAllowed),

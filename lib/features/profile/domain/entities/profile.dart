@@ -11,7 +11,7 @@ class Profile {
   final String? theme;
   final String? emailVerifiedAt;
   final String createdAt;
-  // Sprinkles §6.2: backend stores birthDate, computes+returns age; location
+  // Backend stores birthDate, computes+returns age; location
   // is a plain editable string. All three ride on GET/PUT /profile now.
   final int? age;
   final String? location;

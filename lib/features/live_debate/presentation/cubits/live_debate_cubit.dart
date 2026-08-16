@@ -4,6 +4,7 @@ import 'dart:math' as math;
 
 import 'package:livekit_client/livekit_client.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../../profile/data/repositories/profile_repository.dart';
 import '../../data/datasources/backend_live_debate_data.dart';
 import '../../data/live_debate_socket_events.dart';
@@ -18,7 +19,7 @@ import '../utils/debate_log.dart';
 import '../utils/debate_timeline.dart';
 import 'debate_controller.dart';
 
-/// Backend-connected live-debate controller (§7). REST drives actions; the
+/// Backend-connected live-debate controller. REST drives actions; the
 /// LiveKit data channel drives state via the `{"event": …}` codec
 /// ([LiveDebateSocket]). The **chair** is the timer authority and broadcasts the
 /// timer every second; non-chairs keep a local timer and reconcile within
@@ -29,14 +30,20 @@ class LiveDebateCubit extends DebateController {
     required this.repo,
     required this.profileRepo,
     required this.debateId,
+    this.asGuest = false,
   })  : _data = BackendLiveDebateData.empty(),
         super(DebateInitialState()) {
     _timeline = DebateTimeline(_data.format);
+    if (asGuest) _role = DebateRoomRole.guest;
   }
 
   final LiveDebateRepository repo;
   final ProfileRepository profileRepo;
   final int debateId;
+
+  /// Watching through a share link with no account. Everything that needs a
+  /// user — profile, chat, publishing, moderation — is skipped.
+  final bool asGuest;
 
   // ── State ──────────────────────────────────────────────────────────────────
   LiveStateModel? _state;
@@ -45,9 +52,13 @@ class LiveDebateCubit extends DebateController {
   DebateRoomRole _role = DebateRoomRole.unknown;
   int? _electedChairUserId;
   bool _isReady = false;
+  Failure? _loadFailure;
 
-  /// FE-9: tracks authority so a non-authority→authority transition (a chair
-  /// hand-off picked up by live-state / the FE-10 poll, without a rejoin) can
+  @override
+  Failure? get loadFailure => _loadFailure;
+
+  /// Tracks authority so a non-authority→authority transition (a chair
+  /// hand-off picked up by live-state / the poll, without a rejoin) can
   /// re-broadcast the current publish-lock so everyone converges on the new chair.
   bool _wasAuthority = false;
 
@@ -84,8 +95,8 @@ class LiveDebateCubit extends DebateController {
   bool isCameraEnabled = false;
   Timer? _connectionQualityTimer;
 
-  /// FE-10: periodic `live-state` re-fetch. Self-heals a missed `chair_elected`
-  /// (FE-9) and a dropped participant join/leave — the screen rebuilds into the
+  /// Periodic `live-state` re-fetch. Self-heals a missed `chair_elected`
+  /// and a dropped participant join/leave — the screen rebuilds into the
   /// correct state without anyone leaving — and (with the new logging) prints the
   /// fresh backend payload + digest every tick so issues are diagnosable live.
   Timer? _pollTimer;
@@ -108,7 +119,6 @@ class LiveDebateCubit extends DebateController {
 
   /// The user's **functional debate role**, derived from the live-state (the
   /// source of truth) rather than the LiveKit token's `role_in_room`.
-  ///
   /// This is the core fix for "I joined as the chair but the UI treats me as a
   /// viewer": the main-room token returns `role_if_joined: "viewer"` for judges
   /// and debaters alike (it only controls LiveKit publish rights), so the token
@@ -130,7 +140,7 @@ class LiveDebateCubit extends DebateController {
     return _role; // trainer / viewer / unknown from the token
   }
 
-  /// The chair is the timer/flow authority (§7). Trusts the live-state chair
+  /// The chair is the timer/flow authority. Trusts the live-state chair
   /// (resilient to a missed `chair_elected` broadcast for late joiners) on top
   /// of the token role + the in-memory elected flag.
   @override
@@ -159,7 +169,7 @@ class LiveDebateCubit extends DebateController {
   @override
   List<TeamChatMessage> get chatMessages => List.unmodifiable(_chat);
 
-  // ── Moderation publish-lock (mic + camera) + close-room (§FE-4/FE-6/FE-7) ────
+  // ── Moderation publish-lock (mic + camera) + close-room ────
   bool _muteAllActive = false;
   bool _cameraAllOff = false;
   final Set<String> _micLockedIds = {};
@@ -188,18 +198,12 @@ class LiveDebateCubit extends DebateController {
   int _mutedVoiceEvents = 0;
   DateTime? _mutedVoiceLastTrace;
 
-  /// Detection is on the LOUDEST band, not the mean of all bands.
+  /// Detection uses the loudest band, not the mean of all bands: speech only
+  /// lights up two or three of the seven, so the mean stays near zero even
+  /// when someone is talking loudly.
   ///
-  /// The native analyzer (livekit_client 2.4.1, `Visualizer.kt`) normalises
-  /// each band as `(clamp(magnitude, 0.1, 8.0) - 0.1) / 7.9` over PCM scaled
-  /// to −1..1, and only the low ~3.7 kHz of the spectrum is analysed. Speech
-  /// therefore lights up two or three bands and leaves the rest near zero, so
-  /// the MEAN across seven bands sits around 0.02–0.05 even when someone is
-  /// talking loudly — the old `mean >= 0.25` test could effectively never be
-  /// satisfied, which is why the banner never appeared on device.
-  ///
-  /// Absolute levels also swing with mic gain and how close the phone is, so
-  /// the trigger is [_mutedVoiceFloor] (a slowly-learned quiet level) plus
+  /// Absolute levels swing with mic gain and how close the phone is, so the
+  /// trigger is [_mutedVoiceFloor] (a slowly-learned quiet level) plus
   /// [kMutedVoiceMargin], never below [kMutedVoiceMinPeak].
   static const double kMutedVoiceMinPeak = 0.035;
   static const double kMutedVoiceMargin = 0.03;
@@ -220,19 +224,19 @@ class LiveDebateCubit extends DebateController {
 
   /// Whether the chat dialog is currently open — an incoming message is
   /// marked seen immediately while true; [unreadTeamChatCount] is derived
-  /// from each message's `seenBy` (§2), not tracked as a separate counter.
+  /// from each message's `seenBy`, not tracked as a separate counter.
   bool _chatOpen = false;
 
   /// The chair's next-stage POST is in flight → the room shows a blocking overlay
   /// so a double-tap can't skip a speech.
   bool _advancingStage = false;
 
-  /// Issue 10: emit the "go to the shared result" navigation exactly once,
+  /// Emit the "go to the shared result" navigation exactly once,
   /// whether it's triggered by the chair sharing or by the inbound
   /// `result_revealed` broadcast (the chair receives its own broadcast too).
   bool _resultNavSignaled = false;
 
-  /// Chair-driven open-lobby PAUSE overlay (§open-lobby): a break that freezes the
+  /// Chair-driven open-lobby PAUSE overlay: a break that freezes the
   /// current speaker + timer where they are (so it resumes from the same spot)
   /// WITHOUT advancing/rolling-back the backend stage. Distinct from the real
   /// stage-0 lobby (`_currentStage <= 0`).
@@ -244,8 +248,22 @@ class LiveDebateCubit extends DebateController {
 
   @override
   Future<void> init() async {
-    dlog('init', 'starting init for debateId=$debateId');
+    dlog('init', 'starting init for debateId=$debateId (asGuest=$asGuest)');
     emit(DebateConnectingState());
+    if (asGuest) {
+      // No token, so there is no profile to resolve and no team chat to load.
+      // Both of those calls would 401 and bounce us to the login screen.
+      await _refreshLiveState();
+      if (_loadFailure != null) {
+        dlog('init', 'guest init aborted: ${_loadFailure!.message}');
+        return;
+      }
+      _startLiveStatePolling();
+      _isReady = true;
+      dlog('init', 'guest init complete — isReady=true');
+      emit(DebateConnectedState());
+      return;
+    }
     final profile = await profileRepo.getProfile();
     profile.fold(
       (f) => dlog('init', 'WARN could not load profile: ${f.message} '
@@ -263,7 +281,7 @@ class LiveDebateCubit extends DebateController {
     emit(DebateConnectedState());
   }
 
-  /// Seeds `_chat` from the persisted history (§2) so a rejoining participant
+  /// Seeds `_chat` from the persisted history so a rejoining participant
   /// sees the full team conversation instead of starting empty. Best-effort —
   /// a failure here just leaves chat empty for this session, same as before.
   Future<void> _loadChatHistory() async {
@@ -293,13 +311,21 @@ class LiveDebateCubit extends DebateController {
     res.fold(
       (f) {
         dlog('live-state', 'FETCH FAILED: ${f.message}');
+        _loadFailure = f;
+        // A guest's viewing window closes ten minutes after the debate ends.
+        // Once that happens every poll would fail, so stop polling instead of
+        // raising the same error every few seconds.
+        if (asGuest && f is GoneFailure) _stopLiveStatePolling();
         emit(DebateErrorState(f.message));
       },
-      _applyLiveState,
+      (s) {
+        _loadFailure = null;
+        _applyLiveState(s);
+      },
     );
   }
 
-  /// FE-10: start the ~10s live-state poll. Idempotent; runs for the whole
+  /// Start the ~10s live-state poll. Idempotent; runs for the whole
   /// session (lobby → live → result) and is cancelled on leave/close. Each tick
   /// logs a banner then re-fetches, so the trace shows the backend's answer at
   /// that moment (the "show me the data fetched every 10s" requirement).
@@ -331,9 +357,9 @@ class LiveDebateCubit extends DebateController {
     final stageEntry = _stageByOrder(_currentStage);
     _rebuildTimeline(stageEntry?.durationSeconds);
 
-    // FV2-1: resolve the current speaker straight from live-state — the chair
+    // Resolve the current speaker straight from live-state — the chair
     // never receives its own `stage_changed`, so this is its only way to know who
-    // holds the floor. Prefer the server-resolved `speaker_user_id` (B3), falling
+    // holds the floor. Prefer the server-resolved `speaker_user_id`, falling
     // back to the participant→user mapping.
     _currentSpeakerUserId = _currentStage <= 0
         ? null
@@ -343,7 +369,7 @@ class LiveDebateCubit extends DebateController {
 
     final stageChanged = prevStage != _currentStage;
 
-    // V11 §0: the timer is SERVER-authoritative. Every client (not just the chair)
+    // The timer is SERVER-authoritative. Every client (not just the chair)
     // computes elapsed from the server clock + the persisted paused state, so all
     // devices agree and a (re)joiner restores the exact clock — including a paused
     // open-lobby break (Issues 6 & 7). No peer `time_update` dependency anymore.
@@ -355,7 +381,7 @@ class LiveDebateCubit extends DebateController {
     );
 
     if (stageChanged) {
-      _clearPois(); // Issue 8: leftover POIs don't survive into the next speech
+      _clearPois(); // Leftover POIs don't survive into the next speech
       // Flip the lobby↔debate gate (the chair's own action has no broadcast).
       emit(LobbyModeChangedState());
       emit(SpeakerChangedState());
@@ -376,8 +402,8 @@ class LiveDebateCubit extends DebateController {
     emit(LiveStateUpdatedState());
   }
 
-  /// FE-9: when this device transitions to chair (re-derived from a fresh
-  /// live-state / the FE-10 poll — no rejoin needed), re-broadcast the current
+  /// When this device transitions to chair (re-derived from a fresh
+  /// live-state / the poll — no rejoin needed), re-broadcast the current
   /// publish-lock so everyone converges on the new chair's view, and trace it so
   /// the next test shows exactly when control changed hands.
   void _maybeAnnounceAuthorityGain() {
@@ -499,7 +525,7 @@ class LiveDebateCubit extends DebateController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Rooms / connection (token discipline, §7)
+  // Rooms / connection (token discipline)
   // ──────────────────────────────────────────────────────────────────────────
 
   String _roomParam(DebateRoomType type) => switch (type) {
@@ -583,10 +609,11 @@ class LiveDebateCubit extends DebateController {
             'remoteParticipants=${_room!.remoteParticipants.length} '
             '[${_room!.remoteParticipants.values.map((p) => p.identity).join(", ")}]',
       );
-      // Integrity check: the LiveKit identity must match the auth user we resolved
-      // from the profile, or presence/role lookups (which key off the user id)
-      // will silently fail. Log loudly instead of failing silently.
-      if (identity != null && identity != _myUserId.toString()) {
+      // Integrity check: the LiveKit identity must match the auth user we
+      // resolved from the profile, or presence and role lookups (which key off
+      // the user id) silently fail. Guests are exempt — theirs is a synthetic
+      // `guest-<uuid>` that intentionally matches no user.
+      if (!asGuest && identity != null && identity != _myUserId.toString()) {
         dlog(
           'connect',
           'WARN identity mismatch: LiveKit identity="$identity" but myUserId=$_myUserId '
@@ -595,14 +622,19 @@ class LiveDebateCubit extends DebateController {
       }
 
       localParticipant = _room!.localParticipant;
-      await localParticipant?.setCameraEnabled(false);
-      await localParticipant?.setMicrophoneEnabled(false);
+      // A guest's token carries no publish rights, so don't touch the devices
+      // at all — asking for them would prompt for permissions the guest can
+      // never use.
+      if (!asGuest) {
+        await localParticipant?.setCameraEnabled(false);
+        await localParticipant?.setMicrophoneEnabled(false);
+      }
       _startConnectionQualityTimer();
       _refreshParticipants();
       emit(DebateConnectedState());
       emit(LocalTrackUpdatedState());
       // The backend may elect/assign the chair as a side effect of the judge
-      // JOINING the main room — which happens after our pre-join init() snapshot.
+      // JOINING the main room — which happens after our pre-join init snapshot.
       // Re-sync once connected so a sole/late judge gains chair authority even if
       // the chair_elected broadcast never arrives. (If live-state still reports
       // no chair, the gap is server-side: nobody was elected.)
@@ -657,12 +689,12 @@ class LiveDebateCubit extends DebateController {
       })
       ..on<TrackSubscribedEvent>((_) => _refreshParticipants())
       ..on<TrackUnsubscribedEvent>((_) => _refreshParticipants())
-      // FV2-3: a remote mic/camera mute or unmute must refresh the cached
+      // A remote mic/camera mute or unmute must refresh the cached
       // audio/video flags, else the tile shows a frozen frame / "not speaking"
       // instead of clearly muted / camera-off.
       ..on<TrackMutedEvent>((_) => _refreshParticipants())
       ..on<TrackUnmutedEvent>((_) => _refreshParticipants())
-      // FE-3: dedicated join/leave trace (identity + new count) so a multi-device
+      // Dedicated join/leave trace (identity + new count) so a multi-device
       // test can confirm the event even fires on the other device.
       ..on<ParticipantConnectedEvent>((event) {
         dlog('presence', 'JOIN ▸ ${event.participant.identity} '
@@ -674,7 +706,7 @@ class LiveDebateCubit extends DebateController {
             '(${event.participant.name}) — now ${_room!.remoteParticipants.length + 1} in room');
         _refreshParticipants();
       })
-    // Correct speaking detection for local + remote (§11.4).
+    // Correct speaking detection for local + remote.
       ..on<ActiveSpeakersChangedEvent>((event) {
         final speakerSids = event.speakers.map((s) => s.sid).toSet();
         isLocalSpeaking = localParticipant != null &&
@@ -685,7 +717,7 @@ class LiveDebateCubit extends DebateController {
         if (!isClosed) emit(RemoteTrackReceivedState());
       })
       ..on<RoomDisconnectedEvent>((event) {
-        // §5.1 — an intentional leave already handles its own navigation;
+        // An intentional leave already handles its own navigation;
         // only unexpected disconnects notify the room screen.
         if (_userLeaving || isClosed) return;
         emit(DebateDisconnectedState(reason: event.reason.toString()));
@@ -717,7 +749,7 @@ class LiveDebateCubit extends DebateController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Incoming backend events (§7)
+  // Incoming backend events
   // ──────────────────────────────────────────────────────────────────────────
 
   void _onData(List<int> bytes) {
@@ -736,7 +768,7 @@ class LiveDebateCubit extends DebateController {
         _onStageChanged(event);
         break;
       case LiveEventType.debateModeStarted:
-        // C3: the chair started the live session (intro) OR a real lobby→debate
+        // The chair started the live session (intro) OR a real lobby→debate
         // move. Refresh to pick up `live_started_at` so this device shows the
         // intro (chair welcome) vs the open lobby correctly.
         dlog('mode', 'debate_mode_started → live session started (intro)');
@@ -764,7 +796,7 @@ class LiveDebateCubit extends DebateController {
         emit(SpeakerChangedState());
         break;
       case LiveEventType.speechesCompleted:
-        // FE-3: speeches done → result phase opens, status STILL live. Refresh so
+        // Speeches done → result phase opens, status STILL live. Refresh so
         // resultPhaseOpen flips (speeches_completed_at / rooms.result.open) and
         // the result room becomes available without waiting for the 10s poll.
         dlog('mode', 'speeches_completed → result phase open (status still live)');
@@ -778,7 +810,7 @@ class LiveDebateCubit extends DebateController {
       case LiveEventType.resultRevealed:
         _refreshLiveState();
         emit(ResultRevealedState());
-        _signalResultNav(); // Issue 10: every device opens the shared result
+        _signalResultNav(); // Every device opens the shared result
         break;
       case LiveEventType.poiRaised:
         if (event.byUserId != null) {
@@ -789,7 +821,7 @@ class LiveDebateCubit extends DebateController {
       case LiveEventType.poiAnswered:
         final asker = event.byUserId;
         if (asker != null) _poiRaisedUserIds.remove(asker);
-        // B1/B2: if I'm the asker, learn the outcome — always clear my "asking"
+        // If I'm the asker, learn the outcome — always clear my "asking"
         // toolbar state; on ACCEPT, reopen my mic (lock-exempt) + show the mic
         // dialog (the screen also pushes the "POI accepted" news).
         if (asker == _myUserId) {
@@ -806,7 +838,7 @@ class LiveDebateCubit extends DebateController {
         emit(POIChangedState());
         break;
       case LiveEventType.timerUpdate:
-        // V11 §0: server-authoritative timer. Reconcile this device's clock to the
+        // Server-authoritative timer. Reconcile this device's clock to the
         // server's pause/resume/no-judge state — the single source of truth.
         dlog('timer', 'timer_update → paused=${event.timerIsPaused} '
             'pausedElapsed=${event.timerPausedElapsedSeconds} '
@@ -821,7 +853,7 @@ class LiveDebateCubit extends DebateController {
         emit(TimerTickedState());
         break;
       case LiveEventType.timeUpdate:
-        // Legacy peer timer — retired as the source of truth (V11 §0). Ignored;
+        // Legacy peer timer — retired as the source of truth. Ignored;
         // the server `timer_update` drives the clock now.
         break;
       case LiveEventType.timeControl:
@@ -833,14 +865,14 @@ class LiveDebateCubit extends DebateController {
         // pause/resume freezes/continues the clock.
         dlog('mode', 'lobby_overlay received → ${event.lobbyOverlayEnabled}');
         _lobbyOverlay = event.lobbyOverlayEnabled;
-        _clearPois(); // Issue 8: a toggle clears in-flight POIs
+        _clearPois(); // A toggle clears in-flight POIs
         emit(LobbyModeChangedState());
         break;
       case LiveEventType.teamChat:
         dlog('chat', 'TEAM CHAT received → team=${event.teamId} '
             'from=${event.senderName}: "${event.message}"');
         final incomingSenderId = event.senderId ?? '';
-        // The unread dot is derived from seenBy (§2), not a separate counter.
+        // The unread dot is derived from seenBy, not a separate counter.
         // While the dialog is open the user is looking at this live, so mark
         // it seen immediately; otherwise it stays unread until they open chat
         // (setTeamChatOpen marks it locally + tells the backend).
@@ -885,7 +917,7 @@ class LiveDebateCubit extends DebateController {
         emit(PublishLockChangedState());
         break;
       case LiveEventType.roomClosed:
-        dlog('moderation', 'room_closed received → tearing down the call UI (FE-7)');
+        dlog('moderation', 'room_closed received → tearing down the call UI');
         _roomClosed = true;
         emit(RoomClosedState());
         break;
@@ -894,7 +926,7 @@ class LiveDebateCubit extends DebateController {
 
   void _onStageChanged(LiveEvent e) {
     final previousStage = _currentStage;
-    _clearPois(); // Issue 8: a new speech clears any leftover raised hands
+    _clearPois(); // A new speech clears any leftover raised hands
     dlog('stage', 'stage_changed → currentStage=${e.currentStage} '
         'speakerUserId=${e.speakerUserId} serverStartedAt=${e.serverStartedAt} '
         'durationSeconds=${e.durationSeconds}');
@@ -902,12 +934,12 @@ class LiveDebateCubit extends DebateController {
     _currentSpeakerUserId = e.speakerUserId;
     _serverStartedAt = DateTime.tryParse(e.serverStartedAt ?? '')?.toUtc();
     _rebuildTimeline(e.durationSeconds ?? _stageByOrder(_currentStage)?.durationSeconds);
-    // Seed elapsed from the server start, then run the local timer (§7).
+    // Seed elapsed from the server start, then run the local timer.
     final started = _serverStartedAt;
     elapsedSeconds = started == null
         ? 0
         : DateTime.now().toUtc().difference(started).inSeconds.clamp(0, 1 << 30);
-    // FE-1: the lobby↔debate switch only rebuilds on LobbyModeChangedState, but a
+    // The lobby↔debate switch only rebuilds on LobbyModeChangedState, but a
     // *lobby→debate* transition arrives via stage_changed (which only emitted
     // SpeakerChangedState before) — so the screen never flipped. Emit it here.
     if ((previousStage <= 0) != (_currentStage <= 0)) {
@@ -933,8 +965,8 @@ class LiveDebateCubit extends DebateController {
       dlog('socket-send', 'DROPPED — not connected (localParticipant null)');
       return;
     }
-    // §0.1 diagnostic: confirm the publish was accepted by the SFU. A throw here
-    // is the tell-tale of a missing `canPublishData` grant (the V10 root cause) —
+    // diagnostic: confirm the publish was accepted by the SFU. A throw here
+    // is the tell-tale of a missing `canPublishData` grant (the root cause) —
     // surface it instead of swallowing it, so a future regression is obvious.
     lp.publishData(bytes, reliable: true).catchError((Object e) {
       dlog('socket-send', 'publishData FAILED — canPublishData grant or '
@@ -1016,10 +1048,12 @@ class LiveDebateCubit extends DebateController {
     emit(MutedSpeakingChangedState());
   }
 
-  /// The probe only runs while it can matter: connected, mic OFF, and the local
-  /// user is either the one holding the floor or a judge.
+  /// The probe only runs while it can matter: connected, mic off, and the local
+  /// user is either holding the floor or a judge. Never for a guest — it opens
+  /// the microphone, which they can't publish anyway.
   bool get _shouldMonitorMutedVoice =>
       _room != null &&
+      !asGuest &&
       !isMicEnabled &&
       (_iAmCurrentSpeaker || _debateRole.isJudge);
 
@@ -1047,7 +1081,7 @@ class LiveDebateCubit extends DebateController {
         _mutedVoiceListener = listener;
         _mutedVoiceEvents = 0;
         await visualizer.start();
-        // `AudioVisualizerNative.start()` ignores the native call's success
+        // `AudioVisualizerNative.start` ignores the native call's success
         // flag, so a "track not found" on the platform side would leave us
         // with an EventChannel that simply never emits. Say so out loud.
         _mutedVoiceWatchdog?.cancel();
@@ -1175,7 +1209,7 @@ class LiveDebateCubit extends DebateController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Timer (chair-broadcast, §7)
+  // Timer (chair-broadcast)
   // ──────────────────────────────────────────────────────────────────────────
 
   @override
@@ -1188,13 +1222,13 @@ class LiveDebateCubit extends DebateController {
       final event = timeline.eventAt(elapsedSeconds, isReply: currentSlot?.isReply ?? false);
       if (event != null) emit(DebateTimelineEventState(event));
       emit(TimerTickedState());
-      // V11 §0: the timer is SERVER-authoritative — no peer `time_update`
+      // The timer is SERVER-authoritative — no peer `time_update`
       // broadcast anymore. This is a cosmetic local tick that the next live-state
       // poll / `timer_update` reconciles.
     });
   }
 
-  /// V11 §0: apply the server-authoritative timer — compute elapsed from the
+  /// Apply the server-authoritative timer — compute elapsed from the
   /// server clock + persisted paused state, and run the cosmetic local tick only
   /// while the server says the clock is running. Called on every live-state apply
   /// and every `timer_update`, so all devices converge and a rejoin restores the
@@ -1230,7 +1264,7 @@ class LiveDebateCubit extends DebateController {
   @override
   void pauseTimer() {
     // Local cosmetic freeze; the AUTHORITATIVE pause goes through `toggleTimerPause`
-    // → POST /timer (server broadcasts `timer_update`). V11 §0.
+    // → POST /timer (server broadcasts `timer_update`).
     isPaused = true;
     _localTimer?.cancel();
     emit(TimerTickedState());
@@ -1262,7 +1296,7 @@ class LiveDebateCubit extends DebateController {
           currentSlot != null;
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Stage flow (chair-driven, §7)
+  // Stage flow (chair-driven)
   // ──────────────────────────────────────────────────────────────────────────
 
   @override
@@ -1304,7 +1338,7 @@ class LiveDebateCubit extends DebateController {
             emit(DebateErrorState(f.message));
           },
           (_) {
-            dlog('action', 'next-stage OK — refreshing live-state (FE-1 safety net)');
+            dlog('action', 'next-stage OK — refreshing live-state (safety net)');
             _refreshLiveState();
             _advancingStage = false;
             emit(StageAdvancingChangedState());
@@ -1365,7 +1399,7 @@ class LiveDebateCubit extends DebateController {
   TeamInfo teamFor(DebateSide side) =>
       side == DebateSide.proposition ? _data.propositionTeam : _data.oppositionTeam;
 
-  /// FE-7: drive the fixed slot count from the backend format's `speakers_per_side`.
+  /// Drive the fixed slot count from the backend format's `speakers_per_side`.
   @override
   int get speakersPerSide => _data.slotsPerSide;
 
@@ -1438,7 +1472,7 @@ class LiveDebateCubit extends DebateController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // POI (best-effort mapping to the test-shaped widgets, §7)
+  // POI (best-effort mapping to the test-shaped widgets)
   // ──────────────────────────────────────────────────────────────────────────
 
   int? get _currentPhaseId => _stageByOrder(_currentStage)?.id;
@@ -1449,7 +1483,7 @@ class LiveDebateCubit extends DebateController {
     _poiRaisedUserIds.add(_myUserId);
     final phaseId = _currentPhaseId;
     dlog('poi', 'POI raised by me (userId=$_myUserId, phaseId=$phaseId)');
-    // FE-4: ALWAYS broadcast the peer flash so every other device shows the POI,
+    // ALWAYS broadcast the peer flash so every other device shows the POI,
     // even when the phase id is null (the old code skipped this when phaseId was
     // null → the POI stayed local). Only the REST persistence needs the phase id.
     _publish(LiveDebateSocket.poiRaised(stagePhaseId: phaseId, byUserId: _myUserId));
@@ -1468,12 +1502,12 @@ class LiveDebateCubit extends DebateController {
   @override
   void acceptPOI(String askerUserId) {
     final phaseId = _currentPhaseId;
-    // FE-5: answer the SPECIFIC asker (by user id) so two simultaneous askers are
+    // Answer the SPECIFIC asker (by user id) so two simultaneous askers are
     // disambiguated — clear only that asker and tell every device to drop that
     // asker's badge (`by_user_id` = the asker being answered).
     final askerId = int.tryParse(askerUserId);
     dlog('poi', 'POI ACCEPTED (asker=$askerUserId, phaseId=$phaseId)');
-    // FE-4/B2: always broadcast the answer flash with accepted=true so the asker
+    // Always broadcast the answer flash with accepted=true so the asker
     // learns it (reopens their mic + sees the dialog/news). Persistence needs the id.
     _publish(LiveDebateSocket.poiAnswered(
         stagePhaseId: phaseId, byUserId: askerId ?? _myUserId, accepted: true));
@@ -1490,7 +1524,7 @@ class LiveDebateCubit extends DebateController {
 
   @override
   void refusePOI(String askerUserId) {
-    // FE-5/B1: dismiss the specific asker — and BROADCAST accepted=false so the
+    // Dismiss the specific asker — and BROADCAST accepted=false so the
     // asker's own raised hand + toolbar POI button clear too (not just locally on
     // the speaker's device).
     final uid = int.tryParse(askerUserId);
@@ -1513,7 +1547,7 @@ class LiveDebateCubit extends DebateController {
     emit(POIChangedState());
   }
 
-  /// Issue 8: drop all in-flight POIs — called on a stage change and on an
+  /// Drop all in-flight POIs — called on a stage change and on an
   /// open↔live toggle so a raised hand never lingers into the next speech or the
   /// lobby (a stale POI the next speaker would otherwise "see").
   void _clearPois() {
@@ -1582,12 +1616,12 @@ class LiveDebateCubit extends DebateController {
 
   /// The open lobby is shown before the live session (real stage 0, NOT intro),
   /// during a chair PAUSE overlay mid-debate, or in the result phase. The intro
-  /// (C3) shows the live layout (chair welcome), so it is NOT lobby mode.
+  /// shows the live layout (chair welcome), so it is NOT lobby mode.
   @override
   bool get isLobbyMode =>
       _lobbyOverlay || resultPhaseOpen || (_currentStage <= 0 && !isIntro);
 
-  /// V11 §1: the chair has entered the live session but no speech yet (welcome).
+  /// The chair has entered the live session but no speech yet (welcome).
   @override
   bool get isIntro => _state?.debate.isIntroPhase ?? false;
 
@@ -1598,7 +1632,7 @@ class LiveDebateCubit extends DebateController {
   String get introHostName => _state?.chairJudge?.user.name ?? '';
 
   /// Chair: enter the live session from the lobby → intro (chair welcome, no
-  /// timer). The chair's "Start debate" (next-stage) then begins P1 (C3).
+  /// timer). The chair's "Start debate" (next-stage) then begins P1.
   @override
   Future<void> startLive() async {
     if (!isAuthority) return;
@@ -1621,14 +1655,14 @@ class LiveDebateCubit extends DebateController {
 
   /// Chair toggle. Mid-debate it's a **pause overlay** that freezes the current
   /// speaker + server clock (resume continues from the same spot). From the
-  /// open lobby it enters the **intro** (C3), not P1.
+  /// open lobby it enters the **intro**, not P1.
   @override
   void setLobbyMode(bool enabled) {
     if (!isAuthority) {
       dlog('action', 'setLobbyMode IGNORED — not authority');
       return;
     }
-    // Issue 9: once the speeches are done (result phase open) the room stays in
+    // Once the speeches are done (result phase open) the room stays in
     // the open lobby — the chair can't go back to a speech.
     if (!enabled && resultPhaseOpen) {
       dlog('action', 'setLobbyMode(live) IGNORED — result phase open (Issue 9)');
@@ -1640,9 +1674,9 @@ class LiveDebateCubit extends DebateController {
         dlog('action', 'OPEN-LOBBY pause ▸ freeze stage $_currentStage + timer '
             '(elapsed=$elapsedSeconds)');
         _lobbyOverlay = true;
-        _clearPois(); // Issue 8: clear in-flight POIs on the toggle
+        _clearPois(); // Clear in-flight POIs on the toggle
         _publish(LiveDebateSocket.lobbyOverlay(enabled: true));
-        // V11 §0: AUTHORITATIVE pause via the server (persists + broadcasts), plus
+        // AUTHORITATIVE pause via the server (persists + broadcasts), plus
         // an immediate local freeze for snappy feedback.
         repo.setTimer(debateId: debateId, action: 'pause');
         pauseTimer();
@@ -1659,7 +1693,7 @@ class LiveDebateCubit extends DebateController {
       _enforceLiveFormatMedia();
       emit(LobbyModeChangedState());
     } else if (_currentStage <= 0 && !isIntro) {
-      // C3: open lobby (pre-live) → enter the INTRO (chair welcome), not P1.
+      // Open lobby (pre-live) → enter the INTRO (chair welcome), not P1.
       startLive();
     } else {
       // Intro → "Start debate": begin the first speech.
@@ -1668,7 +1702,7 @@ class LiveDebateCubit extends DebateController {
     }
   }
 
-  /// V11 §0 / Update 1: the chair's stop/resume timer button. Drives the
+  /// / Update 1: the chair's stop/resume timer button. Drives the
   /// server-authoritative pause/resume; the server broadcasts `timer_update` so
   /// every device matches exactly.
   @override
@@ -1735,7 +1769,7 @@ class LiveDebateCubit extends DebateController {
     if (uid != null) _publish(LiveDebateSocket.forceCameraOff(uid));
   }
 
-  // ── Durable publish-lock (mic + camera), chair-broadcast (§FE-4/FE-6) ────────
+  // ── Durable publish-lock (mic + camera), chair-broadcast ────────
   // Mirrors the mock's design: "mute all" / per-user lock *prevents opening* the
   // mic/camera (not just a one-off mute). Judges + whoever holds the floor are
   // always exempt. The chair broadcasts the lock; each client enforces it on
@@ -1919,15 +1953,18 @@ class LiveDebateCubit extends DebateController {
   }
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Role → controls gating (§8)
+  // Role → controls gating
   // ──────────────────────────────────────────────────────────────────────────
 
   bool get _iAmCurrentSpeaker => _currentSpeakerUserId == _myUserId;
 
-  /// Issue 8: only the real current speaker may answer a POI. In the lobby
+  /// Only the real current speaker may answer a POI. In the lobby
   /// `_currentSpeakerUserId` is null → false for everyone.
   @override
   bool get iAmCurrentSpeaker => _iAmCurrentSpeaker;
+
+  @override
+  bool get isGuest => asGuest || _debateRole.isGuest;
 
   @override
   bool get canModerateOthers => isAuthority; // chair only
@@ -1940,10 +1977,13 @@ class LiveDebateCubit extends DebateController {
   @override
   bool get isSpectator =>
       !(_debateRole.isDebater || _debateRole.isJudge);
+  // Guests hold a subscribe-only token, so the mic and camera would fail
+  // anyway. The lobby exception that lets ordinary spectators publish must not
+  // apply to them.
   @override
-  bool get canUseMedia => isLobbyMode || !isSpectator;
+  bool get canUseMedia => !isGuest && (isLobbyMode || !isSpectator);
   @override
-  bool get canAskPoi => _debateRole.isDebater;
+  bool get canAskPoi => !isGuest && _debateRole.isDebater;
   @override
   bool get poiEnabledNow {
     final slot = currentSlot;
@@ -1952,10 +1992,13 @@ class LiveDebateCubit extends DebateController {
 
   @override
   bool get canOpenChat =>
-      _debateRole.isDebater && !_iAmCurrentSpeaker;
+      !isGuest && _debateRole.isDebater && !_iAmCurrentSpeaker;
+
+  @override
+  String? get shareUrl => isGuest ? null : _state?.debate.shareUrl;
 
   // ──────────────────────────────────────────────────────────────────────────
-  // Result flow (§10) — REST actions; state read from live-state
+  // Result flow — REST actions; state read from live-state
   // ──────────────────────────────────────────────────────────────────────────
 
   @override
@@ -1980,8 +2023,8 @@ class LiveDebateCubit extends DebateController {
   @override
   bool get isCancelled => _state?.debate.isCancelled ?? false;
 
-  /// FE-3: result phase is open while the debate is still `live` — driven by the
-  /// backend's `speeches_completed_at` / `rooms.result.open` (B1), never by
+  /// Result phase is open while the debate is still `live` — driven by the
+  /// backend's `speeches_completed_at` / `rooms.result.open`, never by
   /// `status == completed`.
   @override
   bool get resultPhaseOpen =>
@@ -1989,7 +2032,7 @@ class LiveDebateCubit extends DebateController {
       (_state?.rooms.result.open ?? false) ||
       debateFinished;
 
-  /// FE-6: a result has been stored (chair post-submit / judges) — gates the
+  /// A result has been stored (chair post-submit / judges) — gates the
   /// live-room "share result" action.
   @override
   bool get hasResult => _state?.result != null || debateFinished;
@@ -2014,7 +2057,7 @@ class LiveDebateCubit extends DebateController {
       winningSide: winningSide == DebateSide.proposition ? 'proposition' : 'opposition',
       summaryNotes: summaryNotes,
       stageScores: [
-        // FE-1: the backend requires an INTEGER 0–100 per stage — round defensively
+        // The backend requires an INTEGER 0–100 per stage — round defensively
         // so a stray double can never trip the `must be an integer` validator.
         for (final e in scoresByStageOrder.entries)
           StageScore(stageOrder: e.key, score: e.value.round()),
@@ -2023,7 +2066,7 @@ class LiveDebateCubit extends DebateController {
     dlog('action', 'SUBMIT RESULT ▸ POST result (winner=${winningSide.name}, '
         'stages=${scoresByStageOrder.length})');
     final res = await repo.submitResult(debateId: debateId, result: model);
-    // FE-1: report the REAL outcome so the sheet never lies about success.
+    // Report the REAL outcome so the sheet never lies about success.
     return res.fold(
       (f) {
         dlog('action', 'submit-result FAILED: ${f.message}');
@@ -2068,18 +2111,18 @@ class LiveDebateCubit extends DebateController {
             emit(DebateErrorState(f.message));
           },
           (_) async {
-        // Reveals an existing result (no confetti) or cancels the debate (§10).
+        // Reveals an existing result (no confetti) or cancels the debate.
         await _refreshLiveState();
         if (isCancelled) emit(DebateCancelledState());
       },
     );
   }
 
-  // ── Share result / close room (§U4b) — backend stubs ────────────────────────
+  // ── Share result / close room — backend stubs ────────────────────────
   // The dedicated endpoints (server-side publish-lock, kick-all, explicit
   // live→done) don't exist yet; map to what we have and TODO the rest.
 
-  /// Issue 10: navigate to the shared result exactly once (idempotent), driven
+  /// Navigate to the shared result exactly once (idempotent), driven
   /// by either the chair's share or the inbound `result_revealed` broadcast.
   void _signalResultNav() {
     if (_resultNavSignaled || isClosed) return;
@@ -2098,7 +2141,7 @@ class LiveDebateCubit extends DebateController {
     _signalResultNav();
   }
 
-  /// §5.3 — sharing reveals the result, so `revealed` IS the shared flag. The
+  /// Sharing reveals the result, so `revealed` IS the shared flag. The
   /// base class returned a constant false, which kept the chair's "share
   /// result" actions visible after the result had already been shared.
   @override
@@ -2107,7 +2150,7 @@ class LiveDebateCubit extends DebateController {
   @override
   bool get isRoomClosed => _roomClosed;
 
-  /// Chair: force-close the room (FE-7). The backend reveals a pending result or
+  /// Chair: force-close the room. The backend reveals a pending result or
   /// cancels the debate, broadcasts `room_closed`, then deletes the LiveKit room.
   @override
   Future<void> closeRoom() async {
@@ -2152,7 +2195,7 @@ class LiveDebateCubit extends DebateController {
   // Lifecycle
   // ──────────────────────────────────────────────────────────────────────────
 
-  /// §5.1 — true while an intentional local leave is tearing the room down,
+  /// True while an intentional local leave is tearing the room down,
   /// so the RoomDisconnectedEvent listener stays quiet and can't double-pop
   /// the navigator behind the leave flow's own navigation.
   bool _userLeaving = false;

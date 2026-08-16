@@ -2924,6 +2924,36 @@ abstract class AppLocalizations {
   /// **'Share result'**
   String get shareResult;
 
+  /// No description provided for @shareDebate.
+  ///
+  /// In en, this message translates to:
+  /// **'Share debate'**
+  String get shareDebate;
+
+  /// No description provided for @debateLinkCopied.
+  ///
+  /// In en, this message translates to:
+  /// **'Debate link copied'**
+  String get debateLinkCopied;
+
+  /// No description provided for @guestBadge.
+  ///
+  /// In en, this message translates to:
+  /// **'Guest'**
+  String get guestBadge;
+
+  /// No description provided for @guestViewingNotice.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re watching as a guest.'**
+  String get guestViewingNotice;
+
+  /// No description provided for @guestLinkUnavailableTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Link no longer available'**
+  String get guestLinkUnavailableTitle;
+
   /// No description provided for @shareResultPrompt.
   ///
   /// In en, this message translates to:
@@ -3853,6 +3883,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You don\'t have permission to do that.'**
   String get errorNotAllowed;
+
+  /// No description provided for @errorLinkExpired.
+  ///
+  /// In en, this message translates to:
+  /// **'This debate link is no longer available.'**
+  String get errorLinkExpired;
 
   /// No description provided for @errorTooManyRequests.
   ///

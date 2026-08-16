@@ -16,7 +16,6 @@ import 'package:jadal_app/features/teams/presentation/widgets/team_picker_field.
 import 'package:jadal_app/core/error/failure_text.dart';
 
 /// Creates a new survey for the trainer's own team(s).
-///
 /// The `POST /trainer/surveys` endpoint itself only accepts title/description/
 /// team_ids/closes_at (no questions), so questions typed in here are attached
 /// with a follow-up `PUT` call right after creation succeeds — from the

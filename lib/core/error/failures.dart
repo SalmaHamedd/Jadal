@@ -37,18 +37,25 @@ class AuthFailure extends Failure {
   const AuthFailure(super.message);
 }
 
-/// 403 — the action isn't allowed for this role/room. Prefer hiding the control;
-/// if surfaced, show a non-blocking toast and keep the user where they are (§G).
+/// 403 — not allowed for this role or room. Prefer hiding the control; if it
+/// does surface, show a toast and leave the user where they are.
 class ForbiddenFailure extends Failure {
   const ForbiddenFailure([super.message = 'Forbidden']);
 }
 
-/// 404 — the debate/phase/participant doesn't exist; pop back to the list (§G).
+/// 404 — the record doesn't exist; pop back to the list.
 class NotFoundFailure extends Failure {
   const NotFoundFailure([super.message = 'Not found']);
 }
 
-/// 429 — throttled; show "try again in a minute" (§G).
+/// 410 — the resource was there but its access window has closed. Guests get
+/// this when a share link is opened outside the debate's live window. It is not
+/// an auth error, so never bounce to login on it.
+class GoneFailure extends Failure {
+  const GoneFailure([super.message = 'No longer available']);
+}
+
+/// 429 — throttled; show "try again in a minute".
 class RateLimitFailure extends Failure {
   const RateLimitFailure([super.message = 'Too many requests']);
 }

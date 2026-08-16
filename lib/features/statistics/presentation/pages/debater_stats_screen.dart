@@ -30,8 +30,7 @@ import '../widgets/stats_theme.dart';
 
 /// The statistics screen. Pass a [debaterId] to view a specific user; omit it
 /// to resolve the signed-in user from their profile.
-///
-/// §1.9 — [subjectRole] gates the content: debaters get all six stats;
+/// [subjectRole] gates the content: debaters get all six stats;
 /// judges/trainers get an activity-only view (the debater-only metrics never
 /// render for them, and the backend 422s them anyway).
 class DebaterStatsScreen extends StatefulWidget {
@@ -90,7 +89,7 @@ class _DebaterStatsScreenState extends State<DebaterStatsScreen> {
         backgroundColor: StatsTheme.isDark(context)
             ? JadalColors.darkBackground
             : JadalColors.lightBackground,
-        // §1.7/§2.6 — in-body header over the edge-to-edge gradient (matches
+        // In-body header over the edge-to-edge gradient (matches
         // the debate details screen), instead of an AppBar seam.
         body: JadalGradientBackground(
           child: SafeArea(
@@ -188,7 +187,7 @@ class _StatsScaffold extends StatelessWidget {
       backgroundColor: StatsTheme.isDark(context)
           ? JadalColors.darkBackground
           : JadalColors.lightBackground,
-      // §1.7/§2.6 — in-body header over the edge-to-edge gradient (matches
+      // In-body header over the edge-to-edge gradient (matches
       // the debate details screen), instead of an AppBar seam.
       body: JadalGradientBackground(
         child: SafeArea(
@@ -243,13 +242,13 @@ class _StatsView extends StatelessWidget {
             physics: const AlwaysScrollableScrollPhysics(),
             padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
-              // §1.9 — judges/trainers only ever see activity, so there are no
-              // stat tabs for them. MF_FU §8.1 — but the stat still has to name
+              // Judges/trainers only ever see activity, so there are no
+              // stat tabs for them. — but the stat still has to name
               // itself, or the screen presents an unlabelled number.
               if (debaterOnly)
                 _KindSelector(active: state.kind)
               else if (isJudge)
-                // MF_FU §11 — judges have two stats now, so the header card
+                // Judges have two stats now, so the header card
                 // becomes a real selector.
                 JadalSegmentedSwitch<StatKind>(
                   values: const [StatKind.activity, StatKind.judgeRating],
@@ -265,7 +264,7 @@ class _StatsView extends StatelessWidget {
               else
                 const _StatHeaderCard(),
               const SizedBox(height: 16),
-              // MF_FU §8.2 — activity takes from/to/group_by (and nothing else),
+              // Activity takes from/to/group_by (and nothing else),
               // so it gets a reduced bar rather than none at all. Hiding the bar
               // outright is what made the trend chart unreachable.
               StatsCard(
@@ -289,7 +288,7 @@ class _StatsView extends StatelessWidget {
   }
 }
 
-/// MF_FU §8.1 — judges and trainers see exactly one stat, so the tab strip is
+/// Judges and trainers see exactly one stat, so the tab strip is
 /// hidden for them; without this card the screen showed a big number with
 /// nothing naming it. Names the stat and says what it actually measures.
 class _StatHeaderCard extends StatelessWidget {

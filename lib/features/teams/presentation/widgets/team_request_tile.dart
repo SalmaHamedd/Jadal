@@ -6,13 +6,12 @@ import 'package:jadal_app/core/theme/avatar_palette.dart';
 import 'package:jadal_app/core/widgets/jadal_surface.dart';
 import 'package:jadal_app/features/profile/domain/entities/public_user_profile.dart';
 
-/// MF_FU §10.1/§10.2 — one pending join/leave request.
+/// One pending join or leave request, shared by both request lists.
 ///
-/// The join and leave tiles used to be duplicated line-for-line, and both were
-/// filled with an 8%-alpha brand tint painted **over** the blue/orange gradient
-/// background — which is why they read as mud in light theme. They now sit on
-/// the app's standard surface and carry their type on a leading edge bar plus a
-/// labelled pill (colour **and** text, never colour alone).
+/// Sits on the app's standard surface rather than a brand tint over the
+/// gradient background, which muddied it in light theme. The request type is
+/// carried by a leading edge bar and a labelled pill — colour and text, never
+/// colour alone.
 class TeamRequestTile extends StatelessWidget {
   final PublicUserProfile? user;
   final DateTime? requestedAt;
@@ -164,8 +163,7 @@ class TeamRequestTile extends StatelessWidget {
   }
 }
 
-/// MF_FU §10.1 — the accept/reject pair.
-///
+/// The accept/reject pair.
 /// The two buttons used to be an `OutlinedButton.icon` next to an
 /// `ElevatedButton.icon`. The app's global `elevatedButtonTheme` sets
 /// `minimumSize: Size.fromHeight(52)`, which only the accept button inherited,
@@ -231,7 +229,7 @@ class RequestActions extends StatelessWidget {
                 style: AppTextStyles.button(context),
               ),
               style: ElevatedButton.styleFrom(
-                // MF_FU §7.3 — white on positiveGreen is 3.21:1; the darker
+                // White on positiveGreen is 3.21:1; the darker
                 // fill reaches 5.34:1. Used only as a button fill, so the
                 // brand green is unchanged everywhere it is a text/icon accent.
                 backgroundColor: JadalColors.positiveGreenFill,

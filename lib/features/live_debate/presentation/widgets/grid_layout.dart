@@ -17,7 +17,7 @@ class GridParticipant {
   const GridParticipant({required this.id, required this.name, this.isLocal = false});
 }
 
-/// Layout 1 — the Google-Meet-style responsive grid (§8.2). Used in prep/result
+/// Layout 1 — the Google-Meet-style responsive grid. Used in prep/result
 /// rooms and as the open-lobby mode of the live debate. Everyone (participants
 /// + audience) renders as the same [JadalVideoCard].
 class GridLayout extends StatelessWidget {
@@ -45,7 +45,7 @@ class GridLayout extends StatelessWidget {
             const outer = widgetBorderRadius + 2;
             const bw = 2.5;
             // Border must read as distinct from the card body in BOTH themes
-            // (dark's elevated surface used to match the card exactly, §U4a).
+            // (dark's elevated surface used to match the card exactly).
             final cardBorder = dark
                 ? Color.lerp(JadalColors.darkSurfaceElevated, Colors.white, 0.14)!
                 : DebateTheme.surfaceElevated(context);
@@ -63,7 +63,7 @@ class GridLayout extends StatelessWidget {
                   border: Border.all(color: cardBorder, width: bw),
                 ),
                 // Inner radius = outer − border so no sliver of background shows
-                // at the rounded corners (§U4a).
+                // at the rounded corners.
                 child: JadalVideoCard(
                   name: p.name,
                   participantId: p.id,

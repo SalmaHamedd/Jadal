@@ -13,7 +13,7 @@ class ProfileCubit extends Cubit<ProfileState> {
 
   ProfileCubit(this._repository) : super(ProfileInitial());
 
-  /// [warm] — §4.1: an already-in-flight result from the splash prefetch;
+  /// [warm] —: an already-in-flight result from the splash prefetch;
   /// when given it replaces the network call for this load only.
   Future<void> loadProfile({Future<Either<Failure, Profile>>? warm}) async {
     emit(ProfileLoading());
@@ -21,7 +21,7 @@ class ProfileCubit extends Cubit<ProfileState> {
     result.fold(
       (failure) => emit(ProfileError(failure.message)),
       (profile) {
-        // MF_FU §1.1 — keep the drawer's cached identity current. Points and
+        // Keep the drawer's cached identity current. Points and
         // avatar change while the app is open; without this the drawer would
         // show the values as of login until the next sign-in.
         SessionIdentity.cache(

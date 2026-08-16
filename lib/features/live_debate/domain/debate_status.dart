@@ -1,5 +1,5 @@
 /// Lifecycle status of a debate, as returned by `GET /debates` and
-/// `live-state.debate.status`. Drives the debate-list stage tabs (§13) and the
+/// `live-state.debate.status`. Drives the debate-list stage tabs and the
 /// join/cancel gating.
 enum DebateStatus {
   scheduled('scheduled'),

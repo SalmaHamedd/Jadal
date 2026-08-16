@@ -32,7 +32,7 @@ enum _TeamMetric { winRate, avgScore, improvement, activity, combinations }
 /// 1..100 and returns a `below_min_debates` reason when nothing qualifies.
 const int _kMaxMinDebates = 20;
 
-/// MF_FU §9.2/§9.3 — one team's full analysis: the four metrics the debater
+/// One team's full analysis: the four metrics the debater
 /// screen already knows how to render (the backend returns those envelopes
 /// verbatim, so the existing views are reused), plus the new line-up analysis.
 class CoachTeamDetailScreen extends StatefulWidget {
@@ -430,7 +430,7 @@ class _CombinationFilters extends StatelessWidget {
   }
 }
 
-/// MF_FU §9.3 — the ranked line-ups.
+/// The ranked line-ups.
 class _CombinationsView extends StatelessWidget {
   final TeamCombinationsStat data;
   final CombinationMetric metric;
@@ -578,7 +578,7 @@ class _CombinationCard extends StatelessWidget {
                   ),
                   if (delta != null)
                     Text(
-                      // MF_FU §7.5 — arrow + sign, so the comparison survives
+                      // Arrow + sign, so the comparison survives
                       // colour-vision deficiency and greyscale.
                       metric == CombinationMetric.winRate
                           ? signedWithArrow(delta * 100, decimals: 0)

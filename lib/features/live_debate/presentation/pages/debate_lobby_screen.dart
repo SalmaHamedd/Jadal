@@ -19,12 +19,11 @@ import 'debate_room_screen.dart';
 import 'prep_room_screen.dart';
 import 'result_room_screen.dart';
 
-/// Lobby / rooms list (§8.1). The entry point of the feature — provides the
+/// Lobby / rooms list. The entry point of the feature — provides the
 /// shared [DebateController] + [ConnectionCubit] that persist across the room
 /// screens, and gates each room with the [DebateAccess] rules.
-///
 /// [debateId] picks which backend debate to load (from the list → detail flow,
-/// §13); null falls back to `DebateModeConfig.devDebateId`. Ignored in test mode.
+///); null falls back to `DebateModeConfig.devDebateId`. Ignored in test mode.
 class DebateLobbyScreen extends StatelessWidget {
   final int? debateId;
   const DebateLobbyScreen({super.key, this.debateId});
@@ -33,7 +32,7 @@ class DebateLobbyScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // init() loads profile + live-state in backend mode; no-op in test mode.
+        // init loads profile + live-state in backend mode; no-op in test mode.
         BlocProvider(create: (_) => di.sl<DebateController>(param1: debateId)..init()),
         BlocProvider(create: (_) => di.sl<ConnectionCubit>()),
       ],
@@ -67,7 +66,7 @@ class _LobbyView extends StatelessWidget {
                     final data = cubit.data;
                     // After the chair closes the room with an unshared result,
                     // only the chair sees a "share result" action here → flips the
-                    // debate to done (§U4b).
+                    // debate to done.
                     final showShare = cubit.canManageResult &&
                         cubit.isRoomClosed &&
                         cubit.resultView != null &&
@@ -118,7 +117,7 @@ class _RoomCard extends StatelessWidget {
       DebateRoomType.result => Icons.emoji_events_rounded,
     };
 
-    // Card border/accent per room + state (§U3). Live is the meeting point of
+    // Card border/accent per room + state. Live is the meeting point of
     // both brand colours, so it gets the blue↔orange gradient treatment.
     final lightOrange = _lighten(JadalColors.primaryOrange, 0.45);
     final lightBlue = _lighten(JadalColors.primaryBlue, 0.45);
@@ -283,7 +282,7 @@ class _RoomCard extends StatelessWidget {
         );
 
       case DebateRoomType.liveDebate:
-        // The chair closed the room → join is locked for everyone (§U4b).
+        // The chair closed the room → join is locked for everyone.
         if (cubit.isRoomClosed) {
           return _RoomAccess(status: loc.roomClosedStatus, locked: true, onJoin: null);
         }
@@ -323,7 +322,7 @@ class _RoomCard extends StatelessWidget {
     }
   }
 
-  /// Backend pre-join gate (§7): joinability comes from `live-state.rooms`.
+  /// Backend pre-join gate: joinability comes from `live-state.rooms`.
   _RoomAccess _backendAccess(
     BuildContext context,
     DebateController cubit,
@@ -345,7 +344,7 @@ class _RoomCard extends StatelessWidget {
     );
   }
 
-  /// Fetches the room-scoped token (token discipline, §7) and navigates. The
+  /// Fetches the room-scoped token (token discipline) and navigates. The
   /// live room connects inside [DebateRoomScreen.enterDebateRoom], so it isn't
   /// pre-joined here.
   Future<void> _joinBackend(BuildContext context, DebateController cubit) async {
@@ -392,7 +391,7 @@ class _RoomCard extends StatelessWidget {
   }
 
   Future<void> _push(BuildContext context, DebateController cubit, Widget screen) {
-    // Carry the ConnectionCubit so prep/result rooms get the action row too (§9.3).
+    // Carry the ConnectionCubit so prep/result rooms get the action row too.
     final connection = context.read<ConnectionCubit>();
     return Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => MultiBlocProvider(
@@ -433,7 +432,7 @@ class _RoomAccess {
 }
 
 /// Chair-only rooms-list action shown after the room is closed with an unshared
-/// result: shares it (flips the debate live→done) without navigating (§U4b).
+/// result: shares it (flips the debate live→done) without navigating.
 class _ShareResultBanner extends StatelessWidget {
   final DebateController cubit;
   const _ShareResultBanner({required this.cubit});
@@ -474,10 +473,9 @@ class _ShareResultBanner extends StatelessWidget {
   }
 }
 
-/// Compact per-room join button (§U3): solid side colour for prop/opp (light
+/// Compact per-room join button: solid side colour for prop/opp (light
 /// when locked, main when joinable); the blue↔orange gradient for the live room
 /// and result (grey when locked).
-///
 /// Stateful so it can show a spinner and swallow further taps while the join is
 /// in flight — a laggy room-token fetch used to let an impatient user tap several
 /// times and get pushed into the room more than once.

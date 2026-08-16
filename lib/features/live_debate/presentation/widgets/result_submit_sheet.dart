@@ -11,10 +11,10 @@ import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 import '../../../../core/error/failure_text.dart';
 
-/// The chair's result-submit UI (§10): a winning-side picker, one **integer
+/// The chair's result-submit UI: a winning-side picker, one **integer
 /// 0–100** score slider per speech (from [DebateController.scoreableStages]) and
 /// free-text notes. On submit it calls [DebateController.submitResult] and pops
-/// with `true` **only when the backend actually accepted it** (FE-1) — on failure
+/// with `true` **only when the backend actually accepted it** — on failure
 /// it stays open and shows the server's message.
 class ResultSubmitSheet extends StatefulWidget {
   final DebateController controller;
@@ -38,7 +38,7 @@ class ResultSubmitSheet extends StatefulWidget {
 
 class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
   late final List<ResultStageRef> _stages;
-  // FE-1: scores are plain INTEGERS 0–100 for every stage (incl. reply) — no
+  // Scores are plain INTEGERS 0–100 for every stage (incl. reply) — no
   // 59–90 / reply-halving / 0.5 steps (the backend validator rejects decimals).
   final Map<int, int> _scores = {};
   static const int _defaultScore = 75;
@@ -68,7 +68,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
       return;
     }
     setState(() => _submitting = true);
-    // FE-1: honest submit — only treat it as success if the backend accepted it.
+    // Honest submit — only treat it as success if the backend accepted it.
     final ok = await widget.controller.submitResult(
       winningSide: _winning!,
       scoresByStageOrder: _scores.map<int, num>((k, v) => MapEntry(k, v)),
@@ -87,7 +87,7 @@ class _ResultSubmitSheetState extends State<ResultSubmitSheet> {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    // FE-1: surface the backend's real rejection message (e.g. an integer-score
+    // Surface the backend's real rejection message (e.g. an integer-score
     // validation error) and keep the sheet open instead of faking success.
     return BlocListener<DebateController, DebateStates>(
       bloc: widget.controller,
@@ -286,7 +286,7 @@ class _StageSlider extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = stage.side != null ? DebateTheme.sideColor(stage.side!) : JadalColors.judgesGrey;
-    // FE-1: integer 0–100 for every stage (incl. reply) — the backend stores an
+    // Integer 0–100 for every stage (incl. reply) — the backend stores an
     // integer; no 59–90 range, no reply-halving, no 0.5 steps.
     const min = 0.0;
     const max = 100.0;
@@ -326,7 +326,7 @@ class _StageSlider extends StatelessWidget {
                 activeTrackColor: color,
                 thumbColor: color,
                 overlayColor: color.withValues(alpha: 0.16),
-                // The value bubble (pointer) follows the side colour, not blue (§U5).
+                // The value bubble (pointer) follows the side colour, not blue.
                 valueIndicatorColor: color,
                 valueIndicatorTextStyle: AppTextStyles.button(context)
                     .copyWith(color: Colors.white, fontWeight: FontWeight.w800),

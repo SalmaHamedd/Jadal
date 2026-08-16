@@ -4,18 +4,11 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 import 'jadal_surface.dart';
 
-/// MF_FU §4 — the app's one segmented control.
+/// The app's one segmented control.
 ///
-/// The public-statistics scope switch and the achievements sort switch were
-/// two near-identical copies, and both had the same defect: the track's `Row`
-/// used the default `crossAxisAlignment: center`, so each `Expanded` segment
-/// got *loose* vertical constraints and sized to its own content (~20dp of
-/// icon + text) rather than filling the track. The ink splash and the selected
-/// tint therefore hugged the label instead of covering the segment — which is
-/// what "the hover design is on the word itself" meant.
-///
-/// Here the row stretches, so a segment IS the full-height target, and the
-/// selection is a real pill rather than a font-weight change.
+/// The row stretches its children, so each segment fills the track's height
+/// and the ink splash and selected pill cover the whole segment rather than
+/// hugging the label.
 class JadalSegmentedSwitch<T> extends StatelessWidget {
   final List<T> values;
   final T active;

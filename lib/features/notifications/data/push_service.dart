@@ -18,7 +18,6 @@ const String kPushChannelId = 'jadal_default';
 const String kPushChannelName = 'Jadal';
 
 /// Background/terminated **data** handler.
-///
 /// Must be a top-level function — the Flutter engine spawns a separate
 /// isolate for it, so it cannot capture any state from the app. It exists only
 /// so data-only messages aren't dropped; anything the user actually sees in
@@ -30,9 +29,8 @@ Future<void> firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   debugPrint('[push] background message: ${message.messageId}');
 }
 
-/// Owns the whole FCM lifecycle (§7): init, permission, token registration,
+/// Owns the whole FCM lifecycle: init, permission, token registration,
 /// and the three delivery states a tap can arrive in.
-///
 /// Deliberately does NOT depend on any cubit — the auth flow calls
 /// [registerToken] / [unregisterToken] at the right moments instead, because
 /// only it knows when a bearer token is valid.
@@ -55,7 +53,6 @@ class PushService {
   bool get isReady => _initialised;
 
   /// Boot Firebase and wire the message streams. Safe to call more than once.
-  ///
   /// Never throws: if Firebase can't start (missing or malformed
   /// google-services.json, no Play Services on the device) the app must still
   /// run — push is an enhancement, not a dependency.
@@ -75,7 +72,7 @@ class PushService {
 
   Future<void> _initLocalNotifications() async {
     const android = AndroidInitializationSettings('@drawable/ic_notification');
-    // iOS permission is requested explicitly in requestPermission(), not here,
+    // iOS permission is requested explicitly in requestPermission, not here,
     // so the prompt appears at a moment we control.
     const darwin = DarwinInitializationSettings(
       requestAlertPermission: false,
@@ -116,7 +113,7 @@ class PushService {
 
   void _wireStreams() {
     // 1. Foreground. Android delivers nothing visible in this state, so we
-    //    draw the notification ourselves to keep it tappable.
+    // draw the notification ourselves to keep it tappable.
     _onMessageSub = FirebaseMessaging.onMessage.listen(_showForeground);
 
     // 2. Background → tapped. The app is alive, so route immediately.
@@ -125,7 +122,7 @@ class PushService {
     });
 
     // 3. Token rotation. FCM can rotate at any time; a stale token on the
-    //    backend means silently undelivered notifications.
+    // backend means silently undelivered notifications.
     _onTokenRefreshSub =
         FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
       final locale = _lastLocale;
@@ -185,7 +182,6 @@ class PushService {
 
   /// Register this device against the signed-in user. Call AFTER login, once a
   /// bearer token exists — the endpoint is authenticated.
-  ///
   /// [locale] is stored server-side and decides which language each push is
   /// sent in, so it must be re-sent whenever the app language changes.
   Future<void> registerToken({required String locale}) async {

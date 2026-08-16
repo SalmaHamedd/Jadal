@@ -15,7 +15,7 @@ abstract class BlogRepository {
   });
 
   /// `GET /blog?q=&category_id[]=&tag_id[]=&publisher_id[]=&liked_by_me=`
-  /// (sprinkles §10) — extends the same list endpoint, same response shape.
+  /// — extends the same list endpoint, same response shape.
   Future<Either<Failure, List<Blog>>> searchBlogs({
     String? q,
     List<int> categoryIds,

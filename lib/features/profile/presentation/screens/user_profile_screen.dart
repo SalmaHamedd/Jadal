@@ -20,8 +20,7 @@ import 'package:jadal_app/core/error/failure_text.dart';
 import 'package:jadal_app/core/widgets/jadal_error_view.dart';
 
 /// Read-only profile for another user.
-///
-/// §6.1 — this is the SAME template as the own-profile screen: identical dome
+/// This is the SAME template as the own-profile screen: identical dome
 /// cover, identical header, identical section cards, identical entrance
 /// motion. The only differences are the owner-only pieces that simply don't
 /// render here (private details, the edit action, logout).
@@ -264,7 +263,7 @@ class _UserProfileScreenState extends State<UserProfileScreen> {
   String _roleLabel(BuildContext context, String role) => switch (role) {
     'debater' => context.loc.roleDebater,
     'judge' => context.loc.judgeRole,
-    // Display-only rename (§6.6) — wire value stays "trainer".
+    // Display-only rename — wire value stays "trainer".
     'trainer' => context.loc.roleTrainer,
     'admin' => context.loc.roleAdmin,
     _ => role,

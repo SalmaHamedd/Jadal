@@ -43,7 +43,7 @@ class _HomeDebateBannerState extends State<HomeDebateBanner> {
   }
 
   Future<void> _load() async {
-    // §4.1 — consume the splash-time prefetch when present; otherwise fetch
+    // Consume the splash-time prefetch when present; otherwise fetch
     // as before.
     final repo = di.sl<LiveDebateRepository>();
     final liveRes = await (HomePrefetch.takeLive() ??

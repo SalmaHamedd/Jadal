@@ -1,9 +1,9 @@
 import '../../../../core/function/json_utils.dart';
 
-/// V2 §3 — coach team-summary: one scalar per metric, averaged across every
+/// Coach team-summary: one scalar per metric, averaged across every
 /// non-random team the coach has ever created (current + past). Deliberately
 /// NOT the bucketed chart shape — the backend ships four averages, no series.
-/// `teamAvgActive` is the §7 activity score averaged across the coach's
+/// `teamAvgActive` is the activity score averaged across the coach's
 /// CURRENT teams' current members (different in kind from the other three).
 class TeamSummaryStat {
   final int teamsCounted;

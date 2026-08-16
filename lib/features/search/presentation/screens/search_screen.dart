@@ -64,7 +64,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ? JadalColors.darkTextSecondary
         : JadalColors.lightTextSecondary;
 
-    // §2.5 — no longer a bottom-nav tab: pushed from the home app bar, so it
+    // No longer a bottom-nav tab: pushed from the home app bar, so it
     // paints its own gradient backdrop and gets the implicit back button.
     return JadalGradientBackground(
       child: Scaffold(

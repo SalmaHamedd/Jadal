@@ -35,7 +35,7 @@ dependencies:
   cached_network_image: ^3.3.1
   conditional_builder_null_safety: ^0.0.6
   fl_chart: ^0.69.0
-  # Lightweight audio playback for the debate protected-period bell (§8.3).
+  # Lightweight audio playback for the debate protected-period bell.
   audioplayers: ^6.1.0
   # Export the debater-statistics analysis as a styled .xlsx sheet + share it.
   excel: ^4.0.6
@@ -43,8 +43,8 @@ dependencies:
   firebase_core: ^4.13.0
   firebase_messaging: ^16.5.0
   flutter_local_notifications: ^22.3.0
-  # MF_FU §1.2 — the drawer's about-us rows deep-link out (tel:, mailto:,
-  # instagram://, wa.me), so each contact value opens the right app.
+  # The drawer's about-us rows open external apps (tel:, mailto:,
+  # instagram://, wa.me), so each contact value launches the right one.
   url_launcher: ^6.3.1
 
 # url_launcher_android 6.3.30 pulls androidx.browser:browser:1.9.0, which does
@@ -81,7 +81,7 @@ flutter:
   # To add assets to your application, add an assets section, like this:
   assets:
     - assets/images/
-    # Drop a `bell.mp3` here for the debate protected-period bell (§8.3).
+    # Drop a `bell.mp3` here for the debate protected-period bell.
     - assets/sounds/
 
   # An image asset can refer to one or more resolution-specific "variants", see

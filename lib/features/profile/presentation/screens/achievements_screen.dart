@@ -7,8 +7,8 @@ import 'package:jadal_app/features/profile/data/repositories/profile_repository.
 import 'package:jadal_app/features/profile/domain/entities/achievement.dart';
 import 'package:jadal_app/features/profile/presentation/widgets/achievement_badge.dart';
 
-/// §6.8 — how the "show all" page orders its list. Wire values match the
-/// backend's `sort` parameter (BACKEND_RESPONSE §4).
+/// How the "show all" page orders its list. Wire values match the
+/// backend's `sort` parameter.
 enum AchievementSort {
   date('date'),
   rank('rank');
@@ -17,7 +17,7 @@ enum AchievementSort {
   const AchievementSort(this.wire);
 }
 
-/// Full paginated achievements list ("Show all", §6.8) for a given user, with
+/// Full paginated achievements list ("Show all") for a given user, with
 /// a segmented Date | Tier control up top (default: Date) and a loading
 /// indicator centered in the screen rather than inline in the grid.
 class AchievementsScreen extends StatefulWidget {
@@ -131,7 +131,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
         ),
       );
     }
-    // §6.8 — while a next page loads, the indicator is centered over the
+    // While a next page loads, the indicator is centered over the
     // screen instead of rendered inline next to the last achievement.
     return Stack(
       children: [
@@ -167,7 +167,7 @@ class _AchievementsScreenState extends State<AchievementsScreen> {
   }
 }
 
-/// The Date | Tier segmented control (§6.8). MF_FU §4 — now the shared
+/// The Date | Tier segmented control. — now the shared
 /// [JadalSegmentedSwitch], so its hit area covers the whole segment rather
 /// than just the label, and it can no longer drift from the statistics one.
 class _SortSwitch extends StatelessWidget {

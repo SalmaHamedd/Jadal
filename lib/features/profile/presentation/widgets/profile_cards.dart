@@ -20,8 +20,7 @@ class ProfileCard extends StatelessWidget {
       JadalSurface(padding: padding, child: child);
 }
 
-/// §6.7 — one private-details line.
-///
+/// One private-details line.
 /// Every row shares the same leading edge (the age row used to start further
 /// left than its neighbours), and the value wraps freely instead of
 /// truncating, so a long email is shown in full rather than elided. A hairline
@@ -32,7 +31,7 @@ class ProfileDetailRow extends StatelessWidget {
   final String value;
   final bool isLast;
 
-  /// MF_FU §2.3 — a per-field accent instead of the same blue on every row.
+  /// A per-field accent instead of the same blue on every row.
   /// Deliberately small: only the icon plate, the icon, and a hair of tint on
   /// the value. The layout, hairlines and typography are untouched.
   final Color accent;

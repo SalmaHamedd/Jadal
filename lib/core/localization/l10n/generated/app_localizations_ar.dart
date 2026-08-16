@@ -1524,6 +1524,21 @@ class AppLocalizationsAr extends AppLocalizations {
   String get shareResult => 'مشاركة النتيجة';
 
   @override
+  String get shareDebate => 'مشاركة المناظرة';
+
+  @override
+  String get debateLinkCopied => 'تم نسخ رابط المناظرة';
+
+  @override
+  String get guestBadge => 'ضيف';
+
+  @override
+  String get guestViewingNotice => 'أنت تشاهد كضيف.';
+
+  @override
+  String get guestLinkUnavailableTitle => 'الرابط لم يعد متاحًا';
+
+  @override
   String get shareResultPrompt =>
       'تم إغلاق الغرفة. شارك النتيجة لإنهاء المناظرة.';
 
@@ -2044,6 +2059,9 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get errorNotAllowed => 'ليس لديك صلاحية للقيام بذلك.';
+
+  @override
+  String get errorLinkExpired => 'لم يعد رابط هذه المناظرة متاحًا.';
 
   @override
   String get errorTooManyRequests =>

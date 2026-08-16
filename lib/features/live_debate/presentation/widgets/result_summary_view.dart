@@ -8,16 +8,16 @@ import '../utils/debate_theme.dart';
 
 const Color _gold = Color(0xFFF5C542);
 
-/// The shared, render-ready result view (§10): winner appreciation, the
+/// The shared, render-ready result view: winner appreciation, the
 /// best-speaker crown, and the per-speech scores. Deliberately **cubit-free** —
 /// it takes a [DebateResultView] so the live result room and the debate-list
-/// "Done" detail (§13) render the exact same widget. Winner/crown/notes appear
+/// "Done" detail render the exact same widget. Winner/crown/notes appear
 /// only once [DebateResultView.revealed] is true; scores may show beforehand.
 class ResultSummaryView extends StatelessWidget {
   final DebateResultView result;
 
   /// When true the inner list shrink-wraps and doesn't scroll — so it can nest
-  /// inside another scroll view (the debate-list "Done" detail, §13).
+  /// inside another scroll view (the debate-list "Done" detail).
   final bool shrinkWrap;
 
   const ResultSummaryView({super.key, required this.result, this.shrinkWrap = false});

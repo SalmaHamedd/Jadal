@@ -8,10 +8,9 @@ import '../../../../core/widgets/jadal_dialog.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
-/// Team-only chat (§8.5): send/receive messages over the `team_chat` socket
+/// Team-only chat: send/receive messages over the `team_chat` socket
 /// event; messages render only for same-team participants (filtered by
 /// [teamId]). Overflow-safe bubbles.
-///
 /// The chat is coloured by side — blue / deep-blue for the proposition team and
 /// orange / dark-orange for the opposition — so each team's chat reads as its
 /// own. It opens scrolled to the newest message (like a normal messenger) and,
@@ -140,7 +139,7 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
                               final m = messages[i];
                               final mine = m.senderId == localId;
                               // Received bubbles get a tinted fill + border so they
-                              // read clearly against the near-white dialog (§11).
+                              // read clearly against the near-white dialog.
                               final receivedBg = DebateTheme.isDark(context)
                                   ? DebateTheme.surfaceElevated(context)
                                   : Color.lerp(

@@ -6,7 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/activity_stat_model.dart';
 import 'stats_theme.dart';
 
-/// V2 §7 — the activity/participation score. Deliberately NOT a column chart:
+/// The activity/participation score. Deliberately NOT a column chart:
 /// the product ask is "review the improvement of activeness over time," so
 /// this renders a trend line of the per-bucket totals, headed by the big
 /// total, and — the part the raw number can't tell you — a breakdown of what
@@ -30,7 +30,7 @@ class StatsActivityView extends StatelessWidget {
             duration: const Duration(milliseconds: 900),
             curve: Curves.easeOutCubic,
             builder: (context, v, _) => Text(
-              // Arrow + sign, not colour alone (MF_FU §7.5).
+              // Arrow + sign, not colour alone.
               (v > 0
                       ? '▲ '
                       : v < 0
@@ -57,7 +57,7 @@ class StatsActivityView extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 18),
-        // MF_FU §8.2 — the chart was never "removed": it is gated on ≥2
+        // The chart was never "removed": it is gated on ≥2
         // buckets, and the screen used to pin group_by to `none`, which always
         // returns a single all-time bucket. With grouping restored this
         // renders; when a period genuinely has one bucket, say so rather than
@@ -250,7 +250,7 @@ class _BucketRow extends StatelessWidget {
   }
 }
 
-/// MF_FU §7.5 — colour must never be the only carrier of meaning. Positive and
+/// Colour must never be the only carrier of meaning. Positive and
 /// negative deltas take an arrow **and** a sign, so they stay readable under
 /// red–green colour-vision deficiency (where the green and red collapse toward
 /// each other) and in greyscale.

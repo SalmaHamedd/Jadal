@@ -1,6 +1,6 @@
 import 'achievement.dart';
 
-/// `GET /users/{id}` (sprinkles §6.1) — another user's public profile. Email,
+/// `GET /users/{id}` — another user's public profile. Email,
 /// phone and birthDate are only populated when the caller is viewing their
 /// own profile or is an admin (backend hides them otherwise); build UI
 /// assuming they may be absent.

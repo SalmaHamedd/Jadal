@@ -22,10 +22,10 @@ import '../widgets/debate_list_card.dart';
 import 'backend_debate_detail_screen.dart';
 import '../../../main/presentation/screens/main_screen.dart';
 
-/// Backend debate list with stage tabs (§13): one `GET /debates?status=…` per
+/// Backend debate list with stage tabs: one `GET /debates?status=…` per
 /// tab (Registration / Announced / Sides selected / Live / Done / Cancelled),
 /// with `meta`-driven pagination. Tapping a card opens the live-state detail.
-/// A search bar + filter button (§8) replace the tabbed view with a single
+/// A search bar + filter button replace the tabbed view with a single
 /// searched/filtered result list whenever a query or filter is active.
 class DebateListScreen extends StatefulWidget {
   const DebateListScreen({super.key});
@@ -40,7 +40,7 @@ class _DebateListScreenState extends State<DebateListScreen> {
   String _query = '';
   DebateSearchFilter _filter = const DebateSearchFilter();
 
-  /// MF_FU §5.6 — `onChanged` used to commit the query on every keystroke, and
+  /// `onChanged` used to commit the query on every keystroke, and
   /// each commit fired a `/debates/search` request. The results view sequences
   /// them so there was no correctness bug, just a request storm; this coalesces
   /// a burst of typing into one call.
@@ -116,7 +116,7 @@ class _DebateListScreenState extends State<DebateListScreen> {
               icon: const Icon(Icons.menu_rounded),
               onPressed: () => mainScaffoldKey.currentState?.openDrawer(),
             ),
-            // MF_FU §5 — the title stays put when search opens (the field now
+            // The title stays put when search opens (the field now
             // lives in `bottom:`, where the stage tabs were), so the header
             // doesn't jump and the field gets full width and real padding
             // instead of being crammed into the title slot at titleSpacing 0.
@@ -140,7 +140,6 @@ class _DebateListScreenState extends State<DebateListScreen> {
               ),
             ],
             // The statistics entry moved to the Profile tab.
-            //
             // Search replaces the stage tabs outright: `/debates/search` runs
             // across every status, so a stage selector next to it would be
             // meaningless. Gate on `_searching`, not `_isFiltering` — the tabs
@@ -188,7 +187,7 @@ class _DebateListScreenState extends State<DebateListScreen> {
   }
 }
 
-/// MF_FU §5 — the debates search field: a proper contained input with padding,
+/// The debates search field: a proper contained input with padding,
 /// sitting full-width where the stage tabs normally are.
 class _SearchField extends StatelessWidget {
   final TextEditingController controller;
@@ -268,7 +267,7 @@ class _SearchField extends StatelessWidget {
   }
 }
 
-/// The combined search+filter result list (§8) — a flat paginated list
+/// The combined search+filter result list — a flat paginated list
 /// (no status tabs) driven by `GET /debates/search`.
 class _SearchResultsView extends StatefulWidget {
   final String query;
@@ -287,7 +286,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
   bool _hasMore = true;
   String? _error;
 
-  /// §5.6 — sequences requests: a query/filter change invalidates any
+  /// Sequences requests: a query/filter change invalidates any
   /// in-flight response (which used to land in the freshly-cleared list) and
   /// releases the `_loading` latch that used to swallow the reload.
   int _requestSeq = 0;
@@ -336,7 +335,7 @@ class _SearchResultsViewState extends State<_SearchResultsView> {
       }),
       (pageData) => setState(() {
         _items.addAll(pageData.items);
-        // §5.6 — meta-driven: the old items.isNotEmpty heuristic left
+        // Meta-driven: the old items.isNotEmpty heuristic left
         // _hasMore stuck on true after the last page, so the footer spinner
         // kept showing after the results had already been returned.
         _hasMore = pageData.meta.hasMore;

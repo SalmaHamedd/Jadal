@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// Mic badge for a video card (§U4b). Two states with the **same footprint** so
+/// Mic badge for a video card. Two states with the **same footprint** so
 /// the badge never shifts when the mic toggles:
-///  • mic ON  → a smooth volume-reactive bars visualizer (the "dots & lines"
-///    look) driven by the participant's live audio level;
-///  • mic OFF → a calm dark-red mic-off badge (not the eye-searing bright red).
+/// • mic ON → a smooth volume-reactive bars visualizer (the "dots & lines"
+/// look) driven by the participant's live audio level;
+/// • mic OFF → a calm dark-red mic-off badge (not the eye-searing bright red).
 class MicVolumeIndicator extends StatefulWidget {
   final bool micOn;
   final bool isSpeaking;

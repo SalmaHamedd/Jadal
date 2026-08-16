@@ -12,7 +12,7 @@ import '../../domain/debate_registration.dart';
 import '../utils/debate_theme.dart';
 import '../../../../core/error/failure_text.dart';
 
-/// Registration entry (§15.1): pick team / solo / judge and POST to
+/// Registration entry: pick team / solo / judge and POST to
 /// `/debates/{id}/register`. Team registration needs the caller's team id (the
 /// caller must be that team's leader or coach). Resolves to `true` when the
 /// registration succeeds so the caller can refresh. [rootContext] carries the
@@ -54,11 +54,11 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
     _resolveOptions();
   }
 
-  /// The visible options depend on the caller's account role (§UX):
-  ///  • judge   → Register as Judge ONLY (§5.4 — a judge can never go solo)
-  ///  • trainer → Register your Team (+ Solo)
-  ///  • debater → Solo; plus Team **only if they lead a registerable team**
-  ///  • unknown/legacy session (role not cached) → be permissive: show all.
+  /// The visible options depend on the caller's account role:
+  /// • judge → Register as Judge ONLY
+  /// • trainer → Register your Team (+ Solo)
+  /// • debater → Solo; plus Team **only if they lead a registerable team**
+  /// • unknown/legacy session (role not cached) → be permissive: show all.
   Future<void> _resolveOptions() async {
     final role = (await TokenStorage.getRole())?.toLowerCase();
     var showTeam = false;
@@ -259,7 +259,7 @@ class _RegistrationSheetState extends State<_RegistrationSheet> {
   }
 }
 
-/// Picker dialog for the team-registration variant (V12 §1): eligible teams are
+/// Picker dialog for the team-registration variant: eligible teams are
 /// tappable; ineligible ones are shown disabled with their reason.
 class _TeamPickerDialog extends StatelessWidget {
   final RegisterableTeams data;

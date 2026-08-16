@@ -8,7 +8,7 @@ import 'package:jadal_app/core/theme/avatar_palette.dart';
 import 'package:jadal_app/features/profile/presentation/screens/user_profile_screen.dart';
 import 'package:jadal_app/features/search/domain/entities/search_user.dart';
 
-/// V2 §10 — one user row in the search results. The old card buried the
+/// One user row in the search results. The old card buried the
 /// points inside a plain subtitle string; here role and points read as
 /// distinct chips, and the avatar falls back to the name's initial (matching
 /// the leaderboard rows and drawer header) instead of a generic person icon.
@@ -47,8 +47,8 @@ class SearchUserCard extends StatelessWidget {
                   ),
                 ),
                 child: Builder(builder: (context) {
-                  // §2.1 — resolve relative avatar paths so the image shows in
-                  // the list view too; §2.2 — deterministic initial color.
+                  // Resolve relative avatar paths so the image shows in
+                  // the list view too; — deterministic initial color.
                   final url = resolveMediaUrl(user.avatarUrl);
                   return CircleAvatar(
                     radius: context.wp(6.5),

@@ -8,7 +8,7 @@ import '../../../../core/widgets/jadal_gradient_button.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/debate_theme.dart';
 
-/// Shown to the asker after the speaker accepts their POI (§8.4): a mic control
+/// Shown to the asker after the speaker accepts their POI: a mic control
 /// + a Done button that returns them to silence.
 class PoiAskerMicDialog extends StatelessWidget {
   const PoiAskerMicDialog({super.key});

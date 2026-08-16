@@ -5,12 +5,11 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/extensions/responsive_extension.dart';
 
 /// Fully controlled auth input built on a standard [TextFormField].
-///
 /// - One uniform fill colour (no inner "write here" rectangle), and the fill
-///   does NOT change on focus/hover — only the border reacts.
-/// - Standard Material label, not the old one that launched into orbit.
+/// does NOT change on focus/hover — only the border reacts.
+/// - Standard Material floating label.
 /// - Stateless: for password fields the obscure value comes from the cubit,
-///   and the eye calls [onToggleVisibility] back into the cubit.
+/// and the eye calls [onToggleVisibility] back into the cubit.
 class AuthTextField extends StatelessWidget {
   final String label;
   final TextEditingController? controller;

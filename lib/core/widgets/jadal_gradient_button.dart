@@ -5,8 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// Primary gradient CTA, ported from the auth `AuthButton` design so the
-/// gorgeous blue→orange gradient can be reused across the app (§3.3).
-///
+/// gorgeous blue→orange gradient can be reused across the app.
 /// Use this for primary actions only (room Join, dialog confirm). Secondary
 /// actions (Cancel, toggles, icon buttons) should NOT use this. Rule of thumb:
 /// at most one gradient button visible per surface.

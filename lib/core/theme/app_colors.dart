@@ -64,8 +64,7 @@ abstract class JadalColors {
   /// than sitting exactly on it.
   static const Color judgesGreyLight = Color(0xFF636B76);
   // Positive / negative accents, tuned to sit beside the brand blue & orange.
-  //
-  // MF_FU §7.3 — `negativeRed` was #D84857, which under simulated deuteranopia
+  // `negativeRed` was #D84857, which under simulated deuteranopia
   // (the most common colour-vision deficiency) landed at CIEDE2000 ΔE 4.6 from
   // positiveGreen: both collapse to the same olive (#8D8D66 vs #888851), with
   // only a 1.08:1 luminance ratio between them, so win/loss, accept/reject and

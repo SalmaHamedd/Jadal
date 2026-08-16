@@ -2,10 +2,9 @@ import '../../../core/app_models/motion.dart';
 import '../data/models/debate_models.dart';
 
 /// The read-only debate dataset the live-debate UI renders from.
-///
 /// Both the test/mock source ([MockLiveDebateData]) and the backend-derived
 /// source (built from `GET /live-state`) implement this, so the **same widget
-/// tree** can render either mode (§2). Widgets only ever read `controller.data`
+/// tree** can render either mode. Widgets only ever read `controller.data`
 /// through this interface — never a concrete type.
 abstract class LiveDebateData {
   /// Drives prep + speech timing for the whole debate.

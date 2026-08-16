@@ -3,6 +3,7 @@ import 'package:http/http.dart' as http;
 import 'package:internet_connection_checker/internet_connection_checker.dart';
 import '../core/app_cubit/app_cubit.dart';
 import '../core/network/network_info.dart';
+import '../core/services/deep_link_service.dart';
 import '../core/storage/preferences_database.dart';
 import '../features/auth/data/repositories/auth_repository.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
@@ -39,20 +40,23 @@ Future<void> init() async {
   sl.registerLazySingleton(() => ProfileRepository());
   // Debater statistics (read-only API).
   sl.registerLazySingleton<DebaterStatsRepository>(() => DebaterStatsRepositoryImpl());
-  // V2 §3 — public leaderboards (home preview + public stats screen).
+  // Public leaderboards (home preview + public stats screen).
   sl.registerLazySingleton(() => LeaderboardRepository());
-  // §7 — FCM device-token registry (POST/DELETE /api/devices) + the FCM
+  // FCM device-token registry (POST/DELETE /api/devices) + the FCM
   // lifecycle owner. PushService is a singleton because it holds the message
   // stream subscriptions and the last-registered locale.
   sl.registerLazySingleton(() => DeviceRepository());
   sl.registerLazySingleton(() => PushService(devices: sl<DeviceRepository>()));
-  // param1 = the backend debate id to load (from the list → detail → join flow,
-  // §13). Null falls back to `DebateModeConfig.devDebateId`.
-  sl.registerFactoryParam<DebateController, int?, void>(
-    (debateId, _) => LiveDebateCubit(
+  // Owns the app-links subscription for the whole session.
+  sl.registerLazySingleton(() => DeepLinkService());
+  // param1 = which debate to load (null falls back to the dev debate id).
+  // param2 = join as a tokenless guest from a share link.
+  sl.registerFactoryParam<DebateController, int?, bool?>(
+    (debateId, asGuest) => LiveDebateCubit(
       repo: sl<LiveDebateRepository>(),
       profileRepo: sl<ProfileRepository>(),
       debateId: debateId ?? DebateModeConfig.devDebateId,
+      asGuest: asGuest ?? false,
     ),
   );
   sl.registerFactory(() => ConnectionCubit());

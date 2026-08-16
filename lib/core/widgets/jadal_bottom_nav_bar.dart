@@ -15,7 +15,7 @@ class JadalNavItem {
   });
 }
 
-/// A custom bottom nav bar (§5) replacing the stock `BottomNavigationBar`,
+/// A custom bottom nav bar replacing the stock `BottomNavigationBar`,
 /// which had no room for a selected-state animation and gave every tab a
 /// full-tile ripple. This one floats a translucent, rounded surface over the
 /// shared [JadalGradientBackground] instead of painting an opaque strip, so
@@ -63,7 +63,7 @@ class JadalBottomNavBar extends StatelessWidget {
                 final itemWidth = constraints.maxWidth / items.length;
                 return Stack(
                   children: [
-                    // §2.3 — `start` (not physical `left`): in RTL the item
+                    // `start` (not physical `left`): in RTL the item
                     // Row mirrors, and a physical offset sent the pill to the
                     // wrong side (pill on item 1, icons highlighting item 4).
                     AnimatedPositionedDirectional(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 /// Curated bright avatar colours that read well in both light and dark themes
-/// (§8.4). Derived from the legacy `profileColors`, trimmed of the muddiest
+///. Derived from the legacy `profileColors`, trimmed of the muddiest
 /// low-contrast entries.
 const List<Color> kAvatarPalette = [
   Color(0xFF229F7A), // Teal Green
@@ -22,7 +22,7 @@ const List<Color> kAvatarPalette = [
 ];
 
 /// Deterministic colour for a participant: hashing the id means a given person
-/// always gets the same colour (fixes the legacy `Random()`-per-build flicker).
+/// always gets the same colour (fixes the legacy `Random`-per-build flicker).
 Color avatarColorFor(String? id) {
   final key = (id == null || id.isEmpty) ? 'user' : id;
   var hash = 0;

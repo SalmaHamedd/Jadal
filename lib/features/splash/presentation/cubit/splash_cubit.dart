@@ -22,7 +22,7 @@ class SplashCubit extends Cubit<SplashState> {
   Future<void> start() async {
     final stopwatch = Stopwatch()..start();
 
-    // §4.1 — warm the home screen's data while the splash animation plays,
+    // Warm the home screen's data while the splash animation plays,
     // so the post-splash screen renders content rather than spinners. Only
     // when signed in: without a token the calls would just 401.
     final token = await _prefs.getToken();
@@ -30,7 +30,7 @@ class SplashCubit extends Cubit<SplashState> {
 
     final result = await _permissions.requestLiveDebatePermissions();
 
-    // §7 — ask for notifications at first launch, after the debate-critical
+    // Ask for notifications at first launch, after the debate-critical
     // permissions so the essential prompts come first. The result is
     // deliberately discarded and never feeds the gating below: declining push
     // must not block entry to the app.

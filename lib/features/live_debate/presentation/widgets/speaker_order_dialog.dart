@@ -8,7 +8,7 @@ import '../../data/models/debate_models.dart';
 import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
 
-/// Speaker-order selection used by the current leader during prep (§8.1):
+/// Speaker-order selection used by the current leader during prep:
 /// drag-to-reorder the three speakers + (if reply is on) pick the reply speaker
 /// constrained to the 1st or 2nd speaker. Confirms with a gradient button.
 class SpeakerOrderDialog extends StatefulWidget {
@@ -16,7 +16,7 @@ class SpeakerOrderDialog extends StatefulWidget {
   final SpeakerOrder current;
   final bool replyEnabled;
 
-  /// FE-8: the number of speaking slots to offer (= speakers per side), so a
+  /// The number of speaking slots to offer (= speakers per side), so a
   /// 2-person team can still fill a 3rd slot (duplicates allowed). Defaults to
   /// the roster size when not provided.
   final int? slotCount;
@@ -37,7 +37,7 @@ class SpeakerOrderDialog extends StatefulWidget {
 
 class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
   late List<String> _ordered;
-  // FE-8: the DISTINCT debaters for the per-slot dropdown — `team.debaters` is N
+  // The DISTINCT debaters for the per-slot dropdown — `team.debaters` is N
   // fixed slots that may repeat a debater (multi-role), so the dropdown's item
   // list must be de-duplicated (a DropdownButton requires unique item values).
   late List<Debater> _roster;
@@ -53,7 +53,7 @@ class _SpeakerOrderDialogState extends State<SpeakerOrderDialog> {
     ];
     final rosterIds = _roster.map((d) => d.id).toSet();
     final fallback = _roster.isNotEmpty ? _roster.first.id : '';
-    // FE-7/8: exactly N slots (= team speeches per side), duplicates allowed. Seed
+    // Exactly N slots (= team speeches per side), duplicates allowed. Seed
     // from the saved order, else from the slot defaults; coerce any invalid slot
     // to a real debater so the dropdown value is always a valid item.
     final n = (widget.slotCount != null && widget.slotCount! > 0)

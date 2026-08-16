@@ -1536,6 +1536,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get shareResult => 'Share result';
 
   @override
+  String get shareDebate => 'Share debate';
+
+  @override
+  String get debateLinkCopied => 'Debate link copied';
+
+  @override
+  String get guestBadge => 'Guest';
+
+  @override
+  String get guestViewingNotice => 'You\'re watching as a guest.';
+
+  @override
+  String get guestLinkUnavailableTitle => 'Link no longer available';
+
+  @override
   String get shareResultPrompt =>
       'The room is closed. Share the result to finish the debate.';
 
@@ -2061,6 +2076,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get errorNotAllowed => 'You don\'t have permission to do that.';
+
+  @override
+  String get errorLinkExpired => 'This debate link is no longer available.';
 
   @override
   String get errorTooManyRequests =>

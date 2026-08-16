@@ -5,14 +5,14 @@ import '../../domain/debate_room_role.dart';
 import '../../domain/debate_status.dart';
 import 'debate_result_model.dart';
 
-/// Parsed `GET /debates/{id}/live-state` `data` object (§4) — the full picture
+/// Parsed `GET /debates/{id}/live-state` `data` object — the full picture
 /// of a debate: rooms, judges, prop/opp speakers + roster, stages, motion,
 /// format and (once revealed) the result.
 class LiveStateModel {
   final DebateInfo debate;
   final DebateFormatModel format;
 
-  /// `null` before the motion reveal time (show a placeholder, §F).
+  /// `null` before the motion reveal time (show a placeholder).
   final Motion? motion;
   final LiveRooms rooms;
   final List<JudgeEntry> judges;
@@ -20,10 +20,10 @@ class LiveStateModel {
   final SideInfo opposition;
 
   /// Speech list; the **last two can be reversed** (opp reply before prop) — read
-  /// the order from here, never hard-code it (§F).
+  /// the order from here, never hard-code it.
   final List<StageEntry> stages;
 
-  /// `null` for non-judges until `result_revealed_at` is set (§F).
+  /// `null` for non-judges until `result_revealed_at` is set.
   final LiveResult? result;
 
   const LiveStateModel({
@@ -59,7 +59,7 @@ class LiveStateModel {
   }
 
   /// Resolve the current user's involvement by matching their auth id against
-  /// judges / speakers / team members (§4).
+  /// judges / speakers / team members.
   bool isJudge(int userId) => judges.any((j) => j.user.id == userId);
   bool isChair(int userId) => chairJudge?.user.id == userId;
 
@@ -71,7 +71,7 @@ class LiveStateModel {
   }
 
   /// The speaker whose participant row id matches `stages[].participant_id`
-  /// (used to attribute a completed stage's score to a speaker/side, §10).
+  /// (used to attribute a completed stage's score to a speaker/side).
   SpeakerEntry? speakerByParticipantId(int? participantId) {
     if (participantId == null) return null;
     for (final s in [...proposition.speakers, ...opposition.speakers]) {
@@ -93,26 +93,29 @@ class DebateInfo {
   final String? statusRaw;
   final int currentStage;
 
-  /// Server timestamp the in-progress speaking phase started at (B3) — `null` in
+  /// Server timestamp the in-progress speaking phase started at — `null` in
   /// the lobby / stage 0. Used to seed the timer so it reads 0 before any speech
   /// and syncs a mid-speech (re)join to the real elapsed time.
   final DateTime? currentStageStartedAt;
 
-  /// FE-3 (B1): set when the speeches finish → the result phase opens while the
+  /// Set when the speeches finish → the result phase opens while the
   /// debate is STILL `live`. Gate the result UI on this (or `rooms.result.open`),
   /// NEVER on `status == completed`.
   final DateTime? speechesCompletedAt;
 
-  /// V11 §1: set when the chair enters the live session from the lobby (intro
+  /// Set when the chair enters the live session from the lobby (intro
   /// phase) while `current_stage` stays 0. Distinguishes intro from open lobby.
   final DateTime? liveStartedAt;
 
-  // V11 §0: server-authoritative timer. `serverNow` is the server clock at
+  // Server-authoritative timer. `serverNow` is the server clock at
   // response time → the client measures its offset once and computes elapsed
   // without any peer dependency. Paused state + the frozen elapsed are persisted.
   final DateTime? serverNow;
   final bool timerIsPaused;
   final int timerPausedElapsedSeconds;
+  /// Public link to this debate, e.g. `https://jadal-platform.com/d/42`. The
+  /// backend omits the key for guests, so a guest can never re-share.
+  final String? shareUrl;
   final String? cancellationReason;
   final DateTime? scheduledAt;
   final DateTime? startedAt;
@@ -134,6 +137,7 @@ class DebateInfo {
     required this.serverNow,
     required this.timerIsPaused,
     required this.timerPausedElapsedSeconds,
+    required this.shareUrl,
     required this.cancellationReason,
     required this.scheduledAt,
     required this.startedAt,
@@ -156,6 +160,7 @@ class DebateInfo {
         serverNow: asDate(j['server_now']),
         timerIsPaused: asBool(j['timer_is_paused']),
         timerPausedElapsedSeconds: asInt(j['timer_paused_elapsed_seconds']) ?? 0,
+        shareUrl: asString(j['share_url']),
         cancellationReason: asString(j['cancellation_reason']),
         scheduledAt: asDate(j['scheduled_at']),
         startedAt: asDate(j['started_at']),
@@ -169,10 +174,10 @@ class DebateInfo {
   bool get isCompleted => status == DebateStatus.completed;
   bool get resultRevealed => resultRevealedAt != null;
 
-  /// FE-3: speeches are done (result phase open) while still `live`.
+  /// Speeches are done (result phase open) while still `live`.
   bool get speechesCompleted => speechesCompletedAt != null;
 
-  /// V11 §1: the "intro" phase — live session entered (chair welcome) but no
+  /// The "intro" phase — live session entered (chair welcome) but no
   /// speech has started yet (`current_stage == 0` + `live_started_at` set).
   bool get isIntroPhase =>
       currentStage == 0 && liveStartedAt != null && !isCompleted && !isCancelled;
@@ -230,7 +235,7 @@ class LiveUser {
   final String name;
   final String? role;
   final String? status;
-  final String? avatarUrl; // sanitised — malformed double-URLs become null (§4)
+  final String? avatarUrl; // sanitised — malformed double-URLs become null
   final String? email;
   final String? phone;
   final int points;
@@ -262,14 +267,14 @@ class LiveUser {
 }
 
 /// Some `avatar_url`s come back malformed as `/storage/https://…` (a doubled
-/// URL). Treat those as absent so the UI falls back to the initials avatar (§4).
+/// URL). Treat those as absent so the UI falls back to the initials avatar.
 String? sanitizeAvatarUrl(String? raw) {
   if (raw == null || raw.trim().isEmpty) return null;
   if (raw.startsWith('/storage/http')) return null;
   return raw;
 }
 
-/// One slot in `speaking_order[]` (B4) — `{phase_order, user_id, participant_id}`.
+/// One slot in `speaking_order[]` — `{phase_order, user_id, participant_id}`.
 /// DUPLICATES ARE ALLOWED (a 2-person team can fill 3 slots as `[A, B, A]`).
 class SpeakingOrderEntry {
   final int phaseOrder;
@@ -296,8 +301,8 @@ class SideInfo {
   final List<LiveUser> members; // wider roster
   final List<SpeakerEntry> speakers; // approved debaters on this side
 
-  /// B4: the N-slot speaking order with DUPLICATES allowed (multi-role). Drives
-  /// the fixed N equal slots (FE-7) and the order dialog (FE-8).
+  /// The N-slot speaking order with DUPLICATES allowed (multi-role). Drives
+  /// the fixed N equal slots and the order dialog.
   final List<SpeakingOrderEntry> speakingOrder;
 
   const SideInfo({
@@ -399,7 +404,7 @@ class SpeakerEntry {
   final bool isAttended;
   final int? speakingPhaseOrder;
 
-  /// G3: the backend's authoritative reply-speaker flag (`is_reply_speaker`).
+  /// The backend's authoritative reply-speaker flag (`is_reply_speaker`).
   /// This — NOT the role string — drives the PR/OR label and pre-selecting the
   /// reply speaker in the order dialog.
   final bool isReplySpeakerFlag;
@@ -430,7 +435,7 @@ class SpeakerEntry {
         isReplySpeakerFlag: asBool(j['is_reply_speaker']),
       );
 
-  /// G3: read the boolean `is_reply_speaker` (now present, V5 §2). The old
+  /// Read the boolean `is_reply_speaker` (now present). The old
   /// `role.contains('reply')` heuristic was always false (role is just
   /// "debater") — kept only as a defensive fallback.
   bool get isReplySpeaker =>
@@ -448,10 +453,10 @@ class StageEntry {
   final String status;
 
   /// The participant assigned to this stage; maps to `speakers[].id`.
-  /// Can be `null` (e.g. completed/seeded debates — see open Q8).
+  /// Can be `null`, e.g. on completed or seeded debates.
   final int? participantId;
 
-  /// The user id of this stage's speaker, resolved server-side (B3) — saves us
+  /// The user id of this stage's speaker, resolved server-side — saves us
   /// mapping `participant_id → user`. `null` for stages with no speaker.
   final int? speakerUserId;
   final DateTime? startedAt;
@@ -462,7 +467,7 @@ class StageEntry {
   final String? speechText;
 
   /// The DB phase id needed by `POST /stages/{phaseId}/poi`. The live-state
-  /// sample omits it (only `order_index`); parsed when present (open Q7).
+  /// sample omits it (only `order_index`); parsed when present.
   final int? id;
 
   const StageEntry({

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// A lightweight, **dependency-free** confetti burst for the result reveal (§10).
+/// A lightweight, **dependency-free** confetti burst for the result reveal.
 /// Spawns a fixed set of particles that fall + drift + spin, then fades and
 /// calls [onComplete]. Non-interactive (wrapped in [IgnorePointer]) so it never
 /// blocks the result UI underneath.

@@ -1,7 +1,7 @@
 import '../../../../core/function/json_utils.dart';
 
-/// Models for the V12 registration endpoints: the team picker (§1) and the
-/// registrant lists (§3).
+/// Models for the registration endpoints: the team picker and the
+/// registrant lists.
 
 /// One team the caller may register for a debate, with its eligibility.
 class RegisterableTeam {
@@ -30,7 +30,7 @@ class RegisterableTeam {
       );
 }
 
-/// Response of `GET /debates/{id}/registerable-teams` (§1).
+/// Response of `GET /debates/{id}/registerable-teams`.
 class RegisterableTeams {
   final int debateId;
   final int? alreadyRegisteredTeamId;
@@ -49,7 +49,7 @@ class RegisterableTeams {
       );
 }
 
-/// A registered team row (§3).
+/// A registered team row.
 class RegistrantTeam {
   final int teamId;
   final String teamName;
@@ -74,7 +74,7 @@ class RegistrantTeam {
   }
 }
 
-/// A registered individual (judge or solo applicant) row (§3).
+/// A registered individual (judge or solo applicant) row.
 class RegistrantUser {
   final int id;
   final String name;
@@ -99,7 +99,7 @@ class RegistrantUser {
   }
 }
 
-/// Response of `GET /debates/{id}/registrations` (§3).
+/// Response of `GET /debates/{id}/registrations`.
 class DebateRegistrations {
   final List<RegistrantTeam> teams;
   final List<RegistrantUser> judges;

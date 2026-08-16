@@ -1,14 +1,12 @@
 import '../storage/preferences_database.dart';
 
-/// MF_FU §1.1 — the signed-in user's identity, cached at login.
-///
+/// The signed-in user's identity, cached at login.
 /// The nav drawer used to resolve this with **two** live `GET /profile` calls
 /// (one for the header, one for the role gate) plus a third async load for the
 /// contact footer, so its items painted at three different times. Everything
 /// here already rides on the login response (`data.user`), and the backend has
 /// confirmed `points` is read live off the row at login — so the drawer needs
 /// no network call at all.
-///
 /// Refreshed by [ProfileCubit] whenever a profile load/update succeeds, since
 /// points and avatar can change while the app is open.
 class SessionIdentity {
@@ -32,7 +30,7 @@ class SessionIdentity {
   static const _kAvatar = 'user_avatar_url';
   static const _kPoints = 'user_points';
 
-  /// One batched write. This used to be five separate `setValue` calls, each a
+  /// One batched write instead of five separate `setValue` calls, each a
   /// full read-modify-write of the store — and it is called fire-and-forget
   /// from [ProfileCubit], so those writes raced with the token being written
   /// and could drop it. Now it is a single atomic flush.

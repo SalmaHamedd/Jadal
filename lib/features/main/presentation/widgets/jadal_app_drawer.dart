@@ -17,10 +17,9 @@ import 'package:jadal_app/features/surveys/presentation/screens/trainer_surveys_
 import 'package:jadal_app/features/teams/presentation/screens/joinable_teams_screen.dart';
 import 'package:jadal_app/features/teams/presentation/screens/teams_screen.dart';
 
-/// The app's nav drawer (§9) — opens from the layout "start" edge automatically
+/// The app's nav drawer — opens from the layout "start" edge automatically
 /// based on locale/`Directionality`, so RTL/LTR both fall out for free.
-///
-/// MF_FU §1.1 — this used to build from **three** independent async sources:
+/// This used to build from **three** independent async sources:
 /// two live `GET /profile` calls (one for the header, one for the role gate)
 /// plus the contact footer's own load. They resolved at different times, so the
 /// drawer's items appeared in waves. Everything now comes from one future over
@@ -39,7 +38,7 @@ class _JadalAppDrawerState extends State<JadalAppDrawer> {
   @override
   void initState() {
     super.initState();
-    // Created once — not in build() — so a rebuild can't restart it and make
+    // Created once — not in build — so a rebuild can't restart it and make
     // the drawer flash back to its empty state.
     _session = _load();
   }
@@ -264,7 +263,7 @@ class _DrawerItem extends StatelessWidget {
   }
 }
 
-/// MF_FU §1.2 — the about-us block: a real card whose rows each open the right
+/// The about-us block: a real card whose rows each open the right
 /// external app instead of three lines of grey text.
 class _AboutUsCard extends StatelessWidget {
   final ContactInfo contact;

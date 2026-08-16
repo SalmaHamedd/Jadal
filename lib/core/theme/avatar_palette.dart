@@ -1,31 +1,14 @@
 import 'package:flutter/material.dart';
 
-/// §2.2 — deterministic initial-avatar colors for users without an image.
+/// Deterministic initial-avatar colours for users without an image.
 ///
-/// The color is picked by a stable function of the user id, so the same user
-/// gets the same color on every reload and on every device — never
-/// random-per-render.
+/// The colour is a stable function of the user id, so the same user keeps the
+/// same colour across reloads and devices.
 ///
-/// MF_FU §7.4b — this used to be an 8-stop ramp sweeping brand blue → orange
-/// through violet/rose, which meant **neighbouring stops were near-identical by
-/// construction**: worst pair CIEDE2000 ΔE 6.3 for *normal* vision (4 of 28
-/// pairs below the ΔE 11 "distinct" threshold), collapsing to ΔE 0.4 under
-/// tritanopia and 1.7 under deuteranopia.
-///
-/// A measured finding worth recording: **eight mutually-distinguishable hues
-/// are not achievable under dichromacy.** A greedy max-min search over a ~300
-/// colour pool (hue every 6°, five lightness/saturation levels, filtered to
-/// keep white initials ≥ 4.5:1) tops out at *five* stops with every pair
-/// clearing ΔE 11; at six one pair fails, at eight, four do.
-///
-/// That is acceptable here because avatar colour is **decorative, never
-/// semantic** — an avatar always carries the user's initial and sits beside
-/// their name — so it is held to ΔE ≥ 6 rather than ≥ 11. Six stops, and no
-/// purple: purple is blue plus red, so removing red makes it read as blue
-/// (measured ΔE 3.0 against the brand blue under protanopia, the worst
-/// collision available). Separation now comes from lightness as well as hue.
-///
-/// Measured: normal-vision worst pair 6.3 → 12.8, CVD worst 0.4 → 6.2.
+/// Six stops, not eight: more than about five hues cannot stay distinguishable
+/// under colour-blindness, and the old blue→orange ramp collapsed to nearly
+/// identical neighbours. Purple is left out because without red it reads as the
+/// brand blue. Separation comes from lightness as well as hue.
 const List<Color> kUserAvatarPalette = [
   Color(0xFF0352A1), // brand blue
   Color(0xFF0B73DA), // lighter blue — separated by lightness, not hue

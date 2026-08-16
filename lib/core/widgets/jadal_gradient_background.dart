@@ -2,19 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// The shared backdrop for the live-debate (and statistics) screens: a single,
-/// very soft diagonal wash that starts and ends on the scaffold colour and only
-/// drifts a hair toward the brand blue / deep-blue / orange in between.
+/// The shared backdrop for the live-debate and statistics screens: a soft
+/// diagonal wash that starts and ends on the scaffold colour and drifts only
+/// slightly toward the brand colours in between.
 ///
-/// Key points (so it never fights the content on top of it):
-///  • Every stop is **opaque** — the colours are the base blended a little toward
-///    a brand colour, not translucent overlays — so there are no see-through gaps
-///    (that was the "black in the middle" bug) and it works whether it sits over a
-///    Scaffold or wraps one.
-///  • Both ends are exactly the base colour, so the wash melts seamlessly into the
-///    rest of the UI with no hard "cut" between the tint and the background.
-///  • The blend factors are deliberately tiny → subtle, not childish, and it never
-///    overshadows the cards/sheets layered above it.
+/// Every stop is opaque (the base blended toward a brand colour, not a
+/// translucent overlay) so the wash works over a Scaffold or wrapping one, and
+/// both ends match the base colour so it blends into the rest of the UI.
 class JadalGradientBackground extends StatelessWidget {
   final Widget child;
   final EdgeInsetsGeometry padding;

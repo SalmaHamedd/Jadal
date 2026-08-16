@@ -61,7 +61,7 @@ class StatsExcelExporter {
     final excel = Excel.createExcel();
     const sheetName = 'Analysis';
     final sheet = excel[sheetName];
-    // Excel.createExcel() seeds a default 'Sheet1'; drop it so only ours remains.
+    // Excel.createExcel seeds a default 'Sheet1'; drop it so only ours remains.
     final defaultSheet = excel.getDefaultSheet();
     if (defaultSheet != null && defaultSheet != sheetName) {
       excel.delete(defaultSheet);
@@ -109,7 +109,7 @@ class StatsExcelExporter {
   static String teamFileName(String metric) =>
       'jadal-team-$metric-${DateTime.now().toIso8601String().substring(0, 10)}.xlsx';
 
-  /// MF_FU §9 — the coach's per-team analysis. Same sheet style as [build];
+  /// The coach's per-team analysis. Same sheet style as [build];
   /// separate entry point because a team export is scoped by team + metric
   /// rather than by [StatKind] + debater, and because the line-up analysis has
   /// no debater-side equivalent.
@@ -460,7 +460,7 @@ class StatsExcelExporter {
     return excel.save();
   }
 
-  /// MF_FU §11 — the judge's received ratings: headline average, coverage, the
+  /// The judge's received ratings: headline average, coverage, the
   /// full distribution, and the per-period trend.
   static int _writeJudgeRating(Sheet s, int row, JudgeRatingStat d) {
     _put(s, 0, row, TextCellValue('Average rating'), _labelStyle);
@@ -542,7 +542,7 @@ class StatsExcelExporter {
     return row;
   }
 
-  /// MF_FU §9.3 — the team's line-ups, ranked, with the team baseline so each
+  /// The team's line-ups, ranked, with the team baseline so each
   /// row can be read as a delta rather than a bare figure.
   static int _writeCombinations(Sheet s, int row, TeamCombinationsStat d) {
     for (final e in <(String, CellValue)>[

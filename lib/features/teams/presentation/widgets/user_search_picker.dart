@@ -194,7 +194,7 @@ class _UserResultTile extends StatelessWidget {
         child: Row(
           children: [
             Builder(builder: (context) {
-              // §2.1/§2.2 — resolved avatar URL + deterministic initial color.
+              // Resolved avatar URL + deterministic initial color.
               final url = resolveMediaUrl(user.avatarUrl);
               return CircleAvatar(
                 radius: 16,

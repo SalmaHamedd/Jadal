@@ -22,11 +22,11 @@ import '../widgets/top_bar_widgets.dart';
 import 'result_room_screen.dart';
 import '../../../../core/error/failure_text.dart';
 
-/// Layout 2 — the live debate room (§8.3). Body-only (no AppBar). Connects to
-/// LiveKit on init and, for test mode (§9), treats the local user as the first
+/// Layout 2 — the live debate room. Body-only (no AppBar). Connects to
+/// LiveKit on init and, for test mode, treats the local user as the first
 /// speaker with the timer running immediately.
 /// The room's connection lifecycle, used to gate the body so a *failed* connect
-/// never silently drops the user into a fake room (the old behaviour).
+/// never silently drops the user into a fake room.
 enum _ConnPhase { connecting, connected, failed }
 
 class DebateRoomScreen extends StatefulWidget {
@@ -59,7 +59,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // §5.2 — the system back button must behave EXACTLY like "Leave session":
+    // The system back button must behave EXACTLY like "Leave session":
     // same confirmation dialog, then out to the debate details screen. While
     // not connected (connecting/failed) a plain pop back to the rooms list is
     // kept, matching the failed-view's own leave button.
@@ -77,7 +77,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
       },
       child: Scaffold(
       backgroundColor: DebateTheme.background(context),
-      // A3: the debate layout has no text input of its own (chat is a dialog) —
+      // The debate layout has no text input of its own (chat is a dialog) —
       // don't let a dialog's soft keyboard reflow/shrink the team cards underneath
       // (that race on dialog-close threw a RenderFlex overflow on some phones).
       resizeToAvoidBottomInset: false,
@@ -109,7 +109,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is POIAcceptedForLocalState,
               listener: (context, _) {
-                // B2: the asker learns their POI was accepted — push a news line
+                // The asker learns their POI was accepted — push a news line
                 // and open the mic dialog (their mic is already lock-exempt).
                 context.read<DebateController>().updateLatestNews(context.loc.poiAcceptedNews);
                 showDialog(
@@ -136,7 +136,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
               },
             ),
             // Chair shared the result → everyone opens the result screen (confetti),
-            // whose back button returns to the live open lobby (§U4b).
+            // whose back button returns to the live open lobby.
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is NavigateToSharedResultState,
               listener: (context, _) {
@@ -153,7 +153,7 @@ class _DebateRoomScreenState extends State<DebateRoomScreen> {
                 ));
               },
             ),
-            // Chair closed the room → everyone is taken back to the rooms list (§U4b).
+            // Chair closed the room → everyone is taken back to the rooms list.
             BlocListener<DebateController, DebateStates>(
               listenWhen: (_, s) => s is RoomClosedState,
               listener: (context, _) {
@@ -294,7 +294,9 @@ class _DebateView extends StatelessWidget {
     return BlocBuilder<ConnectionCubit, ConnectionStates>(
       builder: (context, _) {
         final connection = context.read<ConnectionCubit>();
-        final showActions = connection.showActions;
+        // A guest has no action row, so the animation stays collapsed and the
+        // cards keep the space the bar would have taken.
+        final showActions = !cubit.isGuest && connection.showActions;
         // A single animated driver: t = 1 → tool bar fully shown, 0 → hidden.
         // The action row's height is `t·kHeight` and the cards' freed space is
         // `(1-t)·kHeight`, so they sum to kHeight at every frame — the cards
@@ -321,7 +323,7 @@ class _DebateView extends StatelessWidget {
                   ),
                 ),
                 // (B)+(C) Main speaker card + speakers. The freed space is
-                // redistributed 75% to the main card / 25% to the team cards (A2)
+                // redistributed 75% to the main card / 25% to the team cards
                 // so the team cards barely shrink and never overflow.
                 Expanded(
                   child: LayoutBuilder(
@@ -366,21 +368,23 @@ class _DebateView extends StatelessWidget {
                     },
                   ),
                 ),
-                // (D) The bottom action row, revealed top-down in lockstep with t.
-                GestureDetector(
-                  onTap: connection.resetHideTimer,
-                  behavior: HitTestBehavior.opaque,
-                  child: ClipRect(
-                    child: Align(
-                      alignment: Alignment.topCenter,
-                      heightFactor: t.clamp(0.0, 1.0),
-                      child: Opacity(
-                        opacity: t.clamp(0.0, 1.0),
-                        child: const DebateActionRow(visible: true),
+                // (D) The bottom action row, revealed top-down in lockstep with
+                // t. Guests have no controls at all, so the row is not built.
+                if (!cubit.isGuest)
+                  GestureDetector(
+                    onTap: connection.resetHideTimer,
+                    behavior: HitTestBehavior.opaque,
+                    child: ClipRect(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        heightFactor: t.clamp(0.0, 1.0),
+                        child: Opacity(
+                          opacity: t.clamp(0.0, 1.0),
+                          child: const DebateActionRow(visible: true),
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
             );
           },
@@ -390,7 +394,7 @@ class _DebateView extends StatelessWidget {
   }
 }
 
-/// Open-lobby mode (§8.5): everyone in the grid; a judge-only "Back to debate"
+/// Open-lobby mode: everyone in the grid; a judge-only "Back to debate"
 /// button at the top returns everyone to the debate layout.
 class _LobbyModeView extends StatelessWidget {
   @override
@@ -401,7 +405,7 @@ class _LobbyModeView extends StatelessWidget {
     // present, so it still renders the full roster for the demo). `isLocal` is
     // resolved from the real user id, not the "prop speaker 0" assumption.
     final tiles = <GridParticipant>[
-      // Judges pinned to the top (§9.4), then prop / opp / audience.
+      // Judges pinned to the top, then prop / opp / audience.
       for (final j in cubit.data.judges)
         if (cubit.isUserPresent(j.id))
           GridParticipant(id: j.id, name: j.name, isLocal: cubit.isLocalUserId(j.id)),
@@ -413,7 +417,7 @@ class _LobbyModeView extends StatelessWidget {
         if (cubit.isUserPresent(a.id))
           GridParticipant(id: a.id, name: a.name, isLocal: cubit.isLocalUserId(a.id)),
     ];
-    // FE-3: append anyone *present in the room* who isn't on the roster (a plain
+    // Append anyone *present in the room* who isn't on the roster (a plain
     // viewer with no judge/debater/audience entry) using their LiveKit identity,
     // so a present participant is never invisible to the others' grid.
     final shownIds = {for (final t in tiles) t.id};
@@ -444,7 +448,7 @@ class _LobbyModeView extends StatelessWidget {
       children: [
         // "Back to debate" is chair-only — and gone once the result phase opens
         // (speeches done / revealed / completed): the room then stays in the open
-        // lobby and can't return to a speech (Issue 9).
+        // lobby and can't return to a speech.
         if (cubit.canControlStage && !cubit.resultPhaseOpen)
           Padding(
             padding: const EdgeInsets.all(12),
@@ -452,7 +456,7 @@ class _LobbyModeView extends StatelessWidget {
               width: double.infinity,
               child: FilledButton.icon(
                 onPressed: () => cubit.setLobbyMode(false),
-                // C3: pre-live this enters the intro (chair welcome); mid-debate
+                // Pre-live this enters the intro (chair welcome); mid-debate
                 // it resumes the paused speaker.
                 icon: Icon(cubit.debateStarted
                     ? Icons.arrow_back_rounded
@@ -462,16 +466,18 @@ class _LobbyModeView extends StatelessWidget {
             ),
           ),
         Expanded(child: GridLayout(participants: tiles)),
-        // Auto-hiding action row (§9.3) — toggled by the screen's outer tap.
-        BlocBuilder<ConnectionCubit, ConnectionStates>(
-          builder: (context, _) {
-            final connection = context.read<ConnectionCubit>();
-            return GestureDetector(
-              onTap: connection.resetHideTimer,
-              child: DebateActionRow(visible: connection.showActions),
-            );
-          },
-        ),
+        // Auto-hiding action row, toggled by the screen's outer tap. Guests
+        // have no controls, so it is left out entirely.
+        if (!cubit.isGuest)
+          BlocBuilder<ConnectionCubit, ConnectionStates>(
+            builder: (context, _) {
+              final connection = context.read<ConnectionCubit>();
+              return GestureDetector(
+                onTap: connection.resetHideTimer,
+                child: DebateActionRow(visible: connection.showActions),
+              );
+            },
+          ),
       ],
     );
   }

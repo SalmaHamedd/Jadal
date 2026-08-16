@@ -7,14 +7,12 @@ import '../../teams/presentation/screens/team_info_screen.dart';
 import '../domain/push_message.dart';
 
 /// Navigator key for the app's root [MaterialApp].
-///
 /// Notification taps arrive from outside the widget tree — including on a cold
 /// start, where no screen has built yet — so routing cannot rely on a
 /// BuildContext from the tap site.
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
-/// Opens the screen a [PushMessage] points at (§7.1 deep links).
-///
+/// Opens the screen a [PushMessage] points at.
 /// Handles all three delivery states the same way: foreground, background, and
 /// cold start. Cold start is why [pendingColdStartMessage] exists — a tap that
 /// launches the app fires before the navigator is mounted, so it is parked and

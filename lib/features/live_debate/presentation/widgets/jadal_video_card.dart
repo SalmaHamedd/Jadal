@@ -8,7 +8,7 @@ import '../utils/debate_theme.dart';
 import 'call_indicators.dart';
 
 /// Reusable participant tile (camera stream or deterministic-colour avatar),
-/// recolored from the legacy `VideoCard` (§8.2/§8.3 C). Used by both the grid
+/// recolored from the legacy `VideoCard`. Used by both the grid
 /// layout and the speaker cards.
 class JadalVideoCard extends StatelessWidget {
   final String name;
@@ -103,9 +103,8 @@ class JadalVideoCard extends StatelessWidget {
             ),
           ),
           // Name (overflow-safe).
-          //
           // On the main speaker card the chair's stop/resume button straddles
-          // the bottom edge, centred — it used to sit right on top of the name.
+          // the bottom edge, centred, clear of the name.
           // [bottomCenterReserved] pulls the name's trailing edge back to just
           // before the button, so it shrinks/ellipsises into the free space
           // instead of running underneath it.

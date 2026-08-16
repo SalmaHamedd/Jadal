@@ -25,7 +25,7 @@ class TeamDetailCubit extends Cubit<TeamDetailState> {
     final result = await repository.addMembers(teamId: state.team.id, memberIds: memberIds);
     result.fold(
       (failure) => emit(state.copyWith(busy: false, error: failure.message)),
-      // MF_FU §10.6 — copyWith, NOT a fresh TeamDetailState: constructing a new
+      // copyWith, NOT a fresh TeamDetailState: constructing a new
       // state resets `joinRequests`/`leaveRequests` to their `const []` default,
       // which wiped the pending-request sections off the screen after any
       // successful mutation.
@@ -173,7 +173,7 @@ class TeamDetailCubit extends Cubit<TeamDetailState> {
         error: failure.message,
         team: previous,
       )),
-      // MF_FU §10.6 — copyWith, NOT a fresh TeamDetailState (see addMembers).
+      // copyWith, NOT a fresh TeamDetailState (see addMembers).
       (team) => emit(state.copyWith(busy: false, team: team)),
     );
   }

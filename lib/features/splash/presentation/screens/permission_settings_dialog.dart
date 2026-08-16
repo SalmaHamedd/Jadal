@@ -9,9 +9,8 @@ import '../../data/permissions_service.dart';
 
 /// Shows a frosted-glass dialog telling the user which permissions
 /// are permanently denied and offers a direct path to app settings.
-///
 /// Usage:
-///   PermissionSettingsDialog.show(context, denied: result.denied);
+/// PermissionSettingsDialog.show(context, denied: result.denied);
 class PermissionSettingsDialog extends StatelessWidget {
   final List<AppPermission> denied;
 
@@ -105,7 +104,7 @@ class PermissionSettingsDialog extends StatelessWidget {
                 Text(
                   loc.permissionsRequiredBody,
                   // "Some permissions were denied. Enable them in Settings
-                  //  to use all features of Jadal."
+                  // to use all features of Jadal."
                   textAlign: TextAlign.center,
                   style: AppTextStyles.body(context)
                       .copyWith(color: textSecondary, height: 1.5),

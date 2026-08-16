@@ -16,7 +16,7 @@ import 'stats_theme.dart';
 class StatsFilterBar extends StatelessWidget {
   final DebaterStatsState state;
 
-  /// MF_FU §8.2 — activity accepts only `from`/`to`/`group_by`; the position,
+  /// Activity accepts only `from`/`to`/`group_by`; the position,
   /// framework and series dimensions don't exist for it (the repository strips
   /// them). It gets the grouping + period rows and nothing else, instead of the
   /// whole bar being hidden — which is what left `group_by` pinned to `none`
@@ -73,7 +73,7 @@ class StatsFilterBar extends StatelessWidget {
             ],
           ),
         // Chart stats: which dimension becomes parallel bars. Follows the
-        // active filter dimension (§1.4).
+        // active filter dimension.
         if (state.isBucketed && !periodOnly)
           _ChipRow(
             label: loc.statsCompare,
@@ -124,7 +124,7 @@ class StatsFilterBar extends StatelessWidget {
                 ),
             ],
           ),
-        // §1.4 — the filter dimension: position OR motion framework, never
+        // The filter dimension: position OR motion framework, never
         // both. Switching clears the other's selection.
         if (!periodOnly) ...[
           _ChipRow(

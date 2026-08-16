@@ -1,4 +1,4 @@
-/// Filter params for `GET /debates/search` (sprinkles §8). All lists are
+/// Filter params for `GET /debates/search`. All lists are
 /// optional/combinable — AND across dimensions, OR within one (e.g. two
 /// `formatIds` means format A OR format B). "Motion tag" was dropped per
 /// backend's confirmation that it isn't real data — motion "tags" are just

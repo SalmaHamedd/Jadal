@@ -1,6 +1,6 @@
 import '../../../../core/function/json_utils.dart';
 
-/// MF_FU §3.1b — one entry in the coach's team picker.
+/// One entry in the coach's team picker.
 class TrainerTeam {
   final int id;
   final String name;
@@ -25,7 +25,7 @@ class TrainerTeam {
       );
 }
 
-/// MF_FU §4 — one member of a line-up. [isCurrentMember] is false for someone
+/// One member of a line-up. [isCurrentMember] is false for someone
 /// who has since left the team; their historical line-ups still appear, so the
 /// coach's history doesn't silently rewrite itself.
 class CombinationMember {

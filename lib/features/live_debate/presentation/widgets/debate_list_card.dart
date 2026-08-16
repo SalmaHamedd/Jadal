@@ -8,19 +8,12 @@ import '../../domain/debate_status.dart';
 import '../utils/debate_date.dart';
 import '../utils/debate_theme.dart';
 
-/// The app's ONE debate card.
+/// The app's one debate card, shared by the debates screen and the profile's
+/// recent-debates list.
 ///
-/// Every card floats the same way — one soft neutral elevation, no per-stage
-/// colour. The single blue→orange accent stripe is the only brand colour and it
-/// is identical on every card, so a list reads calm rather than as a stack of
-/// coloured blocks.
-///
-/// MF_FU §2.4 — this used to be private to the debates screen, while the
-/// profile's "latest debates" (and its "show all" page) had their own
-/// `DebateRowCard` that tinted the whole row orange for completed and red for
-/// cancelled. Five of those stacked was repetitive and loud. Both surfaces now
-/// share this widget; status is carried by [showStatusPill] as *text*, never by
-/// the card's colour.
+/// Every card uses the same neutral elevation and the same blue→orange accent
+/// stripe, so a list reads calm instead of as a stack of coloured blocks.
+/// Status is shown as text via [showStatusPill], never as a card colour.
 class DebateListCard extends StatelessWidget {
   final DebateListItem item;
   final VoidCallback onTap;
@@ -163,7 +156,7 @@ class DebateListCard extends StatelessWidget {
                               ],
                             ],
                           ),
-                          // Registration cards show only title/format/date (§U2).
+                          // Registration cards show only title/format/date.
                           // The motion is dropped in compact mode — two more
                           // wrapped lines in a narrow column read as a wall.
                           if (!compact &&

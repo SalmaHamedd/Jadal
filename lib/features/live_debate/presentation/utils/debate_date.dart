@@ -1,4 +1,4 @@
-/// Compact, locale-neutral date label for debate cards/detail (§13):
+/// Compact, locale-neutral date label for debate cards/detail:
 /// `yyyy-MM-dd HH:mm`, or an empty string when the date is absent.
 String formatDebateDate(DateTime? d) {
   if (d == null) return '';

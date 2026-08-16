@@ -8,12 +8,10 @@ import '../../../core/constants/api_constants.dart';
 import '../../../core/error/failures.dart';
 import '../../../core/services/token_storage.dart';
 
-/// FCM device-token registry (§7.1).
-///
+/// FCM device-token registry.
 /// `POST /devices` upserts keyed on the token — re-registering never
 /// duplicates, and a token previously owned by another user is reassigned, so
 /// pushes for user A can never land on a device now held by user B.
-///
 /// `DELETE /devices` is idempotent (200 even for an unknown token) and is
 /// **scoped to the authenticated caller**, so it must be called BEFORE the auth
 /// token is discarded on logout — an unauthenticated call 401s and the device
@@ -35,7 +33,6 @@ class DeviceRepository {
   }
 
   /// Register or refresh this device's token.
-  ///
   /// Called on successful login, on every FCM token rotation, and whenever the
   /// app language changes — the backend localises each push from the [locale]
   /// stored here, so a stale value means notifications in the wrong language.

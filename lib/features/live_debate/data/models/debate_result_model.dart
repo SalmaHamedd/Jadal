@@ -38,7 +38,7 @@ class DebateResultModel {
 }
 
 /// The **read** shape of `live-state.result` (null until revealed). Assumed to
-/// mirror the submit shape (open Q4 — confirm against a real revealed result).
+/// mirror the submit shape.
 class LiveResult {
   final String? winningSide;
   final String? summaryNotes;
@@ -51,7 +51,7 @@ class LiveResult {
   });
 
   factory LiveResult.fromJson(Map<String, dynamic> j) {
-    // G1: the READ shape nests the per-stage scores under `scores.stages`
+    // The READ shape nests the per-stage scores under `scores.stages`
     // (`{stage_order, participant_id, user_id, score}`) and the notes under
     // `scores.notes` — NOT a top-level `stage_scores` (that is the SUBMIT shape).
     // Reading the wrong key left scores empty → blank result screen + no

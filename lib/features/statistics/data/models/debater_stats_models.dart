@@ -6,8 +6,8 @@ import '../../../../core/function/json_utils.dart';
 /// rates are 0–1 floats.
 
 /// Which stat is on screen. The first three share the bucketed series shape;
-/// ranking, improvement and activity (V2 §7) have their own.
-/// MF_FU §11 adds [judgeRating] — judges-only, backed by
+/// ranking, improvement and activity have their own.
+/// adds [judgeRating] — judges-only, backed by
 /// `GET /judges/{id}/stats/ratings`.
 enum StatKind {
   winRate,

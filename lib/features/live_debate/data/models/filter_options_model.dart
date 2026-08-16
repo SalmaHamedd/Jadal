@@ -1,5 +1,5 @@
 /// Lightweight option-list rows for the debate/blog search filter dialogs
-/// (sprinkles §8/§10) — deliberately separate from the richer domain models
+/// — deliberately separate from the richer domain models
 /// used elsewhere (e.g. `SearchTeam`), since these are just id+name pickers.
 
 class JudgeOption {

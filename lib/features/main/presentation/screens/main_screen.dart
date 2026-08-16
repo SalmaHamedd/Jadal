@@ -14,16 +14,16 @@ import '../../../profile/presentation/screens/profile_screen.dart';
 import '../widgets/jadal_app_drawer.dart';
 
 /// Global key so any nested tab screen (each has its own Scaffold) can open
-/// the shell's drawer via `mainScaffoldKey.currentState?.openDrawer()` — a
-/// plain `Scaffold.of(context).openDrawer()` from inside a tab would only
-/// find that tab's own nested Scaffold, not this one (§9).
+/// the shell's drawer via `mainScaffoldKey.currentState?.openDrawer` — a
+/// plain `Scaffold.of(context).openDrawer` from inside a tab would only
+/// find that tab's own nested Scaffold, not this one.
 final GlobalKey<ScaffoldState> mainScaffoldKey = GlobalKey<ScaffoldState>();
 
 /// The app shell after login: the shared gradient backdrop with no AppBar (so
 /// the wash runs edge-to-edge) and the bottom navigation between the four
-/// sections — Home, Debates (backend list with its stage tabs), Blog (§2.5 —
+/// sections — Home, Debates (backend list with its stage tabs), Blog (—
 /// replaced Search, which now lives behind the home app-bar icon) and
-/// Profile. Also owns the nav drawer (§9); swipe-to-open is restricted to the
+/// Profile. Also owns the nav drawer; swipe-to-open is restricted to the
 /// Home tab so it doesn't fight with gestures on the other tabs.
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -48,7 +48,7 @@ class _MainScreenState extends State<MainScreen> {
   @override
   void initState() {
     super.initState();
-    // §7 — this is the one place every authenticated entry path converges on:
+    // This is the one place every authenticated entry path converges on:
     // a fresh login AND a restart with a stored token both land here. Doing it
     // in the login flow alone would leave a user who never logs out again
     // permanently unregistered, and would miss FCM token rotation.

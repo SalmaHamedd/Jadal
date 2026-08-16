@@ -10,7 +10,6 @@ import 'package:jadal_app/core/widgets/jadal_surface.dart';
 
 /// The ONE profile header, shared verbatim by the self Profile screen and the
 /// read-only public profile.
-///
 /// The cover is **full-bleed**: it starts at the very top of the screen (the
 /// app bar floats over it, so it runs behind the status bar) with no side
 /// padding, and its bottom edge is clipped into a dome. That single curved
@@ -128,7 +127,7 @@ class ProfileHeaderSection extends StatelessWidget {
                   ),
                   child: CircleAvatar(
                     radius: _avatarRadius,
-                    // §2.2 — deterministic per-user color for the initial.
+                    // Deterministic per-user color for the initial.
                     backgroundColor: userAvatarColor(userId),
                     backgroundImage:
                         url != null ? CachedNetworkImageProvider(url) : null,
@@ -170,7 +169,7 @@ class ProfileHeaderSection extends StatelessWidget {
         // stat bar rather than scattered pills.
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          // MF_FU §2.2 — IntrinsicHeight + stretch so all three chips match the
+          // IntrinsicHeight + stretch so all three chips match the
           // tallest one. They used to size to their own content, and the points
           // chip was the only one with a second line, so it stood taller than
           // its neighbours. The unit now sits inline with the value instead.

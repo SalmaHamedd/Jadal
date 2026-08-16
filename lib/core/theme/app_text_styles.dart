@@ -2,24 +2,18 @@ import 'package:flutter/material.dart';
 
 import '../extensions/responsive_extension.dart';
 
-/// The app's canonical Cairo type scale. Every screen should build its text
-/// from one of these instead of hand-rolling `TextStyle(fontFamily: 'Cairo',
-/// fontSize: ..., fontWeight: ...)` — that drift (11, 11.5, 12, 12.5, 13,
-/// 13.5, 14, 15, 15.5, 16, 17, 19, 24...) is exactly what made text sizing
-/// feel inconsistent across the app.
+/// The app's Cairo type scale. Build text from these rather than hand-rolling
+/// a `TextStyle`, which is what let font sizes drift across the app.
 ///
-/// Each role scales with screen width via [ResponsiveExtension.fontSize]
-/// (clamped to a min/max), matching the pattern the auth screens already
-/// used — so a tablet doesn't get the same fixed pixel size as a small
-/// phone. None of these set a color: pass `.copyWith(color: ...)` for
-/// theme-aware (dark/light) or semantic colors.
+/// Each role scales with screen width via [ResponsiveExtension.fontSize],
+/// clamped to a min and max, so a tablet doesn't get a phone's fixed size.
+/// None of them set a colour — use `.copyWith(color: ...)`.
 abstract final class AppTextStyles {
   static const _family = 'Cairo';
 
   /// Big screen-level title (e.g. the Home tab's "Home"/"جدل" heading, the
   /// app name on auth screens).
-  ///
-  /// §2.6d — the title roles below sit deliberately far above [body] so a
+  /// The title roles below sit deliberately far above [body] so a
   /// heading is unmistakably a heading. Only the title end of the scale was
   /// raised; [body] and everything under it keep their sizes so dense
   /// screens (the live debate room, chips, meta rows) keep their density.

@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:livekit_client/livekit_client.dart';
 
+import '../../../../core/error/failures.dart';
 import '../../data/models/debate_models.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_room_role.dart';
@@ -18,8 +19,7 @@ class SpeechSlot {
 }
 
 /// A received team-chat message (rendered only for same-team viewers).
-///
-/// [seenBy] mirrors the backend's persisted `seen_by` (sprinkles §2) — always
+/// [seenBy] mirrors the backend's persisted `seen_by` — always
 /// includes the sender. The unread dot is derived from it (my id ∉ seenBy),
 /// not tracked as a separate counter. [id] is null only for the (rare) window
 /// between a locally-sent message and its `POST /chat` response landing.
@@ -52,11 +52,10 @@ class TeamChatMessage {
       );
 }
 
-/// The shared surface every live-debate **widget** reads from (§2).
-///
+/// The shared surface every live-debate **widget** reads from.
 /// One widget set, two controllers: [DebateCubit] (mock/test, peer-to-peer) and
 /// `LiveDebateCubit` (backend, server-driven) both `extend DebateController`, so
-/// `BlocBuilder<DebateController, DebateStates>` / `context.read<DebateController>()`
+/// `BlocBuilder<DebateController, DebateStates>` / `context.read<DebateController>`
 /// render either mode identically. The **only** intended difference is role-gating —
 /// the permission getters below are all-permissive in test mode and derived from the
 /// token `role_in_room` + live-state in backend mode.
@@ -91,7 +90,7 @@ abstract class DebateController extends Cubit<DebateStates> {
 
   Future<void> connectToRoom({required String url, required String token});
 
-  /// [notify]=false is the intentional-leave path (§5.1): tears the
+  /// [notify]=false is the intentional-leave path: tears the
   /// connection down WITHOUT emitting [DebateDisconnectedState], so the
   /// room's pop-on-disconnect listener can't race the caller's own
   /// navigation. Unexpected disconnects keep the default and still notify.
@@ -173,7 +172,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   SpeakerOrder get oppOrder;
   Debater debaterAt(DebateSide side, int orderIndex);
 
-  /// FE-7: how many fixed speaking slots to render per side (= speakers per
+  /// How many fixed speaking slots to render per side (= speakers per
   /// side). Both team columns render this many cards so they stay equal height;
   /// a side with fewer speakers leaves its bottom slot(s) empty. Default: the
   /// larger side's roster (test mode is symmetric, so this is unchanged there).
@@ -200,7 +199,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   bool isAskingPOIBySid(String sid);
 
   /// Whether the local user currently holds the floor (is the main speaker).
-  /// **Only the current speaker may accept/answer a POI** (Issue 8). Test/mock
+  /// **Only the current speaker may accept/answer a POI**. Test/mock
   /// mode: true whenever a speech is live (the solo demo speaks as the local user).
   bool get iAmCurrentSpeaker => currentSlot != null;
 
@@ -234,7 +233,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// false (only the server-driven cubit sets it).
   bool get isAdvancingStage => false;
 
-  // ── Intro phase + chair timer control (V11) ─────────────────────────────────
+  // ── Intro phase + chair timer control ─────────────────────────────────
   /// The live session has started but no speech yet (chair welcome). Test mode:
   /// always false (the mock goes straight to a speech).
   bool get isIntro => false;
@@ -274,7 +273,7 @@ abstract class DebateController extends Cubit<DebateStates> {
     return '';
   }
 
-  // ── Moderation publish-lock (§U4b) ─────────────────────────────────────────
+  // ── Moderation publish-lock ─────────────────────────────────────────
   // "Mute all = prevent publishing" + per-user lock. Concrete no-op defaults so
   // the backend cubit compiles unchanged (those endpoints don't exist yet, so
   // it inherits the stubs); the test cubit implements them over the data channel.
@@ -295,7 +294,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// Chair: toggle an individual user's publish lock.
   void toggleUserPublishLock(String userId) {}
 
-  // ── Camera lock (mirrors the mic publish-lock above, §FE-4/FE-6) ────────────
+  // ── Camera lock (mirrors the mic publish-lock above/) ────────────
   // Same model for the camera: a room-wide "camera off (all)" and a per-user
   // lock so a user the chair turned off can't re-open their camera. Judges + the
   // current main speaker are always exempt. No-op defaults keep both cubits
@@ -317,7 +316,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// Chair: toggle an individual user's camera lock.
   void toggleUserCameraLock(String userId) {}
 
-  // ── Share result / close room from the live room (§U4b) ─────────────────────
+  // ── Share result / close room from the live room ─────────────────────
 
   /// The submitted result has already been shared to the room.
   bool get resultShared => false;
@@ -333,7 +332,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// live-debate join.
   Future<void> closeRoom() async {}
 
-  // ── Role → controls gating (§8) ───────────────────────────────────────────────
+  // ── Role → controls gating ───────────────────────────────────────────────
   // Test mode returns all-permissive (shows every control); backend mode derives
   // these from the token `role_in_room` + live-state. Widgets HIDE controls a role
   // can never use and DISABLE ones momentarily unavailable.
@@ -367,7 +366,19 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// Viewer / trainer / a team member who is not a speaking participant.
   bool get isSpectator;
 
-  // ── Result flow (§10) ─────────────────────────────────────────────────────────
+  /// Watching through a share link with no account. Guests see the room, the
+  /// cards and the motion and nothing else — no toolbar, no menu, no sharing.
+  bool get isGuest => false;
+
+  /// The debate's public link, used by the share action. Null for guests, who
+  /// must not be able to pass the link on.
+  String? get shareUrl => null;
+
+  /// Why the initial load failed, if it did. Lets the guest entry screen tell a
+  /// closed share link (410) apart from a network problem.
+  Failure? get loadFailure => null;
+
+  // ── Result flow ─────────────────────────────────────────────────────────
   // Same widget set both modes: test stores the result locally; backend submits
   // over REST and reads it back from `live-state`.
 
@@ -379,37 +390,37 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// is completed). [DebateResultView.revealed] tells the reveal status.
   DebateResultView? get resultView;
 
-  /// The main room was closed with no result → the debate is cancelled (§10).
+  /// The main room was closed with no result → the debate is cancelled.
   bool get isCancelled;
 
-  /// FE-3: the result phase is open (speeches finished) while the debate is still
+  /// The result phase is open (speeches finished) while the debate is still
   /// `live` — gate the result room on THIS, not on `debateFinished`/`completed`.
   /// Test/mock mode: opens when the local debate is finished.
   bool get resultPhaseOpen => debateFinished;
 
-  /// FE-6: a result has been stored (submitted) — drives enabling the chair's
+  /// A result has been stored (submitted) — drives enabling the chair's
   /// "share result" action in the LIVE room. Defaults to "a result view exists".
   bool get hasResult => resultView != null;
 
   /// Chair: submit scores. [scoresByStageOrder] is keyed by the 1-based stage
   /// order; [winningSide] picks the victor. **Returns whether the submit actually
-  /// succeeded** (FE-1) so the UI never reports a false success.
+  /// succeeded** so the UI never reports a false success.
   Future<bool> submitResult({
     required DebateSide winningSide,
     required Map<int, num> scoresByStageOrder,
     required String summaryNotes,
   });
 
-  /// Chair: reveal the result in-room — plays the confetti reveal (§10).
+  /// Chair: reveal the result in-room — plays the confetti reveal.
   Future<void> revealResult();
 
   /// Chair: close the main room — reveals an existing result (no confetti),
-  /// otherwise cancels the debate (§10).
+  /// otherwise cancels the debate.
   Future<void> closeMain();
 
   /// Submit a 1–5 debate rating with an optional free-text explanation. Sent
   /// once per explicit submit (never on every star change); the UI only enables
-  /// this once the result is revealed (§10).
+  /// this once the result is revealed.
   Future<void> sendDebateRating(int rating, {String? comment});
 
   // ── Muted-but-speaking banner ────────────────────────────────────────────────
@@ -424,7 +435,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// monitored condition resets.
   void dismissMutedSpeakingBanner() {}
 
-  // ── Backend integration seam (§7) ─────────────────────────────────────────────
+  // ── Backend integration seam ─────────────────────────────────────────────
   // Concrete defaults keep the test cubit unchanged; the backend cubit overrides.
 
   /// Whether [data] is usable. Backend mode is false until `live-state` loads.
@@ -438,7 +449,7 @@ abstract class DebateController extends Cubit<DebateStates> {
   Future<void> enterDebateRoom() async {}
 
   /// Backend: fetch a fresh room-scoped token and connect (token discipline,
-  /// §7). Test mode is a no-op.
+  ///). Test mode is a no-op.
   Future<void> joinRoom(DebateRoomType type) async {}
 
   /// Backend pre-join gate from `live-state.rooms` (`joinable_for_me` +

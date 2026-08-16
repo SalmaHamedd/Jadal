@@ -22,10 +22,10 @@ abstract class DebaterStatsRepository {
 
   Future<Either<Failure, ImprovementStat>> getImprovement(int debaterId, StatsFilter filter);
 
-  /// V2 §7 — raw weighted activity points + breakdown. Only from/to/group_by
+  /// Raw weighted activity points + breakdown. Only from/to/group_by
   /// apply; the other filter dimensions have no meaning for this stat.
   /// [role] picks the endpoint family — activity exists for every role
-  /// (debater | trainer | judge), unlike the five debater-only stats (§1.9).
+  /// (debater | trainer | judge), unlike the five debater-only stats.
   Future<Either<Failure, ActivityStat>> getActivity(int debaterId, StatsFilter filter,
       {String role = 'debater'});
 }

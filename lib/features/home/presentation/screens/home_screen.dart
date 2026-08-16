@@ -29,7 +29,6 @@ class HomeScreen extends StatefulWidget {
 
 /// The hero: avatar, greeting and name in one warm surface, with the rotating
 /// debate banner mounted directly beneath it inside the same block.
-///
 /// The banner was previously a third free-floating element; anchoring it to
 /// the greeting turns the top of the screen into a single composed unit and
 /// gives the banner the prominence it deserves as the one colourful thing on
@@ -164,7 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        // §4.1 — both cubits consume the splash-time prefetch when present.
+        // Both cubits consume the splash-time prefetch when present.
         BlocProvider<BlogCubit>(
           create: (_) {
             final BlogRepository repository = BlogRepositoryImpl();
@@ -208,7 +207,7 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
           ),
-          // §2.5 — search moved out of the bottom nav; it lives here now.
+          // Search moved out of the bottom nav; it lives here now.
           actions: [
             IconButton(
               tooltip: context.loc.searchTitle,

@@ -6,8 +6,7 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/judge_rating_model.dart';
 import 'stats_theme.dart';
 
-/// MF_FU §11 — the judge's average rating received.
-///
+/// The judge's average rating received.
 /// Aggregates only: the payload carries no rater ids, names or comments, and
 /// nothing here can identify who rated what.
 class StatsJudgeRatingView extends StatelessWidget {
@@ -80,7 +79,7 @@ class StatsJudgeRatingView extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
-                  // MF_FU §7.5 — arrow + sign, not colour alone.
+                  // Arrow + sign, not colour alone.
                   signedWithArrow(delta, decimals: 2),
                   style: AppTextStyles.body(context).copyWith(
                     fontWeight: FontWeight.w800,
@@ -155,7 +154,6 @@ class _Stars extends StatelessWidget {
       children: [
         // Star `i` (0-based) stands for the rating value `min + i`, so it is
         // full once the average reaches that value.
-        //
         // The thresholds used to be offset by +0.75/+0.25, which meant a
         // perfect 5.0 on a 1–5 scale needed 5.75 to light the last star — so
         // top marks rendered as four stars. Comparing against the star's own

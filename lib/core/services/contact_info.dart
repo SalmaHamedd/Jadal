@@ -1,14 +1,13 @@
 import '../storage/preferences_database.dart';
 
-/// Support contact info returned on login (sprinkles §9, extended MF_FU §2) —
+/// Support contact info returned on login —
 /// cached locally by [ApiAuthRepository.login] so the nav drawer can show it
 /// without a network call. Any field may be null until the backend row is set.
-///
-/// Two backend corrections baked in here (BACKEND_REPLY_MF_FU §2):
-///  • `instagram` holds a **full URL** in the live data, not a bare handle —
-///    so it is never used to build a URL. Use [instagramUrl] / [instagramHandle].
-///  • [phoneE164] is null (not a guess) when the stored number has no country
-///    code, because a `tel:` built from a local number dials the wrong country.
+/// Two backend corrections baked in here:
+/// • `instagram` holds a **full URL** in the live data, not a bare handle —
+/// so it is never used to build a URL. Use [instagramUrl] / [instagramHandle].
+/// • [phoneE164] is null (not a guess) when the stored number has no country
+/// code, because a `tel:` built from a local number dials the wrong country.
 class ContactInfo {
   final String? email;
   final String? phone;

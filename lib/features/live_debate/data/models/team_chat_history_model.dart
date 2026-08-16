@@ -1,5 +1,5 @@
-/// A persisted team-chat message from `GET/POST /debates/{id}/chat` (sprinkles
-/// §2). `seenBy` always includes the sender; the unread dot is derived as
+/// A persisted team-chat message from `GET/POST /debates/{id}/chat`.
+/// `seenBy` always includes the sender; the unread dot is derived as
 /// "my user id ∉ seenBy" — see [LiveDebateCubit.unreadTeamChatCount].
 class TeamChatHistoryMessage {
   final int id;

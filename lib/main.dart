@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:jadal_app/core/services/deep_link_service.dart';
 import 'package:jadal_app/core/services/session_guard.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/forgot_password_cubit.dart';
 import 'package:jadal_app/features/auth/presentation/cubit/login_cubit.dart';
@@ -25,10 +26,13 @@ Future<void> main() async {
   );
   await di.init();
   await di.sl<AppCubit>().load();
-  // §7 — start FCM before the first frame so a notification tap that launched
-  // the app is already retrievable via getInitialMessage(). Never throws: if
-  // Firebase can't start, push is simply disabled for the session.
+  // Start FCM before the first frame so a notification tap that launched the
+  // app is still retrievable via getInitialMessage. Never throws: if Firebase
+  // can't start, push is simply disabled for the session.
   await di.sl<PushService>().init();
+  // Same reasoning for share links — the launch URL has to be picked up before
+  // the first frame, then replayed once the navigator exists.
+  await di.sl<DeepLinkService>().init();
   // A rejected token must be able to bounce the user back to login from a
   // repository, which has no BuildContext — so the guard borrows the root
   // navigator and is told how to build the login screen.
@@ -53,7 +57,7 @@ class JadalApp extends StatelessWidget {
         builder: (context, state) {
           return MaterialApp(
             debugShowCheckedModeBanner: false,
-            // §7.1 — notification taps route from outside the widget tree
+            // Notification taps route from outside the widget tree
             // (including cold start, before any screen has built).
             navigatorKey: rootNavigatorKey,
             title: 'Jadal',

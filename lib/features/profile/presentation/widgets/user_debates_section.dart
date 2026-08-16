@@ -13,7 +13,6 @@ import 'package:jadal_app/features/live_debate/presentation/widgets/debate_list_
 const int kLatestDebatesPreviewCount = 5;
 
 /// Latest debates (done/cancelled) for a user.
-///
 /// These were bare [ListTile]s painted straight onto the page — no container,
 /// no separation, an icon and two grey lines. Each debate is now a proper
 /// tinted row: a status-coloured icon plate, the title, and a status pill, so
@@ -75,7 +74,7 @@ class UserDebatesSection extends StatelessWidget {
 }
 
 /// Full paginated "show all" list, scoped to one user via the same
-/// debate-search endpoint (§8). Uses the same [DebateListCard] as the preview
+/// debate-search endpoint. Uses the same [DebateListCard] as the preview
 /// so opening "show all" feels like the section expanding, not a different
 /// screen.
 class UserDebatesListScreen extends StatefulWidget {

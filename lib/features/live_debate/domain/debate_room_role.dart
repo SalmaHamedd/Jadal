@@ -1,17 +1,20 @@
-/// The user's role **within a specific room**, from the token `role_in_room`
-/// (and `live-state.rooms[x].role_if_joined`). UI gating keys off this, NOT the
-/// user's global account role (§8, docs §C/§D).
+/// The user's role inside one room, taken from the token's `role_in_room` or
+/// `live-state.rooms[x].role_if_joined`. UI gating uses this, not the user's
+/// global account role.
 enum DebateRoomRole {
   judgeChair('judge_chair'),
   judgePanel('judge_panel'),
   debater('debater'),
-  // G2: the backend also sends these two debater variants (`role_if_joined` /
-  // `role_in_room`). Without them they fell through to `unknown` and anything
-  // keyed off the role broke. Treat all three as a debater.
+  // The backend sends three interchangeable debater spellings; all of them mean
+  // the same thing here.
   debaterMember('debater_member'),
   debaterSpeaker('debater_speaker'),
   trainer('trainer'),
   viewer('viewer'),
+
+  /// Someone who opened a share link without an account. Watch-only: no
+  /// publishing, no controls, no sharing.
+  guest('guest'),
   unknown('unknown');
 
   final String wire;
@@ -27,8 +30,8 @@ enum DebateRoomRole {
   bool get isJudge => this == judgeChair || this == judgePanel;
   bool get isChair => this == judgeChair;
 
-  /// G2: any of the three debater wire values count as a debater for gating
-  /// (POI, team chat, spectator check).
   bool get isDebater =>
       this == debater || this == debaterMember || this == debaterSpeaker;
+
+  bool get isGuest => this == guest;
 }

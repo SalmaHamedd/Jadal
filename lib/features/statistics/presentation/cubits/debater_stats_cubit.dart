@@ -11,7 +11,7 @@ import '../../data/repositories/team_analysis_repository.dart';
 
 enum StatsStatus { initial, loading, loaded, error }
 
-/// §1.4 — which filter dimension is active. Position and framework are
+/// Which filter dimension is active. Position and framework are
 /// mutually exclusive (the backend 422s when both are sent), so the UI keeps
 /// exactly one dimension selectable and clears the other on switch.
 enum StatsFilterDim { positions, frameworks }
@@ -108,19 +108,18 @@ class DebaterStatsState {
 /// Drives the statistics screen: holds the shared filter + selected stat and
 /// re-fetches whenever either changes. Every setter emits immediately (so the
 /// chips feel instant) then loads the matching endpoint.
-///
-/// §1.9 — [subjectRole] gates the debater-only stats: for judges/trainers the
+/// [subjectRole] gates the debater-only stats: for judges/trainers the
 /// screen only ever shows activity, so the cubit starts on it and never leaves.
 class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   final DebaterStatsRepository repo;
   final int debaterId;
   final String subjectRole;
 
-  /// §1.4 — loads the framework filter options (`GET /motion-frameworks`);
+  /// Loads the framework filter options (`GET /motion-frameworks`);
   /// injected so the statistics feature doesn't depend on the live-debate repo.
   final Future<Either<Failure, List<Framework>>> Function()? frameworksLoader;
 
-  /// MF_FU §11 — judge ratings live on their own endpoint, outside the
+  /// Judge ratings live on their own endpoint, outside the
   /// debater-stats repository.
   final TeamAnalysisRepository _analysisRepo = TeamAnalysisRepository();
 
@@ -155,7 +154,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   void setKind(StatKind kind) {
     if (kind == state.kind) return;
     var filter = state.filter;
-    // MF_FU §8.2 — activity's chart needs ≥2 buckets, and the screen used to
+    // Activity's chart needs ≥2 buckets, and the screen used to
     // leave group_by at `none` (one all-time bucket), so the trend line was
     // unreachable. Default it to monthly on entry and restore the user's own
     // grouping when they leave.
@@ -182,7 +181,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
     _fetch();
   }
 
-  /// §1.4 — switch the active filter dimension. Clears the *other* dimension's
+  /// Switch the active filter dimension. Clears the *other* dimension's
   /// selection (they are mutually exclusive) and resets the series split, which
   /// is tied to the active dimension.
   void setDim(StatsFilterDim dim) {
@@ -205,7 +204,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   void togglePosition(String code) {
     final next = [...state.filter.positions];
     next.contains(code) ? next.remove(code) : next.add(code);
-    // §1.4 — never combined with frameworks.
+    // Never combined with frameworks.
     emit(state.copyWith(
         filter: state.filter.copyWith(positions: next, frameworks: const [])));
     _fetch();
@@ -214,7 +213,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
   void toggleFramework(int id) {
     final next = [...state.filter.frameworks];
     next.contains(id) ? next.remove(id) : next.add(id);
-    // §1.4 — never combined with positions.
+    // Never combined with positions.
     emit(state.copyWith(
         filter: state.filter.copyWith(frameworks: next, positions: const [])));
     _fetch();
@@ -272,7 +271,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
           (r) => emit(state.copyWith(status: StatsStatus.loaded, improvement: r)),
         );
       case StatKind.activity:
-        // MF_FU §8.2 — was `const StatsFilter()`, which pinned every activity
+        // Was `const StatsFilter`, which pinned every activity
         // request to group_by=none no matter what the user picked, so the
         // response only ever had one bucket and the trend chart could never
         // render. The real filter goes through now; the repository already
@@ -286,7 +285,7 @@ class DebaterStatsCubit extends Cubit<DebaterStatsState> {
           (r) => emit(state.copyWith(status: StatsStatus.loaded, activity: r)),
         );
       case StatKind.judgeRating:
-        // MF_FU §11 — judges only. Takes from/to/group_by/frameworks; there is
+        // Judges only. Takes from/to/group_by/frameworks; there is
         // no position dimension for a judge.
         final res = await _analysisRepo.getJudgeRatings(
           debaterId,

@@ -6,7 +6,6 @@ import '../theme/app_text_styles.dart';
 import 'jadal_surface.dart';
 
 /// The app's ONE retry control: a reload icon on a soft orange plate.
-///
 /// Screens used to each roll their own — an `OutlinedButton.icon` here, a
 /// bare `ElevatedButton` with no padding there — so a failed load looked
 /// different (and worse) depending on where you hit it.
@@ -46,7 +45,6 @@ class JadalRetryButton extends StatelessWidget {
 
 /// The app's ONE failed-load state: an icon, a human-readable message, and a
 /// [JadalRetryButton].
-///
 /// Always pass a message that has already been through `FailureText` — this
 /// widget renders exactly what it is given, so a raw exception string handed
 /// to it will be shown to the user.

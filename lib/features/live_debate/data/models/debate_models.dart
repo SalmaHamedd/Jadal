@@ -1,5 +1,4 @@
-// Plain mock models for the live-debate feature (§5).
-//
+// Plain mock models for the live-debate feature.
 // These are intentionally swappable: a real backend (or a real
 // `MockLiveDebateData` replacement) can produce the same shapes later.
 // Kept Flutter-free so they can be reused from data/domain code.
@@ -18,10 +17,10 @@ extension DebateSideX on DebateSide {
       this == DebateSide.proposition ? DebateSide.opposition : DebateSide.proposition;
 }
 
-/// The kinds of room shown in the lobby (§5).
+/// The kinds of room shown in the lobby.
 enum DebateRoomType { proposition, opposition, liveDebate, result }
 
-/// Drives prep timing + speech timing (§5). All thresholds in Layout 2 are
+/// Drives prep timing + speech timing. All thresholds in Layout 2 are
 /// derived from these — no magic numbers.
 class DebateFormat {
   /// Counts from the debate's start time; while it elapses, prep rooms are open.
@@ -42,7 +41,7 @@ class DebateFormat {
   /// Reply speech duration (used only when [replySpeech] is true).
   final Duration replyDuration;
 
-  /// Optional backend override for the POI protected margin (§9.1). Absent today
+  /// Optional backend override for the POI protected margin. Absent today
   /// → the manual duration-based rules apply. When present, it replaces them.
   final Duration? poiOffset;
 
@@ -92,7 +91,7 @@ class JudgeInfo {
   const JudgeInfo({required this.id, required this.name});
 }
 
-// The motion lives in core now (§5): see `lib/core/app_models/motion.dart`
+// The motion lives in core now: see `lib/core/app_models/motion.dart`
 // (`Motion` + `Framework`), shared with the backend live-state and debate list.
 
 class AudienceMember {
@@ -131,7 +130,7 @@ class SpeakerOrder {
       );
 }
 
-/// A room in the lobby (§5).
+/// A room in the lobby.
 class DebateRoom {
   final DebateRoomType type;
   final String displayName; // localized

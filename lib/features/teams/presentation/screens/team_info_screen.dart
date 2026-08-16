@@ -17,16 +17,14 @@ import 'package:jadal_app/features/teams/presentation/cubit/team_join_cubit.dart
 import 'package:jadal_app/features/teams/presentation/cubit/team_leave_cubit.dart';
 import 'package:jadal_app/core/error/failure_text.dart';
 
-/// A team info view — reached from a profile's team list (with [membership]
-/// set, so it can show role/joined/left and a "leave team" action for the
-/// caller's own current membership), from search results, or from the
-/// "teams you can join" browse screen (with [canJoin] set). Fetches full
-/// detail via `GET /teams/{id}`, which the backend authorizes for the
-/// team's trainer, its leader, or any current member — so this only falls
-/// back to the bare name/membership info on a genuine 403/404/network error.
-/// If the caller already has the full [initialTeam] (e.g. the "browse teams
-/// to join" list, which the backend deliberately excludes from the 403
-/// above since you're not a member yet), pass it to skip the re-fetch.
+/// Shows a team's details and roster.
+///
+/// Reached from a profile's team list (pass [membership] to show role and
+/// joined/left dates plus a leave action), from search, or from the browse
+/// screen (pass [canJoin]). Fetches the team with `GET /teams/{id}`, which any
+/// signed-in user may read, so the fallback view only appears on a real error.
+/// Pass [initialTeam] when the caller already has the full team to skip the
+/// re-fetch.
 class TeamInfoScreen extends StatefulWidget {
   final int teamId;
   final String teamName;

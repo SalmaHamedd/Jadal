@@ -1,4 +1,4 @@
-/// Filter params for `GET /blog?...` search (sprinkles §10).
+/// Filter params for `GET /blog?...` search.
 class BlogSearchFilter {
   final String? q;
   final List<int> categoryIds;

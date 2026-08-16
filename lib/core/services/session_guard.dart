@@ -4,12 +4,10 @@ import '../storage/preferences_database.dart';
 import 'session_identity.dart';
 
 /// Handles a token the server no longer accepts.
-///
 /// The failure mode this exists for: a stale/rejected token stays on the device
 /// after a logout, so the app still *looks* signed in — the shell renders, the
 /// user can navigate — but every single API call 401s. The user is trapped in a
 /// dead session with no way out except reinstalling.
-///
 /// Any repository that sees a **401** must call [onUnauthorized]. It clears the
 /// stored credentials and sends the app back to login exactly once, no matter
 /// how many in-flight requests fail together.
@@ -42,7 +40,6 @@ abstract class SessionGuard {
 
   /// Signs out **entirely on the device**: drop the stored credentials and go
   /// to the login screen. No network call.
-  ///
   /// This is deliberately API-free. It is what runs when the server has
   /// already rejected the session, where `POST /auth/logout` would just fail
   /// with the same 401 that got us here — and a failed request must never be

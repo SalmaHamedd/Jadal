@@ -23,7 +23,7 @@ Color achievementRankColor(AchievementRank rank) {
   }
 }
 
-/// Rank → localized display label (§6.8 — the tier written out clearly).
+/// Rank → localized display label.
 String achievementRankLabel(BuildContext context, AchievementRank rank) {
   final loc = context.loc;
   switch (rank) {
@@ -40,7 +40,7 @@ String achievementRankLabel(BuildContext context, AchievementRank rank) {
   }
 }
 
-/// §6.8 — a single achievement. The tier color sits FLUSH against the image
+/// A single achievement. The tier color sits FLUSH against the image
 /// (no story-ring gap), the image stays in a fixed position regardless of the
 /// name's line count (the name lives in a fixed two-line box below), and
 /// tapping opens the [AchievementDialog].

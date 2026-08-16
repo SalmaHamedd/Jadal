@@ -11,7 +11,7 @@ import '../cubits/debate_controller.dart';
 import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
 
-/// Compact (small-width) button opening the viewers dialog (§8.3 A, left).
+/// Compact (small-width) button opening the viewers dialog.
 class AudienceButton extends StatelessWidget {
   final DebateController cubit;
   const AudienceButton({super.key, required this.cubit});
@@ -37,7 +37,7 @@ class _Viewer {
   const _Viewer({required this.id, required this.name, required this.role, this.isMe = false});
 }
 
-/// Motion button using the existing motion image (§8.3 A, right). Falls back to
+/// Motion button using the existing motion image. Falls back to
 /// an icon if the asset isn't bundled yet.
 class MotionButton extends StatelessWidget {
   final Motion motion;
@@ -95,7 +95,7 @@ class _TopBarIconButton extends StatelessWidget {
 }
 
 /// Large, searchable list of who's watching: judges + audience + (always) the
-/// local user — unless they're a debater in the match (§8.3 A).
+/// local user — unless they're a debater in the match.
 class AudienceDialog extends StatefulWidget {
   final DebateController cubit;
   const AudienceDialog({super.key, required this.cubit});
@@ -115,7 +115,7 @@ class _AudienceDialogState extends State<AudienceDialog> {
         cubit.data.oppositionTeam.debaterById(me) != null;
     final seen = <String>{};
     final out = <_Viewer>[];
-    // A4: only the judges ACTUALLY in the room (real presence), not the whole
+    // Only the judges ACTUALLY in the room (real presence), not the whole
     // judge roster pinned. Mock reports everyone present → the demo is unchanged.
     for (final j in cubit.data.judges) {
       if (!cubit.isUserPresent(j.id)) continue;

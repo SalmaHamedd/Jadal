@@ -30,12 +30,12 @@ class NewsUpdatedState extends DebateStates {}
 
 class POIChangedState extends DebateStates {}
 
-/// The local user's POI was accepted → show the asker mic dialog (§8.4).
+/// The local user's POI was accepted → show the asker mic dialog.
 class POIAcceptedForLocalState extends DebateStates {}
 
 class TimerTickedState extends DebateStates {}
 
-/// A debate-flow moment crossed (§8.3 B) — the screen plays the bell and pushes
+/// A debate-flow moment crossed — the screen plays the bell and pushes
 /// the localized news for [event].
 class DebateTimelineEventState extends DebateStates {
   final DebateTimelineEvent event;
@@ -52,32 +52,32 @@ class TeamChatUpdatedState extends DebateStates {}
 
 /// The chair's next-stage request is in flight → the room shows a blocking
 /// loading overlay so a laggy server can't be double-tapped into skipping a
-/// speech (§UX).
+/// speech.
 class StageAdvancingChangedState extends DebateStates {}
 
 class DebateFinishedState extends DebateStates {}
 
-/// Backend mode: a fresh `live-state` was fetched and applied (§7) — rebuild
+/// Backend mode: a fresh `live-state` was fetched and applied — rebuild
 /// rooms/teams/judges/result from the new snapshot.
 class LiveStateUpdatedState extends DebateStates {}
 
 /// Backend mode: the result was revealed (`result_revealed`). The result room
-/// plays the celebratory confetti reveal (§10) on this.
+/// plays the celebratory confetti reveal on this.
 class ResultRevealedState extends DebateStates {}
 
 /// The main room was closed without a submitted result → the debate is
-/// cancelled (§10). The result room swaps to the cancelled message on this.
+/// cancelled. The result room swaps to the cancelled message on this.
 class DebateCancelledState extends DebateStates {}
 
 /// Chair moderation publish-lock changed (mute-all / per-user) → widgets
-/// re-evaluate whether the local user may open their mic (§U4b).
+/// re-evaluate whether the local user may open their mic.
 class PublishLockChangedState extends DebateStates {}
 
 /// The chair shared the result from the live room → every client navigates to
-/// the result screen with confetti (§U4b).
+/// the result screen with confetti.
 class NavigateToSharedResultState extends DebateStates {}
 
-/// The chair closed the room → every client is kicked back to the rooms list (§U4b).
+/// The chair closed the room → every client is kicked back to the rooms list.
 class RoomClosedState extends DebateStates {}
 
 /// The local muted-but-speaking detection flipped (started/stopped catching

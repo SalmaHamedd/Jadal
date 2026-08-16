@@ -1,6 +1,6 @@
 import '../../data/models/debate_models.dart';
 
-/// How a user enters the live-debate room (§8.1).
+/// How a user enters the live-debate room.
 enum LiveJoinRole {
   judge,
   participant,
@@ -11,7 +11,7 @@ enum LiveJoinRole {
   blockedNeedsOrder,
 }
 
-/// Pure, easily-reasoned-about access rules for the lobby (§8.1). No Flutter,
+/// Pure, easily-reasoned-about access rules for the lobby. No Flutter,
 /// no side effects — just identity + mock state in, decision out.
 abstract class DebateAccess {
   // ── Prop / Opp team rooms ─────────────────────────────────────────────────

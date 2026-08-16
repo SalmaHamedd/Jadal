@@ -3,7 +3,7 @@ import 'dart:convert';
 /// Codec for the **backend** live-debate data-channel messages, which use an
 /// `{"event": …}` envelope (distinct from the test-mode [DebateSocketProtocol],
 /// which uses `{"type": …}`). The backend publishes most of these; the client
-/// publishes POI flashes and — per §7 — the chair publishes the timer
+/// publishes POI flashes and — the chair publishes the timer
 /// (`time_update`/`time_control`), which the backend passively persists.
 enum LiveEventType {
   // Backend-published (main room).
@@ -12,28 +12,28 @@ enum LiveEventType {
   returnedToLobby('returned_to_lobby'),
   participantAttended('participant_attended'),
   chairElected('chair_elected'),
-  // FE-3 (B1): speeches finished → the result phase opens while status is STILL
+  // Speeches finished → the result phase opens while status is STILL
   // `live`. Replaces the legacy `debate_completed` for opening the result room.
   speechesCompleted('speeches_completed'),
   debateCompleted('debate_completed'),
   resultRevealed('result_revealed'),
-  // Chair force-closed the main room (backend close-room, §FE-7). Sent right
+  // Chair force-closed the main room (backend close-room). Sent right
   // before the LiveKit room is deleted so every client can leave cleanly.
   roomClosed('room_closed'),
   // Client-published peer flashes.
   poiRaised('poi_raised'),
   poiAnswered('poi_answered'),
-  // V11 §0: server-authoritative timer broadcast (pause/resume/no-judge). This
+  // Server-authoritative timer broadcast (pause/resume/no-judge). This
   // REPLACES the chair-peer `time_update` as the source of truth.
   timerUpdate('timer_update'),
-  // Legacy chair-published timer (§7) — retired as the source of truth, kept so
+  // Legacy chair-published timer — retired as the source of truth, kept so
   // an in-flight message from an old client still decodes harmlessly.
   timeUpdate('time_update'),
   timeControl('time_control'),
   teamChat('team_chat'),
   // Chair-published open-lobby PAUSE overlay: a break that freezes the current
   // speaker + timer (so it resumes where it stopped), without touching the
-  // backend stage. Peer-to-peer, like the timer (§open-lobby).
+  // backend stage. Peer-to-peer, like the timer.
   lobbyOverlay('lobby_overlay'),
   // Chair moderation fallback over the data channel (peer self-mutes). The docs
   // prefer LiveKit `roomAdmin`, which the Flutter client SDK doesn't expose, so
@@ -42,7 +42,7 @@ enum LiveEventType {
   forceCameraOff('force_camera_off'),
   // Chair publish-lock: the room-wide / per-user mic + camera lock state. Unlike
   // the fire-once force_* nudges above, this is the durable lock that prevents a
-  // non-exempt user from re-opening their mic/camera until released (§FE-4).
+  // non-exempt user from re-opening their mic/camera until released.
   publishLock('publish_lock');
 
   final String wire;
@@ -82,7 +82,7 @@ class LiveEvent {
   String? get timestamp => data['timestamp'] as String?;
   String? get action => data['action'] as String?;
 
-  // timer_update (server-authoritative, V11 §0)
+  // timer_update (server-authoritative)
   String? get currentStageStartedAt => data['current_stage_started_at'] as String?;
   String? get serverNow => data['server_now'] as String?;
   bool get timerIsPaused => data['timer_is_paused'] == true;
@@ -118,7 +118,7 @@ class LiveEvent {
 abstract class LiveDebateSocket {
   static List<int> _encode(Map<String, dynamic> map) => utf8.encode(jsonEncode(map));
 
-  // FE-4: the phase id is OPTIONAL on the peer flash — it's often null and must
+  // The phase id is OPTIONAL on the peer flash — it's often null and must
   // never block the broadcast (only the REST persistence needs it). `by_user_id`
   // is what every device keys the POI badge off.
   static List<int> poiRaised({int? stagePhaseId, required int byUserId}) =>
@@ -130,7 +130,7 @@ abstract class LiveDebateSocket {
 
   /// [accepted] = the speaker accepted the asker (they may speak) vs refused.
   /// Carries the ASKER's id in `by_user_id` so every device clears that asker's
-  /// badge and the asker learns the outcome (B1/B2).
+  /// badge and the asker learns the outcome.
   static List<int> poiAnswered({
     int? stagePhaseId,
     required int byUserId,
@@ -172,7 +172,7 @@ abstract class LiveDebateSocket {
       _encode({'event': LiveEventType.forceCameraOff.wire, 'target_user_id': targetUserId});
 
   /// The chair's durable publish-lock state (mic + camera), broadcast on every
-  /// change so late joiners and everyone else converge on the same lock (§FE-4).
+  /// change so late joiners and everyone else converge on the same lock.
   static List<int> publishLock({
     required bool muteAllMic,
     required List<String> micLockedIds,

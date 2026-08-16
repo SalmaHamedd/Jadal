@@ -1,11 +1,10 @@
 /// The app's shared visual kit for content surfaces.
 ///
-/// Home and Profile used to each invent their own containers, which is why
-/// they read as unrelated parts stacked on a background. Everything here is
-/// deliberately one system: the same corner radius, the same tonal surface,
-/// the same hairline, the same entrance motion. Brand blue/orange appear only
-/// as small accents (icon badges, values, links) so the neutral surfaces carry
-/// the layout in both themes.
+/// Home and Profile use these instead of inventing their own containers, so
+/// every panel shares one corner radius, tonal surface, hairline and entrance
+/// motion. Brand blue and orange appear only as small accents — icon badges,
+/// values, links — leaving the neutral surfaces to carry the layout in both
+/// themes.
 library;
 
 import 'package:flutter/material.dart';
@@ -28,15 +27,13 @@ Color jadalTextSecondary(BuildContext context) => jadalIsDark(context)
     ? JadalColors.darkTextSecondary
     : JadalColors.lightTextSecondary;
 
-/// MF_FU §7.3 — the theme-aware replacement for a bare `JadalColors.judgesGrey`
+/// The theme-aware replacement for a bare `JadalColors.judgesGrey`
 /// used as **text**.
-///
 /// `judgesGrey` (#9A9A9A) is tuned for the dark ground, where it measures
 /// 5.39:1. On the light ground it is only 2.62:1 — below AA (4.5) and below
 /// even the 3:1 non-text floor — so a caption painted with it is genuinely hard
 /// to read. This picks the light-ground value (5.02:1) when appropriate and
 /// leaves dark theme exactly as it was.
-///
 /// Use this for muted TEXT. A grey used purely as an icon tint or a divider is
 /// fine as-is.
 Color jadalMuted(BuildContext context) => jadalIsDark(context)

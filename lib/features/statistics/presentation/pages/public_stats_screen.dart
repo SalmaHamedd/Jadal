@@ -21,10 +21,10 @@ import '../widgets/stats_theme.dart';
 import '../../../../core/error/failure_text.dart';
 import '../../../../core/widgets/jadal_error_view.dart';
 
-/// V2 §3/§4 — the public statistics screen behind the home screen's
+/// The public statistics screen behind the home screen's
 /// "show more": top-10 leaderboards for debaters and teams across every
 /// metric. Fixed-height shell (no page scroll): scope + metric selectors up
-/// top, one board filling the rest of the viewport. §1.5 adds the own-stats
+/// top, one board filling the rest of the viewport. adds the own-stats
 /// filter set (hidden on the Points tab, which rejects filters).
 class PublicStatsScreen extends StatelessWidget {
   const PublicStatsScreen({super.key});
@@ -40,7 +40,7 @@ class PublicStatsScreen extends StatelessWidget {
         backgroundColor: StatsTheme.isDark(context)
             ? JadalColors.darkBackground
             : JadalColors.lightBackground,
-        // §1.7 — no AppBar: the gradient runs edge-to-edge and the title lives
+        // No AppBar: the gradient runs edge-to-edge and the title lives
         // in an in-body header, same approach as the debate details screen.
         body: JadalGradientBackground(
           child: SafeArea(
@@ -65,7 +65,7 @@ class _Body extends StatelessWidget {
     return BlocBuilder<LeaderboardCubit, LeaderboardState>(
       builder: (context, state) {
         final cubit = context.read<LeaderboardCubit>();
-        // §1.8 — roomier vertical rhythm so a maxed-out board fills the
+        // Roomier vertical rhythm so a maxed-out board fills the
         // screen instead of leaving dead space at the bottom.
         return Padding(
           padding: const EdgeInsets.fromLTRB(16, 10, 16, 20),
@@ -75,7 +75,7 @@ class _Body extends StatelessWidget {
               _ScopeSwitch(active: state.scope, onChanged: cubit.setScope),
               const SizedBox(height: 14),
               _MetricChips(state: state, onChanged: cubit.setMetric),
-              // §1.5 — filters (never on Points, which rejects them).
+              // Filters (never on Points, which rejects them).
               if (state.filtersAvailable) ...[
                 const SizedBox(height: 14),
                 _LeaderboardFilterBar(state: state),
@@ -90,7 +90,7 @@ class _Body extends StatelessWidget {
   }
 }
 
-/// §1.5 — compact filter bar: dimension selector + period on one scrollable
+/// Compact filter bar: dimension selector + period on one scrollable
 /// row, the active dimension's chips on a second.
 class _LeaderboardFilterBar extends StatelessWidget {
   final LeaderboardState state;
@@ -147,7 +147,7 @@ class _LeaderboardFilterBar extends StatelessWidget {
             scrollDirection: Axis.horizontal,
             child: Row(
               children: [
-                // Position is meaningless for a team aggregate (§1.5) — the
+                // Position is meaningless for a team aggregate — the
                 // teams scope only offers the framework dimension.
                 if (!teamsScope) ...[
                   StatsChip(
@@ -268,7 +268,7 @@ class _MonthChip extends StatelessWidget {
   }
 }
 
-/// MF_FU §4 — the shared [JadalSegmentedSwitch]. Previously this segment had no
+/// The shared [JadalSegmentedSwitch]. Previously this segment had no
 /// selected fill at all (selection read through font weight only) and its ink
 /// only covered the label, because the track's Row centred its children instead
 /// of stretching them.
@@ -441,7 +441,7 @@ class LeaderboardRow extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
       child: Padding(
-        // §1.8 — moderately taller rows so a maxed-out top-10 fills the
+        // Moderately taller rows so a maxed-out top-10 fills the
         // screen on typical devices.
         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 12),
         child: Row(
@@ -461,7 +461,7 @@ class LeaderboardRow extends StatelessWidget {
             ),
             const SizedBox(width: 8),
             Builder(builder: (context) {
-              // §2.1/§2.2 — resolved image URL + deterministic initial color.
+              // Resolved image URL + deterministic initial color.
               final url = resolveMediaUrl(entry.imageUrl);
               return CircleAvatar(
                 radius: 19,

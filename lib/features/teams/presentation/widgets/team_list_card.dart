@@ -15,7 +15,7 @@ class TeamListCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // MF_FU §10.4 — same treatment as the debate list card: elevated surface,
+    // Same treatment as the debate list card: elevated surface,
     // hairline, soft shadow, and a leading accent stripe carrying the team's
     // active/inactive state (with the pill's text saying it too).
     final dark = jadalIsDark(context);

@@ -302,7 +302,7 @@ class TeamDetailScreen extends StatelessWidget {
           return JadalGradientBackground(
             child: Scaffold(
               backgroundColor: Colors.transparent,
-              // MF_FU §10.3 — the in-body header used by statistics and the
+              // The in-body header used by statistics and the
               // debate detail, instead of a thin AppBar title that read as an
               // afterthought over the gradient. The status/leader chips moved
               // up here so the header does real work.
@@ -526,7 +526,7 @@ class TeamDetailScreen extends StatelessWidget {
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: team.members.length,
-                        // MF_FU §10.5 — the dragged item used to be wrapped in a
+                        // The dragged item used to be wrapped in a
                         // Material painted with the ambient canvasColor, which
                         // drew an opaque rectangle the size of the item *plus*
                         // its 10dp margin. That is the "it takes the padding
@@ -656,7 +656,7 @@ class _MemberTile extends StatelessWidget {
 
     return Container(
       // No margin: the list's itemBuilder owns the gap, so the drag proxy
-      // doesn't inherit it (MF_FU §10.5).
+      // doesn't inherit it.
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: isDark ? JadalColors.darkSurface : JadalColors.lightSurface,

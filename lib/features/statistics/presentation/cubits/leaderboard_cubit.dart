@@ -16,7 +16,7 @@ class LeaderboardState {
   final Leaderboard? board;
   final String? error;
 
-  /// §1.5 — the shared filter (ignored by the backend-strip for points).
+  /// The shared filter (ignored by the backend-strip for points).
   final LeaderboardFilter filter;
   final StatsFilterDim dim;
   final List<Framework> frameworkOptions;
@@ -32,7 +32,7 @@ class LeaderboardState {
     this.frameworkOptions = const [],
   });
 
-  /// §1.5 / BACKEND_RESPONSE §3 — the Points tab hides every filter control.
+  /// / — the Points tab hides every filter control.
   bool get filtersAvailable => metric != LeaderboardMetric.points;
 
   LeaderboardState copyWith({
@@ -64,7 +64,7 @@ class LeaderboardState {
 class LeaderboardCubit extends Cubit<LeaderboardState> {
   final LeaderboardRepository repo;
 
-  /// §1.5 — loads the framework filter options (`GET /motion-frameworks`).
+  /// Loads the framework filter options (`GET /motion-frameworks`).
   final Future<Either<Failure, List<Framework>>> Function()? frameworksLoader;
 
   final _cache = <(LeaderboardScope, LeaderboardMetric), Leaderboard>{};
@@ -92,7 +92,7 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
     if (scope == state.scope) return;
     // best_speaker doesn't exist for teams — snap back to points.
     final metric = state.metric.availableFor(scope) ? state.metric : LeaderboardMetric.points;
-    // Positions are rejected on the teams leaderboard (§1.5) — drop them and
+    // Positions are rejected on the teams leaderboard — drop them and
     // land on the framework dimension there.
     if (scope == LeaderboardScope.teams &&
         (state.dim == StatsFilterDim.positions || state.filter.positions.isNotEmpty)) {
@@ -110,7 +110,7 @@ class LeaderboardCubit extends Cubit<LeaderboardState> {
     _fetch(state.scope, metric);
   }
 
-  /// §1.4/§1.5 — switch the filter dimension, clearing the other's selection.
+  /// Switch the filter dimension, clearing the other's selection.
   void setDim(StatsFilterDim dim) {
     if (dim == state.dim) return;
     if (dim == StatsFilterDim.positions && state.scope == LeaderboardScope.teams) return;

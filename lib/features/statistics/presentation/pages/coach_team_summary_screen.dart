@@ -18,7 +18,7 @@ import '../utils/stats_excel_exporter.dart';
 import '../widgets/stats_theme.dart';
 import 'coach_team_detail_screen.dart';
 
-/// V2 §3 — the coach's team analysis: four averages across the teams they
+/// The coach's team analysis: four averages across the teams they
 /// train (improvement / win rate / score / member activity), one tile each.
 /// A deliberately simple screen — the backend ships scalars, not series.
 class CoachTeamSummaryScreen extends StatefulWidget {
@@ -40,7 +40,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
   TeamSummaryStat? _stat;
   String? _error;
 
-  /// MF_FU §9.1 — the coach's teams, for the picker. Null id = "All teams",
+  /// The coach's teams, for the picker. Null id = "All teams",
   /// which is the endpoint's original all-teams-averaged behaviour.
   List<TrainerTeam> _teams = const [];
   int? _selectedTeamId;
@@ -168,7 +168,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
         physics: const AlwaysScrollableScrollPhysics(),
         padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
         children: [
-          // MF_FU §9.1 — team picker. "All teams" first (the original averaged
+          // Team picker. "All teams" first (the original averaged
           // behaviour), then active teams, then past ones.
           if (_teams.isNotEmpty) ...[
             _TeamPicker(
@@ -225,7 +225,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
                   child: _MetricTile(
                     icon: Icons.trending_up_rounded,
                     label: context.loc.statsAvgImprovement,
-                    // MF_FU §7.5 — arrow + sign, never colour alone.
+                    // Arrow + sign, never colour alone.
                     value: signedWithArrow(stat.teamAvgImprovement),
                     color: stat.teamAvgImprovement >= 0
                         ? JadalColors.positiveGreen
@@ -267,7 +267,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
                 ),
               ],
             ),
-            // MF_FU §9.2 — a specific team unlocks the full filtered breakdown
+            // A specific team unlocks the full filtered breakdown
             // (and the line-up analysis). Meaningless for the all-teams average,
             // so it only appears with a team selected.
             if (selected != null) ...[
@@ -296,7 +296,7 @@ class _CoachTeamSummaryScreenState extends State<CoachTeamSummaryScreen> {
   }
 }
 
-/// MF_FU §9.1 — "All teams" plus one chip per coached team. Active teams sort
+/// "All teams" plus one chip per coached team. Active teams sort
 /// first (the backend already orders them that way); past teams keep a "past"
 /// pill so a wound-down team is still analysable but visibly historic.
 class _TeamPicker extends StatelessWidget {

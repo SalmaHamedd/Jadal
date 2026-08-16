@@ -1,9 +1,8 @@
 /// A single question inside a survey.
-///
 /// `type` is one of: `rating`, `mcq`, `open_text`.
-///  - `rating`  → [options] is a `{min, max, step}` map.
-///  - `mcq`     → [options] is a `List<String>` of choices.
-///  - `open_text` → [options] is `null`.
+/// - `rating` → [options] is a `{min, max, step}` map.
+/// - `mcq` → [options] is a `List<String>` of choices.
+/// - `open_text` → [options] is `null`.
 class SurveyQuestion {
   final int id;
   final String questionText;

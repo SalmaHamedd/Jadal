@@ -25,7 +25,7 @@ import '../../../complaints/presentation/screens/create_complaint_screen.dart';
 import '../../../../core/error/failure_text.dart';
 import '../../../../core/widgets/jadal_error_view.dart';
 
-/// Debate detail via `GET /live-state` (§13): motion (coloured framework chips +
+/// Debate detail via `GET /live-state`: motion (coloured framework chips +
 /// tags), judges, prop/opp speakers with their order + reply, the stages, and —
 /// for a completed debate — the shared [ResultSummaryView]. The CTA is
 /// status-aware: register (pre-live), join (live), or nothing (done/cancelled).
@@ -145,11 +145,11 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
     final motion = state.motion;
     final status = state.debate.status;
 
-    // Per-status visibility (§U2):
-    //  • registration (scheduled) → format only; no motion/teams/judges yet.
-    //  • announced → + judges + teams shown neutrally (first/second, sides TBD);
-    //    motion only once its reveal time has passed.
-    //  • sides-selected/live/done/cancelled → sides fixed (prop/opp); motion shown.
+    // Per-status visibility:
+    // • registration (scheduled) → format only; no motion/teams/judges yet.
+    // • announced → + judges + teams shown neutrally (first/second, sides TBD);
+    // motion only once its reveal time has passed.
+    // • sides-selected/live/done/cancelled → sides fixed (prop/opp); motion shown.
     final isRegistration = status == DebateStatus.scheduled;
     final isAnnounced = status == DebateStatus.announced;
     final sidesKnown =
@@ -215,7 +215,7 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
             ],
           ),
         ),
-        // While registration is open, surface who's registered so far (V12 §3).
+        // While registration is open, surface who's registered so far.
         if (isRegistration) _RegistrantsBar(debateId: widget.debateId),
         // Judges + teams — nothing to show during registration.
         if (!isRegistration) ...[
@@ -226,10 +226,10 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
               title: loc.judgesLabel,
               child: _JudgesContent(judges: state.judges),
             ),
-          // Teams sit side-by-side as two filled, team-coloured panels (§design).
+          // Teams sit side-by-side as two filled, team-coloured panels.
           _teamsRow(context, state, neutral: isAnnounced),
         ],
-        // Result (completed debates) — the shared widget, winner detail-only (§13).
+        // Result (completed debates) — the shared widget, winner detail-only.
         if (state.debate.isCompleted) ...[
           const SizedBox(height: 4),
           _Section(
@@ -317,7 +317,7 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
           },
         );
       case DebateStatus.teamsSelected:
-        // §5.7 — sides are selected and prep is on: debaters whose prep room
+        // Sides are selected and prep is on: debaters whose prep room
         // is open get a Join button into the rooms list, where their own prep
         // room is the joinable one (`rooms.{prop|opp}.joinable_for_me` already
         // accounts for prep-open state, stage 0 and the caller's side).
@@ -1067,7 +1067,7 @@ class _ErrorView extends StatelessWidget {
 }
 
 /// While the debate is open for registration, three count buttons (Teams /
-/// Judges / Solo) over `GET /registrations` (V12 §3); each opens a list dialog.
+/// Judges / Solo) over `GET /registrations`; each opens a list dialog.
 class _RegistrantsBar extends StatefulWidget {
   final int debateId;
   const _RegistrantsBar({required this.debateId});

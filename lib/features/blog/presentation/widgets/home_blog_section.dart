@@ -16,7 +16,6 @@ import 'package:jadal_app/core/error/failure_text.dart';
 const int kHomeLatestArticlesCount = 1;
 
 /// Home's latest-article block.
-///
 /// It used to embed the same [BlogCard] the all-articles list uses — a tall
 /// stack of image, title, chips, excerpt and a meta row — which is why it
 /// dominated the screen and still felt generic. Here the article is presented

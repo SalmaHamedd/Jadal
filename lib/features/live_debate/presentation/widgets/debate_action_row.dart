@@ -9,9 +9,9 @@ import '../utils/debate_theme.dart';
 import 'debate_settings_sheet.dart';
 import 'team_chat_dialog.dart';
 
-/// Bottom action row (§8.6): camera, mic, ask-POI, random-news, the key
+/// Bottom action row: camera, mic, ask-POI, random-news, the key
 /// next-state button (start → next → finish) and the 3-dots settings menu.
-/// Wrapped in [AnimatedSize] for the tap-to-reveal / auto-hide behaviour (§8.5).
+/// Wrapped in [AnimatedSize] for the tap-to-reveal / auto-hide behaviour.
 class DebateActionRow extends StatelessWidget {
   final bool visible;
   const DebateActionRow({super.key, required this.visible});
@@ -20,7 +20,7 @@ class DebateActionRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // A2: collapse to zero when hidden so the freed space goes back to the cards.
+    // Collapse to zero when hidden so the freed space goes back to the cards.
     // `_DebateView` redistributes it 75% to the main card / 25% to the team cards
     // (via a LayoutBuilder), so the team cards barely shrink and never overflow.
     if (!visible) return const SizedBox(height: 0, width: double.infinity);
@@ -46,14 +46,14 @@ class DebateActionRow extends StatelessWidget {
               child: BlocBuilder<DebateController, DebateStates>(
                 builder: (context, state) {
                   final cubit = context.read<DebateController>();
-                  // Role gating (§8): controls a role can't use are hidden; the
+                  // Role gating: controls a role can't use are hidden; the
                   // POI button stays visible but disabled outside its window.
                   // Test mode returns all flags true, so it shows everything.
                   return Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       if (cubit.canUseMedia)
-                        // Publish-locked (chair mute-all / per-user) → disabled (§U4b).
+                        // Publish-locked (chair mute-all / per-user) → disabled.
                         cubit.canPublishNow
                             ? _ToggleButton(
                                 enabled: cubit.isMicEnabled,
@@ -67,7 +67,7 @@ class DebateActionRow extends StatelessWidget {
                               ),
                       if (cubit.canUseMedia)
                         // Camera-locked (chair camera-all / per-user) → disabled,
-                        // mirroring the mic lock above (§FE-6).
+                        // mirroring the mic lock above.
                         cubit.canEnableCameraNow
                             ? _ToggleButton(
                                 enabled: cubit.isCameraEnabled,
@@ -86,7 +86,7 @@ class DebateActionRow extends StatelessWidget {
                           highlight: cubit.isLocalAskingPOI,
                         ),
                       // The next-stage control belongs to the live debate only;
-                      // the open lobby has its own "Back to debate" button (FE-2).
+                      // the open lobby has its own "Back to debate" button.
                       if (cubit.canControlStage && !cubit.isLobbyMode)
                         _NextButton(cubit: cubit),
                       // Team chat lives in the toolbar now (out of the 3-dots), with
@@ -153,7 +153,7 @@ class _ActionButton extends StatelessWidget {
 }
 
 /// Team-chat toolbar button: opens the team chat dialog and carries an unread
-/// notification dot when messages arrived while it was closed (§UX).
+/// notification dot when messages arrived while it was closed.
 class _ChatButton extends StatelessWidget {
   final DebateController cubit;
   const _ChatButton({required this.cubit});
@@ -205,7 +205,7 @@ class _ChatButton extends StatelessWidget {
   }
 }
 
-/// The next-state control (§8.6): start → next speaker → mark done.
+/// The next-state control: start → next speaker → mark done.
 class _NextButton extends StatelessWidget {
   final DebateController cubit;
   const _NextButton({required this.cubit});
@@ -264,7 +264,7 @@ class _Circle extends StatelessWidget {
                 )
               : null,
           border: Border.all(color: borderColor, width: 1.5),
-          // No glow on the next-stage button — it read as too much (§U4b).
+          // No glow on the next-stage button — it read as too much.
         ),
         child: Center(child: child),
       ),

@@ -30,7 +30,7 @@ class TeamsScreen extends StatelessWidget {
           return JadalGradientBackground(
             child: Scaffold(
               backgroundColor: Colors.transparent,
-              // MF_FU §10.3 — the shared in-body header, matching statistics
+              // The shared in-body header, matching statistics
               // and the debate detail, rather than a thin AppBar title.
               appBar: PreferredSize(
                 preferredSize: const Size.fromHeight(56),

@@ -15,7 +15,7 @@ import '../widgets/result_submit_sheet.dart';
 import '../widgets/result_summary_view.dart';
 import '../../../../core/error/failure_text.dart';
 
-/// Result room (§8.1 / §10). Locked until the chair finishes the debate; then:
+/// Result room. Locked until the chair finishes the debate; then:
 /// the chair submits scores → reveals (confetti) or closes the main room; a
 /// close with no result cancels the debate. Everyone else sees the shared
 /// [ResultSummaryView] once revealed. Access is judge-only and gated in the lobby.
@@ -33,7 +33,7 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
   void initState() {
     super.initState();
     // Opened with an already-revealed result (e.g. the chair shared from the
-    // live room) → celebrate on entry (§U4b).
+    // live room) → celebrate on entry.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
       if (context.read<DebateController>().resultView?.revealed == true) {
@@ -95,8 +95,8 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
   Widget _body(BuildContext context) {
     final cubit = context.read<DebateController>();
     if (cubit.isCancelled) return const _Cancelled();
-    // FE-3: gate on the result phase being open (speeches done while the debate
-    // is STILL `live`), never on `debateFinished`/`completed`.
+    // Gate on the result phase being open — the speeches can finish while the
+    // debate is still `live`, so `debateFinished`/`completed` is too late.
     if (!cubit.resultPhaseOpen) return const _NotReady();
 
     final view = cubit.resultView;
@@ -105,12 +105,12 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
       return cubit.canManageResult ? _ChairSubmitPrompt(cubit: cubit) : const _ResultsPending();
     }
 
-    // FE-2/FE-6: the result room is submit-/read-only — "share result" moved to
-    // the LIVE room, so there is no chair-controls/share bar here.
+    // Read-only here — "share result" lives in the live room instead.
     return Column(
       children: [
         Expanded(child: ResultSummaryView(result: view)),
-        if (view.revealed) _RatingBar(cubit: cubit),
+        // Rating posts as the signed-in user, so guests only read the result.
+        if (view.revealed && !cubit.isGuest) _RatingBar(cubit: cubit),
       ],
     );
   }
@@ -124,7 +124,7 @@ class _ChairSubmitPrompt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
-    // Issue 1: only the judges ACTUALLY present in the result room (real LiveKit
+    // Only the judges ACTUALLY present in the result room (real LiveKit
     // presence), not the full judge roster (mock reports everyone present).
     final tiles = [
       for (final j in cubit.data.judges)
@@ -195,7 +195,7 @@ void _confirmCloseNoResult(BuildContext context, DebateController cubit) {
   );
 }
 
-/// A 1–5 star rating with an optional free-text explanation (§10). The stars
+/// A 1–5 star rating with an optional free-text explanation. The stars
 /// stay editable — nothing is sent while picking. One request per explicit
 /// Submit tap ([DebateController.sendDebateRating]); after a submit the rating
 /// can still be changed and re-submitted ("update").

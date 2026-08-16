@@ -8,9 +8,9 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/services/token_storage.dart';
 import '../models/team_summary_model.dart';
 
-/// Read-only access to `GET /trainers/{id}/stats/team-summary` (V2 §3).
+/// Read-only access to `GET /trainers/{id}/stats/team-summary`.
 /// Same auth policy as the other stats endpoints: self, admin, or public
-/// (§6.4: statistics are public — the old stats_visible gate is gone).
+///.
 class TeamSummaryRepository {
   final http.Client _client;
   TeamSummaryRepository({http.Client? client}) : _client = client ?? http.Client();
@@ -23,7 +23,7 @@ class TeamSummaryRepository {
     };
   }
 
-  /// MF_FU §3.1a — omit [teamId] for the all-teams average (unchanged
+  /// Omit [teamId] for the all-teams average (unchanged
   /// behaviour); pass it for that one team, where `teams_counted` becomes 1.
   /// An unknown id and a team this trainer doesn't coach both return 403,
   /// deliberately indistinguishable so the endpoint can't be used to probe

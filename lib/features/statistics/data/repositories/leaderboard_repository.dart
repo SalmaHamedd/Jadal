@@ -8,7 +8,7 @@ import '../../../../core/error/failures.dart';
 import '../../../../core/services/token_storage.dart';
 import '../models/leaderboard_models.dart';
 
-/// Read-only access to the V2 §3 leaderboards (top-10). §1.5 adds the same
+/// Read-only access to the leaderboards (top-10). adds the same
 /// filter set as own statistics (date range + positions|frameworks), except
 /// for `metric=points`, which stays unfiltered.
 class LeaderboardRepository {
@@ -39,7 +39,7 @@ class LeaderboardRepository {
       final uri = Uri.parse(base).replace(queryParameters: {
         'metric': metric.wire,
         'limit': '$limit',
-        // §1.5 — points is an all-time Elo rating; the endpoint 422s any
+        // Points is an all-time Elo rating; the endpoint 422s any
         // filter on it, so nothing is ever sent for that metric.
         if (metric != LeaderboardMetric.points)
           ...filter.toQuery(scope: scope),

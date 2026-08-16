@@ -38,7 +38,7 @@ class AppCubit extends Cubit<AppState> {
   Future<void> setLocale(Locale locale) async {
     emit(state.copyWith(locale: locale));
     await _prefs.setValue(_localeKey, locale.languageCode);
-    // §7 — the backend localises each push from the locale stored against the
+    // The backend localises each push from the locale stored against the
     // device, so a language switch must be pushed to the server or the user
     // keeps receiving notifications in the language they just left.
     // No-op when logged out or when Firebase failed to start.

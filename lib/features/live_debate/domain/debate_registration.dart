@@ -1,4 +1,4 @@
-/// How a user signs up for a debate (§15.1), sent to
+/// How a user signs up for a debate, sent to
 /// `POST /debates/{id}/register` as the `as` field. Solo maps to the backend's
 /// `debater` variant.
 enum RegistrationKind {

@@ -10,9 +10,9 @@ import 'package:jadal_app/di/injection_container.dart' as di;
 import 'package:jadal_app/features/live_debate/data/repositories/live_debate_repository.dart';
 import 'package:jadal_app/features/live_debate/presentation/utils/debate_theme.dart';
 
-/// Read-only list of every motion framework defined in the system (§9 drawer
+/// Read-only list of every motion framework defined in the system (drawer
 /// entry) — reuses the same `/motion-frameworks` endpoint the debate search
-/// filter dialog (§8) already fetches, rather than a second lookup.
+/// filter dialog already fetches, rather than a second lookup.
 class FrameworksListScreen extends StatefulWidget {
   const FrameworksListScreen({super.key});
 
@@ -76,11 +76,10 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
                 message: FailureText.fromMessage(context, _error),
                 onRetry: _load,
               )
-            // §2.7 — a grid of proper containers instead of the old bare
+            // A grid of proper containers instead of the old bare
             // dot-and-title rows; frameworks are a core part of the app and
             // the screen should carry that weight.
-            //
-            // MF_FU §3.1 — the old fixed 2-column / 1.5-aspect grid gave
+            // The old fixed 2-column / 1.5-aspect grid gave
             // each tile a hard height that a long (often Arabic) framework
             // name overflowed. maxCrossAxisExtent lets wide screens go to
             // three columns instead of stretching two, and mainAxisExtent
@@ -160,7 +159,7 @@ class _FrameworksListScreenState extends State<FrameworksListScreen> {
   }
 }
 
-/// One framework tile (MF_FU §3): a muted banner in the framework's own colour
+/// One framework tile: a muted banner in the framework's own colour
 /// carrying the icon, and the name on the standard elevated surface beneath.
 /// The name scales down to fit rather than overflowing its fixed tile height.
 class _FrameworkCard extends StatelessWidget {

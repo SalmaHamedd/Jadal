@@ -1,8 +1,7 @@
-/// V2 §3 — public leaderboards.
-///
+/// Public leaderboards.
 /// `GET /leaderboards/debaters?metric=…&limit=10` and
 /// `GET /leaderboards/teams?metric=…&limit=10`, both returning
-/// `data: { metric, entries: [ { rank, …subject fields…, value } ] }`.
+/// `data: { metric, entries: [{ rank, …subject fields…, value }] }`.
 /// Debater entries carry `user_id/name/avatar_url`; team entries carry
 /// `team_id/team_name/logo_url` (logo_url is always null today — teams have
 /// no logo column; the UI falls back to an initial).
@@ -10,7 +9,7 @@ library;
 
 enum LeaderboardScope { debaters, teams }
 
-/// §1.5 — optional leaderboard filters. Constraints (BACKEND_RESPONSE §3):
+/// Optional leaderboard filters. Constraints:
 /// `positions` and `frameworks` are mutually exclusive (422); `positions` is
 /// rejected on the teams leaderboard (422); and `metric=points` rejects every
 /// filter (Elo is order-dependent) — the repository strips them for points.

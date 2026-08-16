@@ -6,7 +6,7 @@ import 'package:jadal_app/core/theme/app_text_styles.dart';
 import 'package:jadal_app/features/search/domain/entities/search_team.dart';
 import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.dart';
 
-/// V2 §10 — one team row in the search results, restyled to match
+/// One team row in the search results, restyled to match
 /// [SearchUserCard]: initial-letter fallback avatar, member count as a chip,
 /// and the coach's name on its own line. Tap opens [TeamInfoScreen] — no
 /// membership context here, so it's never leavable; [canJoin] (only true for

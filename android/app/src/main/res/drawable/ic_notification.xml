@@ -1,5 +1,5 @@
 <!--
-  Status-bar icon for push notifications (§7).
+  Status-bar icon for push notifications.
 
   Android renders the small icon as a MASK: every non-transparent pixel is
   painted a flat colour and all colour information is discarded. A full-colour

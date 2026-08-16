@@ -17,7 +17,6 @@ import 'package:jadal_app/features/statistics/presentation/pages/public_stats_sc
 
 /// Home's "top debaters" block, rendered as a **podium** rather than three
 /// list rows.
-///
 /// A ranked list of three is visually indistinguishable from every other list
 /// in the app, which is exactly why this section used to feel like filler. A
 /// podium reads as a result at a glance: the winner is centred and raised,
@@ -39,7 +38,6 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
   List<LeaderboardEntry> _top = const [];
 
   /// Set when the fetch failed.
-  ///
   /// This used to be swallowed (`res.fold((_) {}, …)`), which combined with the
   /// "hide when empty" guard below meant that opening the app with no network
   /// made this whole section **disappear** — while every other block showed an
@@ -64,7 +62,7 @@ class _TopDebatersPreviewState extends State<TopDebatersPreview> {
 
   Future<void> _load() async {
     if (mounted) setState(() => _loading = true);
-    // §4.1 — consume the splash-time prefetch when present.
+    // Consume the splash-time prefetch when present.
     final res =
         await (HomePrefetch.takeLeaderboard() ??
             di.sl<LeaderboardRepository>().getLeaderboard(

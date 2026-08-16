@@ -5,7 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 part 'connection_state.dart';
 
 /// Drives the tap-to-reveal / auto-hide behaviour of the bottom action row
-/// (§8.5). Ported from the legacy `ConnectionCubit`.
+///. Ported from the legacy `ConnectionCubit`.
 class ConnectionCubit extends Cubit<ConnectionStates> {
   ConnectionCubit() : super(ConnectionInitialState());
 
@@ -16,7 +16,7 @@ class ConnectionCubit extends Cubit<ConnectionStates> {
 
   bool showActions = false;
 
-  /// The participant card currently selected (its 3-dots is shown, §9.2). Null
+  /// The participant card currently selected (its 3-dots is shown). Null
   /// when nothing is selected.
   String? selectedParticipantId;
   Timer? _hideTimer;
@@ -35,7 +35,7 @@ class ConnectionCubit extends Cubit<ConnectionStates> {
     }
   }
 
-  /// Selecting a participant card reveals its 3-dots **and** the action row (§9.2/§9.3).
+  /// Selecting a participant card reveals its 3-dots **and** the action row.
   void selectParticipant(String id) {
     selectedParticipantId = selectedParticipantId == id ? null : id;
     showActions = true;

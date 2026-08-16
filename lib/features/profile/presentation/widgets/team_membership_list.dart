@@ -8,7 +8,7 @@ import 'package:jadal_app/features/teams/presentation/screens/team_info_screen.d
 
 /// Current teams for a user, as bordered cards (matching the survey/team
 /// cards elsewhere), with a "show history" toggle that expands the past
-/// memberships in place (§6.4). Renders nothing if there are no current
+/// memberships in place. Renders nothing if there are no current
 /// teams AND the caller hasn't asked to see history. Cards navigate to
 /// [TeamInfoScreen]; the "leave team" action there only shows when
 /// [isOwnProfile] is true — you can't leave someone else's team.
@@ -54,7 +54,7 @@ class _TeamMembershipSectionState extends State<TeamMembershipSection> {
     );
   }
 
-  /// MF_FU §2.1 — belt and braces. The backend already excludes random teams
+  /// Belt and braces. The backend already excludes random teams
   /// from both endpoints; if one ever leaks through, the profile stays clean.
   static List<TeamMembership> _real(List<TeamMembership> items) =>
       items.where((t) => !t.isRandom).toList();

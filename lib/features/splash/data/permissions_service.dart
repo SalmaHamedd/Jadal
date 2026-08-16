@@ -62,13 +62,11 @@ class PermissionsService {
     });
   }
 
-  /// Push-notification permission, asked once at first launch (§7).
-  ///
+  /// Push-notification permission, asked once at first launch.
   /// Deliberately NOT part of [requestLiveDebatePermissions]: that result gates
   /// entry to the app, and push is optional. Folding it in would let a user who
   /// declines notifications be bounced to the "permissions required" screen and
   /// blocked from an app that works perfectly well without them.
-  ///
   /// On Android 13+ (API 33) this shows the runtime prompt; below that it is
   /// granted at install time and returns immediately. Callers ignore the
   /// result — it is informational only.

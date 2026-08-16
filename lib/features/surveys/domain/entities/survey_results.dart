@@ -1,14 +1,5 @@
-/// Results for a survey, as returned by `GET /trainer/surveys/{id}/results`.
-///
-/// Confirmed shape (real sample response):
-/// {
-///   "data": {
-///     "id", "title", "description", "total_responses",
-///     "questions": [ { "id", "question_text", "type", "options",
-///                      "aggregate": { "average"|"distribution"|"answers", "total" } } ],
-///     "responses": [ { "id", "user": {...}, "answers": {"<question_id>": value}, "submitted_at" } ]
-///   }
-/// }
+/// Results for a survey, from `GET /trainer/surveys/{id}/results`: the
+/// questions with their aggregates, plus every individual response.
 
 /// The person who submitted a response.
 class SurveyRespondent {

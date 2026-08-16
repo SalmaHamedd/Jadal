@@ -10,7 +10,7 @@ import '../utils/debate_theme.dart';
 
 /// News ticker with a slide + glow on update, recolored to a Jadal blue/orange
 /// glow (was lightRed/lightBlue). Behaviour preserved from the legacy
-/// `NewsWidget` (§8.3 A).
+/// `NewsWidget`.
 class NewsTicker extends StatefulWidget {
   const NewsTicker({super.key});
 
@@ -43,7 +43,7 @@ class _NewsTickerState extends State<NewsTicker> {
         if (!_initialized) {
           // First open: seed the baseline WITHOUT the glow. The slide+glow should
           // only fire when the news *changes while we're watching* — not just
-          // because the screen was opened (§news).
+          // because the screen was opened.
           _initialized = true;
           _lastNews = news;
         } else if (_lastNews != news) {

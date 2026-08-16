@@ -58,7 +58,7 @@ class ApiConstants {
   static String teamSpeakersUrl(int id) => '$baseUrl/debates/$id/team-speakers';
   static String nextStageUrl(int id) => '$baseUrl/debates/$id/next-stage';
   static String rollbackToLobbyUrl(int id) => '$baseUrl/debates/$id/rollback-to-lobby';
-  // V11: server-authoritative timer (pause/resume) + intro phase (start-live).
+  // Server-authoritative timer (pause/resume) + intro phase (start-live).
   static String timerUrl(int id) => '$baseUrl/debates/$id/timer';
   static String startLiveUrl(int id) => '$baseUrl/debates/$id/start-live';
   static String poiUrl(int id, int phaseId) => '$baseUrl/debates/$id/stages/$phaseId/poi';
@@ -68,7 +68,7 @@ class ApiConstants {
   static String closeRoomUrl(int id) => '$baseUrl/debates/$id/close-room';
   static String get feedbackUrl => '$baseUrl/feedback';
 
-  // Persistent team chat (sprinkles §2) — additive to the peer `team_chat`
+  // Persistent team chat — additive to the peer `team_chat`
   // data-channel event, which still handles live delivery unchanged.
   static String chatUrl(int id) => '$baseUrl/debates/$id/chat';
   static String chatReadUrl(int id) => '$baseUrl/debates/$id/chat/read';
@@ -76,13 +76,13 @@ class ApiConstants {
   /// Self-registration for a debate (as = debater | judge | team).
   static String registerUrl(int id) => '$baseUrl/debates/$id/register';
 
-  /// V12 §1 — teams the caller may register for this debate (lead/coach).
+  /// Teams the caller may register for this debate (lead/coach).
   static String registerableTeamsUrl(int id) => '$baseUrl/debates/$id/registerable-teams';
 
-  /// V12 §3 — who registered so far, split into teams / judges / solo.
+  /// Who registered so far, split into teams / judges / solo.
   static String registrationsUrl(int id) => '$baseUrl/debates/$id/registrations';
 
-  // ── Debater statistics (read-only, §"Debater Statistics API") ────────────────
+  // ── Debater statistics (read-only) ───────────────────────────────────────────
   // {debater} is the debater's user id. Auth: bearer + check.status.
   static String _statsBase(int debaterId) => '$baseUrl/debaters/$debaterId/stats';
   static String winRateUrl(int debaterId) => '${_statsBase(debaterId)}/win-rate';
@@ -91,13 +91,13 @@ class ApiConstants {
   static String scoreRankingUrl(int debaterId) => '${_statsBase(debaterId)}/score-ranking';
   static String improvementUrl(int debaterId) => '${_statsBase(debaterId)}/improvement';
 
-  // ── Public profile / achievements / team history (sprinkles §6) ──────────────
+  // ── Public profile / achievements / team history ──────────────
   static String userProfileUrl(int id) => '$baseUrl/users/$id';
   static String userAchievementsUrl(int id) => '$baseUrl/users/$id/achievements';
   static String userTeamsUrl(int id) => '$baseUrl/users/$id/teams';
   static String userTeamsHistoryUrl(int id) => '$baseUrl/users/$id/teams/history';
 
-  // ── Debate search + filter option lists (sprinkles §8) ────────────────────────
+  // ── Debate search + filter option lists ────────────────────────
   static String get debatesSearchUrl => '$baseUrl/debates/search';
   static String get debateFormatsUrl => '$baseUrl/debate-formats';
   static String get debateTagsDistinctUrl => '$baseUrl/debates/tags/distinct';
@@ -105,33 +105,33 @@ class ApiConstants {
   static String get judgesListUrl => '$baseUrl/judges';
   static String get teamsOptionsUrl => '$baseUrl/teams/options';
 
-  // ── Blog search + filter option lists (sprinkles §10) ─────────────────────────
+  // ── Blog search + filter option lists ─────────────────────────
   static String get blogAuthorsUrl => '$baseUrl/blog/authors';
 
-  // ── Push notifications §7 — FCM device-token registry ────────────────────────
+  // ── Push notifications — FCM device-token registry ────────────────────────
   // POST upserts keyed on the token (reassigning it across users); DELETE is
   // idempotent and scoped to the authenticated caller, so it must be called
   // BEFORE the auth token is discarded on logout or it 401s.
   static String get devicesUrl => '$baseUrl/devices';
 
-  // ── V2 §3 — public leaderboards (top-10; best_speaker is debaters-only) ──────
+  // ── Public leaderboards (top-10; best_speaker is debaters-only) ──────
   static String get leaderboardDebatersUrl => '$baseUrl/leaderboards/debaters';
   static String get leaderboardTeamsUrl => '$baseUrl/leaderboards/teams';
 
-  // ── V2 §3 — coach team-summary (scalar per metric, averaged across teams) ────
+  // ── Coach team-summary (scalar per metric, averaged across teams) ────
   static String trainerTeamSummaryUrl(int trainerId) =>
       '$baseUrl/trainers/$trainerId/stats/team-summary';
 
-  // ── V2 §7 — participation/activity score (raw weighted points + breakdown) ───
+  // ── Participation/activity score (raw weighted points + breakdown) ───
   static String debaterActivityUrl(int id) => '${_statsBase(id)}/activity';
   static String trainerActivityUrl(int id) => '$baseUrl/trainers/$id/stats/activity';
   static String judgeActivityUrl(int id) => '$baseUrl/judges/$id/stats/activity';
 
-  // ── MF_FU §3 — per-team coach analytics ──────────────────────────────────────
+  // ── Per-team coach analytics ──────────────────────────────────────
   /// The coach's teams, for the analysis screen's team picker. `GET /teams` is
   /// NOT reusable here: it is scoped to the caller rather than the subject,
   /// doesn't exclude random teams for a trainer caller, and has no
-  /// `members_count` (BACKEND_REPLY_MF_FU §3.1b).
+  /// `members_count`.
   static String trainerTeamsUrl(int trainerId) =>
       '$baseUrl/trainers/$trainerId/teams';
 
@@ -141,12 +141,12 @@ class ApiConstants {
   static String teamStatUrl(int teamId, String metric) =>
       '$baseUrl/teams/$teamId/stats/$metric';
 
-  /// MF_FU §4 — which line-up performs best. Coach/admin only (403 otherwise):
+  /// Which line-up performs best. Coach/admin only (403 otherwise):
   /// a line-up analysis tells any reader which three people to prepare against.
   static String teamCombinationsUrl(int teamId) =>
       '$baseUrl/teams/$teamId/stats/combinations';
 
-  // ── MF_FU §5 — judge ratings received (aggregates only, never per-rating) ────
+  // ── Judge ratings received (aggregates only, never per-rating) ────
   static String judgeRatingsUrl(int judgeId) =>
       '$baseUrl/judges/$judgeId/stats/ratings';
 }

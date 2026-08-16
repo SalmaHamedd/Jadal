@@ -1,6 +1,6 @@
 /// Rank ordering matches the backend's sort: gold → silver → bronze →
 /// honorable → participation (highest first). Wire value is `honorable`
-/// (BACKEND_RESPONSE §0.1 — `honoring` no longer exists).
+/// — `honoring` no longer exists).
 enum AchievementRank { gold, silver, bronze, honorable, participation }
 
 AchievementRank achievementRankFromWire(String? wire) {

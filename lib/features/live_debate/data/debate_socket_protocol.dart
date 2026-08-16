@@ -1,9 +1,8 @@
 import 'dart:convert';
 
 /// Centralized schema for the LiveKit data-channel messages exchanged on topic
-/// [topic] (§6). All encode/decode lives here so message types are not
+/// [topic]. All encode/decode lives here so message types are not
 /// stringly-typed and scattered around the cubit.
-///
 /// Fixes the legacy bug where the sender published `news_update` but the
 /// receiver matched `new_update`: the single source of truth is
 /// [DebateEventType.newsUpdate.wire] == 'news_update'.

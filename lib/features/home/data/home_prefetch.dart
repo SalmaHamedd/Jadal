@@ -11,10 +11,9 @@ import '../../profile/domain/entities/profile.dart';
 import '../../statistics/data/models/leaderboard_models.dart';
 import '../../statistics/data/repositories/leaderboard_repository.dart';
 
-/// §4.1 — fires the home screen's data requests while the splash timer is
+/// Fires the home screen's data requests while the splash timer is
 /// still running, so the first post-splash frame renders content instead of a
 /// wall of spinners.
-///
 /// Every slot is take-once: the first consumer receives the in-flight future
 /// (or its already-settled result), the slot is cleared, and any later reload
 /// goes to the network exactly as before. Errors travel inside the futures'

@@ -8,33 +8,11 @@ import 'package:path_provider/path_provider.dart';
 
 /// Local key/value store, backed by a single JSON file.
 ///
-/// ## Why this is serialized and cached
-///
-/// Every write used to be an *unsynchronised* read-modify-write of the whole
-/// file: read the map, set one key, write the map back — while
-/// `writeAsString` truncates the file before writing it. With concurrent
-/// callers that produced two ways to silently destroy the session:
-///
-///  1. **Lost update.** Two writers both read the old map; the second one to
-///     finish writes its copy back, discarding the first's key. When the key
-///     that lost was `AUTH_TOKEN`, the user stayed "logged in" in the UI while
-///     every request 401'd.
-///  2. **Torn read.** A reader hitting the file between truncate and write got
-///     empty/!JSON content, silently fell back to `{}`, and then persisted
-///     that `{}` plus its own key — **wiping the token and everything else**.
-///
-/// Both were always possible, but became routine once login and profile loads
-/// started writing ~20 keys (identity + contact details) instead of a handful,
-/// some of them fire-and-forget from a cubit.
-///
-/// Three things make it safe now:
-///  * **One in-memory map is the source of truth**, loaded once. Reads never
-///    touch the disk, so a read can't observe a half-written file.
-///  * **Every mutation runs through [_lock]**, a serial queue, so read-modify-
-///    write sequences can't interleave.
-///  * **Writes are atomic**: a temp file is written and flushed, then renamed
-///    over the real one. A crash mid-write leaves the previous file intact
-///    rather than a truncated one.
+/// Concurrent writes used to lose keys — including the auth token — because
+/// each one re-read and rewrote the whole file. Three rules keep that from
+/// happening: an in-memory map is the source of truth so reads never hit a
+/// half-written file, every mutation is serialised through [_lock], and writes
+/// go to a temp file that is renamed into place.
 ///
 /// Prefer [setValues] over several [setValue] calls: one flush instead of N.
 class PreferencesDatabase {
@@ -111,7 +89,7 @@ class PreferencesDatabase {
     final file = await _localFile;
     final tmp = File('${file.path}.tmp');
     await tmp.writeAsString(json.encode(_memory), flush: true);
-    // rename() is atomic on the same filesystem, so a reader either sees the
+    // rename is atomic on the same filesystem, so a reader either sees the
     // whole old file or the whole new one — never a truncated one.
     await tmp.rename(file.path);
   }
@@ -161,7 +139,6 @@ class PreferencesDatabase {
       });
 
   /// Builds a valid AES-256 key (exactly 32 bytes) from [_secretKey].
-  ///
   /// `encrypt.Key.fromUtf8` does no length validation, so a secret that isn't
   /// 16/24/32 bytes long makes AES throw `ArgumentError` at encrypt time. We
   /// pad/truncate to 32 bytes here so an off-length constant can't break it.

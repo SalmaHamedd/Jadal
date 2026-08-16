@@ -1,4 +1,4 @@
-/// A lightweight publisher/author option for the blog filter dialog (§10) —
+/// A lightweight publisher/author option for the blog filter dialog —
 /// `GET /blog/authors`.
 class BlogAuthorOption {
   final int id;

@@ -12,13 +12,13 @@ DebateSide? debateSideFromString(String? s) {
   return null;
 }
 
-/// A scoreable stage descriptor for the chair's result-submit UI (§10). One per
+/// A scoreable stage descriptor for the chair's result-submit UI. One per
 /// speech (6 or 8, reply speeches included). [stageOrder] is the 1-based order
 /// that maps to `stage_scores.stage_order` in the submit payload.
 class ResultStageRef {
   final int stageOrder;
   final String roleLabel; // P1 / O2 / PR … (test) or the backend stage name
-  final String speakerName; // may be empty when the mapping is unavailable (Q8)
+  final String speakerName; // may be empty when the mapping is unavailable
   final DebateSide? side;
   final bool isReply;
 
@@ -51,7 +51,7 @@ class ResultSpeechScore {
 }
 
 /// The shared, render-ready result the result widget shows in **both** the live
-/// result room and the debate-list "Done" detail (§10). Built locally by the
+/// result room and the debate-list "Done" detail. Built locally by the
 /// test cubit, or from a [LiveStateModel] (backend mode + list detail). Keeping
 /// it cubit-free lets the same widget render it anywhere.
 class DebateResultView {
@@ -62,7 +62,7 @@ class DebateResultView {
   final List<ResultSpeechScore> speeches;
 
   /// Whether the chair has revealed the result. Drives the winner/crown reveal
-  /// and the confetti (§10) — scores may be present before this is true.
+  /// and the confetti — scores may be present before this is true.
   final bool revealed;
 
   const DebateResultView({
@@ -76,9 +76,9 @@ class DebateResultView {
 
   bool get hasScores => speeches.any((s) => s.score != null);
 
-  /// Best speaker = the highest-scoring **non-reply** speech (§10). Returns null
-  /// when there are no scores, or no stage→speaker mapping (graceful fallback,
-  /// open Q8) — the crown is simply hidden in that case.
+  /// Best speaker = the highest-scoring **non-reply** speech. Returns null
+  /// when there are no scores or no stage→speaker mapping, in which case the
+  /// crown is simply hidden.
   ResultSpeechScore? get bestSpeaker {
     ResultSpeechScore? best;
     for (final s in speeches) {
@@ -88,8 +88,8 @@ class DebateResultView {
     return best;
   }
 
-  /// Backend / list mapping (§10). Stage→speaker via `participant_id`; degrades
-  /// gracefully (empty name, no crown) when those fields are null (open Q8).
+  /// Backend / list mapping. Stage→speaker via `participant_id`; degrades
+  /// gracefully (empty name, no crown) when those fields are null.
   factory DebateResultView.fromLiveState(LiveStateModel state) {
     final result = state.result;
     final speeches = <ResultSpeechScore>[

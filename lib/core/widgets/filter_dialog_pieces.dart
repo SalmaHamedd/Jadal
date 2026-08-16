@@ -5,7 +5,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_text_styles.dart';
 
 /// A generic (id, label) option for the multi-select pieces below — shared by
-/// every filter dialog (debate search §8, blog search §10) so they don't each
+/// every filter dialog (debate search, blog search) so they don't each
 /// invent their own option shape.
 class FilterOption {
   final String id;

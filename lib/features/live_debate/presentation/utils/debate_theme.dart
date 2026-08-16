@@ -4,7 +4,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../data/models/debate_models.dart';
 import 'debate_timeline.dart';
 
-/// Shared Jadal colour helpers for the live-debate UI (§3). Light mode is
+/// Shared Jadal colour helpers for the live-debate UI. Light mode is
 /// blue-led with orange reserved for accents/the opposition side; surfaces stay
 /// subtle and blue-or-neutral (matching `login_screen.dart`).
 abstract class DebateTheme {
@@ -19,7 +19,7 @@ abstract class DebateTheme {
   static Color surfaceElevated(BuildContext c) =>
       isDark(c) ? JadalColors.darkSurfaceElevated : JadalColors.surfaceLight;
 
-  /// Camera-off cards should float as a panel darker than the background (§8.3).
+  /// Camera-off cards should float as a panel darker than the background.
   static Color floatingCard(BuildContext c) => isDark(c)
       ? JadalColors.darkSurfaceElevated
       : Color.lerp(JadalColors.lightBackground, JadalColors.deepBlue, 0.06)!;
@@ -46,7 +46,7 @@ abstract class DebateTheme {
         : [JadalColors.primaryOrange, const Color(0xFFC9651A)];
   }
 
-  /// Accent colour for the current timer tier (§8.3 B).
+  /// Accent colour for the current timer tier.
   static Color tierAccent(DebateTier tier, DebateSide side, bool dark) {
     switch (tier) {
       case DebateTier.protected:

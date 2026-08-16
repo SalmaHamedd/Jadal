@@ -1,10 +1,10 @@
 import '../../data/models/debate_models.dart';
 
-/// Visual tier of the main speaker card / timer (§8.3 B). All boundaries are
+/// Visual tier of the main speaker card / timer. All boundaries are
 /// derived from [DebateFormat] — no magic numbers.
 enum DebateTier { protected, open, extra, timeOff }
 
-/// The six debate-flow moments (§8.3 B). Events 1/2/4/5 ring the bell; events
+/// The six debate-flow moments. Events 1/2/4/5 ring the bell; events
 /// 3/6 are news-only.
 enum DebateTimelineEvent {
   speechStarted, // opening protected begins — bell
@@ -28,14 +28,12 @@ extension DebateTimelineEventX on DebateTimelineEvent {
 }
 
 /// Pure state machine for a single speech, driven entirely by [DebateFormat].
-///
-/// POI availability follows the **frontend** rules (§9.1) — the backend has no
+/// POI availability follows the **frontend** rules — the backend has no
 /// POI field — and the protected/open tiers are derived from the same windows:
-///  - **reply speech** → POI never available;
-///  - speech **> 3 min** → POI restricted in the first & last **minute**;
-///  - speech **1–3 min** → first & last **30 s**;
-///  - speech **≤ 1 min** → no POI (the button stays visible but disabled).
-///
+/// - **reply speech** → POI never available;
+/// - speech **> 3 min** → POI restricted in the first & last **minute**;
+/// - speech **1–3 min** → first & last **30 s**;
+/// - speech **≤ 1 min** → no POI (the button stays visible but disabled).
 /// If [DebateFormat.poiOffset] is ever provided by the backend it overrides the
 /// manual rules.
 class DebateTimeline {
@@ -54,7 +52,7 @@ class DebateTimeline {
   /// Total seconds tracked by the progress ring (main + extra).
   int get totalTrackedSeconds => extraEnd;
 
-  /// POI protected margin (seconds) by §9.1, derived from the speech duration.
+  /// POI protected margin (seconds) by, derived from the speech duration.
   int get _poiMargin {
     if (format.poiOffset != null) return format.poiOffset!.inSeconds;
     if (_speech <= 60) return _speech; // ≤1 min → no open window at all
@@ -67,7 +65,7 @@ class DebateTimeline {
   /// First instant POIs are closed again (exclusive end of the open window).
   int get openWindowEnd => _speech - _poiMargin;
 
-  /// Whether POIs are available at [elapsed] for this speech (§9.1).
+  /// Whether POIs are available at [elapsed] for this speech.
   bool poiAllowedAt(int elapsed, {bool isReply = false}) {
     if (isReply) return false;
     if (_speech <= 2 * _poiMargin) return false; // window collapses → no POI

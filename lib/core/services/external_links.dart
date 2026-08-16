@@ -1,8 +1,7 @@
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-/// MF_FU §1.2 — opens a contact value in the right external app.
-///
+/// Opens a contact value in the right external app.
 /// Every helper returns `false` when nothing could be opened, so the caller can
 /// fall back to copying the value to the clipboard instead of the tap doing
 /// nothing at all.

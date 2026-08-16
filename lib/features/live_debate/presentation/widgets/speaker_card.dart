@@ -8,14 +8,13 @@ import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
 import 'call_indicators.dart';
 
-/// One debater card in the speakers section (§8.3 C). Role header on top, then a
+/// One debater card in the speakers section. Role header on top, then a
 /// body that reflects **real presence**: the debater's camera (if on), their
 /// avatar (camera off but present), or a "hasn't joined yet" fallback when the
 /// assigned user isn't actually in the room. A POI bubble appears on the correct
 /// side when this debater raises a POI.
-///
 /// Presentational only — selection (the bottom-end 3-dots) + the details dialog
-/// are handled by the surrounding [SelectableCard] (§9.2).
+/// are handled by the surrounding [SelectableCard].
 class SpeakerCard extends StatelessWidget {
   final Debater debater;
   final DebateSide side;
@@ -64,7 +63,7 @@ class SpeakerCard extends StatelessWidget {
     final pointsStart = side == DebateSide.proposition;
 
     // Avatar size is derived from screen width (not the card's available height)
-    // so it stays fixed when the toolbar shows/hides (§U4b).
+    // so it stays fixed when the toolbar shows/hides.
     final w = MediaQuery.of(context).size.width;
     final avatarD = (w * 0.085).clamp(22.0, 40.0).toDouble();
 
@@ -148,7 +147,7 @@ class SpeakerCard extends StatelessWidget {
                                 ),
                               ),
                             // Small speaking / mute badge — sized down so it fits
-                            // the little card (§UX). Muted → red mic-off; talking →
+                            // the little card. Muted → red mic-off; talking →
                             // animated bars in the side colour.
                             PositionedDirectional(
                               top: 4,
@@ -219,7 +218,7 @@ class SpeakerCard extends StatelessWidget {
   }
 }
 
-/// Body shown when the slot's assigned debater hasn't connected yet (§ presence).
+/// Body shown when the slot's assigned debater hasn't connected yet.
 class _NotJoinedBody extends StatelessWidget {
   final String name;
   const _NotJoinedBody({required this.name});
@@ -227,7 +226,7 @@ class _NotJoinedBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final muted = DebateTheme.textSecondary(context);
-    // §5.5 — the placeholder's fixed-size stack (icon + two text lines) used
+    // The placeholder's fixed-size stack (icon + two text lines) used
     // to overflow when the bottom toolbar shrinks the card on small screens.
     // FittedBox keeps the content's proportions and scales the whole block
     // down with the card instead; the ConstrainedBox keeps text wrapping at
