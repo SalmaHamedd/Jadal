@@ -917,5 +917,19 @@
   "errorTooManyRequests": "محاولات كثيرة. يرجى الانتظار قليلاً ثم المحاولة مرة أخرى.",
   "errorPullToRetry": "اسحب للأسفل لإعادة المحاولة",
   "logoutAnyway": "تسجيل الخروج",
-  "frameworksCount": "{count} إطارًا مستخدمًا في المنصة"
+  "frameworksCount": "{count} إطارًا مستخدمًا في المنصة",
+  "viewResult": "عرض النتيجة",
+  "reviewSpeeches": "مراجعة المداخلات",
+  "resultSubmittedAwaitingReveal": "أرسل رئيس الحكام النتيجة — بانتظار إعلانها.",
+  "judgesChat": "محادثة الحكام",
+  "speechTranscript": "نص المداخلة",
+  "transcriptPending": "ما زال النص قيد الإعداد. عد بعد قليل.",
+  "transcriptUnavailable": "لا يتوفر نص لهذه المداخلة.",
+  "speechNotStarted": "لم تُلقَ هذه المداخلة بعد.",
+  "speechDetails": "تفاصيل المداخلة",
+  "poisOfferedLabel": "نقاط النظام المطروحة",
+  "poisTakenLabel": "نقاط النظام المقبولة",
+  "allottedTimeLabel": "الوقت المخصص",
+  "timeTakenLabel": "الوقت المستغرق",
+  "noSpeechesYet": "لم تُلقَ أي مداخلة بعد."
 }

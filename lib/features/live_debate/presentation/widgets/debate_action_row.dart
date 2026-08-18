@@ -49,9 +49,7 @@ class DebateActionRow extends StatelessWidget {
                   // Role gating: controls a role can't use are hidden; the
                   // POI button stays visible but disabled outside its window.
                   // Test mode returns all flags true, so it shows everything.
-                  return Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
+                  final buttons = <Widget>[
                       if (cubit.canUseMedia)
                         // Publish-locked (chair mute-all / per-user) → disabled.
                         cubit.canPublishNow
@@ -79,12 +77,7 @@ class DebateActionRow extends StatelessWidget {
                                 icon: Icons.videocam_off_rounded,
                                 onPressed: null,
                               ),
-                      if (cubit.canAskPoi)
-                        _ActionButton(
-                          icon: Icons.front_hand_rounded,
-                          onPressed: cubit.poiEnabledNow ? cubit.sendPOIRequest : null,
-                          highlight: cubit.isLocalAskingPOI,
-                        ),
+                      if (cubit.canAskPoi) _PoiButton(cubit: cubit),
                       // The next-stage control belongs to the live debate only;
                       // the open lobby has its own "Back to debate" button.
                       if (cubit.canControlStage && !cubit.isLobbyMode)
@@ -96,6 +89,20 @@ class DebateActionRow extends StatelessWidget {
                         icon: Icons.more_vert_rounded,
                         onPressed: () => DebateSettingsSheet.show(context, cubit),
                       ),
+                    ];
+                  // A panel judge in the result phase is left with two or three
+                  // controls; spread evenly they read as stray dots rather than
+                  // a tool bar, so a short row is grouped in the middle instead.
+                  final spread = buttons.length > 3;
+                  return Row(
+                    mainAxisAlignment: spread
+                        ? MainAxisAlignment.spaceEvenly
+                        : MainAxisAlignment.center,
+                    children: [
+                      for (var i = 0; i < buttons.length; i++) ...[
+                        if (!spread && i > 0) const SizedBox(width: 22),
+                        buttons[i],
+                      ],
                     ],
                   );
                 },
@@ -152,6 +159,54 @@ class _ActionButton extends StatelessWidget {
   }
 }
 
+/// The POI button. One control for the whole hand-raise cycle: raise, tap again
+/// to take it back down, and — once it has gone down for any reason — a short
+/// wait before the next one. The wait shows as a countdown rather than a dead
+/// grey button, so it reads as a rule instead of a fault.
+class _PoiButton extends StatelessWidget {
+  final DebateController cubit;
+  const _PoiButton({required this.cubit});
+
+  @override
+  Widget build(BuildContext context) {
+    final asking = cubit.isLocalAskingPOI;
+    final cooling = cubit.isPoiCoolingDown;
+    // Lowering must stay possible even after the POI window shuts, or a hand
+    // raised on the last legal second would be stuck up.
+    final canPress = asking || (cubit.poiEnabledNow && !cooling);
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        _ActionButton(
+          icon: Icons.front_hand_rounded,
+          onPressed: canPress ? cubit.togglePOI : null,
+          highlight: asking,
+        ),
+        if (cooling && !asking)
+          PositionedDirectional(
+            top: -1,
+            end: -1,
+            child: Container(
+              constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+              padding: const EdgeInsets.symmetric(horizontal: 4),
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: DebateTheme.textSecondary(context),
+                borderRadius: BorderRadius.circular(9),
+                border: Border.all(color: DebateTheme.surfaceElevated(context), width: 1.5),
+              ),
+              child: Text(
+                '${cubit.poiCooldownRemainingSeconds}',
+                style: AppTextStyles.small(context)
+                    .copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 /// Team-chat toolbar button: opens the team chat dialog and carries an unread
 /// notification dot when messages arrived while it was closed.
 class _ChatButton extends StatelessWidget {
@@ -165,14 +220,14 @@ class _ChatButton extends StatelessWidget {
       context: context,
       builder: (_) => BlocProvider.value(
         value: cubit,
-        child: TeamChatDialog(teamId: cubit.myTeamId),
+        child: TeamChatDialog(teamId: cubit.myChatChannelId),
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    final unread = cubit.unreadTeamChatCount;
+    final unread = cubit.unreadTeamChatCount > 0;
     return Stack(
       clipBehavior: Clip.none,
       children: [
@@ -180,23 +235,19 @@ class _ChatButton extends StatelessWidget {
           icon: Icons.forum_rounded,
           onPressed: () => _open(context),
         ),
-        if (unread > 0)
+        // A plain dot, not a tally: mid-debate the useful signal is "someone on
+        // your side said something", not how many times.
+        if (unread)
           PositionedDirectional(
             top: -1,
             end: -1,
             child: Container(
-              constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
-              padding: const EdgeInsets.symmetric(horizontal: 4),
-              alignment: Alignment.center,
+              width: 12,
+              height: 12,
               decoration: BoxDecoration(
                 color: JadalColors.primaryOrange,
-                borderRadius: BorderRadius.circular(9),
-                border: Border.all(color: DebateTheme.surfaceElevated(context), width: 1.5),
-              ),
-              child: Text(
-                unread > 9 ? '9+' : '$unread',
-                style: AppTextStyles.small(context)
-                    .copyWith(color: Colors.white, fontWeight: FontWeight.w800, height: 1),
+                shape: BoxShape.circle,
+                border: Border.all(color: DebateTheme.surfaceElevated(context), width: 2),
               ),
             ),
           ),

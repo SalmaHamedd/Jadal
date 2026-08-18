@@ -6,9 +6,14 @@ import '../../data/models/debate_models.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_room_role.dart';
 import '../../domain/live_debate_data.dart';
+import '../../domain/speech_detail.dart';
 import '../utils/debate_timeline.dart';
 
 part 'debate_state.dart';
+
+/// The chat channel id used by the judge panel. Not a team id, so it can never
+/// collide with one — a judge has no team.
+const String kJudgesChatChannel = 'judges';
 
 /// One step in the debate speaking flow.
 class SpeechSlot {
@@ -115,6 +120,23 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// as [LiveDebateData.currentUserId].
   bool isLocalUserId(String userId) => userId == data.currentUserId;
 
+  /// This person's profile picture, or null when they have none (the cards then
+  /// draw the coloured initial). Searched across both teams, the judge panel and
+  /// the audience so any card can ask by id alone.
+  String? avatarUrlForUser(String userId) {
+    for (final side in DebateSide.values) {
+      final d = teamFor(side).debaterById(userId);
+      if (d != null) return d.avatarUrl;
+    }
+    for (final j in data.judges) {
+      if (j.id == userId) return j.avatarUrl;
+    }
+    for (final a in data.audience) {
+      if (a.id == userId) return a.avatarUrl;
+    }
+    return null;
+  }
+
   /// Whether this user's camera should render (local toggle or a subscribed
   /// remote track). Falls back to the avatar when false.
   bool showVideoForUser(String userId) {
@@ -208,6 +230,20 @@ abstract class DebateController extends Cubit<DebateStates> {
   void refusePOI(String askerSid);
   void poiDone();
 
+  /// The one entry point for the POI button: raises a hand, or takes down the
+  /// one already up.
+  void togglePOI() => isLocalAskingPOI ? lowerPOI() : sendPOIRequest();
+
+  /// Take the local user's own raised hand down (tapped again, or expired).
+  void lowerPOI() {}
+
+  /// The local user raised a hand recently and must wait before raising
+  /// another, whatever ended the last one.
+  bool get isPoiCoolingDown => false;
+
+  /// Seconds left on that wait, for the button's countdown.
+  int get poiCooldownRemainingSeconds => 0;
+
   // ── News ────────────────────────────────────────────────────────────────────
   String get latestNews;
   void updateLatestNews(String message);
@@ -273,6 +309,14 @@ abstract class DebateController extends Cubit<DebateStates> {
     return '';
   }
 
+  /// The one chat channel this user belongs to: the judge panel's if they are a
+  /// judge, otherwise their team's. Nobody is ever in both, so a single channel
+  /// per user keeps the unread count and the "chat is open" flag unambiguous.
+  String get myChatChannelId => isJudgeOfDebate ? kJudgesChatChannel : myTeamId;
+
+  /// Whether [myChatChannelId] is the judge panel's channel.
+  bool get isJudgeChat => myChatChannelId == kJudgesChatChannel;
+
   // ── Moderation publish-lock ─────────────────────────────────────────
   // "Mute all = prevent publishing" + per-user lock. Concrete no-op defaults so
   // the backend cubit compiles unchanged (those endpoints don't exist yet, so
@@ -321,6 +365,12 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// The submitted result has already been shared to the room.
   bool get resultShared => false;
 
+  /// Whether the reveal celebration has already played on this device. The
+  /// result screen can be re-opened from the menu, and confetti every time
+  /// would turn a moment into a nuisance.
+  bool get resultCelebrated => false;
+  void markResultCelebrated() {}
+
   /// The room has been closed by the chair.
   bool get isRoomClosed => false;
 
@@ -347,6 +397,11 @@ abstract class DebateController extends Cubit<DebateStates> {
 
   /// Chair only: submit / reveal / close-main (result actions).
   bool get canManageResult;
+
+  /// A judge on this debate — chair or panel. Separate from [canManageResult]
+  /// on purpose: the whole panel may *see* the ballot and the speech review;
+  /// only the chair may submit or reveal it.
+  bool get isJudgeOfDebate => canManageResult;
 
   /// May toggle mic/camera right now (role- and lobby-aware: everyone in the open
   /// lobby; participants/judges in a live stage; spectators never in a live stage).
@@ -384,6 +439,10 @@ abstract class DebateController extends Cubit<DebateStates> {
 
   /// The stages to score in the chair's submit UI (6 or 8, reply included).
   List<ResultStageRef> get scoreableStages;
+
+  /// Every speech of the debate with its timings, POI counts and transcript, in
+  /// speaking order — what the judges' speech review reads. Empty in test mode.
+  List<SpeechDetail> get speechDetails => const [];
 
   /// The render-ready result for the shared result widget. Null until a result
   /// exists (test: submitted; backend: `live-state.result` present or the debate

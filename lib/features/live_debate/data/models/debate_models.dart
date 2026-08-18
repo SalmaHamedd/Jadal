@@ -61,7 +61,16 @@ class Debater {
   final String name;
   final int ranking; // higher = more senior; highest present picks the order
 
-  const Debater({required this.id, required this.name, required this.ranking});
+  /// Profile picture, already resolved to an absolute URL. Null when the user
+  /// has none — the cards then fall back to the coloured initial.
+  final String? avatarUrl;
+
+  const Debater({
+    required this.id,
+    required this.name,
+    required this.ranking,
+    this.avatarUrl,
+  });
 }
 
 class TeamInfo {
@@ -88,7 +97,8 @@ class TeamInfo {
 class JudgeInfo {
   final String id;
   final String name;
-  const JudgeInfo({required this.id, required this.name});
+  final String? avatarUrl;
+  const JudgeInfo({required this.id, required this.name, this.avatarUrl});
 }
 
 // The motion lives in core now: see `lib/core/app_models/motion.dart`
@@ -98,7 +108,13 @@ class AudienceMember {
   final String id;
   final String name;
   final String role; // localized/descriptive label
-  const AudienceMember({required this.id, required this.name, required this.role});
+  final String? avatarUrl;
+  const AudienceMember({
+    required this.id,
+    required this.name,
+    required this.role,
+    this.avatarUrl,
+  });
 }
 
 /// Speaker order selected during prep (broadcast over the socket; checked by

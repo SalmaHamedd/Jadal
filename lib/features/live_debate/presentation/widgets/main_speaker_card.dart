@@ -110,6 +110,7 @@ class MainSpeakerCard extends StatelessWidget {
                     child: JadalVideoCard(
                       name: speaker.name,
                       participantId: speaker.id,
+                      avatarUrl: speaker.avatarUrl,
                       bgColor: DebateTheme.floatingCard(context),
                       showVideo: cubit.showVideoForUser(speaker.id),
                       videoTrack: cubit.videoTrackForUser(speaker.id),
@@ -359,6 +360,10 @@ class _IdleCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
+      // The slot is taller than the artwork by the timer button's reserve; the
+      // speaking card leaves that strip empty, so this one must too or the gap
+      // to the team cards disappears.
+      margin: const EdgeInsets.only(bottom: kMainSpeakerBottomOverhang),
       decoration: BoxDecoration(
         color: DebateTheme.floatingCard(context),
         borderRadius: BorderRadius.circular(widgetBorderRadius + 4),
@@ -408,9 +413,18 @@ class _IntroCard extends StatelessWidget {
     final hasHost = hostId.isNotEmpty;
     return LayoutBuilder(
       builder: (context, constraints) {
+        // The intro has no timer button, but the slot still reserves room for
+        // one. Leaving that strip empty — exactly as the speaking card does —
+        // keeps the gap to the team cards identical in every phase.
+        const overhang = kMainSpeakerBottomOverhang;
+        final h = constraints.maxHeight - overhang;
         return Stack(
           children: [
-            Positioned.fill(
+            Positioned(
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: overhang,
               child: Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(cardRadius),
@@ -425,12 +439,13 @@ class _IntroCard extends StatelessWidget {
                 child: JadalVideoCard(
                   name: hostName.isNotEmpty ? hostName : '—',
                   participantId: hasHost ? hostId : 'chair',
+                  avatarUrl: hasHost ? cubit.avatarUrlForUser(hostId) : null,
                   bgColor: DebateTheme.floatingCard(context),
                   showVideo: hasHost && cubit.showVideoForUser(hostId),
                   videoTrack: hasHost ? cubit.videoTrackForUser(hostId) : null,
                   isMicEnabled: hasHost && cubit.micOnForUser(hostId),
                   isSpeaking: hasHost && cubit.speakingForUser(hostId),
-                  mainAxis: constraints.maxHeight,
+                  mainAxis: h,
                   borderRadius: cardRadius,
                 ),
               ),

@@ -13,6 +13,7 @@ import '../widgets/debate_screen_header.dart';
 import '../widgets/grid_layout.dart';
 import '../widgets/result_submit_sheet.dart';
 import '../widgets/result_summary_view.dart';
+import 'speech_review_screen.dart';
 import '../../../../core/error/failure_text.dart';
 
 /// Result room. Locked until the chair finishes the debate; then:
@@ -33,10 +34,13 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
   void initState() {
     super.initState();
     // Opened with an already-revealed result (e.g. the chair shared from the
-    // live room) → celebrate on entry.
+    // live room) → celebrate on entry, but only the first time: this screen can
+    // be re-opened from the menu afterwards.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      if (context.read<DebateController>().resultView?.revealed == true) {
+      final cubit = context.read<DebateController>();
+      if (cubit.resultView?.revealed == true && !cubit.resultCelebrated) {
+        cubit.markResultCelebrated();
         setState(() => _showConfetti = true);
       }
     });
@@ -61,6 +65,7 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
                   s is ResultRevealedState || s is DebateErrorState,
               listener: (context, state) {
                 if (state is ResultRevealedState) {
+                  context.read<DebateController>().markResultCelebrated();
                   setState(() => _showConfetti = true);
                 } else if (state is DebateErrorState) {
                   JadalSnackBar.show(context, FailureText.fromMessage(context, state.message), type: SnackBarType.error);
@@ -101,14 +106,20 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
 
     final view = cubit.resultView;
     if (view == null) {
-      // Result phase open, no result yet: the chair submits; everyone else waits.
-      return cubit.canManageResult ? _ChairSubmitPrompt(cubit: cubit) : const _ResultsPending();
+      // No ballot stored yet. The whole panel gets the judges' room; only the
+      // chair gets the buttons that act on it. Anyone else waits.
+      return cubit.isJudgeOfDebate
+          ? _JudgesResultPanel(cubit: cubit)
+          : const _ResultsPending();
     }
 
     // Read-only here — "share result" lives in the live room instead.
     return Column(
       children: [
+        if (!view.revealed && cubit.isJudgeOfDebate)
+          _AwaitingRevealNote(submittedAt: view.submittedAt),
         Expanded(child: ResultSummaryView(result: view)),
+        if (cubit.isJudgeOfDebate) _ReviewSpeechesButton(cubit: cubit),
         // Rating posts as the signed-in user, so guests only read the result.
         if (view.revealed && !cubit.isGuest) _RatingBar(cubit: cubit),
       ],
@@ -116,14 +127,16 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
   }
 }
 
-/// Chair, debate finished, no result yet: judges grid + the submit entry point.
-class _ChairSubmitPrompt extends StatelessWidget {
+/// The judges' room while no ballot is stored: who is here, the speech review,
+/// and — for the chair alone — the actions that decide the debate.
+class _JudgesResultPanel extends StatelessWidget {
   final DebateController cubit;
-  const _ChairSubmitPrompt({required this.cubit});
+  const _JudgesResultPanel({required this.cubit});
 
   @override
   Widget build(BuildContext context) {
     final loc = context.loc;
+    final canSubmit = cubit.canManageResult;
     // Only the judges ACTUALLY present in the result room (real LiveKit
     // presence), not the full judge roster (mock reports everyone present).
     final tiles = [
@@ -139,33 +152,104 @@ class _ChairSubmitPrompt extends StatelessWidget {
                   .copyWith(color: DebateTheme.textPrimary(context))),
         ),
         Expanded(child: GridLayout(participants: tiles)),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
-          child: SizedBox(
-            width: double.infinity,
-            height: 50,
-            child: FilledButton.icon(
-              icon: const Icon(Icons.emoji_events_rounded),
-              label: Text(loc.submitResult,
-                  style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800)),
-              onPressed: () async {
-                final ok = await ResultSubmitSheet.show(context, cubit);
-                if (ok == true && context.mounted) {
-                  JadalSnackBar.show(context, loc.resultSubmittedMsg, type: SnackBarType.success);
-                }
-              },
+        _ReviewSpeechesButton(cubit: cubit),
+        if (canSubmit) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+            child: SizedBox(
+              width: double.infinity,
+              height: 50,
+              child: FilledButton.icon(
+                icon: const Icon(Icons.emoji_events_rounded),
+                label: Text(loc.submitResult,
+                    style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w800)),
+                onPressed: () async {
+                  final ok = await ResultSubmitSheet.show(context, cubit);
+                  if (ok == true && context.mounted) {
+                    JadalSnackBar.show(context, loc.resultSubmittedMsg,
+                        type: SnackBarType.success);
+                  }
+                },
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(bottom: 8),
-          child: TextButton(
-            onPressed: () => _confirmCloseNoResult(context, cubit),
-            child: Text(loc.closeWithoutResult,
-                style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
+          Padding(
+            padding: const EdgeInsets.only(bottom: 8),
+            child: TextButton(
+              onPressed: () => _confirmCloseNoResult(context, cubit),
+              child: Text(loc.closeWithoutResult,
+                  style: AppTextStyles.button(context).copyWith(color: const Color(0xFFE53935))),
+            ),
           ),
-        ),
+        ],
       ],
+    );
+  }
+}
+
+/// Opens the per-speech review without leaving the room — the judge stays
+/// connected the whole time, so this pushes a route rather than navigating away.
+class _ReviewSpeechesButton extends StatelessWidget {
+  final DebateController cubit;
+  const _ReviewSpeechesButton({required this.cubit});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+      child: SizedBox(
+        width: double.infinity,
+        height: 46,
+        child: OutlinedButton.icon(
+          icon: const Icon(Icons.record_voice_over_rounded),
+          label: Text(context.loc.reviewSpeeches,
+              style: AppTextStyles.button(context).copyWith(fontWeight: FontWeight.w700)),
+          onPressed: () => Navigator.of(context).push(MaterialPageRoute(
+            builder: (_) => BlocProvider.value(
+              value: cubit,
+              child: const SpeechReviewScreen(),
+            ),
+          )),
+        ),
+      ),
+    );
+  }
+}
+
+/// The ballot is in but not public yet — tells the panel that, instead of
+/// leaving them on a screen that looks like nothing has happened.
+class _AwaitingRevealNote extends StatelessWidget {
+  final DateTime? submittedAt;
+  const _AwaitingRevealNote({required this.submittedAt});
+
+  @override
+  Widget build(BuildContext context) {
+    final at = submittedAt?.toLocal();
+    final time = at == null
+        ? ''
+        : ' (${at.hour.toString().padLeft(2, '0')}:${at.minute.toString().padLeft(2, '0')})';
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+      decoration: BoxDecoration(
+        color: DebateTheme.surfaceElevated(context),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: JadalColors.primaryBlue.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.how_to_vote_rounded, size: 20, color: JadalColors.primaryBlue),
+          const SizedBox(width: 10),
+          Expanded(
+            child: Text(
+              '${context.loc.resultSubmittedAwaitingReveal}$time',
+              style: AppTextStyles.caption(context)
+                  .copyWith(color: DebateTheme.textSecondary(context)),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

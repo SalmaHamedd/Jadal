@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/widgets/jadal_snack_bar.dart';
+import '../cubits/connection_cubit.dart';
 import '../cubits/debate_controller.dart';
+import '../pages/result_room_screen.dart';
 import '../utils/debate_theme.dart';
 
 /// The 3-dots settings menu: mute-all, open-lobby toggle, team chat,
@@ -79,6 +82,18 @@ class DebateSettingsSheet {
                       Navigator.of(sheetCtx).pop();
                     },
                   ),
+                // The result screen is pushed automatically when the chair
+                // shares, but backing out of it used to be final. This is the
+                // way back for anyone who has a result to look at.
+                if (cubit.resultView != null)
+                  _Item(
+                    icon: Icons.emoji_events_outlined,
+                    label: loc.viewResult,
+                    onTap: () {
+                      Navigator.of(sheetCtx).pop();
+                      _openResult(context, cubit);
+                    },
+                  ),
                 // Chair shares the STORED result from the LIVE room (not the
                 // result room) — enabled once a result exists and until it's
                 // revealed; everyone is taken to the result screen with confetti.
@@ -132,6 +147,21 @@ class DebateSettingsSheet {
         );
       },
     );
+  }
+
+  /// Re-opens the result on top of the room. Pushed, never navigated to, so the
+  /// LiveKit connection survives and backing out returns to the debate.
+  static void _openResult(BuildContext context, DebateController cubit) {
+    final connection = context.read<ConnectionCubit>();
+    Navigator.of(context).push(MaterialPageRoute(
+      builder: (_) => MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: cubit),
+          BlocProvider.value(value: connection),
+        ],
+        child: const ResultRoomScreen(),
+      ),
+    ));
   }
 
   /// Puts the debate's link on the clipboard and confirms it with a snackbar.

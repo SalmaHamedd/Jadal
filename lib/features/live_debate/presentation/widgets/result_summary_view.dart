@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../domain/debate_result_view.dart';
 import '../utils/debate_theme.dart';
+import '../utils/name_text.dart';
 
 const Color _gold = Color(0xFFF5C542);
 
@@ -185,6 +186,9 @@ class _BestSpeakerCard extends StatelessWidget {
                 ),
                 Text(
                   speaker.speakerName,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textDirection: directionOfName(speaker.speakerName),
                   style: AppTextStyles.title(context)
                       .copyWith(color: DebateTheme.textPrimary(context)),
                 ),
@@ -225,6 +229,7 @@ class _SpeechScoreRow extends StatelessWidget {
               speech.speakerName.isNotEmpty ? speech.speakerName : '—',
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textDirection: directionOfName(speech.speakerName),
               style: AppTextStyles.body(context)
                   .copyWith(color: DebateTheme.textPrimary(context)),
             ),

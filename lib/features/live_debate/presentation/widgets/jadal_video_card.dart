@@ -3,9 +3,10 @@ import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../core/constants/constants.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
+import '../utils/name_text.dart';
 import 'call_indicators.dart';
+import 'participant_avatar.dart';
 
 /// Reusable participant tile (camera stream or deterministic-colour avatar),
 /// recolored from the legacy `VideoCard`. Used by both the grid
@@ -34,6 +35,9 @@ class JadalVideoCard extends StatelessWidget {
   /// stop/resume timer button). The name row keeps clear of it.
   final double bottomCenterReserved;
 
+  /// Profile picture shown when the camera is off; null → the coloured initial.
+  final String? avatarUrl;
+
   const JadalVideoCard({
     super.key,
     required this.name,
@@ -49,6 +53,7 @@ class JadalVideoCard extends StatelessWidget {
     this.micLevel,
     this.micActiveColor,
     this.bottomCenterReserved = 0,
+    this.avatarUrl,
   });
 
   @override
@@ -81,23 +86,12 @@ class JadalVideoCard extends StatelessWidget {
                       // fit: VideoViewFit.cover,
                     )
                   : Center(
-                      child: Container(
-                        width: 46 * scale,
-                        height: 46 * scale,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: avatarColorFor(participantId),
-                        ),
-                        alignment: Alignment.center,
-                        child: Text(
-                          avatarInitial(name),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontFamily: 'Cairo',
-                            fontSize: 22 * scale,
-                            fontWeight: FontWeight.w800,
-                          ),
-                        ),
+                      child: ParticipantAvatar(
+                        participantId: participantId,
+                        name: name,
+                        avatarUrl: avatarUrl,
+                        diameter: 46 * scale,
+                        initialFontSize: 22 * scale,
                       ),
                     ),
             ),
@@ -118,6 +112,8 @@ class JadalVideoCard extends StatelessWidget {
               name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
+              textAlign: TextAlign.start,
+              textDirection: directionOfName(name),
               style: TextStyle(
                 // Over a video the name sits on dark footage → white. On the
                 // avatar/card surface it must follow the theme (dark in light

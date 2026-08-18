@@ -52,7 +52,8 @@ class DebateTimeline {
   /// Total seconds tracked by the progress ring (main + extra).
   int get totalTrackedSeconds => extraEnd;
 
-  /// POI protected margin (seconds) by, derived from the speech duration.
+  /// POI protected margin (seconds). The format's configured value wins; the
+  /// duration-based rules below are only the fallback when it is absent.
   int get _poiMargin {
     if (format.poiOffset != null) return format.poiOffset!.inSeconds;
     if (_speech <= 60) return _speech; // ≤1 min → no open window at all
@@ -89,7 +90,9 @@ class DebateTimeline {
   /// boundaries are skipped for reply speeches and ≤1-min speeches.
   DebateTimelineEvent? eventAt(int elapsed, {bool isReply = false}) {
     if (elapsed == 0) return DebateTimelineEvent.speechStarted;
-    final hasPoiWindow = !isReply && _speech > 2 * _poiMargin;
+    // A zero protected window is a real setting: POIs are open the whole speech,
+    // so there is no moment at which they open or close to announce.
+    final hasPoiWindow = !isReply && _poiMargin > 0 && _speech > 2 * _poiMargin;
     if (hasPoiWindow) {
       if (elapsed == openWindowStart) return DebateTimelineEvent.poisOpened;
       if (elapsed == openWindowEnd - 60 && openWindowEnd - 60 > openWindowStart) {

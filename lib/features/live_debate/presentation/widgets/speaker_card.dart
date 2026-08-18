@@ -4,9 +4,10 @@ import 'package:livekit_client/livekit_client.dart';
 import '../../../../core/constants/constants.dart';
 import '../../../../core/localization/l10n/context_localiztion.dart';
 import '../../data/models/debate_models.dart';
-import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
+import '../utils/name_text.dart';
 import 'call_indicators.dart';
+import 'participant_avatar.dart';
 
 /// One debater card in the speakers section. Role header on top, then a
 /// body that reflects **real presence**: the debater's camera (if on), their
@@ -127,23 +128,11 @@ class SpeakerCard extends StatelessWidget {
                               Positioned.fill(child: VideoTrackRenderer(videoTrack!))
                             else
                               Center(
-                                child: Container(
-                                  width: avatarD,
-                                  height: avatarD,
-                                  decoration: BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    color: avatarColorFor(debater.id),
-                                  ),
-                                  alignment: Alignment.center,
-                                  child: Text(
-                                    avatarInitial(debater.name),
-                                    style: TextStyle(
-                                      color: Colors.white,
-                                      fontFamily: 'Cairo',
-                                      fontWeight: FontWeight.w800,
-                                      fontSize: avatarD * 0.42,
-                                    ),
-                                  ),
+                                child: ParticipantAvatar(
+                                  participantId: debater.id,
+                                  name: debater.name,
+                                  avatarUrl: debater.avatarUrl,
+                                  diameter: avatarD,
                                 ),
                               ),
                             // Small speaking / mute badge — sized down so it fits
@@ -169,6 +158,7 @@ class SpeakerCard extends StatelessWidget {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                                 textAlign: TextAlign.start,
+                                textDirection: directionOfName(debater.name),
                                 style: TextStyle(
                                   fontFamily: 'Cairo',
                                   fontWeight: FontWeight.w600,
@@ -262,6 +252,7 @@ class _NotJoinedBody extends StatelessWidget {
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
+                  textDirection: directionOfName(name),
                   style: TextStyle(
                     fontFamily: 'Cairo',
                     fontWeight: FontWeight.w500,

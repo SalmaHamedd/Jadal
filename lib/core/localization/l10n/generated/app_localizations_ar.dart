@@ -2077,4 +2077,47 @@ class AppLocalizationsAr extends AppLocalizations {
   String frameworksCount(int count) {
     return '$count إطارًا مستخدمًا في المنصة';
   }
+
+  @override
+  String get viewResult => 'عرض النتيجة';
+
+  @override
+  String get reviewSpeeches => 'مراجعة المداخلات';
+
+  @override
+  String get resultSubmittedAwaitingReveal =>
+      'أرسل رئيس الحكام النتيجة — بانتظار إعلانها.';
+
+  @override
+  String get judgesChat => 'محادثة الحكام';
+
+  @override
+  String get speechTranscript => 'نص المداخلة';
+
+  @override
+  String get transcriptPending => 'ما زال النص قيد الإعداد. عد بعد قليل.';
+
+  @override
+  String get transcriptUnavailable => 'لا يتوفر نص لهذه المداخلة.';
+
+  @override
+  String get speechNotStarted => 'لم تُلقَ هذه المداخلة بعد.';
+
+  @override
+  String get speechDetails => 'تفاصيل المداخلة';
+
+  @override
+  String get poisOfferedLabel => 'نقاط النظام المطروحة';
+
+  @override
+  String get poisTakenLabel => 'نقاط النظام المقبولة';
+
+  @override
+  String get allottedTimeLabel => 'الوقت المخصص';
+
+  @override
+  String get timeTakenLabel => 'الوقت المستغرق';
+
+  @override
+  String get noSpeechesYet => 'لم تُلقَ أي مداخلة بعد.';
 }

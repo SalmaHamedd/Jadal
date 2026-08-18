@@ -3913,6 +3913,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} frameworks used across the platform'**
   String frameworksCount(int count);
+
+  /// No description provided for @viewResult.
+  ///
+  /// In en, this message translates to:
+  /// **'View result'**
+  String get viewResult;
+
+  /// No description provided for @reviewSpeeches.
+  ///
+  /// In en, this message translates to:
+  /// **'Review speeches'**
+  String get reviewSpeeches;
+
+  /// No description provided for @resultSubmittedAwaitingReveal.
+  ///
+  /// In en, this message translates to:
+  /// **'The chair has submitted the result — awaiting the reveal.'**
+  String get resultSubmittedAwaitingReveal;
+
+  /// No description provided for @judgesChat.
+  ///
+  /// In en, this message translates to:
+  /// **'Judges chat'**
+  String get judgesChat;
+
+  /// No description provided for @speechTranscript.
+  ///
+  /// In en, this message translates to:
+  /// **'Transcript'**
+  String get speechTranscript;
+
+  /// No description provided for @transcriptPending.
+  ///
+  /// In en, this message translates to:
+  /// **'The transcript is still being prepared. Check back shortly.'**
+  String get transcriptPending;
+
+  /// No description provided for @transcriptUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'No transcript is available for this speech.'**
+  String get transcriptUnavailable;
+
+  /// No description provided for @speechNotStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'This speech hasn\'t been delivered yet.'**
+  String get speechNotStarted;
+
+  /// No description provided for @speechDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Speech details'**
+  String get speechDetails;
+
+  /// No description provided for @poisOfferedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'POIs offered'**
+  String get poisOfferedLabel;
+
+  /// No description provided for @poisTakenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'POIs taken'**
+  String get poisTakenLabel;
+
+  /// No description provided for @allottedTimeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Allotted time'**
+  String get allottedTimeLabel;
+
+  /// No description provided for @timeTakenLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Time taken'**
+  String get timeTakenLabel;
+
+  /// No description provided for @noSpeechesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No speeches have been delivered yet.'**
+  String get noSpeechesYet;
 }
 
 class _AppLocalizationsDelegate

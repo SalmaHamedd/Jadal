@@ -65,6 +65,9 @@ class DebateResultView {
   /// and the confetti — scores may be present before this is true.
   final bool revealed;
 
+  /// When the chair stored it. Null in test mode and for older payloads.
+  final DateTime? submittedAt;
+
   const DebateResultView({
     required this.winningSide,
     required this.winningTeamName,
@@ -72,6 +75,7 @@ class DebateResultView {
     required this.summaryNotes,
     required this.speeches,
     required this.revealed,
+    this.submittedAt,
   });
 
   bool get hasScores => speeches.any((s) => s.score != null);
@@ -120,6 +124,7 @@ class DebateResultView {
       summaryNotes: result?.summaryNotes,
       speeches: speeches,
       revealed: state.debate.resultRevealed,
+      submittedAt: result?.submittedAt,
     );
   }
 }

@@ -95,10 +95,20 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
     final loc = context.loc;
     final size = MediaQuery.of(context).size;
     final cubit = context.read<DebateController>();
-    // Side palette: proposition = blue / deep-blue, opposition = orange / dark-orange.
+    // Each chat reads as its own: proposition = blue / deep-blue, opposition =
+    // orange / dark-orange, and the judge panel neutral grey — it belongs to
+    // neither side.
+    final isJudges = widget.teamId == kJudgesChatChannel;
     final isProp = widget.teamId == cubit.data.propositionTeam.teamId;
-    final primary = isProp ? JadalColors.primaryBlue : JadalColors.primaryOrange;
-    final deep = isProp ? JadalColors.deepBlue : const Color(0xFF9C4E12);
+    final Color primary;
+    final Color deep;
+    if (isJudges) {
+      primary = JadalColors.judgesGrey;
+      deep = const Color(0xFF3F4750);
+    } else {
+      primary = isProp ? JadalColors.primaryBlue : JadalColors.primaryOrange;
+      deep = isProp ? JadalColors.deepBlue : const Color(0xFF9C4E12);
+    }
 
     return JadalDialog(
       width: size.width * 0.9,
@@ -106,7 +116,7 @@ class _TeamChatDialogState extends State<TeamChatDialog> {
       firstColor: primary,
       secondColor: deep,
       bodyColor: DebateTheme.surface(context),
-      title: loc.teamChat,
+      title: isJudges ? loc.judgesChat : loc.teamChat,
       body: BlocConsumer<DebateController, DebateStates>(
         listenWhen: (_, s) => s is TeamChatUpdatedState,
         listener: (context, _) {

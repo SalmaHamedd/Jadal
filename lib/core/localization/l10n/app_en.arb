@@ -1097,5 +1097,19 @@
         "type": "int"
       }
     }
-  }
+  },
+  "viewResult": "View result",
+  "reviewSpeeches": "Review speeches",
+  "resultSubmittedAwaitingReveal": "The chair has submitted the result — awaiting the reveal.",
+  "judgesChat": "Judges chat",
+  "speechTranscript": "Transcript",
+  "transcriptPending": "The transcript is still being prepared. Check back shortly.",
+  "transcriptUnavailable": "No transcript is available for this speech.",
+  "speechNotStarted": "This speech hasn't been delivered yet.",
+  "speechDetails": "Speech details",
+  "poisOfferedLabel": "POIs offered",
+  "poisTakenLabel": "POIs taken",
+  "allottedTimeLabel": "Allotted time",
+  "timeTakenLabel": "Time taken",
+  "noSpeechesYet": "No speeches have been delivered yet."
 }

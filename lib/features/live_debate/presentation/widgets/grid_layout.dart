@@ -67,6 +67,7 @@ class GridLayout extends StatelessWidget {
                 child: JadalVideoCard(
                   name: p.name,
                   participantId: p.id,
+                  avatarUrl: cubit.avatarUrlForUser(p.id),
                   bgColor: DebateTheme.floatingCard(context),
                   // Wire each tile to its OWN media (local or a present remote),
                   // so remote cameras show and we never paint the local stream on

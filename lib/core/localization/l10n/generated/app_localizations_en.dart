@@ -2094,4 +2094,49 @@ class AppLocalizationsEn extends AppLocalizations {
   String frameworksCount(int count) {
     return '$count frameworks used across the platform';
   }
+
+  @override
+  String get viewResult => 'View result';
+
+  @override
+  String get reviewSpeeches => 'Review speeches';
+
+  @override
+  String get resultSubmittedAwaitingReveal =>
+      'The chair has submitted the result — awaiting the reveal.';
+
+  @override
+  String get judgesChat => 'Judges chat';
+
+  @override
+  String get speechTranscript => 'Transcript';
+
+  @override
+  String get transcriptPending =>
+      'The transcript is still being prepared. Check back shortly.';
+
+  @override
+  String get transcriptUnavailable =>
+      'No transcript is available for this speech.';
+
+  @override
+  String get speechNotStarted => 'This speech hasn\'t been delivered yet.';
+
+  @override
+  String get speechDetails => 'Speech details';
+
+  @override
+  String get poisOfferedLabel => 'POIs offered';
+
+  @override
+  String get poisTakenLabel => 'POIs taken';
+
+  @override
+  String get allottedTimeLabel => 'Allotted time';
+
+  @override
+  String get timeTakenLabel => 'Time taken';
+
+  @override
+  String get noSpeechesYet => 'No speeches have been delivered yet.';
 }

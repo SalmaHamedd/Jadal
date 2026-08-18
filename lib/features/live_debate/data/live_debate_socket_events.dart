@@ -23,6 +23,9 @@ enum LiveEventType {
   // Client-published peer flashes.
   poiRaised('poi_raised'),
   poiAnswered('poi_answered'),
+  // The asker took their own hand down, or it timed out unanswered. Without
+  // this every other device keeps showing the raised hand until the next stage.
+  poiLowered('poi_lowered'),
   // Server-authoritative timer broadcast (pause/resume/no-judge). This
   // REPLACES the chair-peer `time_update` as the source of truth.
   timerUpdate('timer_update'),
@@ -31,6 +34,9 @@ enum LiveEventType {
   timeUpdate('time_update'),
   timeControl('time_control'),
   teamChat('team_chat'),
+  // The judge panel's private chat. Sent only to the judges' identities rather
+  // than broadcast, so the SFU never forwards it to a debater's client.
+  judgeChat('judge_chat'),
   // Chair-published open-lobby PAUSE overlay: a break that freezes the current
   // speaker + timer (so it resumes where it stopped), without touching the
   // backend stage. Peer-to-peer, like the timer.
@@ -143,6 +149,15 @@ abstract class LiveDebateSocket {
         'accepted': accepted,
       });
 
+  /// The asker's hand going back down — self-lowered or expired. Carries the
+  /// asker's id so every device clears that badge.
+  static List<int> poiLowered({int? stagePhaseId, required int byUserId}) =>
+      _encode({
+        'event': LiveEventType.poiLowered.wire,
+        'stage_phase_id': stagePhaseId,
+        'by_user_id': byUserId,
+      });
+
   static List<int> timeUpdate({
     required int elapsedSeconds,
     required bool isPaused,
@@ -197,6 +212,22 @@ abstract class LiveDebateSocket {
       _encode({
         'event': LiveEventType.teamChat.wire,
         'teamId': teamId,
+        'senderId': senderId,
+        'senderName': senderName,
+        'message': message,
+        'ts': ts,
+      });
+
+  /// Same payload as [teamChat] under its own event, so a client that is not a
+  /// judge ignores it even if it somehow receives one.
+  static List<int> judgeChat({
+    required String senderId,
+    required String senderName,
+    required String message,
+    required int ts,
+  }) =>
+      _encode({
+        'event': LiveEventType.judgeChat.wire,
         'senderId': senderId,
         'senderName': senderName,
         'message': message,

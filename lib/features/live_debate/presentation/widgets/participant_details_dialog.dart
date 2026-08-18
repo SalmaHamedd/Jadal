@@ -7,8 +7,9 @@ import '../../../../core/theme/app_text_styles.dart';
 import '../../data/models/debate_models.dart';
 import '../cubits/connection_cubit.dart';
 import '../cubits/debate_controller.dart';
-import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
+import '../utils/name_text.dart';
+import 'participant_avatar.dart';
 
 /// Which corner the selection 3-dots button sits in.
 enum CardDotsCorner { topStart, bottomEnd }
@@ -149,18 +150,22 @@ class ParticipantDetailsDialog extends StatelessWidget {
             ),
             child: Column(
               children: [
-                CircleAvatar(
-                  radius: 32,
-                  backgroundColor: avatarColorFor(participantId),
-                  child: Text(
-                    avatarInitial(name),
-                    style: AppTextStyles.displayTitle(context).copyWith(color: Colors.white),
-                  ),
+                ParticipantAvatar(
+                  participantId: participantId,
+                  name: name,
+                  avatarUrl: cubit.avatarUrlForUser(participantId),
+                  diameter: 64,
+                  initialFontSize:
+                      AppTextStyles.displayTitle(context).fontSize,
                 ),
                 const SizedBox(height: 12),
+                // The cards can only show a cropped name, so this is where the
+                // whole thing has to be readable — no ellipsis, wraps freely.
                 Text(
                   name,
                   textAlign: TextAlign.center,
+                  softWrap: true,
+                  textDirection: directionOfName(name),
                   style: AppTextStyles.title(context)
                       .copyWith(color: DebateTheme.textPrimary(context)),
                 ),

@@ -33,6 +33,11 @@ class DebateFormatModel {
   final int? speechTimeSeconds;
   final bool? hasReplySpeech;
   final int? replyTimeSeconds;
+
+  /// The POI-closed window at the **start and end** of a speech. `0` is a real
+  /// setting meaning POIs are open throughout — not "missing".
+  final int? protectedTimeSeconds;
+
   final num? motionRevealOffsetHours;
   final num? prepRoomsOpenOffsetHours;
   final int? speakersPerSide;
@@ -48,6 +53,7 @@ class DebateFormatModel {
     this.speechTimeSeconds,
     this.hasReplySpeech,
     this.replyTimeSeconds,
+    this.protectedTimeSeconds,
     this.motionRevealOffsetHours,
     this.prepRoomsOpenOffsetHours,
     this.speakersPerSide,
@@ -65,7 +71,7 @@ class DebateFormatModel {
   factory DebateFormatModel.fromJson(Map<String, dynamic> j) {
     final pc = j['phase_config'];
     List<PhaseConfig> phases = const [];
-    int? speech, reply, speakers, stages;
+    int? speech, reply, speakers, stages, protected;
     bool? hasReply;
     num? motionOffset, prepOffset;
     if (pc is List) {
@@ -77,6 +83,7 @@ class DebateFormatModel {
       final m = pc.cast<String, dynamic>();
       speech = (m['speech_time_seconds'] as num?)?.toInt();
       reply = (m['reply_time_seconds'] as num?)?.toInt();
+      protected = (m['protected_time_seconds'] as num?)?.toInt();
       hasReply = m['has_reply_speech'] as bool?;
       motionOffset = m['motion_reveal_offset_hours'] as num?;
       prepOffset = m['prep_rooms_open_offset_hours'] as num?;
@@ -90,6 +97,8 @@ class DebateFormatModel {
       speechTimeSeconds: (j['speech_time_seconds'] as num?)?.toInt() ?? speech,
       hasReplySpeech: j['has_reply_speech'] as bool? ?? hasReply,
       replyTimeSeconds: (j['reply_time_seconds'] as num?)?.toInt() ?? reply,
+      protectedTimeSeconds:
+          (j['protected_time_seconds'] as num?)?.toInt() ?? protected,
       motionRevealOffsetHours: j['motion_reveal_offset_hours'] as num? ?? motionOffset,
       prepRoomsOpenOffsetHours: j['prep_rooms_open_offset_hours'] as num? ?? prepOffset,
       speakersPerSide: (j['speakers_per_side'] as num?)?.toInt() ?? speakers,

@@ -1,5 +1,6 @@
 import '../../../../core/app_models/debate_format_model.dart';
 import '../../../../core/app_models/motion.dart';
+import '../../../../core/function/media_url.dart';
 import '../../domain/live_debate_data.dart';
 import '../models/debate_models.dart';
 import '../models/live_state_model.dart';
@@ -23,16 +24,19 @@ class BackendLiveDebateData implements LiveDebateData {
     final speech = f.speechTimeSeconds ??
         (state.stages.isNotEmpty ? state.stages.first.durationSeconds : null) ??
         420;
+    // The protected window is configured per format. `0` is a real value
+    // ("POIs open throughout"), so only a null falls back to the old default.
+    final protected = f.protectedTimeSeconds;
     return DebateFormat(
       preparationPeriod:
           DebateFormatModel.hoursOffsetToDuration(f.prepRoomsOpenOffsetHours ?? 1),
       speechDuration: Duration(seconds: speech),
-      // Backend has no protected/extra-time fields — POI windows come from the
-      // manual rules; keep a nominal protected window for tier coloring.
-      protectedPeriod: const Duration(minutes: 1),
+      protectedPeriod: Duration(seconds: protected ?? 60),
+      // Grace time is not configurable yet, so this stays a fixed nominal value.
       extraTime: const Duration(seconds: 30),
       replySpeech: f.hasReply,
       replyDuration: Duration(seconds: f.replyTimeSeconds ?? 240),
+      poiOffset: protected == null ? null : Duration(seconds: protected),
     );
   }
 
@@ -73,6 +77,7 @@ class BackendLiveDebateData implements LiveDebateData {
           name: ordered[i].user.name,
           // Higher rank = earlier speaker (only used by the test leader rule).
           ranking: ordered.length - i,
+          avatarUrl: resolveMediaUrl(ordered[i].user.avatarUrl),
         ),
     ];
     return TeamInfo(
@@ -85,8 +90,13 @@ class BackendLiveDebateData implements LiveDebateData {
   }
 
   @override
-  List<JudgeInfo> get judges =>
-      state.judges.map((j) => JudgeInfo(id: j.user.id.toString(), name: j.user.name)).toList();
+  List<JudgeInfo> get judges => state.judges
+      .map((j) => JudgeInfo(
+            id: j.user.id.toString(),
+            name: j.user.name,
+            avatarUrl: resolveMediaUrl(j.user.avatarUrl),
+          ))
+      .toList();
 
   @override
   List<String> get judgeIds => judges.map((j) => j.id).toList();
@@ -105,7 +115,12 @@ class BackendLiveDebateData implements LiveDebateData {
     final out = <AudienceMember>[];
     for (final m in [...state.proposition.members, ...state.opposition.members]) {
       if (!speakerUserIds.contains(m.id)) {
-        out.add(AudienceMember(id: m.id.toString(), name: m.name, role: m.role ?? 'Member'));
+        out.add(AudienceMember(
+          id: m.id.toString(),
+          name: m.name,
+          role: m.role ?? 'Member',
+          avatarUrl: resolveMediaUrl(m.avatarUrl),
+        ));
       }
     }
     return out;

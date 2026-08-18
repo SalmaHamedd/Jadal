@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/app_models/motion.dart';
@@ -10,6 +11,7 @@ import '../../../../core/widgets/jadal_dialog.dart';
 import '../cubits/debate_controller.dart';
 import '../utils/avatar_palette.dart';
 import '../utils/debate_theme.dart';
+import '../utils/name_text.dart';
 
 /// Compact (small-width) button opening the viewers dialog.
 class AudienceButton extends StatelessWidget {
@@ -34,7 +36,14 @@ class _Viewer {
   final String name;
   final String role;
   final bool isMe;
-  const _Viewer({required this.id, required this.name, required this.role, this.isMe = false});
+  final String? avatarUrl;
+  const _Viewer({
+    required this.id,
+    required this.name,
+    required this.role,
+    this.isMe = false,
+    this.avatarUrl,
+  });
 }
 
 /// Motion button using the existing motion image. Falls back to
@@ -120,12 +129,24 @@ class _AudienceDialogState extends State<AudienceDialog> {
     for (final j in cubit.data.judges) {
       if (!cubit.isUserPresent(j.id)) continue;
       if (seen.add(j.id)) {
-        out.add(_Viewer(id: j.id, name: j.name, role: loc.judgeRole, isMe: j.id == me));
+        out.add(_Viewer(
+          id: j.id,
+          name: j.name,
+          role: loc.judgeRole,
+          isMe: j.id == me,
+          avatarUrl: j.avatarUrl,
+        ));
       }
     }
     for (final a in cubit.data.audience) {
       if (seen.add(a.id)) {
-        out.add(_Viewer(id: a.id, name: a.name, role: a.role, isMe: a.id == me));
+        out.add(_Viewer(
+          id: a.id,
+          name: a.name,
+          role: a.role,
+          isMe: a.id == me,
+          avatarUrl: a.avatarUrl,
+        ));
       }
     }
     // I should always see myself here unless I'm a debater in the match.
@@ -199,32 +220,17 @@ class _AudienceDialogState extends State<AudienceDialog> {
                           ),
                           child: Row(
                             children: [
-                              // Neutral initial avatar (no rainbow colours) — a
-                              // soft brand-blue chip keeps the list calm.
-                              Container(
-                                width: 38,
-                                height: 38,
-                                alignment: Alignment.center,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: JadalColors.primaryBlue.withValues(
-                                    alpha: DebateTheme.isDark(context) ? 0.18 : 0.10,
-                                  ),
-                                ),
-                                child: Text(
-                                  avatarInitial(m.name),
-                                  style: AppTextStyles.body(context).copyWith(
-                                    color: JadalColors.primaryBlue,
-                                    fontWeight: FontWeight.w800,
-                                  ),
-                                ),
-                              ),
+                              // The real picture when there is one; otherwise a
+                              // neutral initial chip (no rainbow colours) that
+                              // keeps the list calm.
+                              _ViewerAvatar(viewer: m),
                               const SizedBox(width: 12),
                               Expanded(
                                 child: Text(
                                   m.isMe ? '${m.name} • ${loc.youTag}' : m.name,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
+                                  textDirection: directionOfName(m.name),
                                   style: AppTextStyles.body(context).copyWith(
                                     fontWeight: FontWeight.w600,
                                     color: DebateTheme.textPrimary(context),
@@ -254,6 +260,48 @@ class _AudienceDialogState extends State<AudienceDialog> {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// One row's face in the viewers dialog. Unlike the room cards this list stays
+/// deliberately monochrome, so the fallback is a soft brand-blue initial chip
+/// rather than the palette colour.
+class _ViewerAvatar extends StatelessWidget {
+  final _Viewer viewer;
+  const _ViewerAvatar({required this.viewer});
+
+  @override
+  Widget build(BuildContext context) {
+    final url = viewer.avatarUrl;
+    final fallback = Container(
+      width: 38,
+      height: 38,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        color: JadalColors.primaryBlue.withValues(
+          alpha: DebateTheme.isDark(context) ? 0.18 : 0.10,
+        ),
+      ),
+      child: Text(
+        avatarInitial(viewer.name),
+        style: AppTextStyles.body(context).copyWith(
+          color: JadalColors.primaryBlue,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+    if (url == null || url.isEmpty) return fallback;
+    return ClipOval(
+      child: CachedNetworkImage(
+        imageUrl: url,
+        width: 38,
+        height: 38,
+        fit: BoxFit.cover,
+        placeholder: (_, _) => fallback,
+        errorWidget: (_, _, _) => fallback,
       ),
     );
   }

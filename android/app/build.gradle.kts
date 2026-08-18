@@ -15,10 +15,9 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
-        // Required by flutter_local_notifications (§7): it uses java.time APIs
-        // that don't exist below API 26, so they must be desugared. The plugin
-        // fails to build without this even when scheduled notifications are
-        // unused.
+        // Required by flutter_local_notifications: it uses java.time APIs that
+        // don't exist below API 26, so they must be desugared. The plugin fails
+        // to build without this even when scheduled notifications are unused.
         isCoreLibraryDesugaringEnabled = true
     }
 

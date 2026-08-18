@@ -5,6 +5,7 @@ import 'dart:math' as math;
 import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/function/media_url.dart';
 import '../../../profile/data/repositories/profile_repository.dart';
 import '../../data/datasources/backend_live_debate_data.dart';
 import '../../data/live_debate_socket_events.dart';
@@ -15,6 +16,7 @@ import '../../data/repositories/live_debate_repository.dart';
 import '../../domain/debate_result_view.dart';
 import '../../domain/debate_room_role.dart';
 import '../../domain/live_debate_data.dart';
+import '../../domain/speech_detail.dart';
 import '../utils/debate_log.dart';
 import '../utils/debate_timeline.dart';
 import 'debate_controller.dart';
@@ -162,6 +164,21 @@ class LiveDebateCubit extends DebateController {
   @override
   bool localPoiAccepted = false;
   Timer? _poiTimer;
+
+  /// How long a raised hand stays up with no answer from the speaker.
+  static const Duration kPoiHold = Duration(seconds: 15);
+
+  /// How long the same debater must wait before raising again, whatever ended
+  /// the last one — accepted, refused, self-lowered or expired.
+  static const Duration kPoiCooldown = Duration(seconds: 15);
+
+  /// The POI endpoint only accepts `raise` and `answer`; `lower` and `refuse`
+  /// return 422 until the backend ships them. The local flow works either way —
+  /// only the server-side counters lag behind.
+  static const bool kPoiLowerRefusePersisted = false;
+
+  DateTime? _poiCooldownUntil;
+  Timer? _poiCooldownTimer;
   @override
   String latestNews = '';
   int _newsCounter = 1;
@@ -285,12 +302,14 @@ class LiveDebateCubit extends DebateController {
   /// sees the full team conversation instead of starting empty. Best-effort —
   /// a failure here just leaves chat empty for this session, same as before.
   Future<void> _loadChatHistory() async {
+    // Only a debater has a persisted channel; for anyone else the request just
+    // 403s, so don't make it.
+    final teamId = myTeamId;
+    if (teamId.isEmpty) return;
     final res = await repo.getChatHistory(debateId);
     res.fold(
       (f) => dlog('chat', 'WARN could not load chat history: ${f.message}'),
       (messages) {
-        final teamId = myTeamId;
-        if (teamId.isEmpty) return; // judge/viewer/trainer — no team chat
         _chat.addAll(messages.map((m) => TeamChatMessage(
               id: m.id,
               teamId: teamId,
@@ -514,6 +533,10 @@ class LiveDebateCubit extends DebateController {
 
   void _rebuildTimeline(int? durationSeconds) {
     final base = _data.format;
+    if (base.poiOffset == null) {
+      dlog('format', 'no protected_time_seconds from the backend — falling back '
+          'to ${base.protectedPeriod.inSeconds}s');
+    }
     _timeline = DebateTimeline(DebateFormat(
       preparationPeriod: base.preparationPeriod,
       speechDuration: Duration(seconds: durationSeconds ?? base.speechDuration.inSeconds),
@@ -521,6 +544,9 @@ class LiveDebateCubit extends DebateController {
       extraTime: base.extraTime,
       replySpeech: base.replySpeech,
       replyDuration: base.replyDuration,
+      // Dropping this here used to throw away the configured protected window
+      // the moment a stage started, silently reverting to the duration rules.
+      poiOffset: base.poiOffset,
     ));
   }
 
@@ -827,6 +853,8 @@ class LiveDebateCubit extends DebateController {
         if (asker == _myUserId) {
           isLocalAskingPOI = false;
           _poiTimer?.cancel();
+          // Answered either way, the hand is down — so the wait starts.
+          _startPoiCooldown();
           if (event.poiAccepted) {
             dlog('poi', 'my POI was ACCEPTED → reopening mic + asker dialog');
             localPoiAccepted = true; // exempts me from the publish-lock
@@ -836,6 +864,17 @@ class LiveDebateCubit extends DebateController {
           }
         }
         emit(POIChangedState());
+        break;
+      case LiveEventType.poiLowered:
+        final lowered = event.byUserId;
+        if (lowered != null) {
+          _poiRaisedUserIds.remove(lowered);
+          if (lowered == _myUserId) {
+            isLocalAskingPOI = false;
+            _poiTimer?.cancel();
+          }
+          emit(POIChangedState());
+        }
         break;
       case LiveEventType.timerUpdate:
         // Server-authoritative timer. Reconcile this device's clock to the
@@ -885,6 +924,23 @@ class LiveDebateCubit extends DebateController {
           message: event.message ?? '',
           ts: event.ts,
           seenBy: seenBy,
+        ));
+        emit(TeamChatUpdatedState());
+        break;
+      case LiveEventType.judgeChat:
+        // Addressed to judges at the SFU; ignoring it here as well means a
+        // stray delivery can never surface on a debater's screen.
+        if (!_debateRole.isJudge) break;
+        dlog('chat', 'JUDGE CHAT received → from=${event.senderName}: '
+            '"${event.message}"');
+        final judgeSenderId = event.senderId ?? '';
+        _chat.add(TeamChatMessage(
+          teamId: kJudgesChatChannel,
+          senderId: judgeSenderId,
+          senderName: event.senderName ?? '',
+          message: event.message ?? '',
+          ts: event.ts,
+          seenBy: {judgeSenderId, if (_chatOpen) _myUserId.toString()}.toList(),
         ));
         emit(TeamChatUpdatedState());
         break;
@@ -958,7 +1014,11 @@ class LiveDebateCubit extends DebateController {
     _refreshLiveState();
   }
 
-  void _publish(List<int> bytes) {
+  /// [to] restricts delivery to those LiveKit identities. Leaving it null
+  /// broadcasts to the room — and so does passing an EMPTY list, which is why
+  /// callers that mean "only these people" must not publish at all when the
+  /// list comes out empty.
+  void _publish(List<int> bytes, {List<String>? to}) {
     _logOutgoing(bytes);
     final lp = _room?.localParticipant;
     if (lp == null) {
@@ -968,10 +1028,26 @@ class LiveDebateCubit extends DebateController {
     // diagnostic: confirm the publish was accepted by the SFU. A throw here
     // is the tell-tale of a missing `canPublishData` grant (the root cause) —
     // surface it instead of swallowing it, so a future regression is obvious.
-    lp.publishData(bytes, reliable: true).catchError((Object e) {
+    lp
+        .publishData(bytes, reliable: true, destinationIdentities: to)
+        .catchError((Object e) {
       dlog('socket-send', 'publishData FAILED — canPublishData grant or '
           'connection issue: $e');
     });
+  }
+
+  /// The other judges currently in the room, by LiveKit identity.
+  List<String> get _otherJudgeIdentities {
+    final st = _state;
+    if (st == null) return const [];
+    final ids = st.judges
+        .map((j) => j.user.id.toString())
+        .where((id) => id != _myUserId.toString())
+        .toSet();
+    return participants
+        .map((p) => p.identity)
+        .where(ids.contains)
+        .toList();
   }
 
   /// Trace every outbound data-channel message in full (POI flashes, team chat,
@@ -1478,7 +1554,51 @@ class LiveDebateCubit extends DebateController {
   int? get _currentPhaseId => _stageByOrder(_currentStage)?.id;
 
   @override
+  bool get isPoiCoolingDown {
+    final until = _poiCooldownUntil;
+    return until != null && DateTime.now().isBefore(until);
+  }
+
+  @override
+  int get poiCooldownRemainingSeconds {
+    final until = _poiCooldownUntil;
+    if (until == null) return 0;
+    final left = until.difference(DateTime.now()).inMilliseconds;
+    return left <= 0 ? 0 : (left / 1000).ceil();
+  }
+
+  /// Block re-raising for [kPoiCooldown] and tick once a second so the button's
+  /// countdown stays honest.
+  void _startPoiCooldown() {
+    _poiCooldownUntil = DateTime.now().add(kPoiCooldown);
+    _poiCooldownTimer?.cancel();
+    _poiCooldownTimer = Timer.periodic(const Duration(seconds: 1), (t) {
+      if (isClosed) return t.cancel();
+      if (!isPoiCoolingDown) {
+        t.cancel();
+        _poiCooldownUntil = null;
+      }
+      emit(POIChangedState());
+    });
+    emit(POIChangedState());
+  }
+
+  void _clearPoiCooldown() {
+    _poiCooldownTimer?.cancel();
+    _poiCooldownTimer = null;
+    _poiCooldownUntil = null;
+  }
+
+  @override
+  void togglePOI() => isLocalAskingPOI ? lowerPOI() : sendPOIRequest();
+
+  @override
   void sendPOIRequest() {
+    if (isLocalAskingPOI || isPoiCoolingDown) {
+      dlog('poi', 'raise IGNORED — asking=$isLocalAskingPOI '
+          'cooldown=${poiCooldownRemainingSeconds}s');
+      return;
+    }
     isLocalAskingPOI = true;
     _poiRaisedUserIds.add(_myUserId);
     final phaseId = _currentPhaseId;
@@ -1492,11 +1612,30 @@ class LiveDebateCubit extends DebateController {
     }
     emit(POIChangedState());
     _poiTimer?.cancel();
-    _poiTimer = Timer(const Duration(seconds: 15), () {
-      isLocalAskingPOI = false;
-      _poiRaisedUserIds.remove(_myUserId);
-      if (!isClosed) emit(POIChangedState());
+    _poiTimer = Timer(kPoiHold, () {
+      if (isClosed) return;
+      dlog('poi', 'my POI expired unanswered after ${kPoiHold.inSeconds}s');
+      lowerPOI();
     });
+  }
+
+  /// Take my own hand down — tapped again, or expired. Broadcasts so every
+  /// other device drops the badge too; lowering is never gated on the POI
+  /// window, or a hand raised on its last legal second could not come down.
+  @override
+  void lowerPOI() {
+    if (!isLocalAskingPOI) return;
+    final phaseId = _currentPhaseId;
+    dlog('poi', 'lowering my POI (userId=$_myUserId, phaseId=$phaseId)');
+    isLocalAskingPOI = false;
+    _poiRaisedUserIds.remove(_myUserId);
+    _poiTimer?.cancel();
+    _publish(LiveDebateSocket.poiLowered(stagePhaseId: phaseId, byUserId: _myUserId));
+    if (kPoiLowerRefusePersisted && phaseId != null) {
+      repo.sendPoi(debateId: debateId, phaseId: phaseId, action: 'lower');
+    }
+    _startPoiCooldown();
+    emit(POIChangedState());
   }
 
   @override
@@ -1528,13 +1667,21 @@ class LiveDebateCubit extends DebateController {
     // asker's own raised hand + toolbar POI button clear too (not just locally on
     // the speaker's device).
     final uid = int.tryParse(askerUserId);
+    final phaseId = _currentPhaseId;
     if (uid != null) {
       dlog('poi', 'POI REFUSED (asker=$uid)');
       _publish(LiveDebateSocket.poiAnswered(
-          stagePhaseId: _currentPhaseId, byUserId: uid, accepted: false));
+          stagePhaseId: phaseId, byUserId: uid, accepted: false));
       _poiRaisedUserIds.remove(uid);
+      if (kPoiLowerRefusePersisted && phaseId != null) {
+        repo.sendPoi(debateId: debateId, phaseId: phaseId, action: 'refuse');
+      }
     }
-    if (askerUserId == 'local' || uid == _myUserId) isLocalAskingPOI = false;
+    if (askerUserId == 'local' || uid == _myUserId) {
+      isLocalAskingPOI = false;
+      _poiTimer?.cancel();
+      _startPoiCooldown();
+    }
     emit(POIChangedState());
   }
 
@@ -1543,6 +1690,8 @@ class LiveDebateCubit extends DebateController {
     localPoiAccepted = false;
     isLocalAskingPOI = false;
     _poiRaisedUserIds.remove(_myUserId);
+    _poiTimer?.cancel();
+    _startPoiCooldown();
     if (isMicEnabled) toggleMic();
     emit(POIChangedState());
   }
@@ -1550,7 +1699,9 @@ class LiveDebateCubit extends DebateController {
   /// Drop all in-flight POIs — called on a stage change and on an
   /// open↔live toggle so a raised hand never lingers into the next speech or the
   /// lobby (a stale POI the next speaker would otherwise "see").
+  /// A new speech is a clean slate, so the re-raise wait goes with them.
   void _clearPois() {
+    _clearPoiCooldown();
     if (_poiRaisedUserIds.isEmpty && !isLocalAskingPOI) return;
     dlog('poi', 'clearing in-flight POIs (stage change / lobby toggle)');
     _poiRaisedUserIds.clear();
@@ -1891,12 +2042,14 @@ class LiveDebateCubit extends DebateController {
   void sendTeamChat({required String teamId, required String message}) {
     final senderName = localParticipant?.name.isNotEmpty == true
         ? localParticipant!.name
-        : firstName(_data.propositionTeam.debaters.isNotEmpty
-        ? _data.propositionTeam.debaters.first.name
-        : 'User');
+        : (_state?.speakerByUserId(_myUserId)?.user.name ??
+            _state?.chairJudge?.user.name ??
+            'User');
     final senderId = _myUserId.toString();
     final ts = DateTime.now().millisecondsSinceEpoch;
-    dlog('chat', 'TEAM CHAT sent → team=$teamId from=$senderName: "$message"');
+    final toJudges = teamId == kJudgesChatChannel;
+    dlog('chat', '${toJudges ? "JUDGE" : "TEAM"} CHAT sent → '
+        'channel=$teamId from=$senderName: "$message"');
     _chat.add(TeamChatMessage(
       teamId: teamId,
       senderId: senderId,
@@ -1905,18 +2058,42 @@ class LiveDebateCubit extends DebateController {
       ts: ts,
       seenBy: [senderId],
     ));
-    _publish(LiveDebateSocket.teamChat(
-      teamId: teamId,
-      senderId: senderId,
-      senderName: senderName,
-      message: message,
-      ts: ts,
-    ));
+    if (toJudges) {
+      // Addressed to the other judges only. With nobody else on the panel in
+      // the room there is no one to address, and publishing with an empty list
+      // would broadcast it to everyone — so it stays local.
+      final judges = _otherJudgeIdentities;
+      if (judges.isEmpty) {
+        dlog('chat', 'no other judge in the room — message kept local');
+      } else {
+        _publish(
+          LiveDebateSocket.judgeChat(
+            senderId: senderId,
+            senderName: senderName,
+            message: message,
+            ts: ts,
+          ),
+          to: judges,
+        );
+      }
+    } else {
+      _publish(LiveDebateSocket.teamChat(
+        teamId: teamId,
+        senderId: senderId,
+        senderName: senderName,
+        message: message,
+        ts: ts,
+      ));
+    }
     emit(TeamChatUpdatedState());
     // Persist alongside the peer broadcast (which already delivered it live) —
     // this is what makes the message survive a leave+rejoin. Best-effort: a
     // failure here doesn't affect the live delivery that already happened.
-    repo.sendChatMessage(debateId: debateId, message: message);
+    // The judge panel has no persisted channel yet, so theirs lives only for
+    // the session.
+    if (!toJudges) {
+      repo.sendChatMessage(debateId: debateId, message: message);
+    }
   }
 
   @override
@@ -1926,8 +2103,10 @@ class LiveDebateCubit extends DebateController {
   @override
   int get unreadTeamChatCount {
     final myId = _myUserId.toString();
+    final channel = myChatChannelId;
+    if (channel.isEmpty) return 0;
     return _chat
-        .where((m) => m.teamId == myTeamId && !m.seenBy.contains(myId))
+        .where((m) => m.teamId == channel && !m.seenBy.contains(myId))
         .length;
   }
 
@@ -1938,15 +2117,17 @@ class LiveDebateCubit extends DebateController {
     // Mark everything currently unseen as seen-by-me locally (instant dot
     // clear) and tell the backend so it survives a rejoin.
     final myId = _myUserId.toString();
+    final channel = myChatChannelId;
     var changed = false;
     for (var i = 0; i < _chat.length; i++) {
       final m = _chat[i];
-      if (m.teamId == myTeamId && !m.seenBy.contains(myId)) {
+      if (m.teamId == channel && !m.seenBy.contains(myId)) {
         _chat[i] = m.copyWith(seenBy: [...m.seenBy, myId]);
         changed = true;
       }
     }
-    repo.markChatRead(debateId);
+    // Only the team channel is persisted, so only it has reads to record.
+    if (!isJudgeChat) repo.markChatRead(debateId);
     if (changed) {
       emit(TeamChatUpdatedState());
     }
@@ -1975,6 +2156,8 @@ class LiveDebateCubit extends DebateController {
   @override
   bool get canManageResult => isAuthority;
   @override
+  bool get isJudgeOfDebate => _debateRole.isJudge;
+  @override
   bool get isSpectator =>
       !(_debateRole.isDebater || _debateRole.isJudge);
   // Guests hold a subscribe-only token, so the mic and camera would fail
@@ -1990,9 +2173,12 @@ class LiveDebateCubit extends DebateController {
     return canAskPoi && poiOpen && slot != null && slot.side != localSide;
   }
 
+  /// Debaters get their team's chat (never while they hold the floor); judges
+  /// get the panel's.
   @override
   bool get canOpenChat =>
-      !isGuest && _debateRole.isDebater && !_iAmCurrentSpeaker;
+      !isGuest &&
+      ((_debateRole.isDebater && !_iAmCurrentSpeaker) || _debateRole.isJudge);
 
   @override
   String? get shareUrl => isGuest ? null : _state?.debate.shareUrl;
@@ -2015,6 +2201,41 @@ class LiveDebateCubit extends DebateController {
             speakerName: sp?.user.name ?? '',
             side: debateSideFromString(sp?.side),
             isReply: stage.isReply,
+          );
+        }(),
+    ];
+  }
+
+  /// Built from live-state rather than a dedicated endpoint: every field the
+  /// review screen needs is already on `stages[]`, except the transcript, which
+  /// the backend fills in asynchronously after the speech ends.
+  @override
+  List<SpeechDetail> get speechDetails {
+    final st = _state;
+    if (st == null) return const [];
+    final stages = [...st.stages]
+      ..sort((a, b) => a.orderIndex.compareTo(b.orderIndex));
+    return [
+      for (final stage in stages)
+        () {
+          final sp = st.speakerByParticipantId(stage.participantId) ??
+              (stage.speakerUserId == null
+                  ? null
+                  : st.speakerByUserId(stage.speakerUserId!));
+          return SpeechDetail(
+            stageOrder: stage.orderIndex,
+            label: stage.name.isNotEmpty ? stage.name : '#${stage.orderIndex}',
+            speakerName: sp?.user.name ?? '',
+            speakerAvatarUrl: resolveMediaUrl(sp?.user.avatarUrl),
+            speakerId: sp?.user.id.toString(),
+            side: debateSideFromString(sp?.side),
+            isReply: stage.isReply,
+            allottedSeconds: stage.durationSeconds,
+            startedAt: stage.startedAt,
+            endedAt: stage.endedAt,
+            poisOffered: stage.poiRaisedCount,
+            poisTaken: stage.poiAnsweredCount,
+            speechText: stage.speechText,
           );
         }(),
     ];
@@ -2147,6 +2368,12 @@ class LiveDebateCubit extends DebateController {
   @override
   bool get resultShared => resultView?.revealed ?? false;
 
+  bool _resultCelebrated = false;
+  @override
+  bool get resultCelebrated => _resultCelebrated;
+  @override
+  void markResultCelebrated() => _resultCelebrated = true;
+
   @override
   bool get isRoomClosed => _roomClosed;
 
@@ -2212,6 +2439,7 @@ class LiveDebateCubit extends DebateController {
     _connectionQualityTimer?.cancel();
     _localTimer?.cancel();
     _poiTimer?.cancel();
+    _poiCooldownTimer?.cancel();
     _userLeaving = false;
     if (notify && !isClosed) {
       emit(DebateDisconnectedState(reason: 'User left the debate'));
@@ -2227,6 +2455,7 @@ class LiveDebateCubit extends DebateController {
     _connectionQualityTimer?.cancel();
     _localTimer?.cancel();
     _poiTimer?.cancel();
+    _poiCooldownTimer?.cancel();
     return super.close();
   }
 }

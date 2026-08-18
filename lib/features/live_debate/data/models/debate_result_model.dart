@@ -44,10 +44,15 @@ class LiveResult {
   final String? summaryNotes;
   final List<StageScore> stageScores;
 
+  /// When the chair stored the result. Present as soon as it is submitted, so
+  /// the panel can be told the ballot is in and only the reveal is outstanding.
+  final DateTime? submittedAt;
+
   const LiveResult({
     this.winningSide,
     this.summaryNotes,
     this.stageScores = const [],
+    this.submittedAt,
   });
 
   factory LiveResult.fromJson(Map<String, dynamic> j) {
@@ -62,6 +67,7 @@ class LiveResult {
       winningSide: asString(j['winning_side']),
       summaryNotes: asString(j['summary_notes']) ?? asString(scores?['notes']),
       stageScores: asMapList(stageList).map(StageScore.fromJson).toList(),
+      submittedAt: asDate(j['submitted_at']),
     );
   }
 
