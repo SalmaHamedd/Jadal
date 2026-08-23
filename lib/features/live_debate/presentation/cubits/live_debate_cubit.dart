@@ -6,6 +6,7 @@ import 'package:livekit_client/livekit_client.dart';
 
 import '../../../../core/error/failures.dart';
 import '../../../../core/function/media_url.dart';
+import '../../../../core/storage/preferences_database.dart';
 import '../../../profile/data/repositories/profile_repository.dart';
 import '../../data/datasources/backend_live_debate_data.dart';
 import '../../data/live_debate_socket_events.dart';
@@ -36,7 +37,13 @@ class LiveDebateCubit extends DebateController {
   })  : _data = BackendLiveDebateData.empty(),
         super(DebateInitialState()) {
     _timeline = DebateTimeline(_data.format);
-    if (asGuest) _role = DebateRoomRole.guest;
+    if (asGuest) {
+      _role = DebateRoomRole.guest;
+    } else {
+      // A signed-in viewer who already rated this debate shouldn't be asked
+      // again after leaving and re-joining, so restore that from local storage.
+      _loadRatedFlag();
+    }
   }
 
   final LiveDebateRepository repo;
@@ -1853,9 +1860,9 @@ class LiveDebateCubit extends DebateController {
     }
   }
 
-  /// / Update 1: the chair's stop/resume timer button. Drives the
-  /// server-authoritative pause/resume; the server broadcasts `timer_update` so
-  /// every device matches exactly.
+  /// The chair's stop/resume timer button. Drives the server-authoritative
+  /// pause/resume; the server broadcasts `timer_update` so every device matches
+  /// exactly.
   @override
   void toggleTimerPause() {
     if (!isAuthority) return;
@@ -2403,6 +2410,30 @@ class LiveDebateCubit extends DebateController {
     );
   }
 
+  static const String _ratedDebatesKey = 'RATED_DEBATES';
+  bool _debateRated = false;
+
+  @override
+  bool get hasRatedDebate => _debateRated;
+
+  /// Restores whether this debate was already rated from the local store, so a
+  /// rejoin doesn't put the rating card back up.
+  Future<void> _loadRatedFlag() async {
+    final ids = await PreferencesDatabase().getValue<List>(_ratedDebatesKey);
+    if (ids != null && ids.contains(debateId) && !_debateRated) {
+      _debateRated = true;
+      if (!isClosed) emit(LiveStateUpdatedState());
+    }
+  }
+
+  /// Records this debate as rated so the card stays hidden on the next visit.
+  Future<void> _rememberRated() async {
+    final prefs = PreferencesDatabase();
+    final existing = await prefs.getValue<List>(_ratedDebatesKey) ?? const [];
+    if (existing.contains(debateId)) return;
+    await prefs.setValue(_ratedDebatesKey, [...existing, debateId]);
+  }
+
   @override
   Future<void> sendDebateRating(int rating, {String? comment}) async {
     final content = comment?.trim();
@@ -2413,8 +2444,14 @@ class LiveDebateCubit extends DebateController {
       content: (content == null || content.isEmpty) ? null : content,
     );
     res.fold(
-          (f) => emit(DebateErrorState(f.message)),
-          (_) => emit(LiveStateUpdatedState()),
+      (f) => emit(DebateErrorState(f.message)),
+      (_) {
+        // Once it's in, drop the card for good — no re-rating, and it stays gone
+        // across leave/rejoin.
+        _debateRated = true;
+        _rememberRated();
+        emit(LiveStateUpdatedState());
+      },
     );
   }
 

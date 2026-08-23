@@ -164,6 +164,28 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
             (state.debate.motionRevealedAt != null &&
                 state.debate.motionRevealedAt!.isBefore(DateTime.now())));
 
+    // Frameworks and tags can come back carrying the same label — the backend
+    // sometimes lists a framework under both — which drew the same chip twice.
+    // Keep the first time we see each label and drop any tag that just repeats a
+    // framework, so nothing shows up duplicated in the hero.
+    final seenChips = <String>{};
+    final frameworkChips = <String>[];
+    final tagChips = <String>[];
+    if (motionRevealed) {
+      for (final f in motion.frameworks) {
+        final name = f.name.trim();
+        if (name.isNotEmpty && seenChips.add(name.toLowerCase())) {
+          frameworkChips.add(name);
+        }
+      }
+      for (final t in motion.tags) {
+        final tag = t.trim();
+        if (tag.isNotEmpty && seenChips.add(tag.toLowerCase())) {
+          tagChips.add(tag);
+        }
+      }
+    }
+
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
       children: [
@@ -183,10 +205,8 @@ class _BackendDebateDetailScreenState extends State<BackendDebateDetailScreen> {
           statusLabel: _statusLabel(loc, status),
           statusColor: _statusAccent(status),
           motionText: motionRevealed ? motion.text : null,
-          frameworkNames: motionRevealed
-              ? motion.frameworks.map((f) => f.name).toList()
-              : const [],
-          tags: motionRevealed ? motion.tags : const [],
+          frameworkNames: frameworkChips,
+          tags: tagChips,
         ),
         // Format — always available.
         _Section(

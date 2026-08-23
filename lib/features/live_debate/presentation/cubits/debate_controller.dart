@@ -477,6 +477,10 @@ abstract class DebateController extends Cubit<DebateStates> {
   /// otherwise cancels the debate.
   Future<void> closeMain();
 
+  /// Whether this user has already rated this debate. Persisted locally so the
+  /// rating card stays hidden after they leave and come back.
+  bool get hasRatedDebate => false;
+
   /// Submit a 1–5 debate rating with an optional free-text explanation. Sent
   /// once per explicit submit (never on every star change); the UI only enables
   /// this once the result is revealed.

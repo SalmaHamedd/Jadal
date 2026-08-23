@@ -1415,19 +1415,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get debatesTitle => 'Debates';
 
   @override
-  String get tabRegistration => 'Registration';
+  String get tabRegistration => 'Scheduled';
 
   @override
   String get tabAnnounced => 'Announced';
 
   @override
-  String get tabSidesSelected => 'Sides selected';
+  String get tabSidesSelected => 'Teams selected';
 
   @override
   String get tabLive => 'Live';
 
   @override
-  String get tabDone => 'Done';
+  String get tabDone => 'Completed';
 
   @override
   String get tabCancelled => 'Cancelled';

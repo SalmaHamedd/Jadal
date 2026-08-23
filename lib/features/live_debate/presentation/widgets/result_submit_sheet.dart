@@ -320,6 +320,13 @@ class _StageSlider extends StatelessWidget {
               ],
             ),
           ),
+          // A one-point nudge on each side of the slider — the full 0–100 drag
+          // is too coarse to land on an exact score, so these do the fine steps.
+          _StepButton(
+            icon: Icons.remove_rounded,
+            color: color,
+            onTap: shown > min.toInt() ? () => onChanged(shown - 1) : null,
+          ),
           Expanded(
             child: SliderTheme(
               data: SliderTheme.of(context).copyWith(
@@ -342,8 +349,13 @@ class _StageSlider extends StatelessWidget {
               ),
             ),
           ),
+          _StepButton(
+            icon: Icons.add_rounded,
+            color: color,
+            onTap: shown < max.toInt() ? () => onChanged(shown + 1) : null,
+          ),
           SizedBox(
-            width: 40,
+            width: 34,
             child: Text(
               display,
               textAlign: TextAlign.end,
@@ -352,6 +364,44 @@ class _StageSlider extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// A small circular −/+ button that steps a stage score by one point. Disabled
+/// (dimmed, no tap) at the ends of the range.
+class _StepButton extends StatelessWidget {
+  final IconData icon;
+  final Color color;
+  final VoidCallback? onTap;
+  const _StepButton({required this.icon, required this.color, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = onTap != null;
+    return Material(
+      type: MaterialType.transparency,
+      shape: const CircleBorder(),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Container(
+          width: 30,
+          height: 30,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: color.withValues(alpha: enabled ? 0.14 : 0.05),
+            border: Border.all(color: color.withValues(alpha: enabled ? 0.5 : 0.18)),
+          ),
+          child: Icon(
+            icon,
+            size: 18,
+            color: color.withValues(alpha: enabled ? 1 : 0.35),
+          ),
+        ),
       ),
     );
   }

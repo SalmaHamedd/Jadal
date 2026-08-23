@@ -121,7 +121,9 @@ class _ResultRoomScreenState extends State<ResultRoomScreen> {
         Expanded(child: ResultSummaryView(result: view)),
         if (cubit.isJudgeOfDebate) _ReviewSpeechesButton(cubit: cubit),
         // Rating posts as the signed-in user, so guests only read the result.
-        if (view.revealed && !cubit.isGuest) _RatingBar(cubit: cubit),
+        // Once they've rated (this visit or a previous one) the card is gone.
+        if (view.revealed && !cubit.isGuest && !cubit.hasRatedDebate)
+          _RatingBar(cubit: cubit),
       ],
     );
   }

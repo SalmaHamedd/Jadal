@@ -475,8 +475,8 @@ const double _kTimerButtonSize = 56;
 /// unchanged — see [MainSpeakerCard].
 const double kMainSpeakerBottomOverhang = _kTimerButtonSize / 2;
 
-/// C1 / Update 1: the chair's circular, icon-only stop/resume timer button. Its
-/// border is the card surface colour so it reads as straddling the card edge.
+/// The chair's circular, icon-only stop/resume timer button. Its border is the
+/// card surface colour so it reads as straddling the card edge.
 class _TimerControlButton extends StatelessWidget {
   final bool isPaused;
   final VoidCallback onTap;

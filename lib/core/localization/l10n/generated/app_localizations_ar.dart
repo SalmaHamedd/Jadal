@@ -1403,19 +1403,19 @@ class AppLocalizationsAr extends AppLocalizations {
   String get debatesTitle => 'المناظرات';
 
   @override
-  String get tabRegistration => 'التسجيل';
+  String get tabRegistration => 'مجدولة';
 
   @override
   String get tabAnnounced => 'معلنة';
 
   @override
-  String get tabSidesSelected => 'تم تحديد الفرق';
+  String get tabSidesSelected => 'تم اختيار الفرق';
 
   @override
   String get tabLive => 'مباشرة';
 
   @override
-  String get tabDone => 'منتهية';
+  String get tabDone => 'مكتملة';
 
   @override
   String get tabCancelled => 'ملغاة';

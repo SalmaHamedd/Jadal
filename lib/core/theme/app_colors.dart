@@ -55,27 +55,14 @@ abstract class JadalColors {
   static const Color oppositionOrange = Color(0xFFEA7C1C);
   static const Color propositionColor = Color(0xFF0352A1);
   static const Color oppositionColor  = Color(0xFFEA7C1C);
-  // Neutral. `judgesGrey` is tuned for the DARK ground (5.39:1 there); on the
-  // light ground it only reaches 2.62:1, below even the 3:1 non-text floor, so
-  // light surfaces use [judgesGreyLight] (4.50:1) instead. Route through
-  // DebateTheme/StatsTheme.textSecondary or jadalTextSecondary where possible.
+
   static const Color judgesGrey = Color(0xFF9A9A9A);
-  /// 5.02:1 on `lightBg`, 5.39:1 on white — clear of the 4.5 AA floor rather
-  /// than sitting exactly on it.
+
   static const Color judgesGreyLight = Color(0xFF636B76);
-  // Positive / negative accents, tuned to sit beside the brand blue & orange.
-  // `negativeRed` was #D84857, which under simulated deuteranopia
-  // (the most common colour-vision deficiency) landed at CIEDE2000 ΔE 4.6 from
-  // positiveGreen: both collapse to the same olive (#8D8D66 vs #888851), with
-  // only a 1.08:1 luminance ratio between them, so win/loss, accept/reject and
-  // every ± delta were indistinguishable. #B3261E scores ΔE 17.4 / 31.8 / 55.7
-  // across deutan/protan/tritan against the UNCHANGED green, and lifts its own
-  // contrast on white from 4.21:1 to 6.54:1. Colour is still never the only
-  // signal — see the arrow/sign rule in the stats views.
+
   static const Color positiveGreen = Color(0xFF1FA463);
   static const Color negativeRed   = Color(0xFFB3261E);
-  /// White-on-green fails contrast at [positiveGreen] (3.21:1); this darker
-  /// green is used only where green is a BUTTON FILL under white text (5.34:1).
+
   static const Color positiveGreenFill = Color(0xFF137A52);
   // Light theme
   static const Color lightBg            = Color(0xFFFBF6F0);
